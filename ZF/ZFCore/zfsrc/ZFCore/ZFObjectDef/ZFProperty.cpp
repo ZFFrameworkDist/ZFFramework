@@ -10,6 +10,9 @@
 #include "ZFProperty.h"
 #include "ZFObjectImpl.h"
 
+#include "ZFPropertyDeclare.h"
+#include "ZFPropertyUserRegister.h"
+
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -52,6 +55,12 @@ ZFProperty::ZFProperty(void)
 , _ZFP_ZFProperty_getterMethod(zfnull)
 , _ZFP_ZFProperty_propertyClassOfRetainProperty(zfnull)
 , _ZFP_ZFProperty_callbackDealloc(zfnull)
+, _ZFP_ZFPropertyLifeCycle_OnInit()
+, _ZFP_ZFPropertyLifeCycle_OnDealloc()
+, _ZFP_ZFPropertyLifeCycle_OnVerify()
+, _ZFP_ZFPropertyLifeCycle_OnAttach()
+, _ZFP_ZFPropertyLifeCycle_OnDetach()
+, _ZFP_ZFPropertyLifeCycle_OnUpdate()
 {
 }
 ZFProperty::~ZFProperty(void)
@@ -79,7 +88,6 @@ void ZFProperty::_ZFP_ZFPropertyInit(ZF_IN zfbool propertyIsUserRegister,
     {
         this->_ZFP_ZFProperty_typeId = typeIdName;
     }
-    this->_ZFP_ZFProperty_serializable = (this->_ZFP_ZFProperty_typeId.compare(ZFPropertyTypeId_none) != 0);
     this->_ZFP_ZFProperty_setterMethod = setterMethod;
     this->_ZFP_ZFProperty_getterMethod = getterMethod;
     this->_ZFP_ZFProperty_propertyClassOfRetainProperty = propertyClassOfRetainProperty;
@@ -300,7 +308,6 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFClass *, propert
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyName)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyTypeName)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyTypeId)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, zfbool, propertyIsSerializable)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFMethod *, setterMethod)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFMethod *, getterMethod)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, zfbool, propertyIsRetainProperty)

@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFObjectObserver_h_
 #define _ZFI_ZFObjectObserver_h_
 
-#include "ZFObjectClassTypeFwd.h"
 #include "ZFCallback.h"
 #include "ZFIdMap.h"
 
@@ -170,8 +169,8 @@ public:
         ZFCallback::executeExact<void, const ZFListenerData &, ZFObject *>(listenerData, userData);
     }
     /** @brief see #ZFListener */
-    inline void operator()(ZF_IN const ZFListenerData &listenerData,
-                           ZF_IN_OPT ZFObject *userData = zfnull) const
+    inline void operator () (ZF_IN const ZFListenerData &listenerData,
+                             ZF_IN_OPT ZFObject *userData = zfnull) const
     {
         ZFCallback::executeExact<void, const ZFListenerData &, ZFObject *>(listenerData, userData);
     }

@@ -35,7 +35,7 @@ public:
      * @brief the input text edit view
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUITextEditWidget *, inputView, ZFPropertyNoInitValue)
-    ZFPROPERTY_CUSTOM_ON_INIT_DECLARE(ZFUITextEditWidget *, inputView)
+    ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE(ZFUITextEditWidget *, inputView)
     {
         zfblockedAlloc(ZFUITextEditWidget, inputView);
         propertyValue = inputView;
@@ -49,15 +49,15 @@ public:
     /**
      * @brief util method to set input hint text
      */
-    ZFMETHOD_DECLARE_1(void, inputHintTextSet,
-                       ZFMP_IN(const zfchar *, text))
+    ZFMETHOD_INLINE_1(void, inputHintTextSet,
+                      ZFMP_IN(const zfchar *, text))
     {
         this->inputView()->textPlaceHolder()->textSet(text);
     }
     /**
      * @brief util method to get input hint text
      */
-    ZFMETHOD_DECLARE_0(const zfchar *, inputHintText)
+    ZFMETHOD_INLINE_0(const zfchar *, inputHintText)
     {
         return this->inputView()->textPlaceHolder()->text();
     }
@@ -65,15 +65,15 @@ public:
     /**
      * @brief util method to set input text
      */
-    ZFMETHOD_DECLARE_1(void, inputTextSet,
-                       ZFMP_IN(const zfchar *, text))
+    ZFMETHOD_INLINE_1(void, inputTextSet,
+                      ZFMP_IN(const zfchar *, text))
     {
         this->inputView()->textSet(text);
     }
     /**
      * @brief util method to get input text
      */
-    ZFMETHOD_DECLARE_0(const zfchar *, inputText)
+    ZFMETHOD_INLINE_0(const zfchar *, inputText)
     {
         return this->inputView()->text();
     }

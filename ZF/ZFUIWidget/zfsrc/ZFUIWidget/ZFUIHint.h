@@ -68,8 +68,9 @@ public:
     /**
      * @brief get hint list in specified #ZFUISysWindow
      */
-    ZFMETHOD_DECLARE_STATIC_1(ZFCoreArrayPOD<ZFUIHint *>, hintList,
-                              ZFMP_IN_OPT(ZFUISysWindow *, inSysWindow, zfnull));
+    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodIsStatic,
+                              ZFCoreArrayPOD<ZFUIHint *>, hintList,
+                              ZFMP_IN_OPT(ZFUISysWindow *, inSysWindow, zfnull))
 
 public:
     /**
@@ -87,15 +88,15 @@ public:
      * you should update the layout param of the hint window instead of the hint view,
      * and the hint view would be layouted accorrding the hintWindow's layout param
      */
-    ZFMETHOD_DECLARE_0(ZFUIWindow *, hintWindow);
+    ZFMETHOD_DECLARE_0(ZFUIWindow *, hintWindow)
 
 public:
     /**
      * @brief the actual hint view
      */
     ZFPROPERTY_RETAIN(ZFUIView *, hintContent)
-    ZFPROPERTY_CUSTOM_ON_ATTACH_DECLARE(ZFUIView *, hintContent);
-    ZFPROPERTY_CUSTOM_ON_DETACH_DECLARE(ZFUIView *, hintContent);
+    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIView *, hintContent);
+    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIView *, hintContent);
     /**
      * @brief the animation to show the hint, null by default
      */
@@ -105,7 +106,7 @@ public:
      *
      * @note show and hide animation won't be included in #hintDuration
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, hintDuration, ZFPropertyInitValue(ZFUIHintDurationDefault()))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, hintDuration, ZFUIHintDurationDefault())
     /**
      * @brief the animation to hide the hint, null by default
      */
@@ -115,8 +116,8 @@ public:
      * @brief whether automatically fix frame accorrding to #ZFUIOnScreenKeyboardAutoResizeStart,
      *   true by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, hintWindowAutoResize, ZFPropertyInitValue(zftrue))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfbool, hintWindowAutoResize);
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, hintWindowAutoResize, zftrue)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfbool, hintWindowAutoResize);
 
 public:
     /**
@@ -127,25 +128,25 @@ public:
      * the hint object would be retained when show,
      * and would be released automatically after hide
      */
-    ZFMETHOD_DECLARE_0(void, hintShow);
+    ZFMETHOD_DECLARE_0(void, hintShow)
     /**
      * @brief hide the hint with animation,
      *   do nothing if not showing,
      *   cancel show task if delaying
      */
-    ZFMETHOD_DECLARE_0(void, hintHide);
+    ZFMETHOD_DECLARE_0(void, hintHide)
     /**
      * @brief whether the hint is showing or delaying, see #hintDelaying
      */
-    ZFMETHOD_DECLARE_0(zfbool, hintShowing);
+    ZFMETHOD_DECLARE_0(zfbool, hintShowing)
     /**
      * @brief whether the hint is delaying, see #hintShowing
      */
-    ZFMETHOD_DECLARE_0(zfbool, hintDelaying);
+    ZFMETHOD_DECLARE_0(zfbool, hintDelaying)
     /**
      * @brief return the animation if animating, or null if not
      */
-    ZFMETHOD_DECLARE_0(ZFAnimation *, hintAnimating);
+    ZFMETHOD_DECLARE_0(ZFAnimation *, hintAnimating)
 
 protected:
     /** @brief see #ZFUIHint::EventHintOnInit */
@@ -195,6 +196,4 @@ private:
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFUIHint_h_
-
-#include "ZFUIHint_Basic.h"
 

@@ -380,7 +380,7 @@ public:
     // quick access
 public:
     /** @brief access #jsonValue */
-    operator const zfchar *(void) const {return this->jsonValue();}
+    operator const zfchar * (void) const {return this->jsonValue();}
     /** @brief access #jsonItem */
     inline ZFJsonItem operator [] (ZF_IN const zfchar *key) const {return this->jsonItem(key);}
     /** @brief access #jsonObjectAtIndex */
@@ -393,6 +393,7 @@ private:
     ZFJsonItem(ZF_IN _ZFP_ZFJsonItemPrivate *ref);
 };
 ZFPROPERTY_TYPE_DECLARE(ZFJsonItem, ZFJsonItem)
+ZFOUTPUT_TYPE(ZFJsonItem, {output << v.objectInfo();})
 
 // ============================================================
 /**
@@ -477,6 +478,4 @@ ZFMETHOD_FUNC_DECLARE_3(void, ZFJsonEscapeCharDecode,
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFJson_h_
-
-#include "ZFJsonSerializableConverter.h"
 

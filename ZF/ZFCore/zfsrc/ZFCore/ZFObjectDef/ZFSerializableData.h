@@ -110,15 +110,15 @@ public:
     /**
      * @brief retain from another ref
      */
-    ZFSerializableData &operator =(ZF_IN const ZFSerializableData &ref);
+    ZFSerializableData &operator = (ZF_IN const ZFSerializableData &ref);
     /**
      * @brief true if same ref
      */
-    zfbool operator ==(ZF_IN const ZFSerializableData &ref) const;
+    zfbool operator == (ZF_IN const ZFSerializableData &ref) const;
     /**
      * @brief true if not same ref
      */
-    inline zfbool operator !=(ZF_IN const ZFSerializableData &ref) const {return !this->operator == (ref);}
+    inline zfbool operator != (ZF_IN const ZFSerializableData &ref) const {return !this->operator == (ref);}
     ~ZFSerializableData(void);
 
 public:
@@ -556,7 +556,4 @@ private:
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFSerializableData_h_
-
-#include "ZFSerializableDataStringConverter.h"
-#include "ZFSerializableDataRefType.h"
 

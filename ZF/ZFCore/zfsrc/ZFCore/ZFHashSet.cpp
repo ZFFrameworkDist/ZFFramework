@@ -16,8 +16,8 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 // ZFHashSet
 ZFOBJECT_REGISTER(ZFHashSet)
 
-ZFMETHOD_DEFINE_1(ZFHashSet, void, objectOnInit,
-                  ZFMP_IN(ZFContainer *, another))
+ZFOBJECT_ON_INIT_DEFINE_1(ZFHashSet,
+                          ZFMP_IN(ZFContainer *, another))
 {
     this->objectOnInit();
     zfself::addFrom(another);
@@ -80,7 +80,7 @@ void ZFHashSet::addFrom(ZF_IN ZFContainer *another)
 void ZFHashSet::removeElement(ZF_IN ZFObject *obj)
 {
     ZFKeyValuePairHolder tmp = d->removeAndGetPair(obj);
-    if(tmp.key.toObject() != zfnull)
+    if(tmp.key != zfnull)
     {
         this->contentOnRemove(tmp.key.toObject());
         this->contentOnChange();

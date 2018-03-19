@@ -70,12 +70,11 @@ protected:
      * you may change them after timer created,
      * but you must not if timer is started
      */
-    ZFMETHOD_DECLARE_PROTECTED_5(void, objectOnInit,
-                                 ZFMP_IN(const zftimet &, timerInterval),
-                                 ZFMP_IN_OPT(ZFObject *, timerParam0, zfnull),
-                                 ZFMP_IN_OPT(ZFObject *, timerParam1, zfnull),
-                                 ZFMP_IN_OPT(const zftimet &, timerDelay, zftimetZero()),
-                                 ZFMP_IN_OPT(zfbool, timerActivateInMainThread, zffalse))
+    ZFOBJECT_ON_INIT_INLINE_5(ZFMP_IN(const zftimet &, timerInterval),
+                              ZFMP_IN_OPT(ZFObject *, timerParam0, zfnull),
+                              ZFMP_IN_OPT(ZFObject *, timerParam1, zfnull),
+                              ZFMP_IN_OPT(const zftimet &, timerDelay, zftimetZero()),
+                              ZFMP_IN_OPT(zfbool, timerActivateInMainThread, zffalse))
     {
         this->objectOnInit();
         zfself::timerIntervalSet(timerInterval);
@@ -94,7 +93,7 @@ protected:
 
 public:
     /** @brief for internal use only */
-    ZFMETHOD_DECLARE_0(void *, nativeTimer);
+    ZFMETHOD_DECLARE_0(void *, nativeTimer)
 
 public:
     /**
@@ -102,8 +101,8 @@ public:
      *
      * assert fail if interval is less than 0
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, timerInterval, ZFPropertyInitValue(1000))
-    ZFPROPERTY_CUSTOM_ON_VERIFY_DECLARE(zftimet, timerInterval)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, timerInterval, 1000)
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zftimet, timerInterval)
     {
         zfCoreAssert(!this->timerStarted());
         zfCoreAssert(this->timerInterval() > 0);
@@ -115,8 +114,8 @@ public:
      * if delay is less than 10, it's treated as 0\n
      * else, first timer event would be fired after (timerDelay + timerInterval)
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, timerDelay, ZFPropertyInitValue(0))
-    ZFPROPERTY_CUSTOM_ON_VERIFY_DECLARE(zftimet, timerDelay)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, timerDelay, 0)
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zftimet, timerDelay)
     {
         zfCoreAssert(!this->timerStarted());
         zfCoreAssert(this->timerDelay() >= 0);
@@ -128,8 +127,8 @@ public:
      * fired in main thread for convenience but may cause timer to be more inaccurate,
      * use only if necessary
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, timerActivateInMainThread, ZFPropertyInitValue(zffalse))
-    ZFPROPERTY_CUSTOM_ON_VERIFY_DECLARE(zfbool, timerActivateInMainThread)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, timerActivateInMainThread, zffalse)
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfbool, timerActivateInMainThread)
     {
         zfCoreAssert(!this->timerStarted());
     }
@@ -141,7 +140,7 @@ public:
      * it won't be released after timer stop
      */
     ZFPROPERTY_RETAIN(ZFObject *, timerParam0)
-    ZFPROPERTY_CUSTOM_ON_VERIFY_DECLARE(ZFObject *, timerParam0)
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(ZFObject *, timerParam0)
     {
         zfCoreAssert(!this->timerStarted());
     }
@@ -153,7 +152,7 @@ public:
      * it won't be released after timer stop
      */
     ZFPROPERTY_RETAIN(ZFObject *, timerParam1)
-    ZFPROPERTY_CUSTOM_ON_VERIFY_DECLARE(ZFObject *, timerParam1)
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(ZFObject *, timerParam1)
     {
         zfCoreAssert(!this->timerStarted());
     }
@@ -162,22 +161,22 @@ public:
     /**
      * @brief start the timer
      */
-    ZFMETHOD_DECLARE_0(void, timerStart);
+    ZFMETHOD_DECLARE_0(void, timerStart)
     /**
      * @brief stop the timer
      */
-    ZFMETHOD_DECLARE_0(void, timerStop);
+    ZFMETHOD_DECLARE_0(void, timerStop)
     /**
      * @brief true if started
      */
-    ZFMETHOD_DECLARE_0(zfbool, timerStarted);
+    ZFMETHOD_DECLARE_0(zfbool, timerStarted)
 
 public:
     /**
      * @brief get timer's current fired count, with 1 as first fired time's value,
      *   keep after timer stop, but reset before timer start
      */
-    ZFMETHOD_DECLARE_0(zfindex, timerActivatedCount);
+    ZFMETHOD_DECLARE_0(zfindex, timerActivatedCount)
 
 public:
     zffinal void _ZFP_ZFTimer_timerOnStart(void);

@@ -46,6 +46,16 @@ public:
     zfbool scrollAniTimerStarted;
     zftimet scrollAniLastTime;
 
+    /*
+     * when size changed, try to move focused child to visible before reload,
+     * typical use case:
+     * 1. click a text edit view inside of a scroll view
+     * 2. on screen keyboard popup and cause client frame shrinked
+     * 3. the text edit view exceeds scroll content visible range and would be removed
+     * 4. the focus lost, cause keyboard hide, which is not expected
+     */
+    zfbool scrollSizeChangedFlag;
+
     ZFUIScroller *xScroll;
     zfbool xScrollEnable;
     zfint xScrollDragPrevPos;
@@ -84,6 +94,7 @@ protected:
     , scrollContentFrameOverrideFlag(zffalse)
     , scrollAniTimerStarted(zffalse)
     , scrollAniLastTime(0)
+    , scrollSizeChangedFlag(zffalse)
     , xScroll(zfnull)
     , xScrollEnable(zftrue)
     , xScrollDragPrevPos(0)
@@ -132,6 +143,20 @@ public:
 public:
     void scrollerUpdate(void)
     {
+        if(this->scrollSizeChangedFlag)
+        {
+            this->scrollSizeChangedFlag = zffalse;
+            for(zfindex i = 0; i < this->pimplOwner->childCount(); ++i)
+            {
+                ZFUIView *child = this->pimplOwner->childAtIndex(i);
+                if(child->viewFocusedRecursive())
+                {
+                    this->pimplOwner->scrollChildToVisible(child, zffalse);
+                    break;
+                }
+            }
+        }
+
         this->scrollContentFrameUpdate();
         this->scrollerActionRun();
     }
@@ -346,7 +371,7 @@ private:
     }
 
 private:
-    ZFMETHOD_DECLARE_0(zftimet, x_scrollAniStart)
+    ZFMETHOD_INLINE_0(zftimet, x_scrollAniStart)
     {
         if(!this->xScrollAniTimerStarted)
         {
@@ -356,7 +381,7 @@ private:
         this->scrollerActionAdd(_ZFP_ZFUIScrollViewActionScrollBegin);
         return this->scrollAniLastTime;
     }
-    ZFMETHOD_DECLARE_0(zftimet, y_scrollAniStart)
+    ZFMETHOD_INLINE_0(zftimet, y_scrollAniStart)
     {
         if(!this->yScrollAniTimerStarted)
         {
@@ -366,7 +391,7 @@ private:
         this->scrollerActionAdd(_ZFP_ZFUIScrollViewActionScrollBegin);
         return this->scrollAniLastTime;
     }
-    ZFMETHOD_DECLARE_0(void, x_scrollAniStop)
+    ZFMETHOD_INLINE_0(void, x_scrollAniStop)
     {
         if(this->xScrollAniTimerStarted)
         {
@@ -378,7 +403,7 @@ private:
             }
         }
     }
-    ZFMETHOD_DECLARE_0(void, y_scrollAniStop)
+    ZFMETHOD_INLINE_0(void, y_scrollAniStop)
     {
         if(this->yScrollAniTimerStarted)
         {
@@ -606,37 +631,37 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollAutoScrollOnStart)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollAutoScrollOnStop)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollOnScrolledByUser)
 
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollEnable)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollEnable)
 {
     d->xScrollEnable = this->scrollEnable();
     d->yScrollEnable = this->scrollEnable();
     ZFPROTOCOL_ACCESS(ZFUIScrollView)->scrollViewScrollEnableSet(this, this->scrollEnable());
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceHorizontal)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceHorizontal)
 {
     d->scrollBounceChanged();
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceVertical)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceVertical)
 {
     d->scrollBounceChanged();
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceHorizontalAlways)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceHorizontalAlways)
 {
     d->scrollBounceChanged();
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceVerticalAlways)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollBounceVerticalAlways)
 {
     d->scrollBounceChanged();
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollAlignToPageHorizontal)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollAlignToPageHorizontal)
 {
     d->scrollAlignToPageChanged();
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollAlignToPageVertical)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, zfbool, scrollAlignToPageVertical)
 {
     d->scrollAlignToPageChanged();
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIScrollView, ZFUIRect, scrollContentFrame)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollView, ZFUIRect, scrollContentFrame)
 {
     if(d->xScroll->scrollContentOffset() != propertyValueOld.point.x
         || d->xScroll->scrollContentSize() != propertyValue.size.width)
@@ -801,6 +826,7 @@ void ZFUIScrollView::layoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds)
     if(xScrollOwnerSize != d->xScroll->scrollOwnerSize()
         || yScrollOwnerSize != d->yScroll->scrollOwnerSize())
     {
+        d->scrollSizeChangedFlag = zftrue;
         d->xScroll->scrollOwnerSizeChanged(xScrollOwnerSize);
         d->yScroll->scrollOwnerSizeChanged(yScrollOwnerSize);
         d->scrollerUpdate();
@@ -1000,8 +1026,9 @@ ZFMETHOD_DEFINE_0(ZFUIScrollView, void, scrollToFitRange)
     d->yScroll->scrollToFitRange();
     d->scrollerUpdate();
 }
-ZFMETHOD_DEFINE_1(ZFUIScrollView, void, scrollChildToVisible,
-                  ZFMP_IN(ZFUIView *, child))
+ZFMETHOD_DEFINE_2(ZFUIScrollView, void, scrollChildToVisible,
+                  ZFMP_IN(ZFUIView *, child),
+                  ZFMP_IN_OPT(zfbool, scrollWithAni, zftrue))
 {
     if(child == zfnull)
     {
@@ -1018,7 +1045,17 @@ ZFMETHOD_DEFINE_1(ZFUIScrollView, void, scrollChildToVisible,
 
     if(offsetX != 0 || offsetY != 0)
     {
-        this->scrollByPoint(this->scrollContentFrame().point.x + offsetX, this->scrollContentFrame().point.y + offsetY);
+        ZFUIRect t = this->scrollContentFrame();
+        t.point.x += offsetX;
+        t.point.y += offsetY;
+        if(scrollWithAni)
+        {
+            this->scrollByPoint(t.point.x, t.point.y);
+        }
+        else
+        {
+            this->scrollContentFrameSet(t);
+        }
     }
 }
 

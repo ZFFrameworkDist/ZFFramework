@@ -99,9 +99,9 @@ ZFCallback::ZFCallback(void)
 ZFCallback::ZFCallback(ZF_IN const ZFCallback &ref)
 : d(zfnull)
 {
-    this->operator =(ref);
+    this->operator = (ref);
 }
-ZFCallback &ZFCallback::operator =(ZF_IN const ZFCallback &ref)
+ZFCallback &ZFCallback::operator = (ZF_IN const ZFCallback &ref)
 {
     _ZFP_ZFCallbackPrivateDataChange(d, ref.d);
     _ZFP_ZFCallbackCachedDataSetup(*this, d);
@@ -302,7 +302,7 @@ zfautoObject ZFCallback::callbackTagRemoveAndGet(ZF_IN const zfchar *key)
             return ret;
         }
     }
-    return zfautoObjectNull();
+    return zfnull;
 }
 void ZFCallback::callbackTagRemoveAll(void)
 {

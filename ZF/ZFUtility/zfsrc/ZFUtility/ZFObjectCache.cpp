@@ -96,7 +96,7 @@ public:
 };
 
 // ============================================================
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFObjectCache, zfbool, cacheTrimWhenReceiveMemoryWarning)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFObjectCache, zfbool, cacheTrimWhenReceiveMemoryWarning)
 {
     ZF_GLOBAL_INITIALIZER_INSTANCE(ZFObjectCacheDataHolder)->cacheTrimListenerSetup(
         this, this->cacheTrimWhenReceiveMemoryWarning());
@@ -165,7 +165,7 @@ ZFMETHOD_DEFINE_1(ZFObjectCache, zfautoObject, cacheGet,
             return it->second->cacheValue;
         }
     }
-    return zfautoObjectNull();
+    return zfnull;
 }
 
 ZFMETHOD_DEFINE_1(ZFObjectCache, zfautoObject, cacheRemove,
@@ -185,7 +185,7 @@ ZFMETHOD_DEFINE_1(ZFObjectCache, zfautoObject, cacheRemove,
             return ret;
         }
     }
-    return zfautoObjectNull();
+    return zfnull;
 }
 ZFMETHOD_DEFINE_0(ZFObjectCache, void, cacheRemoveAll)
 {

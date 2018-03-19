@@ -16,7 +16,6 @@
 #define _ZFI_ZFBuffer_h_
 
 #include "ZFCoreTypeDef.h"
-#include "ZFCoreSPrintf.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -217,7 +216,7 @@ public:
         ++(d->refCount);
     }
     /** @cond ZFPrivateDoc */
-    zffinal ZFBuffer &operator =(ZF_IN const ZFBuffer &ref)
+    zffinal ZFBuffer &operator = (ZF_IN const ZFBuffer &ref)
     {
         _ZFP_ZFBufferPrivate *dTmp = d;
         d = ref.d;
@@ -248,10 +247,7 @@ public:
     /**
      * @brief get a short info
      */
-    zffinal void objectInfoT(ZF_IN_OUT zfstring &ret) const
-    {
-        zfstringAppend(ret, zfText("<ZFBuffer %p(%zi)>"), this->buffer(), this->bufferSize());
-    }
+    zffinal void objectInfoT(ZF_IN_OUT zfstring &ret) const;
     /** @brief see #objectInfoT */
     zffinal zfstring objectInfo(void) const
     {

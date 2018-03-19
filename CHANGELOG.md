@@ -1,3 +1,13 @@
+# 0.1.1 (20180319)
+
+* upgrade Android project files
+* update CI script
+* impl lib's header can now be exported
+* optimize external ZFModule build logic and script
+* optimize method and property declaration
+* reduce recursive header include to improve compile time
+* trim output executable size
+
 # 0.1.0 (20180218)
 
 * first commit

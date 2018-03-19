@@ -10,6 +10,7 @@
 #include "ZFSerializable.h"
 #include "ZFObjectImpl.h"
 #include "ZFObjectCreator.h"
+#include "ZFSerializableDataStringConverter.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_string.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -191,7 +192,7 @@ zfbool ZFSerializable::serializeFromData(ZF_IN const ZFSerializableData &seriali
             }
 
             zfautoObject styleableObj = ZFObjectCreate(styleableType, styleableData);
-            if(styleableObj == zfautoObjectNull())
+            if(styleableObj == zfnull)
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, serializableData,
                     zfText("failed to create object from \"%s\" \"%s\""), styleableType, styleableData);
@@ -216,7 +217,7 @@ zfbool ZFSerializable::serializeFromData(ZF_IN const ZFSerializableData &seriali
                 return zffalse;
             }
 
-            ZFCastZFObjectUnchecked(ZFStyleable *, this)->styleableCopyFrom(ZFCastZFObjectUnchecked(ZFStyleable *, styleableObj));
+            ZFCastZFObjectUnchecked(ZFStyleable *, this)->styleableCopyFrom(styleableObj);
         }
         this->serializableStyleableTypeSet(styleableType);
         this->serializableStyleableDataSet(styleableData);
@@ -360,7 +361,7 @@ zfbool ZFSerializable::serializeToData(ZF_OUT ZFSerializableData &serializableDa
         else if(this->serializableStyleableTypeGet() != zfnull || this->serializableStyleableDataGet() != zfnull)
         { // styleable logic
             zfautoObject styleableObj = ZFObjectCreate(this->serializableStyleableTypeGet(), this->serializableStyleableDataGet());
-            if(styleableObj == zfautoObjectNull())
+            if(styleableObj == zfnull)
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint,
                     zfText("failed to create object from \"%s\" \"%s\""),
@@ -529,11 +530,6 @@ void ZFSerializable::serializableGetAllSerializableEmbededPropertyT(ZF_OUT ZFCor
 
 ZFSerializablePropertyType ZFSerializable::serializableOnCheckPropertyType(ZF_IN const ZFProperty *property)
 {
-    if(!property->propertyIsSerializable())
-    {
-        return ZFSerializablePropertyTypeNotSerializable;
-    }
-
     if(property->propertyIsRetainProperty())
     {
         if(property->setterMethod()->methodPrivilegeType() == ZFMethodPrivilegeTypePrivate)
@@ -562,14 +558,7 @@ ZFSerializablePropertyType ZFSerializable::serializableOnCheckPropertyType(ZF_IN
     }
     else
     {
-        if(property->propertyIsSerializable())
-        {
-            return ZFSerializablePropertyTypeSerializableProperty;
-        }
-        else
-        {
-            return ZFSerializablePropertyTypeNotSerializable;
-        }
+        return ZFSerializablePropertyTypeSerializableProperty;
     }
 }
 
@@ -585,7 +574,7 @@ zfbool ZFSerializable::serializableOnSerializePropertyFromData(ZF_IN const ZFSer
         {
             return zffalse;
         }
-        if(obj != zfautoObjectNull() && !obj.toObject()->classData()->classIsTypeOf(property->propertyClassOfRetainProperty()))
+        if(obj != zfnull && !obj.toObject()->classData()->classIsTypeOf(property->propertyClassOfRetainProperty()))
         {
             ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, propertyData,
                 zfText("object %s not type of %s"),
@@ -630,8 +619,7 @@ zfbool ZFSerializable::serializableOnSerializePropertyToData(ZF_OUT ZFSerializab
     {
         return zftrue;
     }
-    if(!property->propertyIsSerializable()
-        || property->callbackIsInitValue(property, this->toObject(), zfnull))
+    if(property->callbackIsInitValue(property, this->toObject(), zfnull))
     {
         return zftrue;
     }
@@ -746,7 +734,7 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyToData(ZF_OUT ZFSer
     }
     if(propertyRef == zfnull)
     {
-        propertyRef = ZFCastZFObjectUnchecked(ZFSerializable *, initValue);
+        propertyRef = initValue;
     }
 
     if(!ZFCastZFObjectUnchecked(zfself *, obj)->serializeToData(propertyData, outErrorHint, propertyRef))
@@ -1010,7 +998,7 @@ zfbool ZFObjectFromData(ZF_OUT zfautoObject &result,
                         ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
                         ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
 {
-    result = zfautoObjectNull();
+    result = zfnull;
 
     const zfchar *serializableClass = ZFSerializableUtil::requireSerializableClass(ZFPropertyTypeId_none, serializableData, outErrorHint, outErrorPos);
     if(serializableClass == zfnull)

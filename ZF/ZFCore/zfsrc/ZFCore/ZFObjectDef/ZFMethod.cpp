@@ -10,6 +10,12 @@
 #include "ZFMethod.h"
 #include "ZFObjectImpl.h"
 
+#include "ZFMethodDeclare.h"
+#include "ZFMethodUserRegister.h"
+
+#include "ZFMethodFuncDeclare.h"
+#include "ZFMethodFuncUserRegister.h"
+
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -162,6 +168,20 @@ void ZFMethod::objectInfoT(ZF_IN_OUT zfstring &ret) const
                 ret += zfText(", ");
             }
             ret += this->methodParamTypeNameAtIndex(i);
+            zfstringAppend(ret, zfText(" p%zi"), i);
+            if(i >= this->methodParamDefaultBeginIndex())
+            {
+                ret += zfText(" = ");
+                zfautoObject v = this->methodParamDefaultValueAtIndex(i);
+                if(v == zfnull)
+                {
+                    ret += ZFTOKEN_zfnull;
+                }
+                else
+                {
+                    v.toObject()->objectInfoT(ret);
+                }
+            }
         }
         ret += zfText(")");
     }

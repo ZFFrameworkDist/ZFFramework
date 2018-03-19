@@ -17,8 +17,7 @@
 #ifndef _ZFI_ZFCoreLog_h_
 #define _ZFI_ZFCoreLog_h_
 
-#include "ZFCoreUtil.h"
-#include "ZFCoreStringUtil.h"
+#include "ZFCallerInfo.h"
 #include <assert.h>
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -178,6 +177,4 @@ extern ZF_ENV_EXPORT void _ZFP_zfCoreCriticalError(ZF_IN const ZFCallerInfo &cal
 ZF_NAMESPACE_GLOBAL_END
 
 #endif // #ifndef _ZFI_ZFCoreLog_h_
-
-#include "ZFCoreLog_CommonLog.h"
 

@@ -113,13 +113,19 @@ public:
     ZFCoreArrayPOD<const ZFProperty *> propertyList;
     ZFCoreMap propertyMap; // map to const ZFProperty *
     /*
-     * store all property declared by #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE
+     * store all property that has override parent's OnInit step by #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE
      * including self and all parent
+     *
+     * note, only stored when subclass override parent's OnInit,
+     * not applied when the property's direct owner declared custom OnInit
+     *
+     * during owner object's allocation,
+     * all of these property would have their getter being called
+     * to suit most logic case
      */
     zfstlmap<const ZFProperty *, zfbool> propertyAutoInitMap;
     /*
-     * all property that has override init step by #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE
-     * (including self and all parent),
+     * see propertyAutoInitMap,
      * used to check whether two class has same property init step
      */
     _ZFP_ZFClassPropertyInitStepMapType propertyInitStepMap;
@@ -526,7 +532,7 @@ zfautoObject ZFClass::newInstanceGeneric(
 {
     if(d->constructor == zfnull)
     {
-        return zfautoObjectNull();
+        return zfnull;
     }
     if(zftrue
         && param0 == ZFMethodGenericInvokerDefaultParam()
@@ -547,7 +553,7 @@ zfautoObject ZFClass::newInstanceGeneric(
     this->methodForNameGetAllT(objectOnInitMethodList, zfText("objectOnInit"));
     if(objectOnInitMethodList.isEmpty())
     {
-        return zfautoObjectNull();
+        return zfnull;
     }
     ZFObject *obj = d->constructor();
     zfautoObject dummy;
@@ -563,7 +569,7 @@ zfautoObject ZFClass::newInstanceGeneric(
         }
     }
     d->destructor(obj);
-    return zfautoObjectNull();
+    return zfnull;
 }
 zfautoObject ZFClass::newInstanceGenericWithMethod(ZF_IN const ZFMethod *objectOnInitMethod
                                                    , ZF_IN_OPT ZFObject *param0 /* = ZFMethodGenericInvokerDefaultParam() */
@@ -601,7 +607,7 @@ zfautoObject ZFClass::newInstanceGenericWithMethod(ZF_IN const ZFMethod *objectO
         return obj;
     }
     d->destructor(obj);
-    return zfautoObjectNull();
+    return zfnull;
 }
 
 zfindex ZFClass::implementedInterfaceCount(void) const
@@ -879,7 +885,7 @@ zfautoObject ZFClass::classTagRemoveAndGet(ZF_IN const zfchar *key) const
             return ret;
         }
     }
-    return zfautoObjectNull();
+    return zfnull;
 }
 void ZFClass::classTagRemoveAll(void) const
 {
@@ -1356,6 +1362,11 @@ void ZFClass::_ZFP_ZFClass_propertyUnregister(ZF_IN const ZFProperty *zfproperty
 
 void ZFClass::_ZFP_ZFClass_propertyAutoInitRegister(ZF_IN const ZFProperty *property) const
 {
+    if(property->propertyOwnerClass() == this)
+    {
+        return ;
+    }
+
     d->propertyAutoInitMap[property] = zftrue;
 
     for(zfstlmap<const ZFClass *, zfbool>::iterator it = d->allChildren.begin(); it != d->allChildren.end(); ++it)
@@ -1381,6 +1392,11 @@ void ZFClass::_ZFP_ZFClass_propertyAutoInitAction(ZF_IN ZFObject *owner) const
 }
 void ZFClass::_ZFP_ZFClass_propertyInitStepRegister(ZF_IN const ZFProperty *property) const
 {
+    if(property->propertyOwnerClass() == this)
+    {
+        return ;
+    }
+
     d->propertyInitStepMap[property][this] = zftrue;
 
     for(zfstlmap<const ZFClass *, zfbool>::iterator it = d->allChildren.begin(); it != d->allChildren.end(); ++it)

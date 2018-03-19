@@ -14,8 +14,8 @@
 #ifndef _ZFI_ZFObjectGlobalInstance_h_
 #define _ZFI_ZFObjectGlobalInstance_h_
 
-#include "ZFObjectCore.h"
 #include "ZFPropertyType.h"
+#include "ZFMethodDeclare.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -195,7 +195,7 @@ public:
                                         AccessTypeName, accessMethodName) \
     GetterAccessType: \
         /** \n access singleton instance */ \
-        ZFMETHOD_DECLARE_DETAIL_0( \
+        ZFMETHOD_INLINE_DETAIL_0( \
             GetterAccessType, ZFMethodIsStatic, \
             AccessTypeName *, accessMethodName \
             ) \
@@ -204,7 +204,7 @@ public:
         } \
     SetterAccessType: \
         /** @brief see @ref accessMethodName */ \
-        ZFMETHOD_DECLARE_DETAIL_1( \
+        ZFMETHOD_INLINE_DETAIL_1( \
             SetterAccessType, ZFMethodIsStatic, \
             void, accessMethodName##Set \
             , ZFMP_IN(AccessTypeName *, param0) \
@@ -222,14 +222,14 @@ public:
         ZFMETHOD_DECLARE_DETAIL_0( \
             GetterAccessType, ZFMethodIsStatic, \
             ZFObject *, accessMethodName##Reflect \
-            ); \
+            ) \
     SetterAccessType: \
         /** @brief see @ref accessMethodName */ \
         ZFMETHOD_DECLARE_DETAIL_1( \
             SetterAccessType, ZFMethodIsStatic, \
             void, accessMethodName##Set##Reflect \
             , ZFMP_IN(ZFObject *, param0) \
-            ); \
+            ) \
     public:
 #define _ZFP_ZFOBJECT_SINGLETON_DEFINE(OwnerClass, \
                                        AccessTypeName, ObjectTypeName, sig, accessMethodName, \

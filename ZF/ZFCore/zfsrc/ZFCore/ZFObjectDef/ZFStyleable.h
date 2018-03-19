@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFStyleable_h_
 #define _ZFI_ZFStyleable_h_
 
-#include "ZFObjectCore.h"
 #include "ZFSerializable.h"
 #include "ZFCopyable.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -217,7 +216,7 @@ private:
                 return zfnull; \
             } \
             zfautoObject obj = _ZFP_ZFStyleableDefault_##YourStyle::ClassData()->newInstance(); \
-            if(obj != zfautoObjectNull()) \
+            if(obj != zfnull) \
             { \
                 zfself::_ZFP_ZFStyleablEnumDefaultStyleSet(obj.to<YourStyle *>()); \
             } \

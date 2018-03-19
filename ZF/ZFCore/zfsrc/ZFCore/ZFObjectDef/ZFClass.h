@@ -15,9 +15,6 @@
 #ifndef _ZFI_ZFClass_h_
 #define _ZFI_ZFClass_h_
 
-#include "ZFObjectClassTypeFwd.h"
-#include "ZFObjectCast.h"
-#include "ZFAny.h"
 #include "zfautoObjectFwd.h"
 #include "ZFObjectObserver.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -267,7 +264,7 @@ public:
      *
      * create object by specified params,
      * the object must have proper #ZFObject::objectOnInit
-     * declared as #ZFMETHOD_DECLARE_PROTECTED_1 series,
+     * declared as #ZFOBJECT_ON_INIT_DECLARE_1 series,
      * and params are passed accorrding to #ZFMethod::methodGenericInvoke
      * @note this method do much reflection steps to find proper objectOnInit,
      *   which may cause performance issue,
@@ -660,6 +657,4 @@ public:
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFClass_h_
-
-#include "ZFFilterForZFClass.h"
 

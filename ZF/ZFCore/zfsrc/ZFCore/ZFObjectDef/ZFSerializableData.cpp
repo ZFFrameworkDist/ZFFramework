@@ -10,6 +10,7 @@
 #include "ZFSerializableData.h"
 #include "ZFObjectImpl.h"
 #include "ZFSerializableUtil.h"
+#include "ZFSerializableDataRefType.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_string.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_deque.h"
@@ -126,7 +127,7 @@ ZFSerializableData::ZFSerializableData(ZF_IN const ZFSerializableData &ref)
     d = ref.d;
     ++(d->refCount);
 }
-ZFSerializableData &ZFSerializableData::operator =(ZF_IN const ZFSerializableData &ref)
+ZFSerializableData &ZFSerializableData::operator = (ZF_IN const ZFSerializableData &ref)
 {
     zfCoreMutexLocker();
     _ZFP_ZFSerializableDataPrivate *dTmp = d;
@@ -139,7 +140,7 @@ ZFSerializableData &ZFSerializableData::operator =(ZF_IN const ZFSerializableDat
     }
     return *this;
 }
-zfbool ZFSerializableData::operator ==(ZF_IN const ZFSerializableData &ref) const
+zfbool ZFSerializableData::operator == (ZF_IN const ZFSerializableData &ref) const
 {
     return (d == ref.d);
 }
@@ -645,7 +646,7 @@ zfautoObject ZFSerializableData::serializableDataTagRemoveAndGet(ZF_IN const zfc
             return ret;
         }
     }
-    return zfautoObjectNull();
+    return zfnull;
 }
 void ZFSerializableData::serializableDataTagRemoveAll(void)
 {

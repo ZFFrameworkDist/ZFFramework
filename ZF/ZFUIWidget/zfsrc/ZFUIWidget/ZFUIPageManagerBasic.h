@@ -61,7 +61,7 @@ public:
      * -  when the window destroy, call #embededDestroy
      * -  when manager destroy, detach from the window, then hide the window
      */
-    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, managerContainer, ZFPropertyInitValue(_ZFP_managerContainerInit()))
+    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, managerContainer, _ZFP_managerContainerInit())
     /**
      * @brief the page container,
      *   must be set during manager's #ZFUIPageManager::managerOnCreate
@@ -71,7 +71,7 @@ public:
      * @brief create a #ZFUIWindow to hold the manager for short,
      *   see #managerContainer for more info
      */
-    ZFMETHOD_DECLARE_0(zfautoObject, embededCreateWindow);
+    ZFMETHOD_DECLARE_0(zfautoObject, embededCreateWindow)
 
 protected:
     zfoverride

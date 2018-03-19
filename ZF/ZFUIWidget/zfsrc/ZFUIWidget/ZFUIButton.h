@@ -137,21 +137,21 @@ public:
      * @brief true if the button is enabled, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonEnable,
-                                ZFPropertyInitValue(zftrue))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfbool, buttonEnable);
+                                zftrue)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfbool, buttonEnable);
     /**
      * @brief true if the button is checkable button, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonCheckable,
-                                ZFPropertyInitValue(zffalse))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfbool, buttonCheckable);
+                                zffalse)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfbool, buttonCheckable);
     /**
      * @brief true if the button is checked, valid only if #buttonCheckable, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonChecked,
-                                ZFPropertyInitValue(zffalse))
-    ZFPROPERTY_CUSTOM_ON_VERIFY_DECLARE(zfbool, buttonChecked);
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfbool, buttonChecked);
+                                zffalse)
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfbool, buttonChecked);
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfbool, buttonChecked);
     /**
      * @brief mouse up tolerance to detect as click, (0 - #ZFUIGlobalStyle::itemMargin) by default
      *
@@ -160,14 +160,14 @@ public:
      * and a positive value would reduce the button area
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIMargin, buttonClickTolerance,
-                                ZFPropertyInitValue(ZFUIMarginMake(- ZFUIGlobalStyle::DefaultStyle()->itemMargin())))
+                                ZFUIMarginMake(- ZFUIGlobalStyle::DefaultStyle()->itemMargin()))
     /**
      * @brief if two click event's interval smaller than this value,
      *   the second one would be ignored,
      *   100 by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, buttonClickInterval,
-                                ZFPropertyInitValue(100))
+                                100)
 
 protected:
     zfoverride
@@ -180,7 +180,7 @@ public:
      * @brief reset #buttonClickInterval so that next click event would be
      *   ensured to be fired
      */
-    ZFMETHOD_DECLARE_0(void, buttonClickIntervalReset);
+    ZFMETHOD_DECLARE_0(void, buttonClickIntervalReset)
 
 public:
     /**
@@ -189,7 +189,7 @@ public:
      * the optional event paran would be passed to #EventButtonOnClick
      */
     ZFMETHOD_DECLARE_1(void, buttonSimulateClick,
-                       ZFMP_IN_OPT(ZFUIEvent *, event, zfnull));
+                       ZFMP_IN_OPT(ZFUIEvent *, event, zfnull))
 
 protected:
     zfoverride
@@ -247,11 +247,11 @@ public:
     /**
      * @brief current button state
      */
-    ZFMETHOD_DECLARE_0(ZFUIButtonStateEnum, buttonState);
+    ZFMETHOD_DECLARE_0(ZFUIButtonStateEnum, buttonState)
     /**
      * @brief manually update current button state without notify event
      */
-    ZFMETHOD_DECLARE_0(void, buttonStateUpdate);
+    ZFMETHOD_DECLARE_0(void, buttonStateUpdate)
 
 protected:
     /** @brief see #EventButtonStateOnUpdate */

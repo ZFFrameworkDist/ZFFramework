@@ -10,6 +10,7 @@
 #include "ZFUIView.h"
 #include "protocol/ZFProtocolZFUIView.h"
 #include "protocol/ZFProtocolZFUIViewFocus.h"
+#include "ZFUIViewFocus.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_string.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -486,7 +487,7 @@ public:
         {
             return zffalse;
         }
-        if(internalView == zfautoObjectNull())
+        if(internalView == zfnull)
         {
             ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
                 zfText("null view"));
@@ -720,7 +721,7 @@ zfbool ZFUIView::serializableOnSerializeFromData(ZF_IN const ZFSerializableData 
             {
                 return zffalse;
             }
-            if(element == zfautoObjectNull())
+            if(element == zfnull)
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
                     zfText("null view"));
@@ -745,7 +746,7 @@ zfbool ZFUIView::serializableOnSerializeFromData(ZF_IN const ZFSerializableData 
             {
                 return zffalse;
             }
-            if(layoutParam == zfautoObjectNull())
+            if(layoutParam == zfnull)
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
                     zfText("null layoutParam"));
@@ -759,7 +760,7 @@ zfbool ZFUIView::serializableOnSerializeFromData(ZF_IN const ZFSerializableData 
                 return zffalse;
             }
 
-            d->layoutParamSet(this, ZFCastZFObjectUnchecked(ZFUIViewLayoutParam *, layoutParam));
+            d->layoutParamSet(this, layoutParam);
         }
         else if(zfscmpTheSame(category, ZFSerializableKeyword_ZFUIView_internalImplView))
         {
@@ -892,17 +893,17 @@ zfbool ZFUIView::serializableOnCheckNeedSerializeChildren(void)
 
 // ============================================================
 // properties
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfstring, viewDelegateClass)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfstring, viewDelegateClass)
 {
     zfautoObject viewDelegateTmp = ZFClass::newInstanceForName(this->viewDelegateClass());
-    if(!this->viewDelegateSupported() && viewDelegateTmp != zfautoObjectNull())
+    if(!this->viewDelegateSupported() && viewDelegateTmp != zfnull)
     {
         zfCoreCriticalMessage(zfTextA("viewDelegate not supported"));
         return ;
     }
-    this->viewDelegateSet(ZFCastZFObject(ZFUIView *, viewDelegateTmp));
+    this->viewDelegateSet(viewDelegateTmp);
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewVisible)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewVisible)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewVisibleSet(this, this->viewVisible());
     if(this->viewVisible() != propertyValueOld)
@@ -910,11 +911,11 @@ ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewVisible)
         this->layoutRequest();
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zffloat, viewAlpha)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zffloat, viewAlpha)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewAlphaSet(this, this->viewAlpha());
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewFocusable)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewFocusable)
 {
     ZFPROTOCOL_INTERFACE_CLASS(ZFUIViewFocus) *impl = ZFPROTOCOL_TRY_ACCESS(ZFUIViewFocus);
     if(impl != zfnull)
@@ -922,41 +923,41 @@ ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewFocusable)
         impl->viewFocusableSet(this, this->viewFocusable());
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewUIEnable)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewUIEnable)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewUIEnableSet(this, this->viewUIEnable());
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewUIEnableTree)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewUIEnableTree)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewUIEnableTreeSet(this, this->viewUIEnableTree());
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewMouseHoverEventEnable)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewMouseHoverEventEnable)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewMouseHoverEventEnableSet(this, this->viewMouseHoverEventEnable());
 }
 
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizePrefered)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizePrefered)
 {
     if(this->viewSizePrefered() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizeMin)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizeMin)
 {
     if(this->viewSizeMin() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizeMax)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizeMax)
 {
     if(this->viewSizeMax() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIView, ZFUIColor, viewBackgroundColor)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUIColor, viewBackgroundColor)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewBackgroundColorSet(this, this->viewBackgroundColor());
 }
@@ -1462,7 +1463,10 @@ ZFMETHOD_DEFINE_0(ZFUIView, zfbool, viewFocused)
     {
         return impl->viewFocused(this);
     }
-    return zffalse;
+    else
+    {
+        return zffalse;
+    }
 }
 ZFMETHOD_DEFINE_1(ZFUIView, void, viewFocusRequest,
                   ZFMP_IN(zfbool, viewFocus))
@@ -1476,58 +1480,17 @@ ZFMETHOD_DEFINE_1(ZFUIView, void, viewFocusRequest,
         }
     }
 }
-ZFMETHOD_DEFINE_0(ZFUIView, ZFUIView *, viewFocusedChild)
+ZFMETHOD_DEFINE_0(ZFUIView, zfbool, viewFocusedRecursive)
 {
-    if(!ZFPROTOCOL_IS_AVAILABLE(ZFUIViewFocus))
+    ZFPROTOCOL_INTERFACE_CLASS(ZFUIViewFocus) *impl = ZFPROTOCOL_TRY_ACCESS(ZFUIViewFocus);
+    if(impl == zfnull)
     {
-        return zfnull;
+        return zffalse;
     }
-    if(this->viewFocused())
+    else
     {
-        return this;
+        return impl->viewFocusedRecursive(this);
     }
-    ZFUIView *ret = zfnull;
-    for(zfindex i = this->childCount() - 1; i != zfindexMax(); --i)
-    {
-        ret = this->childAtIndex(i)->viewFocusedChild();
-        if(ret != zfnull)
-        {
-            return ret;
-        }
-    }
-    for(zfindex i = d->layerInternalFg.views.count() - 1; i != zfindexMax(); --i)
-    {
-        ret = d->layerInternalFg.views[i]->viewFocusedChild();
-        if(ret != zfnull)
-        {
-            return ret;
-        }
-    }
-    for(zfindex i = d->layerInternalBg.views.count() - 1; i != zfindexMax(); --i)
-    {
-        ret = d->layerInternalBg.views[i]->viewFocusedChild();
-        if(ret != zfnull)
-        {
-            return ret;
-        }
-    }
-    for(zfindex i = d->layerInternalBg.views.count() - 1; i != zfindexMax(); --i)
-    {
-        ret = d->layerInternalBg.views[i]->viewFocusedChild();
-        if(ret != zfnull)
-        {
-            return ret;
-        }
-    }
-    for(zfindex i = d->layerInternalImpl.views.count() - 1; i != zfindexMax(); --i)
-    {
-        ret = d->layerInternalImpl.views[i]->viewFocusedChild();
-        if(ret != zfnull)
-        {
-            return ret;
-        }
-    }
-    return zfnull;
 }
 
 // ============================================================
@@ -1629,9 +1592,9 @@ void ZFUIView::_ZFP_ZFUIView_scaleSetRecursively(ZF_IN zffloat scaleFixed,
 ZFMETHOD_DEFINE_0(ZFUIView, zfautoObject, layoutParamCreate)
 {
     zfautoObject layoutParam = this->layoutParamClass()->newInstance();
-    if(layoutParam == zfautoObjectNull() || !layoutParam.toObject()->classData()->classIsTypeOf(ZFUIViewLayoutParam::ClassData()))
+    if(layoutParam == zfnull || !layoutParam.toObject()->classData()->classIsTypeOf(ZFUIViewLayoutParam::ClassData()))
     {
-        return zfautoObjectNull();
+        return zfnull;
     }
     this->layoutParamOnUpdate(layoutParam.to<ZFUIViewLayoutParam *>());
     return layoutParam;

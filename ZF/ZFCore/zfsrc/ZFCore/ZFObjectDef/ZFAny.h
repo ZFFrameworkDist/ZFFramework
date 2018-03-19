@@ -21,10 +21,30 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 zfclassFwd ZFObject;
 zfclassFwd ZFInterface;
 
+ZFM_CLASS_HAS_MEMBER_DECLARE(ZFAny, toObject, ZFObject *(T::*F)(void))
+template<typename T_Type, int isZFObject>
+zfclassNotPOD _ZFP_ZFAnyCastT
+{
+public:
+    static ZFObject *c(ZF_IN T_Type obj)
+    {
+        return (ZFObject *)obj;
+    }
+};
+template<typename T_Type>
+zfclassNotPOD _ZFP_ZFAnyCastT<T_Type, 1>
+{
+public:
+    static ZFObject *c(ZF_IN T_Type obj)
+    {
+        return obj.toObject();
+    }
+};
+#define _ZFP_ZFAnyCast(T_Type, obj) \
+    (_ZFP_ZFAnyCastT<T_Type, ZFM_CLASS_HAS_MEMBER(ZFAny, toObject, T_Type)>::c(obj))
+
 // ============================================================
 // ZFAny
-template<typename T_ZFObjectBase>
-zfclassFwd ZFAnyT;
 /**
  * @brief util method to cast ZFObject types freely
  *
@@ -49,34 +69,84 @@ public:
     {
     }
     template<typename T_ZFObject>
-    ZFAny(ZF_IN T_ZFObject *obj);
-    template<typename T_ZFObjectBase>
-    ZFAny(ZF_IN const ZFAnyT<T_ZFObjectBase *> &ref);
+    ZFAny(ZF_IN T_ZFObject *obj)
+    : _obj(obj ? obj->toObject() : zfnull)
+    {
+    }
+    template<typename T_ZFObject>
+    ZFAny(ZF_IN T_ZFObject const &obj)
+    : _obj(_ZFP_ZFAnyCast(T_ZFObject, obj))
+    {
+    }
+
+public:
+    template<typename T_ZFObject>
+    ZFAny &operator = (ZF_IN T_ZFObject *obj)
+    {
+        this->_obj = (obj ? obj->toObject() : zfnull);
+        return *this;
+    }
+    template<typename T_ZFObject>
+    ZFAny &operator = (ZF_IN T_ZFObject const &obj)
+    {
+        this->_obj = _ZFP_ZFAnyCast(T_ZFObject, obj);
+        return *this;
+    }
+
+public:
+    template<typename T_ZFObject>
+    zfbool operator == (ZF_IN T_ZFObject *obj) const
+    {
+        return (this->_obj == obj);
+    }
+    template<typename T_ZFObject>
+    zfbool operator != (ZF_IN T_ZFObject *obj) const
+    {
+        return (this->_obj != obj);
+    }
+    template<typename T_ZFObject>
+    zfbool operator == (ZF_IN T_ZFObject const &obj) const
+    {
+        return (this->_obj == _ZFP_ZFAnyCast(T_ZFObject, obj));
+    }
+    template<typename T_ZFObject>
+    zfbool operator != (ZF_IN T_ZFObject const &obj) const
+    {
+        return (this->_obj != _ZFP_ZFAnyCast(T_ZFObject, obj));
+    }
+
 public:
     ZFObject *operator -> (void) const
     {
         return this->toObject();
     }
-    template<typename T_ZFObject>
-    ZFAny &operator =(ZF_IN T_ZFObject *obj);
-    ZFAny &operator =(ZF_IN const ZFAny &ref)
+    operator bool (void) const
     {
-        this->_obj = ref.toObject();
-        return *this;
+        return (this->_obj != zfnull);
     }
-    template<typename T_ZFObjectBase>
-    ZFAny &operator =(ZF_IN const ZFAnyT<T_ZFObjectBase *> &ref);
+    template<typename T_ZFObject>
+    inline operator T_ZFObject * (void) const
+    {
+        return ZFCastZFObject(T_ZFObject *, this->_obj);
+    }
+    /** @endcond */
 
 public:
-    template<typename T_ZFObject>
-    inline operator T_ZFObject *(void) const;
+    /**
+     * @brief get the holded object
+     */
     inline ZFObject *toObject(void) const
     {
         return this->_obj;
     }
+    /**
+     * @brief cast by #ZFCastZFObjectUnchecked
+     */
     template<typename T_ZFObject>
-    inline T_ZFObject to(void) const;
-    /** @endcond */
+    inline T_ZFObject to(void) const
+    {
+        return ZFCastZFObjectUnchecked(T_ZFObject, this->_obj);
+    }
 
 private:
     ZFObject *_obj;
@@ -111,50 +181,110 @@ public:
     {
     }
     template<typename T_ZFObject>
-    ZFAnyT(ZF_IN T_ZFObject *obj)
-    : _obj(obj)
-    {
-    }
-    ZFAnyT(ZF_IN const ZFAnyT<T_ZFObjectBase> &ref)
-    : _obj(ref.toObjectT())
-    {
-    }
-    template<typename T_ZFObject>
     ZFAnyT(ZF_IN const ZFAnyT<T_ZFObject *> &ref)
     : _obj(ref.toObjectT())
     {
     }
-    ZFAnyT(ZF_IN const ZFAny &ref);
+    template<typename T_ZFObject>
+    ZFAnyT(ZF_IN T_ZFObject *obj)
+    : _obj(obj)
+    {
+    }
+    template<typename T_ZFObject>
+    ZFAnyT(ZF_IN T_ZFObject const &obj)
+    : _obj(ZFCastZFObject(T_ZFObjectBase, _ZFP_ZFAnyCast(T_ZFObject, obj)))
+    {
+    }
+
+public:
+    template<typename T_ZFObject>
+    ZFAnyT<T_ZFObjectBase> &operator = (ZF_IN const ZFAnyT<T_ZFObject *> &ref)
+    {
+        this->_obj = ref.toObjectT();
+        return *this;
+    }
+    template<typename T_ZFObject>
+    ZFAnyT<T_ZFObjectBase> &operator = (ZF_IN T_ZFObject *obj)
+    {
+        this->_obj = obj;
+        return *this;
+    }
+    template<typename T_ZFObject>
+    ZFAnyT<T_ZFObjectBase> &operator = (ZF_IN T_ZFObject const &obj)
+    {
+        this->_obj = ZFCastZFObject(T_ZFObjectBase, _ZFP_ZFAnyCast(T_ZFObject, obj));
+        return *this;
+    }
+
+public:
+    template<typename T_ZFObject>
+    zfbool operator == (ZF_IN const ZFAnyT<T_ZFObject *> &ref) const
+    {
+        return (this->_obj == ref.toObjectT());
+    }
+    template<typename T_ZFObject>
+    zfbool operator != (ZF_IN const ZFAnyT<T_ZFObject *> &ref) const
+    {
+        return (this->_obj != ref.toObjectT());
+    }
+    template<typename T_ZFObject>
+    zfbool operator == (ZF_IN T_ZFObject *obj) const
+    {
+        return (this->_obj == obj);
+    }
+    template<typename T_ZFObject>
+    zfbool operator != (ZF_IN T_ZFObject *obj) const
+    {
+        return (this->_obj != obj);
+    }
+    template<typename T_ZFObject>
+    zfbool operator == (ZF_IN T_ZFObject const &obj) const
+    {
+        return (this->_obj == ZFCastZFObject(T_ZFObjectBase, _ZFP_ZFAnyCast(T_ZFObject, obj)));
+    }
+    template<typename T_ZFObject>
+    zfbool operator != (ZF_IN T_ZFObject const &obj) const
+    {
+        return (this->_obj != ZFCastZFObject(T_ZFObjectBase, _ZFP_ZFAnyCast(T_ZFObject, obj)));
+    }
+
 public:
     T_ZFObjectBase operator -> (void) const
     {
         return this->toObjectT();
     }
-    template<typename T_ZFObject>
-    ZFAnyT<T_ZFObjectBase> &operator =(ZF_IN T_ZFObject *obj)
+    operator bool (void) const
     {
-        this->_obj = obj;
-        return *this;
-    }
-    ZFAnyT<T_ZFObjectBase> &operator =(ZF_IN const ZFAnyT<T_ZFObjectBase> &ref)
-    {
-        this->_obj = ref.toObjectT();
-        return *this;
+        return (this->toObject() != zfnull);
     }
     template<typename T_ZFObject>
-    ZFAnyT<T_ZFObjectBase> &operator =(ZF_IN const ZFAnyT<T_ZFObject *> &ref)
+    inline operator T_ZFObject * (void) const
     {
-        this->_obj = ref.toObjectT();
-        return *this;
+        return ZFCastZFObjectUnchecked(ZFM_EXPAND(
+            typename _ZFP_ZFAnyTypeChecker<T_ZFObject *,
+                    zftTypeIsTypeOf<
+                            typename zftTraits<T_ZFObject>::TrType,
+                            typename zftTraits<T_ZFObjectBase>::TrType
+                        >::TypeIsTypeOf
+                >::TypeMatched),
+            this->_obj);
     }
-    ZFAnyT<T_ZFObjectBase> &operator =(ZF_IN const ZFAny &ref);
-
-public:
+    inline ZFObject *toObject(void) const
+    {
+        return (this->_obj ? this->_obj->toObject() : zfnull);
+    }
     template<typename T_ZFObject>
-    inline operator T_ZFObject *(void) const;
-    inline ZFObject *toObject(void) const;
-    template<typename T_ZFObject>
-    inline T_ZFObject to(void) const;
+    inline T_ZFObject to(void) const
+    {
+        return ZFCastZFObjectUnchecked(ZFM_EXPAND(
+            typename _ZFP_ZFAnyTypeChecker<T_ZFObject,
+                    zftTypeIsTypeOf<
+                            typename zftTraits<T_ZFObject>::TrType,
+                            typename zftTraits<T_ZFObjectBase>::TrType
+                        >::TypeIsTypeOf
+                >::TypeMatched),
+            this->_obj);
+    }
     inline T_ZFObjectBase toObjectT(void) const
     {
         return this->_obj;
@@ -175,139 +305,6 @@ private:
 private:
     T_ZFObjectBase _obj;
 };
-
-// ============================================================
-// ZFCastZFObject fix for ZFAny
-inline ZFObject *_ZFP_ObjCastFromUnknown(ZFAny const &obj)
-{
-    return obj;
-}
-inline void _ZFP_ObjCastToUnknown(ZFAny &ret,
-                                  ZFObject * const &obj)
-{
-    ret = obj;
-}
-
-inline ZFObject *_ZFP_ObjCastFromUnknownUnchecked(ZFAny const &obj)
-{
-    return obj;
-}
-inline void _ZFP_ObjCastToUnknownUnchecked(ZFAny &ret,
-                                           ZFObject * const &obj)
-{
-    ret = obj;
-}
-
-// ============================================================
-// ZFCastZFObject fix for ZFAnyT
-template<typename T_ZFObject>
-inline ZFObject *_ZFP_ObjCastFromUnknown(ZFAnyT<T_ZFObject *> const &obj)
-{
-    return obj.toObject();
-}
-template<typename T_ZFObject>
-inline void _ZFP_ObjCastToUnknown(ZFAnyT<T_ZFObject *> &ret,
-                                  ZFObject * const &obj)
-{
-    ret = ZFCastZFObject(T_ZFObject *, obj);
-}
-
-template<typename T_ZFObject>
-inline ZFObject *_ZFP_ObjCastFromUnknownUnchecked(ZFAnyT<T_ZFObject *> const &obj)
-{
-    return obj.toObject();
-}
-template<typename T_ZFObject>
-inline void _ZFP_ObjCastToUnknownUnchecked(ZFAnyT<T_ZFObject *> &ret,
-                                           ZFObject * const &obj)
-{
-    ret = ZFCastZFObjectUnchecked(T_ZFObject *, obj);
-}
-
-// ============================================================
-// ZFAny impl
-/** @cond ZFPrivateDoc */
-template<typename T_ZFObject>
-ZFAny::ZFAny(ZF_IN T_ZFObject *obj)
-: _obj(ZFCastZFObjectUnchecked(ZFObject *, obj))
-{
-}
-template<typename T_ZFObjectBase>
-ZFAny::ZFAny(ZF_IN const ZFAnyT<T_ZFObjectBase *> &ref)
-: _obj(ref.toObject())
-{
-}
-template<typename T_ZFObject>
-ZFAny &ZFAny::operator =(ZF_IN T_ZFObject *obj)
-{
-    this->_obj = ZFCastZFObjectUnchecked(ZFObject *, obj);
-    return *this;
-}
-template<typename T_ZFObjectBase>
-ZFAny &ZFAny::operator =(ZF_IN const ZFAnyT<T_ZFObjectBase *> &ref)
-{
-    this->_obj = ref.toObject();
-    return *this;
-}
-template<typename T_ZFObject>
-inline ZFAny::operator T_ZFObject *(void) const
-{
-    return ZFCastZFObject(T_ZFObject *, this->_obj);
-}
-template<typename T_ZFObject>
-inline T_ZFObject ZFAny::to(void) const
-{
-    return ZFCastZFObjectUnchecked(T_ZFObject, this->_obj);
-}
-/** @endcond */
-
-// ============================================================
-// ZFAny impl
-/** @cond ZFPrivateDoc */
-template<typename T_ZFObjectBase>
-ZFAnyT<T_ZFObjectBase>::ZFAnyT(ZF_IN const ZFAny &ref)
-: _obj(ZFCastZFObject(T_ZFObjectBase, ref.toObject()))
-{
-}
-template<typename T_ZFObjectBase>
-ZFAnyT<T_ZFObjectBase> &ZFAnyT<T_ZFObjectBase>::operator =(ZF_IN const ZFAny &ref)
-{
-    this->_obj = ZFCastZFObject(T_ZFObjectBase, ref.toObject());
-    return *this;
-}
-
-template<typename T_ZFObjectBase>
-template<typename T_ZFObject>
-inline ZFAnyT<T_ZFObjectBase>::operator T_ZFObject *(void) const
-{
-    return ZFCastZFObjectUnchecked(ZFM_EXPAND(
-        typename _ZFP_ZFAnyTypeChecker<T_ZFObject *,
-                zftTypeIsTypeOf<
-                        typename zftTraits<T_ZFObject>::TrType,
-                        typename zftTraits<T_ZFObjectBase>::TrType
-                    >::TypeIsTypeOf
-            >::TypeMatched),
-        this->_obj);
-}
-template<typename T_ZFObjectBase>
-inline ZFObject *ZFAnyT<T_ZFObjectBase>::toObject(void) const
-{
-    return ZFCastZFObjectUnchecked(ZFObject *, this->_obj);
-}
-template<typename T_ZFObjectBase>
-template<typename T_ZFObject>
-inline T_ZFObject ZFAnyT<T_ZFObjectBase>::to(void) const
-{
-    return ZFCastZFObjectUnchecked(ZFM_EXPAND(
-        typename _ZFP_ZFAnyTypeChecker<T_ZFObject,
-                zftTypeIsTypeOf<
-                        typename zftTraits<T_ZFObject>::TrType,
-                        typename zftTraits<T_ZFObjectBase>::TrType
-                    >::TypeIsTypeOf
-            >::TypeMatched),
-        this->_obj);
-}
-/** @endcond */
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFAny_h_

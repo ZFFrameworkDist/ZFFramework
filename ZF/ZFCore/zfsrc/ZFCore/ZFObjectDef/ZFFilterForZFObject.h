@@ -16,6 +16,7 @@
 #define _ZFI_ZFFilterForZFObject_h_
 
 #include "ZFObjectCore.h"
+#include "ZFFilterForZFClass.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -39,7 +40,7 @@ public:
     /**
      * @brief see #ZFFilterBase
      */
-    virtual ZFFilterForZFObject &operator =(ZF_IN const ZFFilterForZFObject &ref);
+    virtual ZFFilterForZFObject &operator = (ZF_IN const ZFFilterForZFObject &ref);
     virtual ~ZFFilterForZFObject(void);
 
     /** @cond ZFPrivateDoc */

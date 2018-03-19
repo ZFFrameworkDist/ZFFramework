@@ -36,7 +36,7 @@ ZFSERIALIZABLEDATA_REFERENCE_TYPE_DEFINE(ZFObjectCreator, ZFSerializableDataRefT
     zfCoreDataDecode(creatorData, zfstring(refData + pos[1].start, pos[1].count));
 
     zfautoObject owner = ZFObjectCreate(creatorType, creatorData);
-    if(owner == zfautoObjectNull())
+    if(owner == zfnull)
     {
         ZFSerializableUtil::errorOccurred(outErrorHint,
             zfText("failed to serialize object from \"%s\" with data \"%s\""),
@@ -94,13 +94,6 @@ ZFSERIALIZABLEDATA_REFERENCE_TYPE_DEFINE(ZFObjectCreator, ZFSerializableDataRefT
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint,
                     zfText("property \"%s\" is not a retain property, no further property access allowed"),
-                    propertyName.cString());
-                return zffalse;
-            }
-            if(!property->propertyIsSerializable())
-            {
-                ZFSerializableUtil::errorOccurred(outErrorHint,
-                    zfText("property \"%s\" is not serializable"),
                     propertyName.cString());
                 return zffalse;
             }

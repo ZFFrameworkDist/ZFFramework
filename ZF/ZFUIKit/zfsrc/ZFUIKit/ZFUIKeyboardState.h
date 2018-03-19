@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFUIKeyboardState_h_
 #define _ZFI_ZFUIKeyboardState_h_
 
-#include "ZFUIKitDef.h"
 #include "ZFUIKeyCode.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -42,12 +41,12 @@ public:
      * @brief true is key is pressed
      */
     ZFMETHOD_DECLARE_1(zfbool, keyPressed,
-                       ZFMP_IN(ZFUIKeyCodeEnum, keyCode));
+                       ZFMP_IN(ZFUIKeyCodeEnum, keyCode))
     /**
      * @brief true is key is pressed
      */
     ZFMETHOD_DECLARE_1(zfbool, keyPressedRaw,
-                       ZFMP_IN(zfflags, keyCodeRaw));
+                       ZFMP_IN(zfflags, keyCodeRaw))
 
 protected:
     zfoverride

@@ -18,8 +18,8 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 zfclassNotPOD _ZFP_ZFMapKeyComparer
 {
 public:
-    inline zfbool operator()(ZFObject *obj1,
-                             ZFObject *obj2) const
+    inline zfbool operator () (ZF_IN ZFObject *obj1,
+                               ZF_IN ZFObject *obj2) const
     {
         ZFCompareResult cmp = ZFObjectCompare(obj1, obj2);
         zfCoreAssertWithMessageTrim(cmp != ZFCompareUncomparable, zfTextA("[ZFMap] key must comparable: %s, %s"),
@@ -47,8 +47,8 @@ public:
 // ZFMap
 ZFOBJECT_REGISTER(ZFMap)
 
-ZFMETHOD_DEFINE_1(ZFMap, void, objectOnInit,
-                  ZFMP_IN(ZFKeyValueContainer *, another))
+ZFOBJECT_ON_INIT_DEFINE_1(ZFMap,
+                          ZFMP_IN(ZFKeyValueContainer *, another))
 {
     this->objectOnInit();
     if(another != zfnull)
@@ -287,7 +287,7 @@ zfautoObject ZFMap::removeAndGet(ZF_IN ZFObject *pKey)
             return tmpValue;
         }
     }
-    return zfautoObjectNull();
+    return zfnull;
 }
 ZFKeyValuePairHolder ZFMap::removeAndGetPair(ZF_IN ZFObject *pKey)
 {
@@ -433,7 +433,7 @@ ZFMETHOD_DEFINE_1(ZFMap, ZFObject *, iteratorNextKey,
     if(data != zfnull && *data != d->data.end())
     {
         ZFObject *ret = (*data)->first;
-        data->operator ++();
+        data->operator ++ ();
         return ret;
     }
     return zfnull;
@@ -445,7 +445,7 @@ ZFMETHOD_DEFINE_1(ZFMap, ZFObject *, iteratorNextValue,
     if(data != zfnull && *data != d->data.end())
     {
         ZFObject *ret = (*data)->second;
-        data->operator ++();
+        data->operator ++ ();
         return ret;
     }
     return zfnull;
@@ -459,7 +459,7 @@ ZFMETHOD_DEFINE_1(ZFMap, ZFKeyValuePair, iteratorNextPair,
     {
         ret.key = (*data)->first;
         ret.value = (*data)->second;
-        data->operator ++();
+        data->operator ++ ();
         return ret;
     }
     return ret;
@@ -471,7 +471,7 @@ ZFMETHOD_DEFINE_1(ZFMap, ZFObject *, iteratorPrevKey,
     if(data != zfnull && *data != d->data.end())
     {
         ZFObject *ret = (*data)->first;
-        data->operator --();
+        data->operator -- ();
         return ret;
     }
     return zfnull;
@@ -483,7 +483,7 @@ ZFMETHOD_DEFINE_1(ZFMap, ZFObject *, iteratorPrevValue,
     if(data != zfnull && *data != d->data.end())
     {
         ZFObject *ret = (*data)->second;
-        data->operator --();
+        data->operator -- ();
         return ret;
     }
     return zfnull;
@@ -497,7 +497,7 @@ ZFMETHOD_DEFINE_1(ZFMap, ZFKeyValuePair, iteratorPrevPair,
     {
         ret.key = (*data)->first;
         ret.value = (*data)->second;
-        data->operator --();
+        data->operator -- ();
         return ret;
     }
     return ret;

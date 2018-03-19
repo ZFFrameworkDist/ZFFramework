@@ -61,7 +61,7 @@ static int _ZFP_ZFImpl_ZFLua_zfl_call_invoker(ZF_IN lua_State *L,
                     break;
                 }
 
-                if(paramList[i] == zfautoObjectNull())
+                if(paramList[i] == zfnull)
                 {
                     if(!ZFObjectFromString(paramList[i], t->zfv, t->zfv.length()))
                     {
@@ -90,7 +90,7 @@ static int _ZFP_ZFImpl_ZFLua_zfl_call_invoker(ZF_IN lua_State *L,
             continue;
         }
 
-        ret = zfautoObjectNull();
+        ret = zfnull;
         if(method->methodGenericInvoker()(method, obj, &errorHint, ret
                 , paramList[0]
                 , paramList[1]
@@ -223,13 +223,13 @@ static int _ZFP_ZFImpl_ZFLua_zfl_call(ZF_IN lua_State *L)
             ZFImpl_ZFLua_luaObjectInfo(L, 2).cString());
         return ZFImpl_ZFLua_luaError(L);
     }
-    v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj);
+    v_zfautoObject *objTmp = obj;
     if(objTmp != zfnull)
     {
         obj = objTmp->zfv;
     }
 
-    if(obj.toObject() == zfnull)
+    if(obj == zfnull)
     {
         ZFLuaErrorOccurredTrim(zfText("[zfl_call] caller object must not be null, while executing: %s"),
             ZFImpl_ZFLua_luaObjectInfo(L, 2).cString());
@@ -269,7 +269,7 @@ static int _ZFP_ZFImpl_ZFLua_zfl_call(ZF_IN lua_State *L)
         zfautoObject methodHolder;
         if(ZFImpl_ZFLua_toObject(methodHolder, L, 2))
         {
-            v_ZFMethod *methodWrapper = ZFCastZFObject(v_ZFMethod *, methodHolder);
+            v_ZFMethod *methodWrapper = methodHolder;
             if(methodWrapper != zfnull)
             {
                 if(methodWrapper->zfv == zfnull)
@@ -366,7 +366,7 @@ static int _ZFP_ZFImpl_ZFLua_zfl_callStatic(ZF_IN lua_State *L)
         zfautoObject methodHolder;
         if(ZFImpl_ZFLua_toObject(methodHolder, L, 1))
         {
-            v_ZFMethod *methodWrapper = ZFCastZFObject(v_ZFMethod *, methodHolder);
+            v_ZFMethod *methodWrapper = methodHolder;
             if(methodWrapper != zfnull)
             {
                 if(methodWrapper->zfv == zfnull)

@@ -134,7 +134,7 @@ public:
      * @brief result type
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFResultTypeEnum, resultType,
-                                ZFPropertyInitValue(ZFResultType::e_Fail))
+                                ZFResultType::e_Fail)
 };
 
 // ============================================================
@@ -211,7 +211,7 @@ public:
      *
      * check by cache time only, whether the cache is valid should be checked by #ZFOperation::cacheIsValid
      */
-    ZFMETHOD_DECLARE_0(zfbool, cacheIsExpired);
+    ZFMETHOD_DECLARE_0(zfbool, cacheIsExpired)
 };
 
 // ============================================================
@@ -352,17 +352,17 @@ public:
      * @brief override default cache expire time,
      *   #ZFOperationCacheExpireTimeUnspecified by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, cacheExpireTime, ZFPropertyInitValue(ZFOperationCacheExpireTimeUnspecified))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, cacheExpireTime, ZFOperationCacheExpireTimeUnspecified)
     /**
      * @brief do what if cache matched,
      *   #ZFOperationCacheMatchAction::e_Unspecified by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(ZFOperationCacheMatchActionEnum, cacheMatchAction, ZFPropertyInitValue(ZFOperationCacheMatchAction::e_Unspecified))
+    ZFPROPERTY_ASSIGN_WITH_INIT(ZFOperationCacheMatchActionEnum, cacheMatchAction, ZFOperationCacheMatchAction::e_Unspecified)
     /**
      * @brief do what if duplicated task started,
      *   #ZFOperationTaskDuplicateAction::e_Unspecified by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(ZFOperationTaskDuplicateActionEnum, taskDuplicateAction, ZFPropertyInitValue(ZFOperationTaskDuplicateAction::e_Unspecified))
+    ZFPROPERTY_ASSIGN_WITH_INIT(ZFOperationTaskDuplicateActionEnum, taskDuplicateAction, ZFOperationTaskDuplicateAction::e_Unspecified)
 
 protected:
     zfoverride

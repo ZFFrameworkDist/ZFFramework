@@ -22,8 +22,8 @@ matrix:
       - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;m2repository" > /dev/null 2>&1
       - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "ndk-bundle" > /dev/null 2>&1
       # build
-      - chmod +x ../ZFFramework/tools/release/testbuild_Android.sh
-      - ../ZFFramework/tools/release/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME} 1
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}
 
   - language: android
     env:
@@ -46,8 +46,8 @@ matrix:
       - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;m2repository" > /dev/null 2>&1
       - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "ndk-bundle" > /dev/null 2>&1
       # build
-      - chmod +x ../ZFFramework/tools/release/testbuild_Android.sh
-      - ../ZFFramework/tools/release/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}
 
   - language: objective-c
     env:
@@ -55,8 +55,8 @@ matrix:
         ZF_PROJ_PATH=demo/zfproj_with_src;
         ZF_PROJ_NAME=ZFFramework_test;
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_iOS.sh
-      - ../ZFFramework/tools/release/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME} 1
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME}
 
   - language: objective-c
     env:
@@ -64,8 +64,8 @@ matrix:
         ZF_PROJ_PATH=demo/zfproj;
         ZF_PROJ_NAME=ZFFramework_test;
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_iOS.sh
-      - ../ZFFramework/tools/release/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME}
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME}
 
   - language: cpp
     env:
@@ -75,8 +75,8 @@ matrix:
     os: linux
     compiler: gcc
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_Qt_Posix.sh
-      - ../ZFFramework/tools/release/testbuild_Qt_Posix.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME} 1
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_Posix.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_Posix.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
 
   - language: cpp
     env:
@@ -86,8 +86,8 @@ matrix:
     os: linux
     compiler: gcc
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_Qt_Posix.sh
-      - ../ZFFramework/tools/release/testbuild_Qt_Posix.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_Posix.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_Posix.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
 
   - language: cpp
     env:
@@ -97,8 +97,8 @@ matrix:
     os: osx
     compiler: clang
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_Qt_MacOS.sh
-      - ../ZFFramework/tools/release/testbuild_Qt_MacOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME} 1
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_MacOS.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_MacOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
 
   - language: cpp
     env:
@@ -108,8 +108,8 @@ matrix:
     os: osx
     compiler: clang
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_Qt_MacOS.sh
-      - ../ZFFramework/tools/release/testbuild_Qt_MacOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_MacOS.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_MacOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
 
   - language: objective-c
     env:
@@ -117,18 +117,19 @@ matrix:
         ZF_PROJ_PATH=demo_ZF2048/zfproj;
         ZF_PROJ_NAME=ZF2048;
     script:
-      - chmod +x ../ZFFramework/tools/release/testbuild_iOS.sh
-      - ../ZFFramework/tools/release/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME}
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME}
 
   - language: cpp
     env:
       - ZF_BUILD=doc
     os: linux
     compiler: clang
+    if: repo = ZFFramework/ZFFramework AND branch = master
     script:
       # we need Doxygen > 1.8.11 (better markdown support, BUG 742715 https://bugzilla.gnome.org/show_bug.cgi?id=742715)
-      - sudo apt-get install wget unzip cmake
-      - _OLD_DIR=$(pwd);
+      - sudo apt-get install wget unzip cmake;
+        _OLD_DIR=$(pwd);
         cd ..;
         wget -q https://github.com/doxygen/doxygen/archive/Release_1_8_14.zip;
         unzip -qo Release_1_8_14.zip;
@@ -138,9 +139,33 @@ matrix:
         cmake -G "Unix Makefiles" ..;
         sudo make install;
         cd "$_OLD_DIR";
-      # make and push doc
-      - chmod +x master/ZF_docs/doc.sh
-      - ./master/ZF_docs/doc.sh
+      - chmod +x master/ZF_CI/doc.sh;
+        ./master/ZF_CI/doc.sh;
+
+  # pod lint takes too long time to build, always timeout, disable for now
+  #
+  # - language: cpp
+  #   env:
+  #     - ZF_BUILD=cocoapods_push
+  #   os: osx
+  #   compiler: clang
+  #   if: repo = ZFFrameworkDist/ZFFramework AND branch = master
+  #   script:
+  #     - sudo gem install cocoapods;
+  #     - chmod +x master/ZF_CI/cocoapods_push.sh;
+  #       travis_wait 30 ./master/ZF_CI/cocoapods_push.sh;
+  #
+  # - language: cpp
+  #   env:
+  #     - ZF_BUILD=cocoapods_lint
+  #   os: osx
+  #   compiler: clang
+  #   if: repo = ZFFramework/ZFFramework AND branch = master
+  #   script:
+  #     - sudo gem install cocoapods;
+  #     - chmod +x master/ZF_CI/cocoapods_lint.sh;
+  #       travis_wait 30 ./master/ZF_CI/cocoapods_lint.sh;
+  #
 
 
 install:

@@ -374,6 +374,7 @@ private:
     ZFXmlItem(ZF_IN _ZFP_ZFXmlItemPrivate *ref);
 };
 ZFPROPERTY_TYPE_DECLARE(ZFXmlItem, ZFXmlItem)
+ZFOUTPUT_TYPE(ZFXmlItem, {output << v.objectInfo();})
 
 // ============================================================
 // ZFXmlVisitData
@@ -707,6 +708,4 @@ ZFMETHOD_FUNC_DECLARE_3(void, ZFXmlEscapeCharDecode,
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFXml_h_
-
-#include "ZFXmlSerializableConverter.h"
 

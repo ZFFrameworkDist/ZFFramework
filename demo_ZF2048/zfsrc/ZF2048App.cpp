@@ -37,20 +37,20 @@ zfclass _ZFP_ZF2048AppPrivate : zfextends ZFObject
 public:
     ZF2048App *owner;
 
-    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, mainLayout, ZFPropertyInitValue(zflineAlloc(ZFUILinearLayout)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, headerLayout, ZFPropertyInitValue(zflineAlloc(ZFUILinearLayout)))
+    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, mainLayout, zflineAlloc(ZFUILinearLayout))
+    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, headerLayout, zflineAlloc(ZFUILinearLayout))
 
-    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, autoMoveButton, ZFPropertyInitValue(zflineAlloc(ZF2048AppButton)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, undoButton, ZFPropertyInitValue(zflineAlloc(ZF2048AppButton)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUIViewLayout *, scoreLayoutHolder, ZFPropertyInitValue(zflineAlloc(ZFUIViewLayout)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, scoreLayout, ZFPropertyInitValue(zflineAlloc(ZFUILinearLayout)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, scoreHint, ZFPropertyInitValue(zflineAlloc(_ZFP_ZF2048AppTextView)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, scoreLabel, ZFPropertyInitValue(zflineAlloc(_ZFP_ZF2048AppTextView)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, settingButton, ZFPropertyInitValue(zflineAlloc(ZF2048AppButton)))
-    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, aboutButton, ZFPropertyInitValue(zflineAlloc(ZF2048AppButton)))
+    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, autoMoveButton, zflineAlloc(ZF2048AppButton))
+    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, undoButton, zflineAlloc(ZF2048AppButton))
+    ZFPROPERTY_RETAIN_READONLY(ZFUIViewLayout *, scoreLayoutHolder, zflineAlloc(ZFUIViewLayout))
+    ZFPROPERTY_RETAIN_READONLY(ZFUILinearLayout *, scoreLayout, zflineAlloc(ZFUILinearLayout))
+    ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, scoreHint, zflineAlloc(_ZFP_ZF2048AppTextView))
+    ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, scoreLabel, zflineAlloc(_ZFP_ZF2048AppTextView))
+    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, settingButton, zflineAlloc(ZF2048AppButton))
+    ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, aboutButton, zflineAlloc(ZF2048AppButton))
 
-    ZFPROPERTY_RETAIN_READONLY(ZF2048AppAutoMoveSettingDialog *, autoMoveSettingDialog, ZFPropertyInitValue(zflineAlloc(ZF2048AppAutoMoveSettingDialog)))
-    ZFPROPERTY_RETAIN_READONLY(ZF2048AppAutoMoveRunner *, autoMoveRunner, ZFPropertyInitValue(zflineAlloc(ZF2048AppAutoMoveRunner)))
+    ZFPROPERTY_RETAIN_READONLY(ZF2048AppAutoMoveSettingDialog *, autoMoveSettingDialog, zflineAlloc(ZF2048AppAutoMoveSettingDialog))
+    ZFPROPERTY_RETAIN_READONLY(ZF2048AppAutoMoveRunner *, autoMoveRunner, zflineAlloc(ZF2048AppAutoMoveRunner))
 
 public:
     void orientationUpdate(void)
@@ -86,7 +86,7 @@ public:
                 return ;
         }
     }
-    ZFLISTENER_DECLARE(orientationOnChange)
+    ZFLISTENER_INLINE(orientationOnChange)
     {
         if(ZFUIWindow::windowForView(this->mainLayout())->windowOwnerSysWindow() != listenerData.sender)
         {
@@ -96,7 +96,7 @@ public:
     }
 
 public:
-    ZFLISTENER_DECLARE(appPaused)
+    ZFLISTENER_INLINE(appPaused)
     {
         this->autoMoveRunner()->runnerStop();
         this->autoMoveButton()->buttonCheckedSet(zffalse);
@@ -153,18 +153,18 @@ public:
             this->gameOver();
         }
     }
-    ZFLISTENER_DECLARE(dataOnChange)
+    ZFLISTENER_INLINE(dataOnChange)
     {
         this->dataUpdate();
     }
 
 public:
-    ZFLISTENER_DECLARE(dialogAfterHide)
+    ZFLISTENER_INLINE(dialogAfterHide)
     {
         this->owner->game()->gameFocus();
     }
 
-    ZFLISTENER_DECLARE(autoMoveOnClick)
+    ZFLISTENER_INLINE(autoMoveOnClick)
     {
         if(this->autoMoveButton()->buttonChecked())
         {
@@ -177,27 +177,27 @@ public:
             this->owner->game()->gameFocus();
         }
     }
-    ZFLISTENER_DECLARE(autoMoveOnStart)
+    ZFLISTENER_INLINE(autoMoveOnStart)
     {
         this->autoMoveButton()->buttonCheckedSet(zftrue);
         this->autoMoveRunner()->actionList.removeAll();
         this->autoMoveRunner()->actionList.copyFrom(this->autoMoveSettingDialog()->autoMoves);
         this->autoMoveRunner()->runnerStart();
     }
-    ZFLISTENER_DECLARE(autoMoveOnStop)
+    ZFLISTENER_INLINE(autoMoveOnStop)
     {
         this->autoMoveButton()->buttonCheckedSet(zffalse);
     }
-    ZFLISTENER_DECLARE(autoMoveStop)
+    ZFLISTENER_INLINE(autoMoveStop)
     {
         this->autoMoveRunner()->runnerStop();
     }
-    ZFLISTENER_DECLARE(settingOnChange)
+    ZFLISTENER_INLINE(settingOnChange)
     {
         ZF2048AppSettingDialog *settingDialog = listenerData.sender->toAny();
         this->owner->game()->gameReset(settingDialog->dataWidth, settingDialog->dataHeight);
     }
-    ZFLISTENER_DECLARE(settingOnClick)
+    ZFLISTENER_INLINE(settingOnClick)
     {
         zfblockedAlloc(ZF2048AppSettingDialog, settingDialog, this->owner->game()->gameDataWidth(), this->owner->game()->gameDataHeight());
         settingDialog->observerAdd(ZF2048AppSettingDialog::EventSettingOnChange(), ZFCallbackForMemberMethod(this, ZFMethodAccess(zfself, settingOnChange)));

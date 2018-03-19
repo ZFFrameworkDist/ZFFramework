@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFUIDialog_h_
 #define _ZFI_ZFUIDialog_h_
 
-#include "ZFUIWidgetDef.h"
 #include "ZFUIButton.h"
 #include "ZFUIOnScreenKeyboardAutoResize.h"
 #include "ZFUIOnScreenKeyboardAutoFit.h"
@@ -147,37 +146,37 @@ public:
      * @brief whether this dialog update layout accorrding to #ZFUISysWindow::sysWindowMargin,
      *   true by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, sysWindowMarginShouldApply, ZFPropertyInitValue(zftrue))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, sysWindowMarginShouldApply, zftrue)
 
     /**
      * @brief dialog's background color, #ZFUIGlobalStyle::colorMask by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, dialogWindowColor, ZFPropertyInitValue(ZFUIGlobalStyle::DefaultStyle()->colorMask()))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIColor, dialogWindowColor);
+    ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, dialogWindowColor, ZFUIGlobalStyle::DefaultStyle()->colorMask())
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIColor, dialogWindowColor);
     /**
      * @brief whether auto dim window background by an alpha change animation, true by default
      *
      * valid only if #dialogWindowColor is not transparent
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoDim, ZFPropertyInitValue(zftrue))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoDim, zftrue)
 
     /**
      * @brief dialog's layout param, created by #ZFUIDialogDefaultLayoutParamCreator by default
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUIViewLayoutParam *, dialogLayoutParam,
-                               ZFPropertyInitValue(ZFUIDialogDefaultLayoutParamCreator().to<ZFUIViewLayoutParam *>()))
+                               ZFUIDialogDefaultLayoutParamCreator().to<ZFUIViewLayoutParam *>())
 
     /**
      * @brief dialog's show animation, #ZFUIDialogDefaultAniShowCreator by default
      */
     ZFPROPERTY_RETAIN_WITH_INIT(ZFAnimation *, dialogAniShow,
-                                ZFPropertyInitValue(ZFUIDialogDefaultAniShowCreator().to<ZFAnimation *>()))
+                                ZFUIDialogDefaultAniShowCreator().to<ZFAnimation *>())
 
     /**
      * @brief dialog's hide animation, #ZFUIDialogDefaultAniHideCreator by default
      */
     ZFPROPERTY_RETAIN_WITH_INIT(ZFAnimation *, dialogAniHide,
-                                ZFPropertyInitValue(ZFUIDialogDefaultAniHideCreator().to<ZFAnimation *>()))
+                                ZFUIDialogDefaultAniHideCreator().to<ZFAnimation *>())
 
     /**
      * @brief dialog's background image
@@ -185,15 +184,15 @@ public:
      * note that the #ZFUIImage::imageNinePatch would be used as dialog content's margin
      */
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUIImage *, dialogBackgroundImage,
-                                ZFPropertyInitValue(zfRes(zfText("ZFUIWidget/ZFUIDialog_background.xml"))))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIImage *, dialogBackgroundImage);
+                                zfRes(zfText("ZFUIWidget/ZFUIDialog_background.xml")))
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIImage *, dialogBackgroundImage);
 
     /**
      * @brief whether automatically focus to dialog content, true by default
      *
      * focus would be done by #dialogFocusOnUpdate
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogFocusAutomatically, ZFPropertyInitValue(zftrue))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogFocusAutomatically, zftrue)
 
     /**
      * @brief whether hide when touched outside of the dialog, false by default
@@ -213,14 +212,14 @@ public:
      * which is internal view and won't be serialized
      */
     ZFPROPERTY_RETAIN(ZFUIView *, dialogView)
-    ZFPROPERTY_CUSTOM_ON_ATTACH_DECLARE(ZFUIView *, dialogView);
-    ZFPROPERTY_CUSTOM_ON_DETACH_DECLARE(ZFUIView *, dialogView);
+    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIView *, dialogView);
+    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIView *, dialogView);
 
     /**
      * @brief whether automatically fix frame accorrding to #ZFUIOnScreenKeyboardAutoResizeStart,
      *   true by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoResize, ZFPropertyInitValue(zftrue))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoResize, zftrue)
 
     /**
      * @brief whether automatically fix frame accorrding to #ZFUIOnScreenKeyboardAutoFitStart,
@@ -228,9 +227,9 @@ public:
      *
      * auto fit settings can be changed by #dialogWindowAutoFit
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoFit, ZFPropertyInitValue(zffalse))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoFit, zffalse)
     /** @brief see #dialogWindowAutoFit */
-    ZFMETHOD_DECLARE_0(ZFUIOnScreenKeyboardAutoFitLayout *, dialogWindowAutoFitLayout)
+    ZFMETHOD_INLINE_0(ZFUIOnScreenKeyboardAutoFitLayout *, dialogWindowAutoFitLayout)
     {
         return ZFCastZFObject(ZFUIOnScreenKeyboardAutoFitLayout *, this->dialogWindow()->viewDelegate());
     }
@@ -239,15 +238,15 @@ public:
     /**
      * @brief true if dialog is showing
      */
-    ZFMETHOD_DECLARE_0(zfbool, dialogShowing);
+    ZFMETHOD_DECLARE_0(zfbool, dialogShowing)
     /**
      * @brief show the dialog
      */
-    ZFMETHOD_DECLARE_0(void, dialogShow);
+    ZFMETHOD_DECLARE_0(void, dialogShow)
     /**
      * @brief hide the dialog
      */
-    ZFMETHOD_DECLARE_0(void, dialogHide);
+    ZFMETHOD_DECLARE_0(void, dialogHide)
     /**
      * @brief stop any animation and hide the dialog immediately,
      *   usually used to destroy a dialog immediately
@@ -255,13 +254,13 @@ public:
      * this method would be called for all showing dialog
      * during #ZFFrameworkCleanup, see #ZFUIDialog for more info
      */
-    ZFMETHOD_DECLARE_0(void, dialogHideForce);
+    ZFMETHOD_DECLARE_0(void, dialogHideForce)
     /**
      * @brief util method to attach click listener to specified button,
      *   which would simply hide the dialog
      */
     ZFMETHOD_DECLARE_1(void, dialogApplyAutoHide,
-                       ZFMP_IN(ZFUIButton *, button));
+                       ZFMP_IN(ZFUIButton *, button))
 
 public:
     /**
@@ -269,7 +268,7 @@ public:
      *
      * by default, the dialog's window would have #ZFUIWindowLevel::e_AppHigh as #ZFUIWindow::windowLevel
      */
-    ZFMETHOD_DECLARE_0(ZFUIWindow *, dialogWindow);
+    ZFMETHOD_DECLARE_0(ZFUIWindow *, dialogWindow)
 
 protected:
     /**

@@ -164,7 +164,7 @@ public:
     zfautoObject cellLoadAtIndex(ZF_IN zfindex index)
     {
         zfautoObject ret = this->listAdapter->cellCacheOnAccess(index);
-        if(ret != zfautoObjectNull())
+        if(ret != zfnull)
         {
             zfCoreAssertWithMessage(ZFCastZFObject(ZFUIListCell *, ret.toObject()) != zfnull, zfTextA("list cell %s not type of %s"),
                 zfsCoreZ2A(ret.toObject()->classData()->className()),
@@ -172,7 +172,7 @@ public:
             return ret;
         }
         ret = this->listAdapter->cellAtIndex(index);
-        zfCoreAssertWithMessage(ret != zfautoObjectNull(), zfTextA("cellAtIndex must return a %s"), zfsCoreZ2A(ZFUIListCell::ClassData()->className()));
+        zfCoreAssertWithMessage(ret != zfnull, zfTextA("cellAtIndex must return a %s"), zfsCoreZ2A(ZFUIListCell::ClassData()->className()));
         ZFUIListCell *cell = ZFCastZFObject(ZFUIListCell *, ret.toObject());
         zfCoreAssertWithMessage(cell != zfnull, zfTextA("list cell %s not type of %s"),
             zfsCoreZ2A(ret.toObject()->classData()->className()),
@@ -1380,7 +1380,7 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIListView, ListCellOnDetach)
 ZFOBSERVER_EVENT_REGISTER(ZFUIListView, ListVisibleCellOnChange)
 
 #define _ZFP_ZFUIListView_listAdapterHolderTag zfText("_ZFP_ZFUIListView_listAdapterHolderTag")
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIListView, ZFUIListAdapter *, listAdapter)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIListView, ZFUIListAdapter *, listAdapter)
 {
     d->listAdapterBeforeDetach();
     d->listAdapter = this->listAdapter();
@@ -1401,7 +1401,7 @@ ZFMETHOD_DEFINE_1(ZFUIListView, void, listAdapterSetAutoRetain,
     zfRelease(listAdapter);
 }
 
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIListView, ZFUIOrientationEnum, listOrientation)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIListView, ZFUIOrientationEnum, listOrientation)
 {
     if(this->listOrientation() != propertyValueOld)
     {
@@ -1410,14 +1410,14 @@ ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIListView, ZFUIOrientationEnum, listOrient
         this->listReload();
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIListView, zfint, cellSizeHint)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIListView, zfint, cellSizeHint)
 {
     if(this->cellSizeHint() != propertyValueOld)
     {
         this->listReload();
     }
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIListView, zfbool, listBounce)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIListView, zfbool, listBounce)
 {
     if(this->listBounce() != propertyValueOld)
     {

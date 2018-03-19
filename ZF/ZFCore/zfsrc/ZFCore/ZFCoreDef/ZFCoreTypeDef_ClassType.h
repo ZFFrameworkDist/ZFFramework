@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFCoreTypeDef_ClassType_h_
 #define _ZFI_ZFCoreTypeDef_ClassType_h_
 
-#include "ZFCoreEnvDef.h"
 #include "ZFCoreTypeDef_CoreType.h"
 #include <stdlib.h>
 #include <memory.h>
@@ -107,7 +106,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define ZFCLASS_DISALLOW_COPY_CONSTRUCTOR(ClassName) \
     private: \
         ClassName(const ClassName &); \
-        ClassName &operator =(const ClassName &); \
+        ClassName &operator = (const ClassName &); \
     public:
 
 // ============================================================

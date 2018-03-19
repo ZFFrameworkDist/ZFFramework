@@ -16,7 +16,6 @@
 #define _ZFI_ZFCoreMutex_h_
 
 #include "ZFCoreTypeDef.h"
-#include "ZFCoreUtil.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 /**

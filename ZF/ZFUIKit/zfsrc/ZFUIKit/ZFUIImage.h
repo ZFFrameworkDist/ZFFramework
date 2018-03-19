@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFUIImage_h_
 #define _ZFI_ZFUIImage_h_
 
-#include "ZFUITypeDef.h"
 #include "ZFUIGlobalStyle.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -148,8 +147,8 @@ public:
      *
      * to access pixel size, use #imageSizeFixed instead
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, imageScale, ZFPropertyInitValue(1))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zffloat, imageScale);
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, imageScale, 1)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zffloat, imageScale);
     /**
      * @brief nine patch described by a margin value, disabled if zero margin or margin exceeds image size
      * @note #ZFUIImage always use custom scale value, see #ZFUIImage::imageScale
@@ -161,7 +160,7 @@ public:
      *
      * ensured to be (#imageScale * #ZFUIGlobalStyle::imageScale)
      */
-    ZFMETHOD_DECLARE_0(zffloat, imageScaleFixed)
+    ZFMETHOD_INLINE_0(zffloat, imageScaleFixed)
     {
         return (this->imageScale() * ZFUIGlobalStyle::DefaultStyle()->imageScale());
     }
@@ -169,14 +168,14 @@ public:
      * @brief get size of the image
      * @note #ZFUIImage always use custom scale value, see #ZFUIImage::imageScale
      */
-    ZFMETHOD_DECLARE_0(const ZFUISize &, imageSize);
+    ZFMETHOD_DECLARE_0(const ZFUISize &, imageSize)
     /**
      * @brief get raw size of the image without scale (in pixel unit)
      *
      * this is the pixel size of the image,
      * not affected by #imageScale
      */
-    ZFMETHOD_DECLARE_0(const ZFUISize &, imageSizeFixed);
+    ZFMETHOD_DECLARE_0(const ZFUISize &, imageSizeFixed)
 
     // ============================================================
     // other
@@ -203,7 +202,7 @@ public:
     /**
      * @brief get native image object
      */
-    ZFMETHOD_DECLARE_0(void *, nativeImage);
+    ZFMETHOD_DECLARE_0(void *, nativeImage)
 
 public:
     zffinal void _ZFP_ZFUIImage_imageScaleOnChange(void);

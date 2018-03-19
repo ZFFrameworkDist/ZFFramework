@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFKeyValueContainer_h_
 #define _ZFI_ZFKeyValueContainer_h_
 
-#include "ZFObject.h"
 #include "ZFIterable.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -154,11 +153,11 @@ public:
     ZFMETHOD_DECLARE_3(void, objectInfoOfContentT,
                        ZFMP_IN_OUT(zfstring &, ret),
                        ZFMP_IN_OPT(zfindex, maxCount, zfindexMax()),
-                       ZFMP_IN_OPT(const ZFTokenForKeyValueContainer &, token, ZFTokenForKeyValueContainerDefault()));
-    /** @brief see #objectInfoOfContentT */
-    ZFMETHOD_DECLARE_2(zfstring, objectInfoOfContent,
-                       ZFMP_IN_OPT(zfindex, maxCount, zfindexMax()),
                        ZFMP_IN_OPT(const ZFTokenForKeyValueContainer &, token, ZFTokenForKeyValueContainerDefault()))
+    /** @brief see #objectInfoOfContentT */
+    ZFMETHOD_INLINE_2(zfstring, objectInfoOfContent,
+                      ZFMP_IN_OPT(zfindex, maxCount, zfindexMax()),
+                      ZFMP_IN_OPT(const ZFTokenForKeyValueContainer &, token, ZFTokenForKeyValueContainerDefault()))
     {
         zfstring ret;
         this->objectInfoOfContentT(ret, maxCount, token);

@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFUIListView_h_
 #define _ZFI_ZFUIListView_h_
 
-#include "ZFUIWidgetDef.h"
 #include "ZFUIListAdapter.h"
 #include "ZFUIListCellUpdater.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -80,7 +79,7 @@ public:
      * @brief list adapter, no auto retain
      */
     ZFPROPERTY_ASSIGN(ZFUIListAdapter *, listAdapter)
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIListAdapter *, listAdapter);
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIListAdapter *, listAdapter);
     /**
      * @brief set and retain the list adapter
      *
@@ -88,12 +87,12 @@ public:
      * you may use this method to retain it automatically
      */
     ZFMETHOD_DECLARE_1(void, listAdapterSetAutoRetain,
-                       ZFMP_IN(ZFUIListAdapter *, listAdapter));
+                       ZFMP_IN(ZFUIListAdapter *, listAdapter))
 
     /**
      * @brief list updater to update list cells, holds #ZFUIListCellUpdater
      */
-    ZFPROPERTY_RETAIN_READONLY(ZFArrayEditable *, cellUpdater, ZFPropertyInitValue(zflineAlloc(ZFArrayEditable)))
+    ZFPROPERTY_RETAIN_READONLY(ZFArrayEditable *, cellUpdater, zflineAlloc(ZFArrayEditable))
 
     /**
      * @brief direction to layout children, #ZFUIOrientation::e_Top by default
@@ -102,8 +101,8 @@ public:
      * while #ZFUIOrientation::e_Bottom means layout children from bottom to top
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIOrientationEnum, listOrientation,
-                                ZFPropertyInitValue(ZFUIOrientation::e_Top))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIOrientationEnum, listOrientation);
+                                ZFUIOrientation::e_Top)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIOrientationEnum, listOrientation);
 
     /**
      * @brief list cell's hint size which would be passed to #ZFUIListAdapter,
@@ -111,15 +110,15 @@ public:
      *   #ZFUIGlobalStyle::itemSizeListCell by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfint, cellSizeHint,
-                                ZFPropertyInitValue(ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell()))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfint, cellSizeHint);
+                                ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell())
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfint, cellSizeHint);
 
     /**
      * @brief whether auto update #ZFUIScrollView::scrollBounceVertical series accorrding to #listOrientation,
      *   true by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, listBounce, ZFPropertyInitValue(zftrue))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfbool, listBounce);
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, listBounce, zftrue)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfbool, listBounce);
 
     // ============================================================
     // override
@@ -188,11 +187,11 @@ public:
      * @note this method would reload the entire list,
      *   use #listReloadCellAtIndex for performance
      */
-    ZFMETHOD_DECLARE_0(void, listReload);
+    ZFMETHOD_DECLARE_0(void, listReload)
     /**
      * @brief true if list need reload
      */
-    ZFMETHOD_DECLARE_0(zfbool, listReloadRequested);
+    ZFMETHOD_DECLARE_0(zfbool, listReloadRequested)
     /**
      * @brief reload cell at index immediately, do nothing if index not in visible range
      *   or #listReloadRequested
@@ -200,7 +199,7 @@ public:
      * this method would have higher performance if you want to update specified cell only
      */
     ZFMETHOD_DECLARE_1(void, listReloadCellAtIndex,
-                       ZFMP_IN(zfindex, index));
+                       ZFMP_IN(zfindex, index))
 
 public:
     /**
@@ -209,14 +208,14 @@ public:
      * returned value should not be stored,
      * since visible cell may change frequently
      */
-    ZFMETHOD_DECLARE_0(ZFCoreArrayPOD<ZFUIListCell *>, listVisibleCell);
+    ZFMETHOD_DECLARE_0(ZFCoreArrayPOD<ZFUIListCell *>, listVisibleCell)
     /**
      * @brief return first visible cell's index, valid only if #listReloadRequested is not true
      *
      * index is ordered by #ZFUIListAdapter,
      * so first cell may positioned at bottom accorrding to layout orientation
      */
-    ZFMETHOD_DECLARE_0(const zfindexRange &, listVisibleCellIndexRange);
+    ZFMETHOD_DECLARE_0(const zfindexRange &, listVisibleCellIndexRange)
 
 public:
     /**
@@ -231,14 +230,14 @@ public:
     ZFMETHOD_DECLARE_3(void, scrollListCellToHead,
                        ZFMP_IN(zfindex, cellIndex),
                        ZFMP_IN_OPT(zfint, offset, 0),
-                       ZFMP_IN_OPT(zfbool, animated, zftrue));
+                       ZFMP_IN_OPT(zfbool, animated, zftrue))
     /**
      * @brief scroll cell to bottom, see #scrollListCellToHead
      */
     ZFMETHOD_DECLARE_3(void, scrollListCellToTail,
                        ZFMP_IN(zfindex, cellIndex),
                        ZFMP_IN_OPT(zfint, offset, 0),
-                       ZFMP_IN_OPT(zfbool, animated, zftrue));
+                       ZFMP_IN_OPT(zfbool, animated, zftrue))
 
     // ============================================================
     // events

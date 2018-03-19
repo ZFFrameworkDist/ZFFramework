@@ -16,7 +16,7 @@ ZFSTYLE_DEFAULT_DEFINE(ZF2048UIBlock)
 ZFOBJECT_REGISTER(ZF2048UIBlock)
 ZFCACHEABLE_DEFINE_WITH_MAX(ZF2048UIBlock, ZF2048UIBlock, 16)
 
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZF2048UIBlock, ZF2048Value, blockValue)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZF2048UIBlock, ZF2048Value, blockValue)
 {
     if(this->blockValue() == 0)
     {
@@ -27,7 +27,7 @@ ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZF2048UIBlock, ZF2048Value, blockValue)
 
     zfstring skinKey = zfstringWithFormat(zfText("ZF2048_block_%d"), (zfint)this->blockValue());
     zfautoObject skin = zfSkin(skinKey);
-    if(skin == zfautoObjectNull())
+    if(skin == zfnull)
     {
         zfSkinApplyZFStyleable(this, zfText("ZF2048_block_na"));
         this->blockTitle()->textSet(zfstringWithFormat(zfText("%d"), (zfint)this->blockValue()));

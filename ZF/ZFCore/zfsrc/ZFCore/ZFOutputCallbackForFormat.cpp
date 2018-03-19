@@ -74,9 +74,9 @@ public:
             this->writtenLen += this->output.execute(buf.cString(), buf.length() * sizeof(zfchar));
         }
     }
-    ZFMETHOD_DECLARE_2(zfindex, onOutput,
-                       ZFMP_IN(const void *, s),
-                       ZFMP_IN(zfindex, count))
+    ZFMETHOD_INLINE_2(zfindex, onOutput,
+                      ZFMP_IN(const void *, s),
+                      ZFMP_IN(zfindex, count))
     {
         if(!this->output.callbackIsValid())
         {
@@ -195,7 +195,7 @@ ZFCALLBACK_SERIALIZE_CUSTOM_TYPE_DEFINE(ZFOutputCallbackForFormat, ZFCallbackSer
     {
         return zffalse;
     }
-    ZFOutputFormat *format = ZFCastZFObject(ZFOutputFormat *, formatHolder);
+    ZFOutputFormat *format = formatHolder;
     if(format == zfnull)
     {
         ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, *formatData,

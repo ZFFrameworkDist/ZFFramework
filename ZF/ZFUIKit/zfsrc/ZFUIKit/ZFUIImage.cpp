@@ -263,7 +263,7 @@ void ZFUIImage::copyableOnCopyFrom(ZF_IN ZFObject *anotherObj)
     d->copyFrom(ZFCastZFObjectUnchecked(zfself *, anotherObj)->d);
 }
 
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIImage, zffloat, imageScale)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIImage, zffloat, imageScale)
 {
     d->imageSizeUpdate();
     this->imageScaleOnChange();
@@ -444,7 +444,7 @@ ZFMETHOD_FUNC_DEFINE_1(zfautoObject, ZFUIImageEncodeFromBase64,
     }
     else
     {
-        return zfautoObjectNull();
+        return zfnull;
     }
 }
 ZFMETHOD_FUNC_DEFINE_2(zfbool, ZFUIImageEncodeToBase64,
@@ -490,7 +490,7 @@ ZFMETHOD_FUNC_DEFINE_1(zfautoObject, ZFUIImageEncodeFromFile,
     }
     else
     {
-        return zfautoObjectNull();
+        return zfnull;
     }
 }
 ZFMETHOD_FUNC_DEFINE_2(zfbool, ZFUIImageEncodeToFile,

@@ -92,9 +92,9 @@ extern ZF_ENV_EXPORT void _ZFP_ZFCallback_executeNullCallback(void);
         : ParentType(ref) \
         { \
         } \
-        virtual CallbackTypeName &operator =(ZF_IN const ZFCallback &ref) \
+        virtual CallbackTypeName &operator = (ZF_IN const ZFCallback &ref) \
         { \
-            ParentType::operator =(ref); \
+            ParentType::operator = (ref); \
             return *this; \
         } \
         /** @endcond */
@@ -178,7 +178,7 @@ public:
     /** @cond ZFPrivateDoc */
     ZFCallback(void);
     ZFCallback(const ZFCallback &ref);
-    virtual ZFCallback &operator =(const ZFCallback &ref);
+    virtual ZFCallback &operator = (const ZFCallback &ref);
     virtual ~ZFCallback(void);
     zfbool operator == (ZF_IN const ZFCallback &ref) const {return (this->objectCompare(ref) == ZFCompareTheSame);}
     zfbool operator != (ZF_IN const ZFCallback &ref) const {return (this->objectCompare(ref) != ZFCompareTheSame);}
@@ -555,6 +555,4 @@ private:
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFCallback_h_
-
-#include "ZFCallback_template.h"
 

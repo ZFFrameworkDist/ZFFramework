@@ -15,7 +15,6 @@
 #ifndef _ZFI_ZFUIPageRequest_h_
 #define _ZFI_ZFUIPageRequest_h_
 
-#include "ZFUIWidgetDef.h"
 #include "ZFUIPage.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -116,7 +115,7 @@ zfclass ZFUIPageRequestPageGroupResume : zfextends ZFUIPageRequest
 
 public:
     /** @brief page group id to resume */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfstring, pageGroupId, ZFPropertyInitValue(ZFUIPageGroupIdInvalid))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfstring, pageGroupId, ZFUIPageGroupIdInvalid)
 };
 
 /**

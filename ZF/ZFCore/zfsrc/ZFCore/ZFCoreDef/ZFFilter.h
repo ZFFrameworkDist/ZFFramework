@@ -15,9 +15,6 @@
 #ifndef _ZFI_ZFFilter_h_
 #define _ZFI_ZFFilter_h_
 
-#include "ZFCoreTypeDef.h"
-#include "ZFCoreUtilStringConvert.h"
-#include "ZFCoreUtilComparer.h"
 #include "ZFCoreArray.h"
 #include "ZFCoreSPrintf.h"
 
@@ -121,7 +118,7 @@ public:
     /**
      * @brief retain only
      */
-    virtual ZFFilterBase<T_Public, T_Internal> &operator =(ZF_IN const ZFFilterBase<T_Public, T_Internal> &ref)
+    virtual ZFFilterBase<T_Public, T_Internal> &operator = (ZF_IN const ZFFilterBase<T_Public, T_Internal> &ref)
     {
         if(this != &ref)
         {
@@ -284,13 +281,11 @@ public:
     {
         if(this->_customFilters != zfnull)
         {
-            for(zfiterator it = this->_customFilters->iterator();
-                this->_customFilters->iteratorIsValid(it);
-                this->_customFilters->iteratorNext(it))
+            for(zfindex i = 0; i < this->_customFilters->count(); ++i)
             {
-                if(this->_customFilters->iteratorGet(it) == customFilterCallback)
+                if(this->_customFilters->get(i) == customFilterCallback)
                 {
-                    this->_customFilters->iteratorRemove(it);
+                    this->_customFilters->remove(i);
                     break;
                 }
             }
@@ -383,7 +378,7 @@ public:
     {
         this->_filters.objectInfoOfContentT(ret,
             _ZFP_ZFFilterBase_contentInfoGetter,
-            zfHint("max count")5,
+            5, // max count
             ZFTokenForContainerDefault());
     }
     /** @brief see #objectInfoT */
@@ -496,9 +491,9 @@ public:
     {
     }
     /** @cond ZFPrivateDoc */
-    virtual ZFFilterBasic<T_Public, T_Internal> &operator =(ZF_IN const ZFFilterBasic<T_Public, T_Internal> &ref)
+    virtual ZFFilterBasic<T_Public, T_Internal> &operator = (ZF_IN const ZFFilterBasic<T_Public, T_Internal> &ref)
     {
-        zfsuper::operator =(ref);
+        zfsuper::operator = (ref);
         return *this;
     }
     /** @endcond */
@@ -569,9 +564,9 @@ public:
     {
     }
     /** @cond ZFPrivateDoc */
-    virtual ZFFilterForStringBase<T_Public, T_Internal> &operator =(ZF_IN const ZFFilterForStringBase<T_Public, T_Internal> &ref)
+    virtual ZFFilterForStringBase<T_Public, T_Internal> &operator = (ZF_IN const ZFFilterForStringBase<T_Public, T_Internal> &ref)
     {
-        zfsuper::operator =(ref);
+        zfsuper::operator = (ref);
         return *this;
     }
     /** @endcond */

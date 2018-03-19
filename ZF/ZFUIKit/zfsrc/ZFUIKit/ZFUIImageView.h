@@ -45,16 +45,16 @@ public:
      * @brief image for this view
      */
     ZFPROPERTY_RETAIN(ZFUIImage *, image)
-    ZFPROPERTY_CUSTOM_ON_ATTACH_DECLARE(ZFUIImage *, image);
-    ZFPROPERTY_CUSTOM_ON_DETACH_DECLARE(ZFUIImage *, image);
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIImage *, image);
+    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIImage *, image);
+    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIImage *, image);
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIImage *, image);
 
     /**
      * @brief image scale type, fill by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIContentScaleTypeEnum, imageScaleType,
-                                ZFPropertyInitValue(ZFUIContentScaleType::EnumDefault()))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIContentScaleTypeEnum, imageScaleType)
+                                ZFUIContentScaleType::EnumDefault())
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIContentScaleTypeEnum, imageScaleType)
     {
         this->layoutRequest();
     }
@@ -63,7 +63,7 @@ public:
      * @brief margin of the content image
      */
     ZFPROPERTY_ASSIGN(ZFUIMargin, imageMargin)
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(ZFUIMargin, imageMargin)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFUIMargin, imageMargin)
     {
         this->nativeImplViewMarginUpdate();
     }
@@ -73,14 +73,13 @@ public:
      * @brief measure image view accorrding to current image
      */
     ZFMETHOD_DECLARE_1(void, measureImageView,
-                       ZFMP_OUT(ZFUISize &, ret));
+                       ZFMP_OUT(ZFUISize &, ret))
 
 protected:
     /**
      * @brief init with image
      */
-    ZFMETHOD_DECLARE_PROTECTED_1(void, objectOnInit,
-                                 ZFMP_IN(ZFUIImage *, image))
+    ZFOBJECT_ON_INIT_INLINE_1(ZFMP_IN(ZFUIImage *, image))
     {
         this->objectOnInit();
         this->imageSet(image);

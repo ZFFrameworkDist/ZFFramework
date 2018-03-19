@@ -162,14 +162,14 @@ public:
     }
 
 public:
-    ZFLISTENER_DECLARE(dialogClickMaskOnClick)
+    ZFLISTENER_INLINE(dialogClickMaskOnClick)
     {
         if(this->pimplOwner->dialogHideWhenTouchOutside())
         {
             this->pimplOwner->dialogHide();
         }
     }
-    ZFLISTENER_DECLARE(aniShowOnStop)
+    ZFLISTENER_INLINE(aniShowOnStop)
     {
         if(!this->dialogWindowAniShow->aniRunning()
             && !this->dialogWindowAniHide->aniRunning()
@@ -204,7 +204,7 @@ public:
             this->pimplOwner->dialogAfterShow();
         }
     }
-    ZFLISTENER_DECLARE(aniHideOnStop)
+    ZFLISTENER_INLINE(aniHideOnStop)
     {
         if(!this->dialogWindowAniShow->aniRunning()
             && !this->dialogWindowAniHide->aniRunning()
@@ -311,15 +311,15 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIDialog, DialogBeforeHide)
 ZFOBSERVER_EVENT_REGISTER(ZFUIDialog, DialogAfterHide)
 ZFOBSERVER_EVENT_REGISTER(ZFUIDialog, DialogFocusOnUpdate)
 
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIDialog, ZFUIColor, dialogWindowColor)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIDialog, ZFUIColor, dialogWindowColor)
 {
     d->dialogWindowBg->viewBackgroundColorSet(this->dialogWindowColor());
 }
-ZFPROPERTY_CUSTOM_ON_UPDATE_DEFINE(ZFUIDialog, ZFUIImage *, dialogBackgroundImage)
+ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIDialog, ZFUIImage *, dialogBackgroundImage)
 {
     d->dialogBg->imageSet(this->dialogBackgroundImage());
 }
-ZFPROPERTY_CUSTOM_ON_ATTACH_DEFINE(ZFUIDialog, ZFUIView *, dialogView)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIDialog, ZFUIView *, dialogView)
 {
     if(this->dialogView() != zfnull)
     {
@@ -327,7 +327,7 @@ ZFPROPERTY_CUSTOM_ON_ATTACH_DEFINE(ZFUIDialog, ZFUIView *, dialogView)
         this->dialogView()->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
     }
 }
-ZFPROPERTY_CUSTOM_ON_DETACH_DEFINE(ZFUIDialog, ZFUIView *, dialogView)
+ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(ZFUIDialog, ZFUIView *, dialogView)
 {
     if(this->dialogView() != zfnull)
     {

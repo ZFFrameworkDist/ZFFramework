@@ -33,7 +33,7 @@ public:
     /**
      * @brief the image
      */
-    ZFPROPERTY_RETAIN_READONLY(ZFUIAnimatedImage *, animatedImage, ZFPropertyInitValue(zflineAlloc(ZFUIAnimatedImage)))
+    ZFPROPERTY_RETAIN_READONLY(ZFUIAnimatedImage *, animatedImage, zflineAlloc(ZFUIAnimatedImage))
     /**
      * @brief whether wrap size to each image frame's size, false by default
      *
@@ -42,22 +42,22 @@ public:
      * -  false: this view would not be measured when image frame updated,
      *   and this view's size would be measured to the max size of all image frame
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, animatedImageWrapToImage, ZFPropertyInitValue(zffalse))
-    ZFPROPERTY_CUSTOM_ON_UPDATE_DECLARE(zfbool, animatedImageWrapToImage);
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, animatedImageWrapToImage, zffalse)
+    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfbool, animatedImageWrapToImage);
 
 public:
     /** @brief see #ZFUIAnimatedImage::aniStart */
-    ZFMETHOD_DECLARE_0(void, aniStart)
+    ZFMETHOD_INLINE_0(void, aniStart)
     {
         this->animatedImage()->aniStart();
     }
     /** @brief see #ZFUIAnimatedImage::aniStop */
-    ZFMETHOD_DECLARE_0(void, aniStop)
+    ZFMETHOD_INLINE_0(void, aniStop)
     {
         this->animatedImage()->aniStop();
     }
     /** @brief see #ZFUIAnimatedImage::aniRunning */
-    ZFMETHOD_DECLARE_0(zfbool, aniRunning)
+    ZFMETHOD_INLINE_0(zfbool, aniRunning)
     {
         return this->animatedImage()->aniRunning();
     }

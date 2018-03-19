@@ -39,7 +39,7 @@ public:
      * negative value means not specified, use #ZFUIAnimatedImage::aniFrameDurationDefault\n
      * 0 means disable this frame
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, aniFrameDuration, ZFPropertyInitValue(-1))
+    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, aniFrameDuration, -1)
 };
 
 // ============================================================
@@ -98,13 +98,13 @@ public:
      * @brief default duration between each frame, 10 by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, aniFrameDurationDefault,
-                                ZFPropertyInitValue(10))
+                                10)
 
     /**
      * @brief whether keep previous state when start animating, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, aniKeepPreviousState,
-                                ZFPropertyInitValue(zftrue))
+                                zftrue)
 
     /**
      * @brief number of times to repeat, zfindexMax() by default
@@ -113,25 +113,25 @@ public:
      * -  zfindexMax() means repeat until stop manually
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfindex, aniRepeatCount,
-                                ZFPropertyInitValue(zfindexMax()))
+                                zfindexMax())
 
     /**
      * @brief ani frames, holds #ZFUIAnimatedImageAniFrame
      */
     ZFPROPERTY_RETAIN_DETAIL(ZFArrayEditable *, aniFrames,
-                             ZFPropertyInitValue(zflineAlloc(ZFArrayEditable)),
+                             zflineAlloc(ZFArrayEditable),
                              protected, protected)
 
 public:
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_0(zfindex, aniFrameCount)
+    ZFMETHOD_INLINE_0(zfindex, aniFrameCount)
     {
         return this->aniFrames()->count();
     }
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_2(void, aniFrameAdd,
-                       ZFMP_IN(ZFUIImage *, aniFrameImage),
-                       ZFMP_IN_OPT(zftimet, aniFrameDuration, (zftimet)-1))
+    ZFMETHOD_INLINE_2(void, aniFrameAdd,
+                      ZFMP_IN(ZFUIImage *, aniFrameImage),
+                      ZFMP_IN_OPT(zftimet, aniFrameDuration, (zftimet)-1))
     {
         zfCoreAssert(aniFrameImage != zfnull);
         zfblockedAlloc(ZFUIAnimatedImageAniFrame, aniFrame);
@@ -140,32 +140,32 @@ public:
         this->aniFrames()->add(aniFrame);
     }
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_1(void, aniFrameRemoveAtIndex,
-                       ZFMP_IN(zfindex, index))
+    ZFMETHOD_INLINE_1(void, aniFrameRemoveAtIndex,
+                      ZFMP_IN(zfindex, index))
     {
         this->aniFrames()->remove(index);
     }
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_1(ZFUIAnimatedImageAniFrame *, aniFrameAtIndex,
-                       ZFMP_IN(zfindex, index))
+    ZFMETHOD_INLINE_1(ZFUIAnimatedImageAniFrame *, aniFrameAtIndex,
+                      ZFMP_IN(zfindex, index))
     {
         return this->aniFrames()->get<ZFUIAnimatedImageAniFrame *>(index);
     }
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_1(ZFUIImage *, aniFrameImageAtIndex,
-                       ZFMP_IN(zfindex, index))
+    ZFMETHOD_INLINE_1(ZFUIImage *, aniFrameImageAtIndex,
+                      ZFMP_IN(zfindex, index))
     {
         return this->aniFrames()->get<ZFUIAnimatedImageAniFrame *>(index)->aniFrameImage();
     }
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_1(zftimet, aniFrameDurationAtIndex,
-                       ZFMP_IN(zfindex, index))
+    ZFMETHOD_INLINE_1(zftimet, aniFrameDurationAtIndex,
+                      ZFMP_IN(zfindex, index))
     {
         return this->aniFrames()->get<ZFUIAnimatedImageAniFrame *>(index)->aniFrameDuration();
     }
     /** @brief see #ZFUIAnimatedImageAniFrame */
-    ZFMETHOD_DECLARE_1(zftimet, aniFrameDurationFixedAtIndex,
-                       ZFMP_IN(zfindex, index))
+    ZFMETHOD_INLINE_1(zftimet, aniFrameDurationFixedAtIndex,
+                      ZFMP_IN(zfindex, index))
     {
         zftimet ret = this->aniFrames()->get<ZFUIAnimatedImageAniFrame *>(index)->aniFrameDuration();
         if(ret < 0)
@@ -179,15 +179,15 @@ public:
     /**
      * @brief start animation
      */
-    ZFMETHOD_DECLARE_0(void, aniStart);
+    ZFMETHOD_DECLARE_0(void, aniStart)
     /**
      * @brief stop animation
      */
-    ZFMETHOD_DECLARE_0(void, aniStop);
+    ZFMETHOD_DECLARE_0(void, aniStop)
     /**
      * @brief true if running
      */
-    ZFMETHOD_DECLARE_0(zfbool, aniRunning);
+    ZFMETHOD_DECLARE_0(zfbool, aniRunning)
 
 public:
     /**
@@ -199,11 +199,11 @@ public:
      * other event won't be notified
      */
     ZFMETHOD_DECLARE_1(void, aniManual,
-                       ZFMP_IN(zfindex, aniFrame));
+                       ZFMP_IN(zfindex, aniFrame))
     /**
      * @brief see #aniManual
      */
-    ZFMETHOD_DECLARE_0(void, aniManualPrev)
+    ZFMETHOD_INLINE_0(void, aniManualPrev)
     {
         this->aniManual((this->aniFrameIndexCurrent() > 0)
             ? (this->aniFrameIndexCurrent() - 1)
@@ -212,7 +212,7 @@ public:
     /**
      * @brief see #aniManual
      */
-    ZFMETHOD_DECLARE_0(void, aniManualNext)
+    ZFMETHOD_INLINE_0(void, aniManualNext)
     {
         this->aniManual(this->aniFrameIndexCurrent() + 1);
     }
@@ -221,31 +221,31 @@ public:
     /**
      * @brief see #aniFrameIndexCurrent
      */
-    ZFMETHOD_DECLARE_0(ZFUIImage *, aniFrameImageCurrent);
+    ZFMETHOD_DECLARE_0(ZFUIImage *, aniFrameImageCurrent)
     /**
      * @brief see #aniFrameIndexCurrent
      */
-    ZFMETHOD_DECLARE_0(zftimet, aniFrameDurationCurrent);
+    ZFMETHOD_DECLARE_0(zftimet, aniFrameDurationCurrent)
     /**
      * @brief see #aniFrameIndexCurrent
      */
-    ZFMETHOD_DECLARE_0(zftimet, aniFrameDurationFixedCurrent);
+    ZFMETHOD_DECLARE_0(zftimet, aniFrameDurationFixedCurrent)
     /**
      * @brief see #aniFrameIndexCurrent
      */
-    ZFMETHOD_DECLARE_0(ZFUIAnimatedImageAniFrame *, aniFrameCurrent);
+    ZFMETHOD_DECLARE_0(ZFUIAnimatedImageAniFrame *, aniFrameCurrent)
     /**
      * @brief current ani frame index
      *
      * may be zfindexMax() if not started
      */
-    ZFMETHOD_DECLARE_0(zfindex, aniFrameIndexCurrent);
+    ZFMETHOD_DECLARE_0(zfindex, aniFrameIndexCurrent)
 
 public:
     /**
      * @brief repeat count since start, 0 for first time
      */
-    ZFMETHOD_DECLARE_0(zfindex, aniRepeatCountCurrent);
+    ZFMETHOD_DECLARE_0(zfindex, aniRepeatCountCurrent)
 
 protected:
     zfoverride
