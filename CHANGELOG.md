@@ -1,3 +1,13 @@
+# 0.1.2 (20180423)
+
+* update build script
+* optimize identity logic
+* optimize timeline animation impl
+* add property animation
+* optimize event dispatch
+* optimize lua api
+* bugfix: native view cache doesn't properly reset state
+
 # 0.1.1 (20180319)
 
 * upgrade Android project files

@@ -278,6 +278,41 @@ public:
 
 public:
     /**
+     * @brief attach a state that indicate whether the observer has add,
+     *   for performance usage
+     *
+     * notifying an observer requires much CPU to check and execute,
+     * even if no observer has ever added\n
+     * to optimize this, you may attach a flag to indicate whether
+     * any observer has ever added\n
+     * usage:
+     * @code
+     *   enum {
+     *       Flag_MyEvent0,
+     *       Flag_MyEvent1,
+     *   };
+     *   zfuint myFlag = 0;
+     *   observer.observerHasAddStateAttach(EventXXX, &myFlag, Flag_MyEvent0);
+     *   observer.observerHasAddStateAttach(EventXXX, &myFlag, Flag_MyEvent1);
+     *
+     *   if(ZFBitTest(myFlag, Flag_MyEvent0))
+     *   {
+     *       observer.observerNotify(...);
+     *   }
+     * @endcode
+     */
+    zffinal void observerHasAddStateAttach(ZF_IN const zfidentity &eventId,
+                                           ZF_IN_OUT zfuint *flag,
+                                           ZF_IN_OUT zfuint flagBit);
+    /**
+     * @brief see #observerHasAddStateAttach
+     */
+    zffinal void observerHasAddStateDetach(ZF_IN const zfidentity &eventId,
+                                           ZF_IN_OUT zfuint *flag,
+                                           ZF_IN_OUT zfuint flagBit);
+
+public:
+    /**
      * @brief return a short string describe the object
      */
     void objectInfoT(ZF_OUT zfstring &ret) const;
@@ -293,11 +328,15 @@ public:
 
 public:
     /** @brief owner object of this observer holder, or null if none */
-    ZFObject *observerOwner(void) const;
-    zffinal void _ZFP_ZFObserverHolder_observerOwnerSet(ZF_IN ZFObject *obj);
+    inline ZFObject *observerOwner(void) const
+    {
+        return this->_observerOwner;
+    }
+    zffinal void _ZFP_ZFObserverHolder_observerOwnerSet(ZF_IN ZFObject *obj) const;
 
 private:
     _ZFP_ZFObserverHolderPrivate *d;
+    ZFObject *_observerOwner;
 };
 
 // ============================================================
@@ -313,37 +352,6 @@ extern ZF_ENV_EXPORT ZFObserverHolder &_ZFP_ZFObjectGlobalEventObserverRef(void)
 // ============================================================
 // observer
 /**
- * @brief see #ZFOBSERVER_EVENT
- *
- * get name from event id, or null if no such event id
- * @note can be found only if accessed or registered by #ZFOBSERVER_EVENT_REGISTER
- */
-inline const zfchar *ZFObserverEventGetName(ZF_IN const zfidentity &eventId)
-{
-    return ZFIdMapGetName(zfText("ZFObserverEvent"), eventId);
-}
-/**
- * @brief see #ZFOBSERVER_EVENT
- *
- * get event id from name, or #zfidentityInvalid if no such event name
- * @note can be found only if accessed or registered by #ZFOBSERVER_EVENT_REGISTER
- */
-inline zfidentity ZFObserverEventGetId(ZF_IN const zfchar *name)
-{
-    return ZFIdMapGetId(zfText("ZFObserverEvent"), name);
-}
-/**
- * @brief see #ZFOBSERVER_EVENT
- *
- * get all registered id data, for debug use only
- * @note can be found only if accessed or registered by #ZFOBSERVER_EVENT_REGISTER
- */
-inline void ZFObserverEventGetId(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF_OUT ZFCoreArrayPOD<const zfchar *> &idNames)
-{
-    ZFIdMapGetAll(zfText("ZFObserverEvent"), idValues, idNames);
-}
-
-/**
  * @brief see #ZFObject::observerNotify
  *
  * usage:
@@ -353,7 +361,7 @@ inline void ZFObserverEventGetId(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF
  *       ZFOBSERVER_EVENT(YourEvent)
  *   };
  *
- *   // optional, in cpp files only, required only if you need ZFObserverEventGetId/ZFObserverEventGetName
+ *   // optional, in cpp files only, required only if you need ZFIdMapGetId/ZFIdMapGetName
  *   ZFOBSERVER_EVENT_REGISTER(YourClass, YourEvent)
  * @endcode
  * declare a event for ZFObject's observer logic,
@@ -373,11 +381,11 @@ inline void ZFObserverEventGetId(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF
  *   after relaunching the app,
  *   the event id is not ensured the same,
  *   you should use the name of the event to store or pass between apps,
- *   and you can use #ZFObserverEventGetId or #ZFObserverEventGetName
+ *   and you can use #ZFIdMapGetId or #ZFIdMapGetName
  *   to convert them easily
  */
 #define ZFOBSERVER_EVENT(YourEvent) \
-    ZFIDMAP_DETAIL(ZFObserverEvent, Event, YourEvent)
+    ZFIDMAP_DETAIL(Event, YourEvent)
 
 /**
  * @brief declare a observer event in global scope, see #ZFOBSERVER_EVENT
@@ -390,7 +398,7 @@ inline void ZFObserverEventGetId(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF
  *   ZFOBSERVER_EVENT_GLOBAL_WITH_NS(YourNamespace, YourEvent)
  *   ZF_NAMESPACE_END(YourNamespace)
  *
- *   // optional, in cpp files only, required only if you need ZFObserverEventGetId/ZFObserverEventGetName
+ *   // optional, in cpp files only, required only if you need ZFIdMapGetId/ZFIdMapGetName
  *   ZFOBSERVER_EVENT_GLOBAL_REGISTER(YourNamespace, YourEvent)
  *
  *   // use the event
@@ -400,7 +408,7 @@ inline void ZFObserverEventGetId(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF
  * typically you should use #ZFOBSERVER_EVENT_GLOBAL which have "ZFGlobalEvent" as namespace
  */
 #define ZFOBSERVER_EVENT_GLOBAL_WITH_NS(GlobalNamespace, YourEvent) \
-    ZFIDMAP_GLOBAL_DETAIL(ZFObserverEvent, GlobalNamespace, Event, YourEvent)
+    ZFIDMAP_GLOBAL_DETAIL(GlobalNamespace, Event, YourEvent)
 
 /**
  * @brief global event with namespace "ZFGlobalEvent", see #ZFOBSERVER_EVENT_GLOBAL_WITH_NS
@@ -410,11 +418,11 @@ inline void ZFObserverEventGetId(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF
 
 /** @brief see #ZFOBSERVER_EVENT */
 #define ZFOBSERVER_EVENT_REGISTER(Scope, YourEvent) \
-    ZFIDMAP_DETAIL_REGISTER(ZFObserverEvent, Scope, Event, YourEvent)
+    ZFIDMAP_DETAIL_REGISTER(Scope, Event, YourEvent)
 
 /** @brief see #ZFOBSERVER_EVENT */
 #define ZFOBSERVER_EVENT_GLOBAL_REGISTER(Scope, YourEvent) \
-    ZFIDMAP_GLOBAL_DETAIL_REGISTER(ZFObserverEvent, Scope, Event, YourEvent)
+    ZFIDMAP_GLOBAL_DETAIL_REGISTER(Scope, Event, YourEvent)
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFObjectObserver_h_
