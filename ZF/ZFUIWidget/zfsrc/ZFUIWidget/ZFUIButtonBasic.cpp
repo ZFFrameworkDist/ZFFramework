@@ -109,7 +109,7 @@ public:
         static ZFLISTENER_PROTOTYPE_EXPAND(button##T_Component##Style##T_State##Changed) \
         { \
             const ZFProperty *property = listenerData.param0->to<ZFPointerHolder *>()->holdedDataPointer<const ZFProperty *>(); \
-            ZFUIButtonBasic *button = userData->to<ZFObjectHolder *>()->holdedObj.to<ZFUIButtonBasic *>(); \
+            ZFUIButtonBasic *button = userData->objectHolded(); \
             button->prepareButton##T_Component(); \
             if(button->buttonState() == ZFUIButtonState::e_##T_State) \
             { \
@@ -631,13 +631,6 @@ ZFMETHOD_DEFINE_0(ZFUIButtonBasic, void, prepareButtonBackground)
         }
     }
 }
-
-// ============================================================
-ZFLANGAPPLY_DEFINE(ZFUIButtonBasic, ZFUIButtonBasicTextNormal, {obj->buttonLabelTextSet(langValue, ZFUIButtonState::e_Normal);})
-ZFLANGAPPLY_DEFINE(ZFUIButtonBasic, ZFUIButtonBasicTextHighlighted, {obj->buttonLabelTextSet(langValue, ZFUIButtonState::e_Highlighted);})
-ZFLANGAPPLY_DEFINE(ZFUIButtonBasic, ZFUIButtonBasicTextChecked, {obj->buttonLabelTextSet(langValue, ZFUIButtonState::e_Checked);})
-ZFLANGAPPLY_DEFINE(ZFUIButtonBasic, ZFUIButtonBasicTextCheckedHighlighted, {obj->buttonLabelTextSet(langValue, ZFUIButtonState::e_CheckedHighlighted);})
-ZFLANGAPPLY_DEFINE(ZFUIButtonBasic, ZFUIButtonBasicTextDisabled, {obj->buttonLabelTextSet(langValue, ZFUIButtonState::e_Disabled);})
 
 ZF_NAMESPACE_GLOBAL_END
 

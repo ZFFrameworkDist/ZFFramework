@@ -87,7 +87,7 @@ public:
 public:
     static ZFLISTENER_PROTOTYPE_EXPAND(aniOnStop)
     {
-        ZFUIScrollThumbDefault *owner = userData->to<ZFObjectHolder *>()->holdedObj.to<ZFUIScrollThumbDefault *>();
+        ZFUIScrollThumbDefault *owner = userData->objectHolded();
         if(owner != zfnull)
         {
             owner->d->thumbView->viewAlphaSet(1);
@@ -96,7 +96,7 @@ public:
     }
     static ZFLISTENER_PROTOTYPE_EXPAND(thumbHideAniAutoStop)
     {
-        ZFUIScrollThumbDefault *owner = userData->to<ZFObjectHolder *>()->holdedObj.to<ZFUIScrollThumbDefault *>();
+        ZFUIScrollThumbDefault *owner = userData->objectHolded();
         if(owner != zfnull)
         {
             owner->d->thumbHideAni->aniStop();
@@ -152,14 +152,14 @@ void ZFUIScrollThumbDefault::objectOnDealloc(void)
     zfsuper::objectOnDealloc();
 }
 
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollThumbDefault, ZFUIImage *, scrollThumbImageHorizontal)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIScrollThumbDefault, ZFUIImage *, scrollThumbImageHorizontal)
 {
     if(this->scrollThumbHorizontal())
     {
         d->thumbView->imageSet(this->scrollThumbImageHorizontal());
     }
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIScrollThumbDefault, ZFUIImage *, scrollThumbImageVertical)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIScrollThumbDefault, ZFUIImage *, scrollThumbImageVertical)
 {
     if(!this->scrollThumbHorizontal())
     {

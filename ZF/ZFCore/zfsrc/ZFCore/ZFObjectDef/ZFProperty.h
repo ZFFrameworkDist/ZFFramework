@@ -23,7 +23,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
 zfclassFwd ZFProperty;
-typedef void (*_ZFP_ZFPropertyCallbackDealloc)(ZF_IN ZFObject *owner, ZF_IN const ZFProperty *property);
+typedef void (*_ZFP_ZFPropertyCallbackDealloc)(ZF_IN const ZFProperty *property, ZF_IN ZFObject *owner);
 /**
  * @brief info for a property for ZFObject, see #ZFPROPERTY_RETAIN for more info
  */
@@ -145,6 +145,8 @@ public:
     ZFPropertyCallbackValueSet callbackValueSet;
     /** @brief see #ZFPropertyCallbackValueGet */
     ZFPropertyCallbackValueGet callbackValueGet;
+    /** @brief see #ZFPropertyCallbackValueReset */
+    ZFPropertyCallbackValueReset callbackValueReset;
     /** @brief see #ZFPropertyCallbackCompare */
     ZFPropertyCallbackCompare callbackCompare;
     /** @brief see #ZFPropertyCallbackGetInfo */
@@ -228,6 +230,7 @@ extern ZF_ENV_EXPORT ZFProperty *_ZFP_ZFPropertyRegister(ZF_IN zfbool propertyIs
                                                          , ZF_IN ZFPropertyCallbackIsInitValue callbackIsInitValue
                                                          , ZF_IN ZFPropertyCallbackValueSet callbackValueSet
                                                          , ZF_IN ZFPropertyCallbackValueGet callbackValueGet
+                                                         , ZF_IN ZFPropertyCallbackValueReset callbackValueReset
                                                          , ZF_IN ZFPropertyCallbackCompare callbackCompare
                                                          , ZF_IN ZFPropertyCallbackGetInfo callbackGetInfo
                                                          , ZF_IN ZFPropertyCallbackValueStore callbackValueStore
@@ -253,6 +256,7 @@ public:
                                   , ZF_IN ZFPropertyCallbackIsInitValue callbackIsInitValue
                                   , ZF_IN ZFPropertyCallbackValueSet callbackValueSet
                                   , ZF_IN ZFPropertyCallbackValueGet callbackValueGet
+                                  , ZF_IN ZFPropertyCallbackValueReset callbackValueReset
                                   , ZF_IN ZFPropertyCallbackCompare callbackCompare
                                   , ZF_IN ZFPropertyCallbackGetInfo callbackGetInfo
                                   , ZF_IN ZFPropertyCallbackValueStore callbackValueStore
@@ -273,6 +277,7 @@ public:
                                            , callbackIsInitValue
                                            , callbackValueSet
                                            , callbackValueGet
+                                           , callbackValueReset
                                            , callbackCompare
                                            , callbackGetInfo
                                            , callbackValueStore
@@ -292,39 +297,32 @@ public:
 };
 
 // ============================================================
-/** @brief default property callback impl */
 template<typename T_PropHT, typename T_PropVT>
-inline void ZFPropertyCallbackValueSetDefault(ZF_IN const ZFProperty *property,
-                                              ZF_IN ZFObject *dstObj,
-                                              ZF_IN const void *value)
+inline void _ZFP_propCbDValueSet(ZF_IN const ZFProperty *property,
+                                 ZF_IN ZFObject *dstObj,
+                                 ZF_IN const void *value)
 {
     property->setterMethod()->execute<void, T_PropVT const &>(dstObj, *(const T_PropHT *)value);
 }
-
-/** @brief default property callback impl */
 template<typename T_PropHT, typename T_PropVT>
-inline const void *ZFPropertyCallbackValueGetDefault_assign(ZF_IN const ZFProperty *property,
-                                                            ZF_IN ZFObject *ownerObj)
+inline const void *_ZFP_propCbDValueGet(ZF_IN const ZFProperty *property,
+                                        ZF_IN ZFObject *ownerObj)
 {
     return &(property->getterMethod()->execute<T_PropVT const &>(ownerObj));
 }
-
-/** @brief default property callback impl */
 template<typename T_PropHT>
-inline ZFCompareResult ZFPropertyCallbackCompareDefault(ZF_IN const ZFProperty *property,
-                                                        ZF_IN ZFObject *ownerObj,
-                                                        ZF_IN const void *v0,
-                                                        ZF_IN const void *v1)
+inline ZFCompareResult _ZFP_propCbDCompare(ZF_IN const ZFProperty *property,
+                                           ZF_IN ZFObject *ownerObj,
+                                           ZF_IN const void *v0,
+                                           ZF_IN const void *v1)
 {
     return ZFComparerDefault(*(const T_PropHT *)v0, *(const T_PropHT *)v1);
 }
-
-/** @brief default property callback impl */
 template<typename T_PropHT>
-inline void ZFPropertyCallbackGetInfoDefault(ZF_IN const ZFProperty *property,
-                                             ZF_IN ZFObject *ownerObj,
-                                             ZF_IN const void *value,
-                                             ZF_IN_OUT zfstring &ret)
+inline void _ZFP_propCbDGetInfo(ZF_IN const ZFProperty *property,
+                                ZF_IN ZFObject *ownerObj,
+                                ZF_IN const void *value,
+                                ZF_IN_OUT zfstring &ret)
 {
     ZFCoreElementInfoGetter<T_PropHT>::elementInfoGetter(ret, *(const T_PropHT *)value);
 }
@@ -336,26 +334,22 @@ extern ZF_ENV_EXPORT void _ZFP_ZFPropertyValueStoreImpl(ZF_IN const ZFProperty *
 extern ZF_ENV_EXPORT void _ZFP_ZFPropertyValueReleaseImpl(ZF_IN const ZFProperty *property,
                                                           ZF_IN ZFObject *ownerObj,
                                                           ZF_IN void *valueStored);
-/** @brief default property callback impl */
 template<typename T_PropHT>
-inline void *ZFPropertyCallbackValueStoreDefault(ZF_IN const ZFProperty *property,
-                                                 ZF_IN ZFObject *ownerObj,
-                                                 ZF_IN_OPT const void *value)
+inline void *_ZFP_propCbDValueStore(ZF_IN const ZFProperty *property,
+                                    ZF_IN ZFObject *ownerObj,
+                                    ZF_IN_OPT const void *value)
 {
     T_PropHT *valueStored = zfnew(T_PropHT, *(const T_PropHT *)value);
     _ZFP_ZFPropertyValueStoreImpl(property, ownerObj, valueStored, zfnew(ZFCorePointerForObject<T_PropHT *>, valueStored));
     return valueStored;
 }
-
-/** @brief default property callback impl */
 template<typename T_PropHT>
-inline void ZFPropertyCallbackValueReleaseDefault(ZF_IN const ZFProperty *property,
-                                                  ZF_IN ZFObject *ownerObj,
-                                                  ZF_IN void *value)
+inline void _ZFP_propCbDValueRelease(ZF_IN const ZFProperty *property,
+                                     ZF_IN ZFObject *ownerObj,
+                                     ZF_IN void *value)
 {
     _ZFP_ZFPropertyValueReleaseImpl(property, ownerObj, value);
 }
-
 template<typename T_Type, typename T_TypeFix = void, typename T_ReservedFix = void>
 zfclassNotPOD _ZFP_ZFPropertyProgressHolder
 {
@@ -368,13 +362,12 @@ public:
         return zffalse;
     }
 };
-/** @brief default property callback impl */
 template<typename T_PropHT, typename T_PropVT>
-inline zfbool ZFPropertyCallbackProgressUpdateDefault(ZF_IN const ZFProperty *property,
-                                                      ZF_IN ZFObject *ownerObj,
-                                                      ZF_IN_OPT const void *from = zfnull,
-                                                      ZF_IN_OPT const void *to = zfnull,
-                                                      ZF_IN_OPT zffloat progress = 1)
+inline zfbool _ZFP_propCbDProgressUpdate(ZF_IN const ZFProperty *property,
+                                         ZF_IN ZFObject *ownerObj,
+                                         ZF_IN_OPT const void *from = zfnull,
+                                         ZF_IN_OPT const void *to = zfnull,
+                                         ZF_IN_OPT zffloat progress = 1)
 {
     if(from == zfnull)
     {

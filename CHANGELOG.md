@@ -1,3 +1,14 @@
+# 0.1.3 (20180503)
+
+* redesign of skin and lang logic
+* optimize path info impl
+* add `ZFPROPERTY_WEAK`
+* allow reset property value by reflect
+* fix lua operators impl
+* optimize observer performance
+* trim output executable size
+* optimize build script
+
 # 0.1.2 (20180423)
 
 * update build script

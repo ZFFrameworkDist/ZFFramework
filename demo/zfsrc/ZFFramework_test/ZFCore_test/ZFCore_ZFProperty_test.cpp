@@ -24,6 +24,9 @@ public:
     ZFPROPERTY_ASSIGN(zfstring, propertyAssign)
     ZFPROPERTY_ASSIGN_READONLY(zfstring, propertyAssignReadonly, ZFPropertyNoInitValue)
 
+    // weak
+    ZFPROPERTY_WEAK(ZFObject *, propertyWeak)
+
     // custom callback
     ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE(ZFObject *, propertyRetain)
     {
@@ -45,17 +48,12 @@ public:
     {
         zfLogT();
     }
-    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(ZFObject *, propertyRetain)
-    {
-        zfLogT();
-    }
 
     ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE(zfstring, propertyAssign);
     ZFPROPERTY_OVERRIDE_ON_DEALLOC_DECLARE(zfstring, propertyAssign);
     ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfstring, propertyAssign);
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfstring, propertyAssign);
     ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(zfstring, propertyAssign);
-    ZFPROPERTY_OVERRIDE_ON_UPDATE_DECLARE(zfstring, propertyAssign);
 };
 ZFPROPERTY_OVERRIDE_ON_INIT_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
 {
@@ -74,10 +72,6 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstr
     zfLogT();
 }
 ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
-{
-    zfLogT();
-}
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
 {
     zfLogT();
 }
@@ -150,6 +144,14 @@ protected:
             p->propertyAssignReadonlySet(zfstring());
 #endif
             zfLogT() << p->propertyAssignReadonly();
+
+            // weak
+            {
+                zfblockedAlloc(ZFObject, value);
+                p->propertyWeakSet(value);
+                zfLogT() << p->propertyWeak();
+            }
+            zfLogT() << p->propertyWeak();
 
             // copy
             this->testCaseOutputSeparator();

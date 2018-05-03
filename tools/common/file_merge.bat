@@ -14,16 +14,21 @@ echo   file_merge.bat DST_PATH FILE1_PATH [FILE2_PATH ...]
 exit /b 1
 :run
 
-more "%FILE1_PATH%" > "%DST_PATH%.tmp"
+for %%a in (%DST_PATH%\..) do set _DST_PARENT=%%~fa
+mkdir "%_DST_PARENT%" >nul 2>&1
+
+>nul 2>&1 (
+    more "%FILE1_PATH%" > "%DST_PATH%"
+)
 
 shift
 :all_file
 shift
 set FILEN_PATH=%~1%
 if defined FILEN_PATH (
-    more "%FILEN_PATH%" >> "%DST_PATH%.tmp"
+    >nul 2>&1 (
+        more "%FILEN_PATH%" >> "%DST_PATH%"
+    )
     goto :all_file
 )
-
-move /y "%DST_PATH%.tmp" "%DST_PATH%" >nul 2>&1
 

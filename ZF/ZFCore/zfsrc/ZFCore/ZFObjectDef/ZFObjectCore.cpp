@@ -101,6 +101,10 @@ ZFObjectHolder *ZFObject::objectHolder(void)
     }
     return d->objectHolder;
 }
+ZFAny ZFObject::objectHolded(void)
+{
+    return this->to<ZFObjectHolder *>()->_ZFP_objectHolded;
+}
 
 void ZFObject::objectInfoOfInstanceT(ZF_IN_OUT zfstring &ret)
 {
@@ -357,7 +361,7 @@ void ZFObject::_ZFP_ZFObjectDealloc(ZFObject *obj)
     for(zfstlsize i = obj->d->propertyAccessed.size() - 1; i != (zfstlsize)-1; --i)
     {
         const ZFProperty *property = obj->d->propertyAccessed[i];
-        property->_ZFP_ZFProperty_callbackDealloc(obj, property);
+        property->_ZFP_ZFProperty_callbackDealloc(property, obj);
     }
     obj->d->objectInstanceState = ZFObjectInstanceStateOnDealloc;
     obj->objectOnDealloc();
@@ -397,7 +401,7 @@ void ZFObject::objectOnDealloc(void)
 
     if(d->objectHolder)
     {
-        d->objectHolder->holdedObj = (ZFObject *)zfnull;
+        d->objectHolder->objectHoldedSet(zfnull);
         zfRelease(d->objectHolder);
     }
 
@@ -461,25 +465,17 @@ void ZFObject::objectIsInternalSet(ZF_IN zfbool value)
     }
 }
 
-void ZFObject::_ZFP_ZFObject_objectPropertyValueAttach(ZF_IN const ZFProperty *property,
-                                                       ZF_IN zfbool firstTimeAccess)
+void ZFObject::_ZFP_ZFObject_objectPropertyValueAttach(ZF_IN const ZFProperty *property)
 {
-    if(firstTimeAccess)
-    {
-        d->propertyAccessed.push_back(property);
-    }
+    d->propertyAccessed.push_back(property);
 }
-void ZFObject::_ZFP_ZFObject_objectPropertyValueDetach(ZF_IN const ZFProperty *property,
-                                                       ZF_IN zfbool completeDetach)
+void ZFObject::_ZFP_ZFObject_objectPropertyValueDetach(ZF_IN const ZFProperty *property)
 {
-    if(completeDetach)
+    for(zfstlsize i = d->propertyAccessed.size() - 1; i != (zfstlsize)-1; --i)
     {
-        for(zfstlsize i = d->propertyAccessed.size() - 1; i != (zfstlsize)-1; --i)
+        if(d->propertyAccessed[i] == property)
         {
-            if(d->propertyAccessed[i] == property)
-            {
-                d->propertyAccessed.erase(d->propertyAccessed.begin() + i);
-            }
+            d->propertyAccessed.erase(d->propertyAccessed.begin() + i);
         }
     }
 }
@@ -510,6 +506,7 @@ ZFEXPORT_ENUM_DEFINE(ZFObjectInstanceState, ZFObjectInstanceStateOnInit, ZFObjec
 
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, const ZFClass *, classData)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, ZFObjectHolder *, objectHolder)
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, ZFAny, objectHolded)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, objectInfoOfInstanceT, ZFMP_IN_OUT(zfstring &, ret))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, zfstring, objectInfoOfInstance)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, objectInfoT, ZFMP_IN_OUT(zfstring &, ret))
@@ -527,7 +524,7 @@ ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, const ZFObserverHolder &, o
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_6(ZFObject, zfidentity, observerAdd, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, observer), ZFMP_IN_OPT(ZFObject *, userData, zfnull), ZFMP_IN_OPT(ZFObject *, owner, zfnull), ZFMP_IN_OPT(zfbool, autoRemoveAfterActivate, zffalse), ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, zfidentity, observerAdd, ZFMP_IN(const ZFObserverAddParam &, param))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_2(ZFObject, void, observerRemove, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, callback))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerRemove, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, callback), ZFMP_IN(ZFObject *, userData), ZFMP_IN_OPT(ZFComparer<ZFObject *>::Comparer, userDataComparer, zfnull))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerRemove, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, callback), ZFMP_IN(ZFObject *, userData), ZFMP_IN_OPT(ZFComparer<ZFObject *>::Comparer, userDataComparer, ZFComparerCheckEqual))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveByTaskId, ZFMP_IN(zfidentity, taskId))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveByOwner, ZFMP_IN(ZFObject *, owner))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveAll, ZFMP_IN(const zfidentity &, eventId))

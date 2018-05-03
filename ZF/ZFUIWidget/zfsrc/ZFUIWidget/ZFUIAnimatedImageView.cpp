@@ -23,7 +23,7 @@ public:
     ZFListener animatedImageOnUpdateListener;
     static ZFLISTENER_PROTOTYPE_EXPAND(animatedImageOnUpdate)
     {
-        ZFUIAnimatedImageView *view = userData->to<ZFObjectHolder *>()->holdedObj;
+        ZFUIAnimatedImageView *view = userData->objectHolded();
         if(view->animatedImageWrapToImage())
         {
             view->imageSet(view->animatedImage()->aniFrameImageCurrent());
@@ -41,7 +41,7 @@ ZF_GLOBAL_INITIALIZER_END(ZFUIAnimatedImageViewDataHolder)
 // ZFUIAnimatedImageView
 ZFOBJECT_REGISTER(ZFUIAnimatedImageView)
 
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIAnimatedImageView, zfbool, animatedImageWrapToImage)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIAnimatedImageView, zfbool, animatedImageWrapToImage)
 {
     if(this->animatedImageWrapToImage() != propertyValueOld)
     {

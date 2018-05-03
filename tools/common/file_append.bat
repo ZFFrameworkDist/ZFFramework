@@ -14,5 +14,10 @@ echo   file_append.bat DST_PATH SRC_PATH
 exit /b 1
 :run
 
-more "%SRC_PATH%" >> "%DST_PATH%.tmp"
+for %%a in (%DST_PATH%\..) do set _DST_PARENT=%%~fa
+mkdir "%_DST_PARENT%" >nul 2>&1
+
+>nul 2>&1 (
+    more "%SRC_PATH%" >> "%DST_PATH%"
+)
 

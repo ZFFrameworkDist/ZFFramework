@@ -70,19 +70,19 @@ protected:
         this->loadContent();
         this->prepareLogic();
 
-        zfLangApplyProperty_zfstring(this->owner, ZFPropertyAccess(ZF2048AppDialog, dialogTitle), zfText("ZF2048SettingDialog_title"));
+        this->owner->styleKeySet(zfText("dialogTitle"), zfText("ZF2048SettingDialog_title"));
 
-        zfLangApplyZFUITextViewText(this->dataWidthHint, zfText("ZF2048SettingDialog_widthHint"));
-        zfLangApplyZFUITextViewText(this->dataHeightHint, zfText("ZF2048SettingDialog_heightHint"));
+        this->dataWidthHint->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_widthHint"));
+        this->dataHeightHint->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_heightHint"));
 
-        zfLangApplyZFUIButtonBasicTextNormal(this->dataWidthIncrease, zfText("ZF2048SettingDialog_dataIncrease"));
-        zfLangApplyZFUIButtonBasicTextNormal(this->dataWidthDecrease, zfText("ZF2048SettingDialog_dataDecrease"));
+        this->dataWidthIncrease->buttonLabelStyleNormal()->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_dataIncrease"));
+        this->dataWidthDecrease->buttonLabelStyleNormal()->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_dataDecrease"));
 
-        zfLangApplyZFUIButtonBasicTextNormal(this->dataHeightIncrease, zfText("ZF2048SettingDialog_dataIncrease"));
-        zfLangApplyZFUIButtonBasicTextNormal(this->dataHeightDecrease, zfText("ZF2048SettingDialog_dataDecrease"));
+        this->dataHeightIncrease->buttonLabelStyleNormal()->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_dataIncrease"));
+        this->dataHeightDecrease->buttonLabelStyleNormal()->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_dataDecrease"));
 
-        zfLangApplyZFUIButtonBasicTextNormal(this->confirmButton, zfText("ZF2048SettingDialog_confirm"));
-        zfLangApplyZFUIButtonBasicTextNormal(this->cancelButton, zfText("ZF2048SettingDialog_cancel"));
+        this->confirmButton->buttonLabelStyleNormal()->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_confirm"));
+        this->cancelButton->buttonLabelStyleNormal()->styleKeySet(zfText("text"), zfText("ZF2048SettingDialog_cancel"));
     }
 
 private:
@@ -182,9 +182,9 @@ private:
     void prepareLogic(void)
     {
         ZFLISTENER_LOCAL(increaseOnClick, {
-            ZFUIButtonBasic *increase = userData->tagGet<ZFObjectHolder *>(zfText("increase"))->holdedObj;
-            ZFUITextEdit *edit = userData->tagGet<ZFObjectHolder *>(zfText("edit"))->holdedObj;
-            ZFUIButtonBasic *decrease = userData->tagGet<ZFObjectHolder *>(zfText("decrease"))->holdedObj;
+            ZFUIButtonBasic *increase = userData->tagGet(zfText("increase"))->objectHolded();
+            ZFUITextEdit *edit = userData->tagGet(zfText("edit"))->objectHolded();
+            ZFUIButtonBasic *decrease = userData->tagGet(zfText("decrease"))->objectHolded();
             zfindex value = _ZFP_ZF2048AppSettingDialogPrivate::readData(edit);
             ++value;
             value = zfmApplyRange<zfindex>(value, _ZFP_ZF2048AppDataWidthMin, _ZFP_ZF2048AppDataWidthMax);
@@ -193,9 +193,9 @@ private:
             decrease->buttonEnableSet(value != _ZFP_ZF2048AppDataWidthMin);
         })
         ZFLISTENER_LOCAL(decreaseOnClick, {
-            ZFUIButtonBasic *increase = userData->tagGet<ZFObjectHolder *>(zfText("increase"))->holdedObj;
-            ZFUITextEdit *edit = userData->tagGet<ZFObjectHolder *>(zfText("edit"))->holdedObj;
-            ZFUIButtonBasic *decrease = userData->tagGet<ZFObjectHolder *>(zfText("decrease"))->holdedObj;
+            ZFUIButtonBasic *increase = userData->tagGet(zfText("increase"))->objectHolded();
+            ZFUITextEdit *edit = userData->tagGet(zfText("edit"))->objectHolded();
+            ZFUIButtonBasic *decrease = userData->tagGet(zfText("decrease"))->objectHolded();
             zfindex value = _ZFP_ZF2048AppSettingDialogPrivate::readData(edit);
             --value;
             value = zfmApplyRange<zfindex>(value, _ZFP_ZF2048AppDataWidthMin, _ZFP_ZF2048AppDataWidthMax);
@@ -204,9 +204,9 @@ private:
             decrease->buttonEnableSet(value != _ZFP_ZF2048AppDataWidthMin);
         })
         ZFLISTENER_LOCAL(editOnChange, {
-            ZFUIButtonBasic *increase = userData->tagGet<ZFObjectHolder *>(zfText("increase"))->holdedObj;
-            ZFUITextEdit *edit = userData->tagGet<ZFObjectHolder *>(zfText("edit"))->holdedObj;
-            ZFUIButtonBasic *decrease = userData->tagGet<ZFObjectHolder *>(zfText("decrease"))->holdedObj;
+            ZFUIButtonBasic *increase = userData->tagGet(zfText("increase"))->objectHolded();
+            ZFUITextEdit *edit = userData->tagGet(zfText("edit"))->objectHolded();
+            ZFUIButtonBasic *decrease = userData->tagGet(zfText("decrease"))->objectHolded();
             zfindex value = _ZFP_ZF2048AppSettingDialogPrivate::readData(edit);
             value = zfmApplyRange<zfindex>(value, _ZFP_ZF2048AppDataWidthMin, _ZFP_ZF2048AppDataWidthMax);
             increase->buttonEnableSet(value != _ZFP_ZF2048AppDataWidthMax);

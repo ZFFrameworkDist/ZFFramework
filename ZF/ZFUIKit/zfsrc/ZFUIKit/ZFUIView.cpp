@@ -32,11 +32,11 @@ public:
 private:
     static ZFLISTENER_PROTOTYPE_EXPAND(layoutParamChanged)
     {
-        userData->to<ZFObjectHolder *>()->holdedObj.to<ZFUIView *>()->layoutRequest();
+        userData->objectHolded<ZFUIView *>()->layoutRequest();
     }
     static ZFLISTENER_PROTOTYPE_EXPAND(viewPropertyOnUpdate)
     {
-        userData->to<ZFObjectHolder *>()->holdedObj.to<ZFUIView *>()->_ZFP_ZFUIView_viewPropertyNotifyUpdate();
+        userData->objectHolded<ZFUIView *>()->_ZFP_ZFUIView_viewPropertyNotifyUpdate();
     }
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewListenerHolder)
 
@@ -916,7 +916,7 @@ zfbool ZFUIView::serializableOnCheckNeedSerializeChildren(void)
 
 // ============================================================
 // properties
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfstring, viewDelegateClass)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfstring, viewDelegateClass)
 {
     zfautoObject viewDelegateTmp = ZFClass::newInstanceForName(this->viewDelegateClass());
     if(!this->viewDelegateSupported() && viewDelegateTmp != zfnull)
@@ -926,7 +926,7 @@ ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfstring, viewDelegateClass)
     }
     this->viewDelegateSet(viewDelegateTmp);
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewVisible)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfbool, viewVisible)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewVisibleSet(this, this->viewVisible());
     if(this->viewVisible() != propertyValueOld)
@@ -934,11 +934,11 @@ ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewVisible)
         this->layoutRequest();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zffloat, viewAlpha)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zffloat, viewAlpha)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewAlphaSet(this, this->viewAlpha());
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewFocusable)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfbool, viewFocusable)
 {
     ZFPROTOCOL_INTERFACE_CLASS(ZFUIViewFocus) *impl = ZFPROTOCOL_TRY_ACCESS(ZFUIViewFocus);
     if(impl != zfnull)
@@ -946,41 +946,41 @@ ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewFocusable)
         impl->viewFocusableSet(this, this->viewFocusable());
     }
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewUIEnable)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfbool, viewUIEnable)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewUIEnableSet(this, this->viewUIEnable());
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewUIEnableTree)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfbool, viewUIEnableTree)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewUIEnableTreeSet(this, this->viewUIEnableTree());
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, zfbool, viewMouseHoverEventEnable)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfbool, viewMouseHoverEventEnable)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewMouseHoverEventEnableSet(this, this->viewMouseHoverEventEnable());
 }
 
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizePrefered)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, ZFUISize, viewSizePrefered)
 {
     if(this->viewSizePrefered() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizeMin)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, ZFUISize, viewSizeMin)
 {
     if(this->viewSizeMin() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUISize, viewSizeMax)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, ZFUISize, viewSizeMax)
 {
     if(this->viewSizeMax() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_UPDATE_DEFINE(ZFUIView, ZFUIColor, viewBackgroundColor)
+ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, ZFUIColor, viewBackgroundColor)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->viewBackgroundColorSet(this, this->viewBackgroundColor());
 }
@@ -1096,14 +1096,10 @@ void ZFUIView::objectOnDeallocPrepare(void)
     { // directly remove all children, better performance
         this->implChildOnRemoveAllForDealloc();
 
-        ZFCoreArrayPOD<ZFUIView *> layerNormal = d->layerNormal.views;
-        d->layerNormal.views = ZFCoreArrayPOD<ZFUIView *>();
-        ZFCoreArrayPOD<ZFUIView *> layerInternalFg = d->layerInternalFg.views;
-        d->layerInternalFg.views = ZFCoreArrayPOD<ZFUIView *>();
-        ZFCoreArrayPOD<ZFUIView *> layerInternalBg = d->layerInternalBg.views;
-        d->layerInternalBg.views = ZFCoreArrayPOD<ZFUIView *>();
-        ZFCoreArrayPOD<ZFUIView *> layerInternalImpl = d->layerInternalImpl.views;
-        d->layerInternalImpl.views = ZFCoreArrayPOD<ZFUIView *>();
+        ZFCoreArrayPOD<ZFUIView *> &layerNormal = d->layerNormal.views;
+        ZFCoreArrayPOD<ZFUIView *> &layerInternalFg = d->layerInternalFg.views;
+        ZFCoreArrayPOD<ZFUIView *> &layerInternalBg = d->layerInternalBg.views;
+        ZFCoreArrayPOD<ZFUIView *> &layerInternalImpl = d->layerInternalImpl.views;
 
         for(zfindex i = layerNormal.count() - 1; i != zfindexMax(); --i)
         {
@@ -1138,6 +1134,10 @@ void ZFUIView::objectOnDeallocPrepare(void)
             zfRelease(child);
         }
 
+        layerNormal.removeAll();
+        layerInternalFg.removeAll();
+        layerInternalBg.removeAll();
+        layerInternalImpl.removeAll();
         this->viewChildOnChange();
     }
     else
