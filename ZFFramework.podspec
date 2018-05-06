@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZFFramework'
-  s.version          = '0.1.3'
+  s.version          = '0.1.4'
   s.summary          = 'cross-platform C++ app framework'
   s.description      = <<-DESC
 see http://ZFFramework.com for more info
@@ -20,7 +20,7 @@ minimal steps to use in iOS with cocoapods to embed to existing projects:
           return 0;
       }
 
-recommended to use https://github.com/ZFFramework/ZFProjCreator to create project files
+recommended to use https://github.com/ZFFramework/ZFFramework/blob/master/tools/zfproj_creator/zfproj_creator.sh to create project files
 if you want to deploy to multiple platforms
 
 pod list:
