@@ -24,9 +24,13 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * parent class must be object type that can be allocated\n
  * return null if parent class not valid
  * or class name already exists
+ *
+ * @note dynamic registered contents would be removed automatically
+ *   during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkHigh
  */
 extern ZF_ENV_EXPORT const ZFClass *ZFClassDynamicRegister(ZF_IN const zfchar *className,
                                                            ZF_IN const ZFClass *parent,
+                                                           ZF_IN_OPT ZFObject *classDynamicRegisterUserData = zfnull,
                                                            ZF_OUT_OPT zfstring *errorHint = zfnull);
 /**
  * @brief unregister class that registered by #ZFClassDynamicRegister

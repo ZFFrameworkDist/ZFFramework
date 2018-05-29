@@ -37,7 +37,7 @@ extern ZF_ENV_EXPORT lua_State *_ZFP_ZFImpl_ZFLua_luaState(void);
  *   all necessary register steps would be performed
  * -  in ZFLua, all types are wrapped by #zfautoObject
  *   (wrapped directly for ZFObject type,
- *   wrapped by #ZFPropertyTypeWrapper for non-ZFObject type)
+ *   wrapped by #ZFTypeIdWrapper for non-ZFObject type)
  * -  all global variables are also wrapped by #zfautoObject
  * -  class and namespace are wrapped by lua raw string value as a global variable,
  *   and should be registered by #ZFImpl_ZFLua_implSetupScope\n
@@ -363,10 +363,10 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
         if(paramName == zfnull && dispatchInfo.paramList[N]->toObject() != zfnull) \
         { \
             ZFImpl_ZFLua_UnknownParam *t = ZFCastZFObject(ZFImpl_ZFLua_UnknownParam *, dispatchInfo.paramList[N]->toObject()); \
-            if(t != zfnull && desiredClass::ClassData()->classIsTypeOf(ZFPropertyTypeWrapper::ClassData())) \
+            if(t != zfnull && desiredClass::ClassData()->classIsTypeOf(ZFTypeIdWrapper::ClassData())) \
             { \
                 zfblockedAlloc(desiredClass, t2); \
-                if(t2->to<ZFPropertyTypeWrapper *>()->wrappedValueFromString(t->zfv)) \
+                if(t2->to<ZFTypeIdWrapper *>()->wrappedValueFromString(t->zfv)) \
                 { \
                     _ZFP_##paramName = t2; \
                     paramName = t2; \
@@ -388,10 +388,10 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
         if(paramName == zfnull) \
         { \
             ZFImpl_ZFLua_UnknownParam *t = ZFCastZFObject(ZFImpl_ZFLua_UnknownParam *, dispatchInfo.paramList[N]->toObject()); \
-            if(t != zfnull && desiredClass::ClassData()->classIsTypeOf(ZFPropertyTypeWrapper::ClassData())) \
+            if(t != zfnull && desiredClass::ClassData()->classIsTypeOf(ZFTypeIdWrapper::ClassData())) \
             { \
                 zfblockedAlloc(desiredClass, t2); \
-                if(t2->to<ZFPropertyTypeWrapper *>()->wrappedValueFromString(t->zfv)) \
+                if(t2->to<ZFTypeIdWrapper *>()->wrappedValueFromString(t->zfv)) \
                 { \
                     _ZFP_##paramName = t2; \
                     paramName = t2; \
@@ -434,7 +434,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
     } while(zffalse)
 
 // ============================================================
-/** @brief class prefix for #ZFPropertyTypeWrapper impl */
+/** @brief class prefix for #ZFTypeIdWrapper impl */
 #define ZFImpl_ZFLua_PropTypePrefix zfText("v_")
 /** @brief see #ZFImpl_ZFLua_PropTypePrefix */
 #define ZFImpl_ZFLua_PropTypePrefixLen 2
@@ -594,16 +594,8 @@ inline void ZFImpl_ZFLua_luaCFunctionRegister(ZF_IN lua_State *L, ZF_IN const zf
 /** @brief util for impl */
 inline void ZFImpl_ZFLua_luaPush(ZF_IN lua_State *L, ZF_IN zfautoObject &v)
 {
-    v_zfbool *t = v;
-    if(t != zfnull)
-    {
-        lua_pushboolean(L, (bool)t->zfv);
-    }
-    else
-    {
-        ELuna::convert2LuaType<zfautoObject>::convertType(L, v);
-        ZFImpl_ZFLua_implSetupObject(L);
-    }
+    ELuna::convert2LuaType<zfautoObject>::convertType(L, v);
+    ZFImpl_ZFLua_implSetupObject(L);
 }
 /** @brief util for impl */
 inline void ZFImpl_ZFLua_luaPush(ZF_IN lua_State *L, ZF_IN const zfautoObject &v)

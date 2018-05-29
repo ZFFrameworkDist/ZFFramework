@@ -116,7 +116,7 @@ public:
         {
             *(zfautoObject *)outInitValue = tmp;
         }
-        T_Type cur = property->getterMethod()->execute<T_Type const &>(ownerObj);
+        T_Type cur = getterInvoker(property->getterMethod(), ownerObj);
         T_Type initValueTmp = tmp.to<T_Type>();
         if(cur == initValueTmp)
         {
@@ -242,7 +242,7 @@ public:
         {
             *(T_Type *)outInitValue = tmp;
         }
-        return (property->getterMethod()->execute<T_Type const &>(ownerObj) == tmp);
+        return (getterInvoker(property->getterMethod(), ownerObj) == tmp);
     }
     /** @brief default impl for #ZFPropertyUserRegisterRetain */
     static const void *callbackValueGet(ZF_IN const ZFProperty *property, ZF_IN ZFObject *ownerObj)
@@ -316,7 +316,7 @@ private:
         registerSig, \
         ownerClass, \
         Type, propertyNameString, \
-        ZFPropertyTypeId_noneOrType, \
+        ZFTypeId_noneOrType, \
         setterMethod, getterMethod, \
         propertyClassOfRetainProperty \
         , Func_ZFPropertyCallbackIsValueAccessed \
@@ -331,7 +331,7 @@ private:
         , ownerClass \
         , propertyNameString \
         , ZFM_TOSTRING(Type) \
-        , ZFPropertyTypeId_noneOrType \
+        , ZFTypeId_noneOrType \
         , setterMethod \
         , getterMethod \
         , propertyClassOfRetainProperty \
@@ -344,6 +344,8 @@ private:
         , _ZFP_propCbDGetInfo<zfautoObject> \
         , _ZFP_propCbDValueStore<zfautoObject> \
         , _ZFP_propCbDValueRelease<zfautoObject> \
+        , _ZFP_propCbDSerializeFrom_get<Type>() \
+        , _ZFP_propCbDSerializeTo_get<Type>() \
         , _ZFP_propCbDProgressUpdate<zfautoObject, Type> \
         , _ZFP_PropURInit_##registerSig::propertyInit \
         , zfnull \
@@ -352,7 +354,7 @@ private:
         registerSig, \
         ownerClass, \
         Type, propertyNameString, \
-        ZFPropertyTypeId_noneOrType, \
+        ZFTypeId_noneOrType, \
         setterMethod, \
         getterMethod, \
         propertyClassOfRetainProperty \
@@ -368,7 +370,7 @@ private:
         , ownerClass \
         , propertyNameString \
         , ZFM_TOSTRING(Type) \
-        , ZFPropertyTypeId_noneOrType \
+        , ZFTypeId_noneOrType \
         , setterMethod \
         , getterMethod \
         , propertyClassOfRetainProperty \
@@ -381,6 +383,8 @@ private:
         , _ZFP_propCbDGetInfo<Type> \
         , _ZFP_propCbDValueStore<Type> \
         , _ZFP_propCbDValueRelease<Type> \
+        , _ZFP_propCbDSerializeFrom_get<Type>() \
+        , _ZFP_propCbDSerializeTo_get<Type>() \
         , _ZFP_propCbDProgressUpdate<Type, Type> \
         , _ZFP_PropURInit_##registerSig::propertyInit \
         , zfnull \
@@ -391,7 +395,7 @@ private:
         Type, propertyNameString, InitValueOrEmpty, \
         SetterAccessType, GetterAccessType, \
         RetainOrAssign, \
-        ZFPropertyTypeId_noneOrType, \
+        ZFTypeId_noneOrType, \
         propertyClassOfRetainProperty \
         , Func_ZFPropertySetterInvoker \
         , Func_ZFPropertyGetterInvoker \
@@ -417,7 +421,7 @@ private:
         resultProperty = _ZFP_ZFPropertyRegister _ZFP_ZFPropertyUserRegister_ParamExpand_##RetainOrAssign( \
                 _, _ownerClass, \
                 Type, _propertyName, \
-                ZFPropertyTypeId_noneOrType, \
+                ZFTypeId_noneOrType, \
                 setterMethod, getterMethod, \
                 propertyClassOfRetainProperty \
                 , Func_ZFPropertyCallbackIsValueAccessed \
@@ -432,7 +436,7 @@ private:
         Type, propertyNameSig, InitValueOrEmpty, \
         SetterAccessType, GetterAccessType, \
         RetainOrAssign, \
-        ZFPropertyTypeId_noneOrType, \
+        ZFTypeId_noneOrType, \
         propertyClassOfRetainProperty \
         , Func_ZFPropertySetterInvoker \
         , Func_ZFPropertyGetterInvoker \
@@ -465,7 +469,7 @@ private:
         _ZFP_ZFPropertyUserRegister_ParamExpand_##RetainOrAssign( \
             ownerClassSig##_##propertyNameSig, ownerClassSig::ClassData(), \
             Type, ZFM_TOSTRING(propertyNameSig), \
-            ZFPropertyTypeId_noneOrType, \
+            ZFTypeId_noneOrType, \
             _ZFP_PropURMH_##ownerClassSig##_##propertyNameSig::S(), \
             _ZFP_PropURMH_##ownerClassSig##_##propertyNameSig::G(), \
             propertyClassOfRetainProperty \
@@ -576,7 +580,7 @@ private:
         Type, propertyNameString, InitValueOrEmpty, \
         SetterAccessType, GetterAccessType, \
         Retain, \
-        ZFPropertyTypeId_ZFObject(), \
+        ZFTypeId_ZFObject(), \
         zftTraits<Type>::TrType::ClassData() \
         , Func_ZFPropertySetterInvoker \
         , Func_ZFPropertyGetterInvoker \
@@ -615,7 +619,7 @@ private:
         Type, propertyNameSig, InitValueOrEmpty, \
         SetterAccessType, GetterAccessType, \
         Retain, \
-        ZFPropertyTypeId_ZFObject(), \
+        ZFTypeId_ZFObject(), \
         zftTraits<Type>::TrType::ClassData() \
         , Func_ZFPropertySetterInvoker \
         , Func_ZFPropertyGetterInvoker \
@@ -656,7 +660,7 @@ private:
         Type, propertyNameString, InitValueOrEmpty, \
         SetterAccessType, GetterAccessType, \
         Assign, \
-        ZFPropertyTypeIdData<zftTraits<Type>::TrNoRef>::PropertyTypeId(), \
+        ZFTypeId<zftTraits<Type>::TrNoRef>::TypeId(), \
         zfnull \
         , Func_ZFPropertySetterInvoker \
         , Func_ZFPropertyGetterInvoker \
@@ -695,7 +699,7 @@ private:
         Type, propertyNameSig, InitValueOrEmpty, \
         SetterAccessType, GetterAccessType, \
         Assign, \
-        ZFPropertyTypeIdData<zftTraits<Type>::TrNoRef>::PropertyTypeId(), \
+        ZFTypeId<zftTraits<Type>::TrNoRef>::TypeId(), \
         zfnull \
         , Func_ZFPropertySetterInvoker \
         , Func_ZFPropertyGetterInvoker \

@@ -29,13 +29,13 @@ zfclassFwd ZFMethodDynamicRegisterParam;
  * -  use #ZFMethodGenericInvoker to implement,
  *   have lower performance (trade for flexibility)
  *
- * @note dynamic registered method would be removed automatically
- *   during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkNormal
+ * @note dynamic registered contents would be removed automatically
+ *   during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkHigh
  * @warning if your method has return value,
  *   you must take care the life cycle of the return value\n
  *   when the method called by plain #ZFMethod::execute
  *   instead of #ZFMethod::methodGenericInvoker,
- *   the #ZFPropertyTypeWrapper created by generic invoker
+ *   the #ZFTypeIdWrapper created by generic invoker
  *   would be released immediately after method call,
  *   which would cause the raw return value
  *   points to invalid address\n
@@ -55,7 +55,21 @@ extern ZF_ENV_EXPORT void ZFMethodDynamicUnregister(ZF_IN const ZFMethod *method
 // ============================================================
 /* ZFMETHOD_MAX_PARAM */
 zfclassFwd _ZFP_ZFMethodDynamicRegisterParamPrivate;
-/** @brief param for #ZFMethodDynamicRegister */
+/**
+ * @brief param for #ZFMethodDynamicRegister
+ *
+ * required:
+ * -  methodOwnerClass or methodNamespace
+ * -  methodGenericInvoker
+ * -  methodName
+ *
+ * optional:
+ * -  methodDynamicRegisterUserData, null by default
+ * -  methodType, #ZFMethodTypeStatic by default
+ * -  methodPrivilegeType, #ZFMethodPrivilegeTypePublic by default
+ * -  methodReturnTypeId, #ZFTypeId_void by default
+ * -  methodReturnTypeName, empty by default
+ */
 zffinal zfclassLikePOD ZF_ENV_EXPORT ZFMethodDynamicRegisterParam
 {
 public:

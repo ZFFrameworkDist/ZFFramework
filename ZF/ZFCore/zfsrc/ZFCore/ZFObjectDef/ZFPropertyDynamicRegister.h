@@ -32,8 +32,8 @@ zfclassFwd ZFPropertyDynamicRegisterParam;
  *   have lower performance (trade for flexibility)
  * -  no weak property support (assign property with ZFObject type)
  *
- * @note dynamic registered method would be removed automatically
- *   during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkNormal
+ * @note dynamic registered contents would be removed automatically
+ *   during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkHigh
  */
 extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyDynamicRegister(ZF_IN const ZFPropertyDynamicRegisterParam &param,
                                                                  ZF_OUT_OPT zfstring *errorHint = zfnull);
@@ -46,7 +46,7 @@ extern ZF_ENV_EXPORT void ZFPropertyDynamicUnregister(ZF_IN const ZFProperty *pr
 /**
  * @brief callback to setup init value for #ZFPropertyDynamicRegister
  *
- * returned object must be valid to #ZFPropertyTypeIdDataBase::propertyWrapper
+ * returned object must be valid to #ZFTypeIdBase::typeIdWrapper
  */
 typedef zfautoObject (*ZFPropertyDynamicRegisterInitValueCallback)(ZF_IN const ZFProperty *property);
 

@@ -104,6 +104,16 @@ public:
 };
 
 // ============================================================
+/**
+ * @brief see #ZFObject::observerNotify
+ *
+ * this event is reserved for #ZFDynamic::removeAllOnEvent
+ */
+ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
+ZFOBSERVER_EVENT_GLOBAL(ZFDynamicRemoveAll)
+ZF_NAMESPACE_END(ZFGlobalEvent)
+
+// ============================================================
 zfclassFwd _ZFP_ZFDynamicPrivate;
 /**
  * @brief util class to dynamic register class/method/property
@@ -111,20 +121,30 @@ zfclassFwd _ZFP_ZFDynamicPrivate;
  * usage:
  * @code
  *   ZFDynamic()
- *       .classBegin(xxx)
- *           .method(xxx)
- *           .property(xxx)
+ *       .classBegin(className [, parent, userData])
+ *           .event(eventName)
+ *           .method(callback, userData, returnTypeId, methodName [, paramTypeId0, ...])
+ *           .property(typeIdOrRetainClass, propertyName [, propertyInitValue])
  *       .classEnd()
- *       .NSBegin(xxx)
- *           .method(xxx)
- *       .NSEnd();
+ *       .NSBegin([methodNamespace])
+ *           .event(eventName)
+ *           .method(callback, userData, returnTypeId, methodName [, paramTypeId0, ...])
+ *       .NSEnd()
+ *       .enumBegin(enumClassName)
+ *           .enumIsFlagsSet(isFlag)
+ *           .enumValue(enumName [, enumValue])
+ *           .enumValue(enumName [, enumValue])
+ *       .enumEnd([enumDefault])
+ *   ;
  * @endcode
  *
  * when any steps failed, #errorCallbackNotify would be called,
  * and all further call would be ignored\n
  * \n
  * you may store the returned ZFDynamic object,
- * and use #removeAll to remove all registered items at once
+ * and use #removeAll to remove all registered items at once,
+ * or, use the util method #removeAllOnEvent to automatically
+ * remove when specified event notified to #ZFGlobalEventCenter
  */
 zfclassLikePOD ZF_ENV_EXPORT ZFDynamic
 {
@@ -141,29 +161,68 @@ public:
     /** @brief see #ZFDynamic */
     void removeAll(void);
     /** @brief see #ZFDynamic */
+    ZFDynamic &removeAllOnEvent(ZF_IN zfidentity eventId = ZFGlobalEvent::EventZFDynamicRemoveAll());
+    /** @brief see #ZFDynamic */
     const ZFCoreArrayPOD<const ZFClass *> &allClass(void) const;
+    /** @brief see #ZFDynamic */
+    const ZFCoreArrayPOD<const ZFClass *> &allEnum(void) const;
     /** @brief see #ZFDynamic */
     const ZFCoreArrayPOD<const ZFMethod *> &allMethod(void) const;
     /** @brief see #ZFDynamic */
     const ZFCoreArrayPOD<const ZFProperty *> &allProperty(void) const;
+    /** @brief see #ZFDynamic */
+    const ZFCoreArrayPOD<zfidentity> &allEvent(void) const;
 
 public:
     /** @brief see #ZFDynamic */
     ZFDynamic &classBegin(ZF_IN const zfchar *className,
-                          ZF_IN_OPT const ZFClass *parentClass = ZFObject::ClassData());
+                          ZF_IN_OPT const ZFClass *parentClass = ZFObject::ClassData(),
+                          ZF_IN_OPT ZFObject *classDynamicRegisterUserData = zfnull);
     /** @brief see #ZFDynamic */
     ZFDynamic &classBegin(ZF_IN const zfchar *className,
-                          ZF_IN const zfchar *parentClassName);
+                          ZF_IN const zfchar *parentClassName,
+                          ZF_IN_OPT ZFObject *classDynamicRegisterUserData = zfnull);
     /** @brief see #ZFDynamic */
     ZFDynamic &classBegin(ZF_IN const ZFClass *cls);
     /** @brief see #ZFDynamic */
     ZFDynamic &classEnd(void);
+
+    /** @brief see #ZFDynamic */
+    ZFDynamic &onInit(ZF_IN const ZFListener &onInitCallback,
+                      ZF_IN_OPT ZFObject *userData = zfnull);
+    /** @brief see #ZFDynamic */
+    ZFDynamic &onDealloc(ZF_IN const ZFListener &onDeallocCallback,
+                         ZF_IN_OPT ZFObject *userData = zfnull);
 
 public:
     /** @brief see #ZFDynamic */
     ZFDynamic &NSBegin(ZF_IN_OPT const zfchar *methodNamespace = ZFMethodFuncNamespaceGlobal);
     /** @brief see #ZFDynamic */
     ZFDynamic &NSEnd(void);
+
+public:
+    /** @brief see #ZFDynamic */
+    ZFDynamic &enumBegin(ZF_IN const zfchar *enumClassName);
+    /** @brief see #ZFDynamic */
+    ZFDynamic &enumIsFlagsSet(ZF_IN zfbool enumIsFlags);
+    /** @brief see #ZFDynamic */
+    ZFDynamic &enumValue(ZF_IN const zfchar *enumName,
+                         ZF_IN_OPT zfuint enumValue = ZFEnumInvalid());
+    /** @brief see #ZFDynamic */
+    ZFDynamic &enumEnd(ZF_IN_OPT zfuint enumDefault = ZFEnumInvalid());
+
+public:
+    /**
+     * @brief register a event, see also #ZFOBSERVER_EVENT #ZFOBSERVER_EVENT_GLOBAL
+     *
+     * if within class scope (#classBegin),
+     * `YourClassName::EventYourEvent` would be registered,
+     * otherwise, `YourNamespace::EventYourEvent` would be registered\n
+     * registered event would include:
+     * -  an event registered by #ZFIdMapRegister
+     * -  a #ZFMethod to access the event
+     */
+    ZFDynamic &event(ZF_IN const zfchar *eventName);
 
 public:
     /**
@@ -213,32 +272,38 @@ public:
      */
     ZFDynamic &property(ZF_IN const zfchar *propertyTypeId,
                         ZF_IN const zfchar *propertyName,
-                        ZF_IN_OPT const ZFListener &initValueCallback = ZFCallbackNull(),
-                        ZF_IN_OPT ZFObject *initValueCallbackUserData = zfnull);
+                        ZF_IN_OPT ZFObject *propertyInitValue = zfnull);
     /** @brief see #ZFDynamic */
     ZFDynamic &property(ZF_IN const ZFClass *propertyClassOfRetainProperty,
                         ZF_IN const zfchar *propertyName,
-                        ZF_IN_OPT const ZFListener &initValueCallback = ZFCallbackNull(),
-                        ZF_IN_OPT ZFObject *initValueCallbackUserData = zfnull);
+                        ZF_IN_OPT ZFObject *propertyInitValue = zfnull);
     /** @brief see #ZFDynamic */
     ZFDynamic &property(ZF_IN const ZFPropertyDynamicRegisterParam &param);
 
 public:
     /** @brief error callback which would be called if error occurred */
-    ZFDynamic &errorCallbackAdd(ZF_IN const ZFOutputCallback &errorCallback = ZFOutputCallbackDefault());
+    ZFDynamic &errorCallbackAdd(ZF_IN const ZFOutput &errorCallback = ZFOutputDefault());
     /** @brief see #errorCallbackAdd */
-    ZFDynamic &errorCallbackRemove(ZF_IN const ZFOutputCallback &errorCallback);
+    ZFDynamic &errorCallbackRemove(ZF_IN const ZFOutput &errorCallback);
     /** @brief see #errorCallbackAdd */
     zfindex errorCallbackCount(void) const;
     /** @brief see #errorCallbackAdd */
-    const ZFOutputCallback &errorCallbackAtIndex(ZF_IN zfindex index) const;
+    const ZFOutput &errorCallbackAtIndex(ZF_IN zfindex index) const;
     /** @brief see #errorCallbackAdd */
     void errorCallbackNotify(ZF_IN const zfchar *errorHint) const;
 
 private:
     _ZFP_ZFDynamicPrivate *d;
 };
-ZFPROPERTY_TYPE_ACCESS_ONLY_DECLARE(ZFDynamic, ZFDynamic)
+ZFTYPEID_ACCESS_ONLY_DECLARE(ZFDynamic, ZFDynamic)
+
+// ============================================================
+/**
+ * @brief util method to notify #ZFGlobalEvent::EventZFDynamicRemoveAll
+ *
+ * ensured called during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkNormal
+ */
+ZFMETHOD_FUNC_DECLARE_0(void, ZFDynamicRemoveAll)
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFDynamicRegisterUtil_h_

@@ -15,36 +15,53 @@
 #ifndef _ZFI_ZFEnumDeclarePropType_h_
 #define _ZFI_ZFEnumDeclarePropType_h_
 
-#include "ZFEnumDeclare.h"
+#include "ZFObjectClassTypeFwd.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
-// ZFPropertyTypeWrapper
-#define _ZFP_ZFENUM_PROP_TYPE_WRAPPER_DECLARE(EnumName) \
-    public: \
-        zfoverride \
-        virtual const zfchar *wrappedValueTypeId(void);
+template<typename T_Type>
+zfclassNotPOD _ZFP_ZFEnumCanModify
+{
+public:
+    enum {
+        v = (zffalse
+            || zftTraits<T_Type>::TrModifier == zftTraitsModifier_R
+            || zftTraits<T_Type>::TrModifier == zftTraitsModifier_P
+            || zftTraits<T_Type>::TrModifier == zftTraitsModifier_PR
+            || zftTraits<T_Type>::TrModifier == zftTraitsModifier_PCR
+        ) ? 1 : 0,
+    };
+};
 
 // ============================================================
 // normal enum
 #define _ZFP_ZFENUM_PROP_TYPE_DECLARE(EnumName) \
-    ZFPROPERTY_TYPE_DECLARE_WITH_CUSTOM_WRAPPER(EnumName##Enum, EnumName##Enum) \
+    ZFTYPEID_DECLARE_WITH_CUSTOM_WRAPPER(EnumName##Enum, EnumName##Enum) \
     /** @cond ZFPrivateDoc */ \
     template<> \
-    zfclassNotPOD ZFPropertyTypeIdData<EnumName##Enum> : zfextendsNotPOD ZFPropertyTypeIdDataBase \
+    zfclassNotPOD ZFTypeId<EnumName##Enum> : zfextendsNotPOD ZFTypeIdBase \
     { \
-        _ZFP_ZFPROPERTY_TYPE_ID_DATA_BASE_EXPAND(EnumName##Enum) \
     public: \
         enum { \
-            PropertyRegistered = 1, \
-            PropertySerializable = 1, \
+            TypeIdRegistered = 1, \
+            TypeIdSerializable = 1, \
         }; \
-        static inline const zfchar *PropertyTypeId(void) \
+        static inline const zfchar *TypeId(void) \
         { \
-            return ZFPropertyTypeId_##EnumName##Enum(); \
+            return ZFTypeId_##EnumName##Enum(); \
         } \
         zfoverride \
-        virtual zfbool propertyWrapper(ZF_OUT zfautoObject &v) const \
+        virtual zfbool typeIdSerializable(void) const \
+        { \
+            return TypeIdSerializable; \
+        } \
+        zfoverride \
+        virtual const zfchar *typeId(void) const \
+        { \
+            return TypeId(); \
+        } \
+        zfoverride \
+        virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const \
         { \
             EnumName *t = zfAlloc(EnumName); \
             v = t; \
@@ -79,10 +96,27 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         public: \
             static zfbool accessAvailable(ZF_IN ZFObject *obj) \
             { \
-                return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
+                if(_ZFP_ZFEnumCanModify<T_Access>::v) \
+                { \
+                    return (ZFCastZFObject(EnumName##Editable *, obj) != zfnull); \
+                } \
+                else \
+                { \
+                    return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                } \
             } \
             static T_Access access(ZF_IN ZFObject *obj) \
             { \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
                 /* EnumReinterpretCast */ \
                 return *(typename zftTraits<T_Access>::TrNoRef *)(&(ZFCastZFObject(EnumName *, obj)->_ZFP_ZFEnum_value)); \
             } \
@@ -95,16 +129,33 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         public: \
             static zfbool accessAvailable(ZF_IN ZFObject *obj) \
             { \
-                return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
+                if(_ZFP_ZFEnumCanModify<T_Access>::v) \
+                { \
+                    return (ZFCastZFObject(EnumName##Editable *, obj) != zfnull); \
+                } \
+                else \
+                { \
+                    return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                } \
             } \
             static T_Access access(ZF_IN ZFObject *obj) \
             { \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
                 EnumName *t = ZFCastZFObject(EnumName *, obj); \
                 _TrNoRef *holder = zfnew(_TrNoRef); \
                 /* EnumReinterpretCast */ \
                 *holder = (_TrNoRef)(&(t->_ZFP_ZFEnum_value)); \
                 _ZFP_PropAliasAttach(obj, holder, \
-                    zfsConnectLineFree(ZFM_TOSTRING(EnumName), zfText("_"), zftTraits<_TrNoRef>::ModifierId()), \
+                    zfsConnectLineFree(ZFM_TOSTRING(EnumName), zfText("_"), zftTraits<_TrNoRef>::ModifierName()), \
                     _ZFP_PropAliasOnDetach); \
                 return *holder; \
             } \
@@ -120,7 +171,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
     /** @endcond */
 
 #define _ZFP_ZFENUM_PROP_TYPE_DEFINE(EnumName) \
-    ZFPROPERTY_TYPE_DEFINE_BY_STRING_CONVERTER_WITH_CUSTOM_WRAPPER(EnumName##Enum, EnumName##Enum, { \
+    ZFTYPEID_DEFINE_BY_STRING_CONVERTER_WITH_CUSTOM_WRAPPER(EnumName##Enum, EnumName##Enum, { \
             if(zfsncmp(src, ZFEnumNameInvalid(), srcLen) == 0) \
             { \
                 v = (EnumName##Enum)ZFEnumInvalid(); \
@@ -136,39 +187,59 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         }) \
     const zfchar *EnumName::wrappedValueTypeId(void) \
     { \
-        return ZFPropertyTypeId_##EnumName##Enum(); \
+        return ZFTypeId_##EnumName##Enum(); \
     }
 
 
 // ============================================================
 // enum flags
 #define _ZFP_ZFENUM_FLAGS_PROP_TYPE_DECLARE(EnumName, EnumFlagsName) \
-    ZFPROPERTY_TYPE_DECLARE_WITH_CUSTOM_WRAPPER(EnumFlagsName, EnumFlagsName) \
+    ZFTYPEID_DECLARE_WITH_CUSTOM_WRAPPER(EnumFlagsName, EnumFlagsName) \
+    /** @brief type wrapper for #ZFTypeId::Value */ \
+    zfclass ZF_ENV_EXPORT v_##EnumFlagsName : zfextends EnumName##Editable \
+    { \
+        ZFOBJECT_DECLARE(v_##EnumFlagsName, EnumName##Editable) \
+    public: \
+        zfoverride \
+        virtual const zfchar *wrappedValueTypeId(void) \
+        { \
+            return ZFTypeId_##EnumFlagsName(); \
+        } \
+    }; \
     /** @cond ZFPrivateDoc */ \
     template<> \
-    zfclassNotPOD ZFPropertyTypeIdData<EnumFlagsName> : zfextendsNotPOD ZFPropertyTypeIdDataBase \
+    zfclassNotPOD ZFTypeId<EnumFlagsName> : zfextendsNotPOD ZFTypeIdBase \
     { \
-        _ZFP_ZFPROPERTY_TYPE_ID_DATA_BASE_EXPAND(EnumFlagsName) \
     public: \
         enum { \
-            PropertyRegistered = 1, \
-            PropertySerializable = 1, \
+            TypeIdRegistered = 1, \
+            TypeIdSerializable = 1, \
         }; \
-        static inline const zfchar *PropertyTypeId(void) \
+        static inline const zfchar *TypeId(void) \
         { \
-            return ZFPropertyTypeId_##EnumFlagsName(); \
+            return ZFTypeId_##EnumFlagsName(); \
         } \
         zfoverride \
-        virtual zfbool propertyWrapper(ZF_OUT zfautoObject &v) const \
+        virtual zfbool typeIdSerializable(void) const \
         { \
-            EnumName *t = zfAlloc(EnumName); \
+            return TypeIdSerializable; \
+        } \
+        zfoverride \
+        virtual const zfchar *typeId(void) const \
+        { \
+            return TypeId(); \
+        } \
+        zfoverride \
+        virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const \
+        { \
+            v_##EnumFlagsName *t = zfAlloc(v_##EnumFlagsName); \
             v = t; \
             zfRelease(t); \
             return zftrue; \
         } \
         static zfbool ValueStore(ZF_OUT zfautoObject &obj, ZF_IN zfuint const &v) \
         { \
-            EnumName *t = zfAlloc(EnumName, v); \
+            v_##EnumFlagsName *t = zfAlloc(v_##EnumFlagsName, v); \
             obj = t; \
             zfRelease(t); \
             return zftrue; \
@@ -201,10 +272,27 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         public: \
             static zfbool accessAvailable(ZF_IN ZFObject *obj) \
             { \
-                return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
+                if(_ZFP_ZFEnumCanModify<T_Access>::v) \
+                { \
+                    return (ZFCastZFObject(EnumName##Editable *, obj) != zfnull); \
+                } \
+                else \
+                { \
+                    return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                } \
             } \
             static T_Access access(ZF_IN ZFObject *obj) \
             { \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
                 /* EnumReinterpretCast */ \
                 return *(typename zftTraits<T_Access>::TrNoRef *)(&(ZFCastZFObject(EnumName *, obj)->_ZFP_ZFEnum_value)); \
             } \
@@ -217,16 +305,33 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         public: \
             static zfbool accessAvailable(ZF_IN ZFObject *obj) \
             { \
-                return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
+                if(_ZFP_ZFEnumCanModify<T_Access>::v) \
+                { \
+                    return (ZFCastZFObject(EnumName##Editable *, obj) != zfnull); \
+                } \
+                else \
+                { \
+                    return (ZFCastZFObject(EnumName *, obj) != zfnull); \
+                } \
             } \
             static T_Access access(ZF_IN ZFObject *obj) \
             { \
+                v_zfautoObject *objTmp = ZFCastZFObject(v_zfautoObject *, obj); \
+                if(objTmp != zfnull) \
+                { \
+                    obj = objTmp->zfv; \
+                } \
                 EnumName *t = ZFCastZFObject(EnumName *, obj); \
                 _TrNoRef *holder = zfnew(_TrNoRef); \
                 /* EnumReinterpretCast */ \
                 *holder = (_TrNoRef)(&(t->_ZFP_ZFEnum_value)); \
                 _ZFP_PropAliasAttach(obj, holder, \
-                    zfsConnectLineFree(ZFM_TOSTRING(EnumName), zfText("_"), zftTraits<_TrNoRef>::ModifierId()), \
+                    zfsConnectLineFree(ZFM_TOSTRING(EnumName), zfText("_"), zftTraits<_TrNoRef>::ModifierName()), \
                     _ZFP_PropAliasOnDetach); \
                 return *holder; \
             } \
@@ -242,7 +347,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
     /** @endcond */
 
 #define _ZFP_ZFENUM_FLAGS_PROP_TYPE_DEFINE(EnumName, EnumFlagsName) \
-    ZFPROPERTY_TYPE_DEFINE_BY_STRING_CONVERTER_WITH_CUSTOM_WRAPPER(EnumFlagsName, EnumFlagsName, { \
+    ZFTYPEID_DEFINE_BY_STRING_CONVERTER_WITH_CUSTOM_WRAPPER(EnumFlagsName, EnumFlagsName, { \
             zfflags flags = zfflagsZero(); \
             if(!zfflagsFromString(flags, \
                 EnumName::ClassData(), \
@@ -254,7 +359,8 @@ ZF_NAMESPACE_GLOBAL_BEGIN
             return zftrue; \
         }, { \
             return zfflagsToString(s, EnumName::ClassData(), (zfflags)v.enumValue()); \
-        })
+        }) \
+    ZFOBJECT_REGISTER(v_##EnumFlagsName)
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFEnumDeclarePropType_h_

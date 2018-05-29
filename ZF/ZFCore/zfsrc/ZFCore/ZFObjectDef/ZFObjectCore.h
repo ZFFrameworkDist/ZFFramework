@@ -261,11 +261,19 @@ public:
      * @brief see #ZFObject::observerNotify
      *
      * notified when object allocated (after #objectOnInitFinish\n
-     * this event is only designed for convenient and for debug use only
+     * this event is only designed for convenient and for debug use only,
+     * usually you should use #ZFClass::instanceObserverAdd
      */
     ZFOBSERVER_EVENT(ObjectAfterAlloc)
     /**
      * @brief see #ZFObject::observerNotify
+     *
+     * notified before object dealloc\n
+     * note: the object's retain count should be 1 when this event is notified,
+     * it's safe to retain the object during this event,
+     * but it's your responsibility to ensure logic valid,
+     * after notified this event, all observer of this event would be removed,
+     * so that it's safe to release the object again to finally destroy the object
      */
     ZFOBSERVER_EVENT(ObjectBeforeDealloc)
     /**
@@ -384,6 +392,25 @@ public:
      *   and follow the rules described in #objectHash
      */
     virtual ZFCompareResult objectCompare(ZF_IN ZFObject *anotherObj);
+
+public:
+    /* ZFMETHOD_MAX_PARAM */
+    /**
+     * @brief util method to perform #ZFMethod::methodGenericInvoke,
+     *   do nothing if fail
+     */
+    virtual zfautoObject invoke(ZF_IN const zfchar *methodName
+                                , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
+                                , ZF_OUT_OPT zfbool *success = zfnull
+                                , ZF_OUT_OPT zfstring *errorHint = zfnull
+                                );
 
 public:
     /**
@@ -619,7 +646,7 @@ public:
     zfbool _ZFP_ZFObjectTryLock(void);
 
     ZFObject *_ZFP_ZFObjectCheckOnInit(void);
-    static void _ZFP_ZFObjectDealloc(ZFObject *obj);
+    void _ZFP_ZFObjectCheckRelease(void);
 
 public:
     /**

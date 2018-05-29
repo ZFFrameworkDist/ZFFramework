@@ -67,7 +67,7 @@ extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const ZFClass *cls,
  *     (similar to weak in Object-C)
  * -  ZFProperty support those type only:
  *   -  ZFObject *
- *   -  all types that registered by #ZFPROPERTY_TYPE_DECLARE
+ *   -  all types that registered by #ZFTYPEID_DECLARE
  * -  ZFProperty is also reflectable,
  *   you may reflect the ZFProperty itself by #ZFClass::propertyForName,
  *   or reflect the setter and getter as ZFMethod,
@@ -150,7 +150,7 @@ extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const ZFClass *cls,
         _ZFP_ZFPROPERTY_GETTER(GetterAccessType, Type, Name) \
         /** @brief see @ref Name */ \
         _ZFP_ZFPROPERTY_SETTER_RETAIN(SetterAccessType, Type, Name) \
-        _ZFP_ZFPROPERTY_DECLARE_RETAIN(Type, ZFPropertyTypeId_ZFObject(), Name, \
+        _ZFP_ZFPROPERTY_DECLARE_RETAIN(Type, ZFTypeId_ZFObject(), Name, \
                                        InitValueOrEmpty) \
     public:
 
@@ -180,7 +180,7 @@ extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const ZFClass *cls,
         _ZFP_ZFPROPERTY_GETTER(GetterAccessType, Type, Name) \
         /** @brief see @ref Name */ \
         _ZFP_ZFPROPERTY_SETTER_ASSIGN(SetterAccessType, Type, Name) \
-        _ZFP_ZFPROPERTY_DECLARE_ASSIGN(Type, ZFPropertyTypeIdData<zftTraits<Type>::TrNoRef>::PropertyTypeId(), Name, \
+        _ZFP_ZFPROPERTY_DECLARE_ASSIGN(Type, ZFTypeId<zftTraits<Type>::TrNoRef>::TypeId(), Name, \
                                        InitValueOrEmpty) \
     public:
 
@@ -270,46 +270,74 @@ extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const ZFClass *cls,
  *   to skip the step, use #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE_NO_AUTO_INIT instead
  */
 #define ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE(Type, Name) \
-    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnInit, ZFM_EMPTY, ZFM_EXPAND( \
+    public: \
+        static zfbool _ZFP_propLExt_##Name(void) {return zftrue;} \
+    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnInit, ZFM_EMPTY)
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE_NO_AUTO_INIT(Type, Name) \
+    public: \
+        static zfbool _ZFP_propLExt_##Name(void) {return zffalse;} \
+    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnInit, ZFM_EMPTY)
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_INIT_DEFINE(OwnerClass, Type, Name) \
+    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnInit, ZFM_EMPTY, ZFM_EXPAND( \
+            OwnerClass::ClassData()->_ZFP_ZFClass_propertyAutoInitRegister(OwnerClass::_ZFP_Prop_##Name()); \
+            if(OwnerClass::_ZFP_propLExt_##Name()) \
+            { \
+                OwnerClass::ClassData()->_ZFP_ZFClass_propertyInitStepRegister(OwnerClass::_ZFP_Prop_##Name()); \
+            } \
+        ))
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(Type, Name) \
+    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, OnInit, ZFM_EMPTY, ZFM_EXPAND( \
             zfself::ClassData()->_ZFP_ZFClass_propertyAutoInitRegister(zfself::_ZFP_Prop_##Name()); \
             zfself::ClassData()->_ZFP_ZFClass_propertyInitStepRegister(zfself::_ZFP_Prop_##Name()); \
         ))
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
-#define ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE_NO_AUTO_INIT(Type, Name) \
-    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnInit, ZFM_EMPTY, ZFM_EXPAND( \
+#define ZFPROPERTY_OVERRIDE_ON_INIT_INLINE_NO_AUTO_INIT(Type, Name) \
+    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, OnInit, ZFM_EMPTY, ZFM_EXPAND( \
             zfself::ClassData()->_ZFP_ZFClass_propertyInitStepRegister(zfself::_ZFP_Prop_##Name()); \
         ))
-/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
-#define ZFPROPERTY_OVERRIDE_ON_INIT_DEFINE(OwnerClass, Type, Name) \
-    _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnInit, ZFM_EMPTY)
 
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_DEALLOC_DECLARE(Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnDealloc, ZFM_EXPAND, ZFM_EMPTY())
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnDealloc, ZFM_EXPAND)
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_DEALLOC_DEFINE(OwnerClass, Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnDealloc, ZFM_EXPAND)
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnDealloc, ZFM_EXPAND, ZFM_EMPTY())
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_DEALLOC_INLINE(Type, Name) \
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, OnDealloc, ZFM_EXPAND, ZFM_EMPTY())
 
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnVerify, ZFM_EMPTY, ZFM_EMPTY())
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnVerify, ZFM_EMPTY)
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(OwnerClass, Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnVerify, ZFM_EMPTY)
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnVerify, ZFM_EMPTY, ZFM_EMPTY())
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(Type, Name) \
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, OnVerify, ZFM_EMPTY, ZFM_EMPTY())
 
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnAttach, ZFM_EXPAND, ZFM_EMPTY())
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnAttach, ZFM_EXPAND)
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(OwnerClass, Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnAttach, ZFM_EXPAND)
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnAttach, ZFM_EXPAND, ZFM_EMPTY())
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(Type, Name) \
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, OnAttach, ZFM_EXPAND, ZFM_EMPTY())
 
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnDetach, ZFM_EXPAND, ZFM_EMPTY())
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, OnDetach, ZFM_EXPAND)
 /** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
 #define ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(OwnerClass, Type, Name) \
-     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnDetach, ZFM_EXPAND)
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, OnDetach, ZFM_EXPAND, ZFM_EMPTY())
+/** @brief see #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE */
+#define ZFPROPERTY_OVERRIDE_ON_DETACH_INLINE(Type, Name) \
+     _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, OnDetach, ZFM_EXPAND, ZFM_EMPTY())
 
 // ============================================================
 template<typename T_ZFObject>
@@ -368,7 +396,7 @@ public:
     }
 };
 
-#define _ZFP_ZFPROPERTY_DECLARE_REGISTER_RETAIN(Type, ZFPropertyTypeId_noneOrType, Name, \
+#define _ZFP_ZFPROPERTY_DECLARE_REGISTER_RETAIN(Type, ZFTypeId_noneOrType, Name, \
                                                 propertyClassOfRetainProperty) \
     public: \
         static ZFProperty *_ZFP_Prop_##Name(void) \
@@ -379,7 +407,7 @@ public:
                     , zfself::ClassData() \
                     , ZFM_TOSTRING(Name) \
                     , ZFM_TOSTRING(Type) \
-                    , ZFPropertyTypeId_noneOrType \
+                    , ZFTypeId_noneOrType \
                     , ZFMethodAccess(zfself, _ZFP_ZFPROPERTY_SETTER_NAME(Type, Name)) \
                     , ZFMethodAccess(zfself, _ZFP_ZFPROPERTY_GETTER_NAME(Type, Name)) \
                     , propertyClassOfRetainProperty \
@@ -392,13 +420,15 @@ public:
                     , _ZFP_propCbDGetInfo<zfself::PropHT_##Name> \
                     , _ZFP_propCbDValueStore<PropHT_##Name> \
                     , _ZFP_propCbDValueRelease<PropHT_##Name> \
+                    , _ZFP_propCbDSerializeFrom_get<zfself::PropVT_##Name>() \
+                    , _ZFP_propCbDSerializeTo_get<zfself::PropVT_##Name>() \
                     , _ZFP_propCbDProgressUpdate<PropHT_##Name, zfself::PropVT_##Name> \
                     , zfnull \
                     , zfself::_ZFP_propCbDel_##Name \
                 ); \
             return _propertyInfoHolder.propertyInfo; \
         }
-#define _ZFP_ZFPROPERTY_DECLARE_REGISTER_ASSIGN(Type, ZFPropertyTypeId_noneOrType, Name, \
+#define _ZFP_ZFPROPERTY_DECLARE_REGISTER_ASSIGN(Type, ZFTypeId_noneOrType, Name, \
                                                 propertyClassOfRetainProperty) \
     public: \
         static ZFProperty *_ZFP_Prop_##Name(void) \
@@ -409,7 +439,7 @@ public:
                     , zfself::ClassData() \
                     , ZFM_TOSTRING(Name) \
                     , ZFM_TOSTRING(Type) \
-                    , ZFPropertyTypeId_noneOrType \
+                    , ZFTypeId_noneOrType \
                     , ZFMethodAccess(zfself, _ZFP_ZFPROPERTY_SETTER_NAME(Type, Name)) \
                     , ZFMethodAccess(zfself, _ZFP_ZFPROPERTY_GETTER_NAME(Type, Name)) \
                     , propertyClassOfRetainProperty \
@@ -422,6 +452,8 @@ public:
                     , _ZFP_propCbDGetInfo<zfself::PropHT_##Name> \
                     , _ZFP_propCbDValueStore<PropHT_##Name> \
                     , _ZFP_propCbDValueRelease<PropHT_##Name> \
+                    , _ZFP_propCbDSerializeFrom_get<zfself::PropVT_##Name>() \
+                    , _ZFP_propCbDSerializeTo_get<zfself::PropVT_##Name>() \
                     , _ZFP_propCbDProgressUpdate<PropHT_##Name, zfself::PropVT_##Name> \
                     , zfnull \
                     , zfself::_ZFP_propCbDel_##Name \
@@ -429,7 +461,7 @@ public:
             return _propertyInfoHolder.propertyInfo; \
         }
 
-#define _ZFP_ZFPROPERTY_VALUE_DECLARE_RETAIN(Type, ZFPropertyTypeId_noneOrType, Name, \
+#define _ZFP_ZFPROPERTY_VALUE_DECLARE_RETAIN(Type, ZFTypeId_noneOrType, Name, \
                                              InitValueOrEmpty) \
     public: \
         /** @brief original type for the property */ \
@@ -522,7 +554,7 @@ public:
             return &(t->Name##_PropV._ZFP_v->valueHolder); \
         } \
     public:
-#define _ZFP_ZFPROPERTY_VALUE_DECLARE_ASSIGN(Type, ZFPropertyTypeId_noneOrType, Name, \
+#define _ZFP_ZFPROPERTY_VALUE_DECLARE_ASSIGN(Type, ZFTypeId_noneOrType, Name, \
                                              InitValueOrEmpty) \
     public: \
         /** @brief original type for the property */ \
@@ -622,18 +654,18 @@ public:
     public:
 
 // ============================================================
-#define _ZFP_ZFPROPERTY_DECLARE_RETAIN(Type, ZFPropertyTypeId_noneOrType, Name, \
+#define _ZFP_ZFPROPERTY_DECLARE_RETAIN(Type, ZFTypeId_noneOrType, Name, \
                                        InitValueOrEmpty) \
-    _ZFP_ZFPROPERTY_DECLARE_REGISTER_RETAIN(Type, ZFPropertyTypeId_noneOrType, Name, \
+    _ZFP_ZFPROPERTY_DECLARE_REGISTER_RETAIN(Type, ZFTypeId_noneOrType, Name, \
                                             zftTraits<Type>::TrType::ClassData()) \
-    _ZFP_ZFPROPERTY_VALUE_DECLARE_RETAIN(Type, ZFPropertyTypeId_noneOrType, Name, \
+    _ZFP_ZFPROPERTY_VALUE_DECLARE_RETAIN(Type, ZFTypeId_noneOrType, Name, \
                                          InitValueOrEmpty) \
     _ZFP_ZFPROPERTY_DECLARE_CALLBACK(Type, Name)
-#define _ZFP_ZFPROPERTY_DECLARE_ASSIGN(Type, ZFPropertyTypeId_noneOrType, Name, \
+#define _ZFP_ZFPROPERTY_DECLARE_ASSIGN(Type, ZFTypeId_noneOrType, Name, \
                                        InitValueOrEmpty) \
-    _ZFP_ZFPROPERTY_DECLARE_REGISTER_ASSIGN(Type, ZFPropertyTypeId_noneOrType, Name, \
+    _ZFP_ZFPROPERTY_DECLARE_REGISTER_ASSIGN(Type, ZFTypeId_noneOrType, Name, \
                                             zfnull) \
-    _ZFP_ZFPROPERTY_VALUE_DECLARE_ASSIGN(Type, ZFPropertyTypeId_noneOrType, Name, \
+    _ZFP_ZFPROPERTY_VALUE_DECLARE_ASSIGN(Type, ZFTypeId_noneOrType, Name, \
                                          InitValueOrEmpty) \
     _ZFP_ZFPROPERTY_DECLARE_CALLBACK(Type, Name)
 
@@ -726,7 +758,7 @@ public:
     public:
 
 // ============================================================
-#define _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, lifeCycleName, constFix, extraRegStep) \
+#define _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_INLINE(Type, Name, lifeCycleName, constFix, extraRegStep) \
     private: \
         zfclassNotPOD _ZFP_propLReg_##lifeCycleName##_##Name \
         { \
@@ -760,7 +792,32 @@ public:
         zffinal void _ZFP_propL_##lifeCycleName##_##Name( \
             ZF_IN zfself::PropHT_##Name constFix(const) &propertyValue, \
             ZF_IN zfself::PropHT_##Name const &propertyValueOld)
-#define _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, lifeCycleName, constFix) \
+#define _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DECLARE(Type, Name, lifeCycleName, constFix) \
+    public: \
+        zffinal void _ZFP_propL_##lifeCycleName##_##Name( \
+            ZF_IN zfself::PropHT_##Name constFix(const) &propertyValue, \
+            ZF_IN zfself::PropHT_##Name const &propertyValueOld);
+#define _ZFP_ZFPROPERTY_LIFE_CYCLE_OVERRIDE_DEFINE(OwnerClass, Type, Name, lifeCycleName, constFix, extraRegStep) \
+    ZF_STATIC_REGISTER_INIT(propL_##OwnerClass##_##lifeCycleName##_##Name) \
+    { \
+        _ZFP_ZFPropertyLifeCycleRegister( \
+            ZFM_TOSTRING(lifeCycleName), \
+            OwnerClass::_ZFP_Prop_##Name(), \
+            OwnerClass::ClassData(), \
+            a); \
+        extraRegStep \
+    } \
+    public: \
+        static void a( \
+            ZF_IN ZFObject *propertyOwnerObject, \
+            ZF_IN void *propertyValue, \
+            ZF_IN const void *propertyValueOld) \
+        { \
+            ZFCastZFObjectUnchecked(OwnerClass *, propertyOwnerObject)->OwnerClass::_ZFP_propL_##lifeCycleName##_##Name( \
+                *(constFix(const) OwnerClass::PropHT_##Name *)propertyValue, \
+                *(OwnerClass::PropHT_##Name *)propertyValueOld); \
+        } \
+    ZF_STATIC_REGISTER_END(propL_##OwnerClass##_##lifeCycleName##_##Name) \
     void OwnerClass::_ZFP_propL_##lifeCycleName##_##Name( \
         ZF_IN zfself::PropHT_##Name constFix(const) &propertyValue, \
         ZF_IN zfself::PropHT_##Name const &propertyValueOld)

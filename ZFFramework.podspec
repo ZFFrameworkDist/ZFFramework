@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZFFramework'
-  s.version          = '0.2.0'
+  s.version          = '0.3.0'
   s.summary          = 'cross-platform C++ app framework'
   s.description      = <<-DESC
 see http://ZFFramework.com for more info
@@ -31,7 +31,7 @@ for ZF_MODULE_NAME list, please refer to https://github.com/ZFFramework/ZFFramew
   s.homepage         = 'https://github.com/ZFFramework/ZFFramework'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'ZSaberLv0' => 'master@zsaber.com' }
-  s.source           = { :git => 'https://github.com/ZFFrameworkDist/ZFFramework.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/ZFFrameworkDist/ZFFramework.git', :tag => #{s.version} }
   s.ios.deployment_target = '8.0'
   s.requires_arc     = true
   s.frameworks       = 'Foundation'

@@ -96,6 +96,7 @@ public:
     ZFCoreArrayPOD<zfbool *> ZFCoreLibDestroyFlag;
     ZFClass *pimplOwner;
     zfbool classIsDynamicRegister;
+    zfautoObject classDynamicRegisterUserData;
     _ZFP_ZFObjectConstructor constructor;
     _ZFP_ZFObjectDestructor destructor;
     zfstring className;
@@ -247,6 +248,7 @@ public:
     , ZFCoreLibDestroyFlag()
     , pimplOwner(zfnull)
     , classIsDynamicRegister(zffalse)
+    , classDynamicRegisterUserData()
     , constructor(zfnull)
     , destructor(zfnull)
     , className()
@@ -398,7 +400,7 @@ void ZFClass::_ZFP_ZFClass_instanceObserverNotify(ZF_IN ZFObject *obj) const
 {
     if(!d->instanceObserverCached.empty())
     {
-        ZFListenerData listenerData(zfidentityInvalid(), obj);
+        ZFListenerData listenerData(ZFObject::EventObjectAfterAlloc(), obj);
         for(zfstlsize i = 0; i < d->instanceObserverCached.size(); ++i)
         {
             _ZFP_ZFClassPrivate::InstanceObserverData &data = *(d->instanceObserverCached[i]);
@@ -522,6 +524,10 @@ zfbool ZFClass::classIsTypeOf(ZF_IN const ZFClass *cls) const
 zfbool ZFClass::classIsDynamicRegister(void) const
 {
     return d->classIsDynamicRegister;
+}
+ZFObject *ZFClass::classDynamicRegisterUserData(void) const
+{
+    return d->classDynamicRegisterUserData;
 }
 
 zfbool ZFClass::classIsAbstract(void) const
@@ -697,20 +703,19 @@ const ZFMethod *ZFClass::methodForNameIgnoreParent(ZF_IN const zfchar *methodNam
             for(zfstlsize i = 0; i < l.size(); ++i)
             {
                 const ZFMethod *m = l[i];
-
-                #define _ZFP_ZFClass_paramLoop(N) \
-                    if(zfsIsEmpty(methodParamTypeId##N)) {return m;} \
-                    if(m->methodParamCount() <= N || !zfscmpTheSame(m->methodParamTypeIdAtIndex(N), methodParamTypeId##N)) {continue;}
-                _ZFP_ZFClass_paramLoop(0)
-                _ZFP_ZFClass_paramLoop(1)
-                _ZFP_ZFClass_paramLoop(2)
-                _ZFP_ZFClass_paramLoop(3)
-                _ZFP_ZFClass_paramLoop(4)
-                _ZFP_ZFClass_paramLoop(5)
-                _ZFP_ZFClass_paramLoop(6)
-                _ZFP_ZFClass_paramLoop(7)
-                #undef _ZFP_ZFClass_paramLoop
-                return m;
+                if(m->methodParamTypeIdIsMatch(
+                          methodParamTypeId0
+                        , methodParamTypeId1
+                        , methodParamTypeId2
+                        , methodParamTypeId3
+                        , methodParamTypeId4
+                        , methodParamTypeId5
+                        , methodParamTypeId6
+                        , methodParamTypeId7
+                    ))
+                {
+                    return m;
+                }
             }
         }
     }
@@ -973,7 +978,8 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
                                        ZF_IN _ZFP_ZFObjectDestructor destructor,
                                        ZF_IN _ZFP_ZFObjectCheckInitImplementationListCallback checkInitImplListCallback,
                                        ZF_IN zfbool isInterface,
-                                       ZF_IN zfbool classIsDynamicRegister)
+                                       ZF_IN zfbool classIsDynamicRegister,
+                                       ZF_IN ZFObject *classDynamicRegisterUserData)
 {
     zfCoreMutexLocker();
     ZFCorePointerBase *d = _ZFP_ZFClassMap.get(name);
@@ -999,6 +1005,7 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
         }
 
         cls->d->classIsDynamicRegister = classIsDynamicRegister;
+        cls->d->classDynamicRegisterUserData = classDynamicRegisterUserData;
         cls->d->constructor = constructor;
         cls->d->destructor = destructor;
 
@@ -1258,8 +1265,11 @@ void ZFClass::_ZFP_ZFClassInitFinish_allParentAndChildrenCache(ZF_IN ZFClass *cl
         clsToCheck.removeFirst();
         if(cls->d->allParent.find(clsTmp) == cls->d->allParent.end())
         {
-            cls->d->allParent[clsTmp] = zftrue;
-            clsTmp->d->allChildren[cls] = zftrue;
+            if(clsTmp != cls)
+            {
+                cls->d->allParent[clsTmp] = zftrue;
+                clsTmp->d->allChildren[cls] = zftrue;
+            }
 
             if(clsTmp->parentClass() != zfnull)
             {
@@ -1353,7 +1363,7 @@ void ZFClass::_ZFP_ZFClass_methodAndPropertyAutoRegister(void) const
                 const ZFClass *,
                 zfText("ClassData"));
 
-            if(!this->classIsTypeOf(ZFPropertyTypeWrapper::ClassData()))
+            if(!this->classIsTypeOf(ZFTypeIdWrapper::ClassData()))
             {
                 // create dummy instance to ensure static init of the object would take effect
                 // including method and property register
@@ -1508,7 +1518,8 @@ _ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *name,
                                                        ZF_IN _ZFP_ZFObjectDestructor destructor,
                                                        ZF_IN _ZFP_ZFObjectCheckInitImplementationListCallback checkInitImplListCallback,
                                                        ZF_IN_OPT zfbool isInterface /* = zffalse */,
-                                                       ZF_IN_OPT zfbool classIsDynamicRegister /* = zffalse */)
+                                                       ZF_IN_OPT zfbool classIsDynamicRegister /* = zffalse */,
+                                                       ZF_IN_OPT ZFObject *classDynamicRegisterUserData /* = zfnull */)
 : ZFCoreLibDestroyFlag(zffalse)
 , cls(zfnull)
 {
@@ -1520,7 +1531,8 @@ _ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *name,
         destructor,
         checkInitImplListCallback,
         isInterface,
-        classIsDynamicRegister);
+        classIsDynamicRegister,
+        classDynamicRegisterUserData);
 }
 _ZFP_ZFClassRegisterHolder::~_ZFP_ZFClassRegisterHolder(void)
 {

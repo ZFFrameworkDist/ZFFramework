@@ -46,16 +46,6 @@ public:
     zfbool scrollAniTimerStarted;
     zftimet scrollAniLastTime;
 
-    /*
-     * when size changed, try to move focused child to visible before reload,
-     * typical use case:
-     * 1. click a text edit view inside of a scroll view
-     * 2. on screen keyboard popup and cause client frame shrinked
-     * 3. the text edit view exceeds scroll content visible range and would be removed
-     * 4. the focus lost, cause keyboard hide, which is not expected
-     */
-    zfbool scrollSizeChangedFlag;
-
     ZFUIScroller *xScroll;
     zfbool xScrollEnable;
     zfint xScrollDragPrevPos;
@@ -94,7 +84,6 @@ protected:
     , scrollContentFrameOverrideFlag(zffalse)
     , scrollAniTimerStarted(zffalse)
     , scrollAniLastTime(0)
-    , scrollSizeChangedFlag(zffalse)
     , xScroll(zfnull)
     , xScrollEnable(zftrue)
     , xScrollDragPrevPos(0)
@@ -143,20 +132,6 @@ public:
 public:
     void scrollerUpdate(void)
     {
-        if(this->scrollSizeChangedFlag)
-        {
-            this->scrollSizeChangedFlag = zffalse;
-            for(zfindex i = 0; i < this->pimplOwner->childCount(); ++i)
-            {
-                ZFUIView *child = this->pimplOwner->childAtIndex(i);
-                if(child->viewFocusedRecursive())
-                {
-                    this->pimplOwner->scrollChildToVisible(child, zffalse);
-                    break;
-                }
-            }
-        }
-
         this->scrollContentFrameUpdate();
         this->scrollerActionRun();
     }
@@ -826,10 +801,26 @@ void ZFUIScrollView::layoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds)
     if(xScrollOwnerSize != d->xScroll->scrollOwnerSize()
         || yScrollOwnerSize != d->yScroll->scrollOwnerSize())
     {
-        d->scrollSizeChangedFlag = zftrue;
         d->xScroll->scrollOwnerSizeChanged(xScrollOwnerSize);
         d->yScroll->scrollOwnerSizeChanged(yScrollOwnerSize);
         d->scrollerUpdate();
+
+        ZFLISTENER_LOCAL(action, {
+            ZFUIScrollView *scrollView = userData->objectHolded();
+            if(scrollView == zfnull)
+            {
+                return ;
+            }
+            ZFUIView *focusedChild = scrollView->viewFocusFind();
+            if(focusedChild != zfnull)
+            {
+                scrollView->scrollChildToVisible(
+                    focusedChild,
+                    ZFUIMarginMake(ZFUIGlobalStyle::DefaultStyle()->itemMargin()),
+                    zffalse);
+            }
+        })
+        ZFThreadTaskRequest(action, this->objectHolder());
     }
 
     d->scrollThumbUpdate();
@@ -979,45 +970,35 @@ static void _ZFP_ZFUIScrollView_scrollChildToVisible(ZF_OUT zfint &offset,
                                                      ZF_IN zfint childStart,
                                                      ZF_IN zfint childLength,
                                                      ZF_IN zfint selfStart,
-                                                     ZF_IN zfint selfLength)
+                                                     ZF_IN zfint selfLength,
+                                                     ZF_IN zfint contentOffset,
+                                                     ZF_IN zfint contentSize,
+                                                     ZF_IN zfint marginHead,
+                                                     ZF_IN zfint marginTail)
 {
-    zfint childTail = childStart + childLength;
-    zfint selfTail = selfStart + selfLength;
-    if(childLength > selfLength)
+    if(childLength + marginHead + marginTail >= selfLength)
     {
-        if(childStart < selfStart)
-        {
-            if(childTail > selfTail)
-            {
-                if(zfmAbs(childStart - selfStart) <= zfmAbs(childTail - selfTail))
-                {
-                    offset = selfStart - childStart;
-                }
-                else
-                {
-                    offset = selfTail - childTail;
-                }
-            }
-            else
-            {
-                offset = selfTail - childTail;
-            }
-        }
-        else
-        {
-            offset = selfStart - childStart;
-        }
+        // offset = selfStart + marginHead + (selfLength - marginHead - marginTail) / 2 - (childStart + childLength / 2);
+        offset = (2 * selfStart + marginHead + selfLength - marginTail - 2 * childStart - childLength) / 2;
     }
     else
     {
-        if(childStart < selfStart)
+        if(childStart < selfStart + marginHead)
         {
-            offset = selfStart - childStart;
+            offset = selfStart + marginHead - childStart;
         }
-        else if(childTail > selfTail)
+        else if(childStart + childLength > selfStart + selfLength - marginTail)
         {
-            offset = selfTail - childTail;
+            offset = (selfStart + selfLength - marginTail) - (childStart + childLength);
         }
+    }
+    if(contentOffset + offset > 0)
+    {
+        offset = -contentOffset;
+    }
+    if(contentSize >= selfLength && contentOffset + offset + contentSize < selfLength)
+    {
+        offset = selfLength - contentOffset - contentSize;
     }
 }
 ZFMETHOD_DEFINE_0(ZFUIScrollView, void, scrollToFitRange)
@@ -1026,8 +1007,9 @@ ZFMETHOD_DEFINE_0(ZFUIScrollView, void, scrollToFitRange)
     d->yScroll->scrollToFitRange();
     d->scrollerUpdate();
 }
-ZFMETHOD_DEFINE_2(ZFUIScrollView, void, scrollChildToVisible,
+ZFMETHOD_DEFINE_3(ZFUIScrollView, void, scrollChildToVisible,
                   ZFMP_IN(ZFUIView *, child),
+                  ZFMP_IN_OPT(const ZFUIMargin &, margin, ZFUIMarginMake(ZFUIGlobalStyle::DefaultStyle()->itemMargin())),
                   ZFMP_IN_OPT(zfbool, scrollWithAni, zftrue))
 {
     if(child == zfnull)
@@ -1040,8 +1022,19 @@ ZFMETHOD_DEFINE_2(ZFUIScrollView, void, scrollChildToVisible,
 
     ZFUIRect selfRect = ZFUIViewPositionOnScreen(this);
     ZFUIRect childRect = ZFUIViewPositionOnScreen(child);
-    _ZFP_ZFUIScrollView_scrollChildToVisible(offsetX, childRect.point.x, childRect.size.width, selfRect.point.x, selfRect.size.width);
-    _ZFP_ZFUIScrollView_scrollChildToVisible(offsetY, childRect.point.y, childRect.size.height, selfRect.point.y, selfRect.size.height);
+    const ZFUIRect &contentFrame = this->scrollContentFrame();
+    _ZFP_ZFUIScrollView_scrollChildToVisible(
+        offsetX,
+        childRect.point.x, childRect.size.width,
+        selfRect.point.x, selfRect.size.width,
+        contentFrame.point.x, contentFrame.size.width,
+        margin.left, margin.right);
+    _ZFP_ZFUIScrollView_scrollChildToVisible(
+        offsetY,
+        childRect.point.y, childRect.size.height,
+        selfRect.point.y, selfRect.size.height,
+        contentFrame.point.y, contentFrame.size.height,
+        margin.top, margin.bottom);
 
     if(offsetX != 0 || offsetY != 0)
     {
