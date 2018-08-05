@@ -31,14 +31,14 @@ public:
     ZFObject *invokerObject; /**< @brief data to hold params for #ZFMethodGenericInvoker */
     zfstring errorHint; /**< @brief data to hold params for #ZFMethodGenericInvoker */
     zfautoObject ret; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param0; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param1; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param2; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param3; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param4; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param5; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param6; /**< @brief data to hold params for #ZFMethodGenericInvoker */
-    ZFObject *param7; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param0; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param1; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param2; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param3; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param4; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param5; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param6; /**< @brief data to hold params for #ZFMethodGenericInvoker */
+    zfautoObject param7; /**< @brief data to hold params for #ZFMethodGenericInvoker */
 protected:
     /** @cond ZFPrivateDoc */
     ZFDynamicMethodData(void)
@@ -48,14 +48,14 @@ protected:
     , invokerObject(zfnull)
     , errorHint()
     , ret()
-    , param0(zfnull)
-    , param1(zfnull)
-    , param2(zfnull)
-    , param3(zfnull)
-    , param4(zfnull)
-    , param5(zfnull)
-    , param6(zfnull)
-    , param7(zfnull)
+    , param0()
+    , param1()
+    , param2()
+    , param3()
+    , param4()
+    , param5()
+    , param6()
+    , param7()
     {
     }
     /** @endcond */
@@ -121,7 +121,7 @@ zfclassFwd _ZFP_ZFDynamicPrivate;
  * usage:
  * @code
  *   ZFDynamic()
- *       .classBegin(className [, parent, userData])
+ *       .classBegin(classNameFull [, parent, userData])
  *           .event(eventName)
  *           .method(callback, userData, returnTypeId, methodName [, paramTypeId0, ...])
  *           .property(typeIdOrRetainClass, propertyName [, propertyInitValue])
@@ -144,24 +144,66 @@ zfclassFwd _ZFP_ZFDynamicPrivate;
  * you may store the returned ZFDynamic object,
  * and use #removeAll to remove all registered items at once,
  * or, use the util method #removeAllOnEvent to automatically
- * remove when specified event notified to #ZFGlobalEventCenter
+ * remove when specified event notified to #ZFGlobalEventCenter\n
+ * to make it more convenient for script language,
+ * you may also use #regTag to make the registration looks like singleton registration
  */
 zfclassLikePOD ZF_ENV_EXPORT ZFDynamic
 {
 public:
-    /** @cond ZFPrivateDoc */
+    /** @brief main constructor */
     ZFDynamic(void);
+    /** @brief construct with #regTag */
+    ZFDynamic(ZF_IN const zfchar *regTag);
+
+    /** @cond ZFPrivateDoc */
     ZFDynamic(ZF_IN const ZFDynamic &ref);
+    ~ZFDynamic(void);
     ZFDynamic &operator = (ZF_IN const ZFDynamic &ref);
     zfbool operator == (ZF_IN const ZFDynamic &ref) const;
     zfbool operator != (ZF_IN const ZFDynamic &ref) const {return !this->operator == (ref);}
     /** @endcond */
 
 public:
+    /**
+     * @brief util method to export all symbols to a tag file
+     *
+     * the tag file contains all of these in plain text format, one line for each:
+     * -  class name
+     * -  method namespace
+     * -  method name (including property)
+     * -  type id name
+     *
+     * output ensured unique, while order are not ensured\n
+     * anything that starts with "_ZFP_" would be ignored\n
+     * \n
+     * this is useful to use ZFFramework in some script language
+     * which has no semantic completion,
+     * so that you can use keyword completion by using the tag file
+     */
+    static void exportTag(ZF_IN_OUT const ZFOutput &output);
+
+public:
+    /**
+     * @brief util to make the registration able to be called more than once
+     *
+     * by default, dynamic register would fail if contents already exists,
+     * that's not very convenient for script languages\n
+     * to solve this, you may use this method to mark the registration,
+     * which would automatically unregister old ones if exists,
+     * identified by tha regTag
+     */
+    ZFDynamic &regTag(ZF_IN const zfchar *regTag);
+    /** @brief see #regTag */
+    const zfchar *regTagGet(void) const;
+
+public:
     /** @brief see #ZFDynamic */
     void removeAll(void);
     /** @brief see #ZFDynamic */
     ZFDynamic &removeAllOnEvent(ZF_IN zfidentity eventId = ZFGlobalEvent::EventZFDynamicRemoveAll());
+    /** @brief see #ZFDynamic */
+    zfidentity removeAllOnEventGet(void) const;
     /** @brief see #ZFDynamic */
     const ZFCoreArrayPOD<const ZFClass *> &allClass(void) const;
     /** @brief see #ZFDynamic */
@@ -175,12 +217,12 @@ public:
 
 public:
     /** @brief see #ZFDynamic */
-    ZFDynamic &classBegin(ZF_IN const zfchar *className,
+    ZFDynamic &classBegin(ZF_IN const zfchar *classNameFull,
                           ZF_IN_OPT const ZFClass *parentClass = ZFObject::ClassData(),
                           ZF_IN_OPT ZFObject *classDynamicRegisterUserData = zfnull);
     /** @brief see #ZFDynamic */
-    ZFDynamic &classBegin(ZF_IN const zfchar *className,
-                          ZF_IN const zfchar *parentClassName,
+    ZFDynamic &classBegin(ZF_IN const zfchar *classNameFull,
+                          ZF_IN const zfchar *parentClassNameFull,
                           ZF_IN_OPT ZFObject *classDynamicRegisterUserData = zfnull);
     /** @brief see #ZFDynamic */
     ZFDynamic &classBegin(ZF_IN const ZFClass *cls);
@@ -196,7 +238,7 @@ public:
 
 public:
     /** @brief see #ZFDynamic */
-    ZFDynamic &NSBegin(ZF_IN_OPT const zfchar *methodNamespace = ZFMethodFuncNamespaceGlobal);
+    ZFDynamic &NSBegin(ZF_IN_OPT const zfchar *methodNamespace = ZF_NAMESPACE_GLOBAL_NAME);
     /** @brief see #ZFDynamic */
     ZFDynamic &NSEnd(void);
 
@@ -219,7 +261,7 @@ public:
      * `YourClassName::EventYourEvent` would be registered,
      * otherwise, `YourNamespace::EventYourEvent` would be registered\n
      * registered event would include:
-     * -  an event registered by #ZFIdMapRegister
+     * -  an event registered by #ZFIdMapDynamicRegister
      * -  a #ZFMethod to access the event
      */
     ZFDynamic &event(ZF_IN const zfchar *eventName);
@@ -272,11 +314,15 @@ public:
      */
     ZFDynamic &property(ZF_IN const zfchar *propertyTypeId,
                         ZF_IN const zfchar *propertyName,
-                        ZF_IN_OPT ZFObject *propertyInitValue = zfnull);
+                        ZF_IN_OPT ZFObject *propertyInitValue = zfnull,
+                        ZF_IN_OPT ZFMethodPrivilegeType setterPrivilegeType = ZFMethodPrivilegeTypePublic,
+                        ZF_IN_OPT ZFMethodPrivilegeType getterPrivilegeType = ZFMethodPrivilegeTypePublic);
     /** @brief see #ZFDynamic */
     ZFDynamic &property(ZF_IN const ZFClass *propertyClassOfRetainProperty,
                         ZF_IN const zfchar *propertyName,
-                        ZF_IN_OPT ZFObject *propertyInitValue = zfnull);
+                        ZF_IN_OPT ZFObject *propertyInitValue = zfnull,
+                        ZF_IN_OPT ZFMethodPrivilegeType setterPrivilegeType = ZFMethodPrivilegeTypePublic,
+                        ZF_IN_OPT ZFMethodPrivilegeType getterPrivilegeType = ZFMethodPrivilegeTypePublic);
     /** @brief see #ZFDynamic */
     ZFDynamic &property(ZF_IN const ZFPropertyDynamicRegisterParam &param);
 

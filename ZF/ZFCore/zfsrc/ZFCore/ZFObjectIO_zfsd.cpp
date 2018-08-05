@@ -11,10 +11,22 @@
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFOBJECTIO_DEFINE(zfsd, zfText("zfsd"), {
-        return ZFObjectFromInput(ret, input, outErrorHint);
+ZFOBJECTIO_DEFINE(zfsd, {
+        return ZFObjectIOImplCheck(pathInfo, zfText("zfsd"));
     }, {
-        return ZFObjectToOutput(output, obj, outErrorHint);
+        ZFSerializableData data;
+        if(!ZFSerializableDataFromInput(data, input, outErrorHint))
+        {
+            return zffalse;
+        }
+        return ZFObjectFromData(ret, data, outErrorHint);
+    }, {
+        ZFSerializableData data;
+        if(!ZFObjectToData(data, obj, outErrorHint))
+        {
+            return zffalse;
+        }
+        return ZFSerializableDataToOutput(output, data, outErrorHint);
     })
 
 ZF_NAMESPACE_GLOBAL_END

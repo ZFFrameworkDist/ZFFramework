@@ -212,9 +212,9 @@ public:
     /**
      * @brief text edit's cursor position
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfindexRange, textSelectRange, zfindexRangeZero())
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfindexRange, textSelectRange)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfindexRange, textSelectRange)
+    ZFPROPERTY_ASSIGN_WITH_INIT(ZFIndexRange, textSelectRange, ZFIndexRangeZero())
+    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(ZFIndexRange, textSelectRange)
+    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFIndexRange, textSelectRange)
 
     /**
      * @brief whether #textEditNotifyConfirm when lost focus, true by default
@@ -256,12 +256,12 @@ public:
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, textColor)
 
     /**
-     * @brief text shadow color, #ZFUIColorTransparent by default, use transparent to disable text shadow
+     * @brief text shadow color, #ZFUIColorZero by default, use transparent to disable text shadow
      *
      * note that implementation may have no text shadow support
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, textShadowColor,
-                                ZFUIColorTransparent())
+                                ZFUIColorZero())
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, textShadowColor)
 
     /**

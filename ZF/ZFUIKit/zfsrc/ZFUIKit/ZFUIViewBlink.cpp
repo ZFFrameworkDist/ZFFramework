@@ -15,8 +15,10 @@
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, ViewBlinkOn)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, ViewBlinkOff)
+ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(ViewBlinkOn)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(ViewBlinkOff)
+ZF_NAMESPACE_END(ZFGlobalEvent)
 
 // ============================================================
 #define _ZFP_ZFUIViewBlink_DEBUG_noAni 0
@@ -65,7 +67,7 @@ ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewBlink,
                        ZFMP_IN(ZFUIView *, view),
                        ZFMP_IN_OPT(const ZFUIViewBlinkParam &, blinkParam, ZFUIViewBlinkParam()))
 {
-    if(blinkParam.blinkCount() <= 0 || blinkParam.blinkDuration() <= 0)
+    if(blinkParam.blinkCount() <= 0)
     {
         return ;
     }
@@ -77,7 +79,7 @@ ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewBlink,
 ZFMETHOD_FUNC_DEFINE_INLINE_4(void, ZFUIViewBlink,
                               ZFMP_IN(ZFUIView *, view),
                               ZFMP_IN(ZFUIImage *, blinkImage),
-                              ZFMP_IN_OPT(zftimet, blinkDuration, ZFUIGlobalStyle::DefaultStyle()->aniDurationNormal()),
+                              ZFMP_IN_OPT(zftimet, blinkDuration, zftimetZero()),
                               ZFMP_IN_OPT(zfindex, blinkCount, 1))
 
 // ============================================================
@@ -229,7 +231,7 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewBlinkInitSetting, ZFLevelZFFramewo
 {
     (void)ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder);
     #if _ZFP_ZFUIViewBlink_DEBUG_color
-        ZFUIViewBlinkImageDefaultSet(ZFUIImageLoadFromColor(ZFUIColorMake(255, 255, 0, 0)));
+        ZFUIViewBlinkImageDefaultSet(ZFUIImageLoadFromColor(ZFUIColorMake(255, 0, 0)));
     #else
         ZFUIViewBlinkImageDefaultSet(zfRes(zfText("ZFUIKit/ZFUIViewBlinkImage.xml")));
     #endif

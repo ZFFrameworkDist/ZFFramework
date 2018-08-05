@@ -123,7 +123,7 @@ public:
             (jint)textEditKeyboardReturnType);
     }
 
-    virtual void textSelectRange(ZF_IN ZFUITextEdit *textEdit, ZF_OUT zfindexRange &textSelectRange)
+    virtual void textSelectRange(ZF_IN ZFUITextEdit *textEdit, ZF_OUT ZFIndexRange &textSelectRange)
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
         static jmethodID jmId_start = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, zfTextA("native_textSelectRange_start"),
@@ -139,7 +139,7 @@ public:
         textSelectRange.count = JNIUtilCallStaticIntMethod(jniEnv, this->jclsOwner, jmId_count,
             ZFCastStatic(jobject, textEdit->nativeImplView()));
     }
-    virtual void textSelectRangeSet(ZF_IN ZFUITextEdit *textEdit, ZF_IN const zfindexRange &textSelectRange)
+    virtual void textSelectRangeSet(ZF_IN ZFUITextEdit *textEdit, ZF_IN const ZFIndexRange &textSelectRange)
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
         static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, zfTextA("native_textSelectRangeSet"),
@@ -205,7 +205,7 @@ public:
             ).c_str());
         JNIUtilCallStaticVoidMethod(jniEnv, this->jclsOwner, jmId,
             ZFCastStatic(jobject, textEdit->nativeImplView()),
-            ZFCastStatic(jint, textColor));
+            ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorToColor(textColor));
     }
     virtual void textShadowColorSet(ZF_IN ZFUITextEdit *textEdit,
                                     ZF_IN ZFUIColor const &textShadowColor)
@@ -218,7 +218,7 @@ public:
             ).c_str());
         JNIUtilCallStaticVoidMethod(jniEnv, this->jclsOwner, jmId,
             ZFCastStatic(jobject, textEdit->nativeImplView()),
-            ZFCastStatic(jint, textShadowColor));
+            ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorToColor(textShadowColor));
     }
     virtual void textShadowOffsetSet(ZF_IN ZFUITextEdit *textEdit,
                                      ZF_IN ZFUISize const &textShadowOffset)

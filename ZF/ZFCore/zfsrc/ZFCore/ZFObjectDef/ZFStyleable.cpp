@@ -49,6 +49,11 @@ void ZFStyleable::styleableCopyFrom(ZF_IN ZFStyleable *anotherStyleable)
     {
         return ;
     }
+    if(this->styleKey() == zfnull)
+    {
+        this->styleKeySet(anotherStyleable->styleKey());
+    }
+
     _ZFP_I_ZFStyleable_PropertyTypeHolder *holderTmp = this->_ZFP_ZFStyleable_getPropertyTypeHolder();
     const ZFClass *thisCls = this->classData();
     const ZFClass *anotherCls = anotherStyleable->classData();
@@ -124,6 +129,10 @@ void ZFStyleable::styleableOnCopyPropertyFrom(ZF_IN ZFStyleable *anotherStyleabl
                                               ZF_IN const ZFProperty *property,
                                               ZF_IN ZFStyleable::PropertyType propertyType)
 {
+    if(this->styleKey(property) == zfnull)
+    {
+        this->styleKeySet(property, anotherStyleable->styleKey(property));
+    }
     switch(propertyType)
     {
         case ZFStyleable::PropertyTypeNormal:
@@ -133,8 +142,10 @@ void ZFStyleable::styleableOnCopyPropertyFrom(ZF_IN ZFStyleable *anotherStyleabl
             break;
         case ZFStyleable::PropertyTypeStyleable:
         {
-            ZFStyleable *selfPropertyValue = ((const zfautoObject *)property->callbackValueGet(property, this->toObject()))->to<ZFStyleable *>();
-            ZFStyleable *anotherPropertyValue = ((const zfautoObject *)property->callbackValueGet(property, anotherStyleable->toObject()))->to<ZFStyleable *>();
+            ZFPropertyCallbackValueGetHolder _valueGetHolder(property, this->toObject());
+            ZFPropertyCallbackValueGetHolder _valueGetHolderRef(property, anotherStyleable->toObject());
+            ZFStyleable *selfPropertyValue = *(const zfautoObject *)_valueGetHolder.value();
+            ZFStyleable *anotherPropertyValue = *(const zfautoObject *)_valueGetHolderRef.value();
             if(selfPropertyValue != zfnull && anotherPropertyValue != zfnull)
             {
                 selfPropertyValue->styleableCopyFrom(anotherPropertyValue);
@@ -143,8 +154,10 @@ void ZFStyleable::styleableOnCopyPropertyFrom(ZF_IN ZFStyleable *anotherStyleabl
             break;
         case ZFStyleable::PropertyTypeCopyable:
         {
-            ZFCopyable *selfPropertyValue = ((const zfautoObject *)property->callbackValueGet(property, this->toObject()))->to<ZFCopyable *>();
-            ZFObject *anotherPropertyValue = ((const zfautoObject *)property->callbackValueGet(property, anotherStyleable->toObject()))->toObject();
+            ZFPropertyCallbackValueGetHolder _valueGetHolder(property, this->toObject());
+            ZFPropertyCallbackValueGetHolder _valueGetHolderRef(property, anotherStyleable->toObject());
+            ZFCopyable *selfPropertyValue = *(const zfautoObject *)_valueGetHolder.value();
+            ZFObject *anotherPropertyValue = *(const zfautoObject *)_valueGetHolderRef.value();
             if(selfPropertyValue != zfnull && anotherPropertyValue != zfnull)
             {
                 selfPropertyValue->copyFrom(anotherPropertyValue);
@@ -162,7 +175,7 @@ _ZFP_I_ZFStyleable_PropertyTypeHolder *ZFStyleable::_ZFP_ZFStyleable_getProperty
 {
     zfCoreMutexLocker();
     _ZFP_I_ZFStyleable_PropertyTypeHolder *holder = this->classData()->classTagGet<_ZFP_I_ZFStyleable_PropertyTypeHolder *>(
-        _ZFP_I_ZFStyleable_PropertyTypeHolder::ClassData()->className());
+        _ZFP_I_ZFStyleable_PropertyTypeHolder::ClassData()->classNameFull());
     if(holder == zfnull)
     {
         zflockfree_zfblockedAlloc(_ZFP_I_ZFStyleable_PropertyTypeHolder, holderTmp);
@@ -190,9 +203,9 @@ _ZFP_I_ZFStyleable_PropertyTypeHolder *ZFStyleable::_ZFP_ZFStyleable_getProperty
 
         holder = holderTmp;
         this->classData()->classTagSet(
-            _ZFP_I_ZFStyleable_PropertyTypeHolder::ClassData()->className(),
+            _ZFP_I_ZFStyleable_PropertyTypeHolder::ClassData()->classNameFull(),
             holderTmp);
-        this->ClassData()->classDataChangeAutoRemoveTagAdd(_ZFP_I_ZFStyleable_PropertyTypeHolder::ClassData()->className());
+        this->ClassData()->classDataChangeAutoRemoveTagAdd(_ZFP_I_ZFStyleable_PropertyTypeHolder::ClassData()->classNameFull());
     }
     return holder;
 }
@@ -244,14 +257,14 @@ public:
         ZFStyleable *defaultStyle = listenerData.sender->to<ZFStyleable *>()->defaultStyle();
         zfCoreAssert(defaultStyle != zfnull);
         _ZFP_ZFStyleDefaultApplyAutoCopyTaskData *taskData = defaultStyle->toObject()
-            ->tagGet<_ZFP_ZFStyleDefaultApplyAutoCopyTaskData *>(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->className());
+            ->tagGet<_ZFP_ZFStyleDefaultApplyAutoCopyTaskData *>(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->classNameFull());
         zfCoreAssert(taskData != zfnull);
 
         taskData->styles.removeElement(listenerData.sender->objectHolder());
 
         if(taskData->styles.isEmpty())
         {
-            defaultStyle->toObject()->tagRemove(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->className());
+            defaultStyle->toObject()->tagRemove(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->classNameFull());
             defaultStyle->toObject()->observerRemove(ZFObject::EventObjectPropertyValueOnUpdate(),
                 ZF_GLOBAL_INITIALIZER_INSTANCE(ZFStyleDefaultApplyAutoCopyDataHolder)->defaultStyleOnChangeListener);
         }
@@ -263,7 +276,7 @@ public:
         const ZFProperty *property = listenerData.param0->to<ZFPointerHolder *>()->holdedDataPointer<const ZFProperty *>();
         ZFStyleable *defaultStyle = listenerData.sender->to<ZFStyleable *>();
         _ZFP_ZFStyleDefaultApplyAutoCopyTaskData *taskData = defaultStyle->toObject()
-            ->tagGet<_ZFP_ZFStyleDefaultApplyAutoCopyTaskData *>(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->className());
+            ->tagGet<_ZFP_ZFStyleDefaultApplyAutoCopyTaskData *>(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->classNameFull());
 
         ZFCoreArrayPOD<ZFObjectHolder *> styles;
         styles.copyFrom(taskData->styles);
@@ -283,11 +296,11 @@ void ZFStyleDefaultApplyAutoCopy(ZF_IN ZFStyleable *style)
         if(defaultStyle != zfnull)
         {
             _ZFP_ZFStyleDefaultApplyAutoCopyTaskData *taskData = defaultStyle->toObject()
-                ->tagGet<_ZFP_ZFStyleDefaultApplyAutoCopyTaskData *>(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->className());
+                ->tagGet<_ZFP_ZFStyleDefaultApplyAutoCopyTaskData *>(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->classNameFull());
             if(taskData == zfnull)
             {
                 taskData = zfAlloc(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData);
-                defaultStyle->toObject()->tagSet(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->className(), taskData);
+                defaultStyle->toObject()->tagSet(_ZFP_ZFStyleDefaultApplyAutoCopyTaskData::ClassData()->classNameFull(), taskData);
                 zfRelease(taskData);
 
                 defaultStyle->toObject()->observerAdd(ZFObject::EventObjectPropertyValueOnUpdate(),
@@ -316,6 +329,29 @@ ZF_GLOBAL_INITIALIZER_DESTROY(ZFStyleCleanup)
 }
 ZF_GLOBAL_INITIALIZER_END(ZFStyleCleanup)
 
+static zfstlmap<zfstlstringZ, _ZFP_ZFStyleDecoder> &_ZFP_ZFStyleDecoderMap(void)
+{
+    static zfstlmap<zfstlstringZ, _ZFP_ZFStyleDecoder> d;
+    return d;
+}
+void _ZFP_ZFStyleDecoderRegister(ZF_IN const zfchar *registerSig,
+                                 ZF_IN _ZFP_ZFStyleDecoder decoder)
+{
+    zfCoreMutexLocker();
+    zfstlmap<zfstlstringZ, _ZFP_ZFStyleDecoder> &m = _ZFP_ZFStyleDecoderMap();
+    zfCoreAssert(registerSig != zfnull && decoder != zfnull);
+    zfCoreAssertWithMessageTrim(m.find(registerSig) == m.end(),
+        zfTextA("[ZFSTYLE_DECODER_DEFINE] %s already registered"),
+        registerSig);
+    m[registerSig] = decoder;
+}
+void _ZFP_ZFStyleDecoderUnregister(ZF_IN const zfchar *registerSig)
+{
+    zfCoreMutexLocker();
+    zfstlmap<zfstlstringZ, _ZFP_ZFStyleDecoder> &m = _ZFP_ZFStyleDecoderMap();
+    m.erase(registerSig);
+}
+
 void ZFStyleSet(ZF_IN const zfchar *styleKey, ZF_IN ZFStyleable *styleValue)
 {
     if(styleValue)
@@ -325,9 +361,24 @@ void ZFStyleSet(ZF_IN const zfchar *styleKey, ZF_IN ZFStyleable *styleValue)
         zfCoreMutexUnlock();
     }
 }
-ZFStyleable *ZFStyleGet(ZF_IN const zfchar *styleKey)
+zfautoObject ZFStyleGet(ZF_IN const zfchar *styleKey)
 {
+    if(zfsIsEmpty(styleKey))
+    {
+        return zfnull;
+    }
+
     zfCoreMutexLocker();
+    zfautoObject ret;
+    zfstlmap<zfstlstringZ, _ZFP_ZFStyleDecoder> &m = _ZFP_ZFStyleDecoderMap();
+    for(zfstlmap<zfstlstringZ, _ZFP_ZFStyleDecoder>::iterator it = m.begin(); it != m.end(); ++it)
+    {
+        if(it->second(ret, styleKey))
+        {
+            return ret;
+        }
+    }
+
     zfstlmap<zfstlstringZ, zfautoObject> &d = _ZFP_ZFStyleHolder();
     zfstlmap<zfstlstringZ, zfautoObject>::iterator it = d.find(styleKey);
     if(it != d.end())
@@ -377,8 +428,10 @@ void ZFStyleChangeEnd()
     }
 }
 
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, ZFStyleOnChange)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, ZFStyleOnInvalid)
+ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFStyleOnChange)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFStyleOnInvalid)
+ZF_NAMESPACE_END(ZFGlobalEvent)
 
 static zfbool _ZFP_ZFStyleInvalidCheckDisableFlag = zffalse;
 void ZFStyleInvalidCheckDisable(ZF_IN zfbool enable)
@@ -438,7 +491,7 @@ ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFStyleable, const zfchar *, styleKey
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(void, ZFStyleDefaultApplyAutoCopy, ZFMP_IN(ZFStyleable *, styleValue))
 
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFStyleSet, ZFMP_IN(const zfchar *, styleKey), ZFMP_IN(ZFStyleable *, styleValue))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFStyleable *, ZFStyleGet, ZFMP_IN(const zfchar *, styleKey))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfautoObject, ZFStyleGet, ZFMP_IN(const zfchar *, styleKey))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFStyleGetAll, ZFMP_IN_OUT(ZFCoreArrayPOD<const zfchar *> &, styleKey), ZFMP_IN_OUT(ZFCoreArrayPOD<ZFStyleable *>, styleValue))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(void, ZFStyleRemoveAll)
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(void, ZFStyleChangeBegin)

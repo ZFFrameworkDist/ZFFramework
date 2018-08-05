@@ -102,7 +102,7 @@ public:
      */
     ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
                               void, sleep,
-                              ZFMP_IN(const zftimet &, miliSecs))
+                              ZFMP_IN(zftimet, miliSecs))
 
     // ============================================================
     // thread instance method
@@ -182,7 +182,7 @@ public:
      *         false if wait timeout or error
      */
     ZFMETHOD_DECLARE_1(zfbool, threadWait,
-                       ZFMP_IN(const zftimet &, miliSecs))
+                       ZFMP_IN(zftimet, miliSecs))
 
     /**
      * @brief return true if current thread is main thread
@@ -216,7 +216,7 @@ protected:
      */
     ZFMETHOD_DECLARE_DETAIL_2(protected, ZFMethodTypeVirtual,
                               void, threadOnRun,
-                              ZFMP_IN(const ZFListenerData &, listenerData),
+                              ZFMP_IN_OUT(ZFListenerData &, listenerData),
                               ZFMP_IN(ZFObject *, userData))
 
 public:

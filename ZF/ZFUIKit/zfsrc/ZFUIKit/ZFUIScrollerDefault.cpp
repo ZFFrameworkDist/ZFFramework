@@ -188,7 +188,7 @@ public:
                 : this->calcBounceTailFromContentOffset(contentOffset));
     }
 
-    zfint calcScrollOffset(ZF_IN zfint dragOffset, ZF_IN const zftimet &timeOffset)
+    zfint calcScrollOffset(ZF_IN zfint dragOffset, ZF_IN zftimet timeOffset)
     {
         zfint offset = 0;
         if(timeOffset > 0)
@@ -239,7 +239,7 @@ public:
 
     // ============================================================
     // aniByPoint logic
-    void aniByPointUpdate(ZF_IN const zftimet &curTime)
+    void aniByPointUpdate(ZF_IN zftimet curTime)
     {
         if(curTime >= this->aniByPointStopTime)
         {
@@ -271,7 +271,7 @@ public:
         {
             return _ZFP_ZFUIScrollerDefault_aniByPointDurationMax;
         }
-        zftimet ret = (zftimet)(ZFBezierLinear().y_by_x((zft_zffloat)offset / _ZFP_ZFUIScrollerDefault_scrollAniBounceDragMax)
+        zftimet ret = (zft_zftimet)(ZFBezierLinear().y_by_x((zft_zffloat)offset / _ZFP_ZFUIScrollerDefault_scrollAniBounceDragMax)
             * _ZFP_ZFUIScrollerDefault_aniByPointDurationMax);
         if(ret < _ZFP_ZFUIScrollerDefault_aniByPointDurationMin)
         {
@@ -282,9 +282,9 @@ public:
             return ret;
         }
     }
-    void aniByPointStart(ZF_IN zfint stopPos, ZF_IN_OPT zftimet duration = (zftimet)-1)
+    void aniByPointStart(ZF_IN zfint stopPos, ZF_IN_OPT zftimet duration = zftimetZero())
     {
-        if(duration < 0)
+        if(duration <= 0)
         {
             duration = this->aniByPointDurationForOffset(stopPos - this->contentOffset);
         }
@@ -373,7 +373,7 @@ public:
         this->scrollAniNotifyStart();
         this->aniBySpeedLastTime = this->aniLastTime;
     }
-    void aniBySpeedUpdate(ZF_IN const zftimet &curTime)
+    void aniBySpeedUpdate(ZF_IN zftimet curTime)
     {
         zfint v = zfmAbs(this->aniBySpeedCurSpeed);
         zftimet t = (curTime - this->aniBySpeedLastTime);
@@ -508,7 +508,7 @@ private:
     }
     zftimet aniBySpeed_calcTime(ZF_IN zfint v, ZF_IN zfint offset, ZF_IN zfint a)
     {
-        zftimet t = (zftimet)((-v + sqrt((double)((long)v * v + (long)2 * a * offset))) * 1000 / a);
+        zftimet t = (zft_zftimet)((-v + sqrt((double)((long)v * v + (long)2 * a * offset))) * 1000 / a);
         return zfmMax((zftimet)0, t);
     }
 
@@ -577,7 +577,7 @@ void ZFUIScrollerDefault::objectOnDealloc(void)
     zfsuper::objectOnDealloc();
 }
 
-void ZFUIScrollerDefault::scrollOwnerSizeChanged(ZF_IN const zfint &ownerSize)
+void ZFUIScrollerDefault::scrollOwnerSizeChanged(ZF_IN zfint ownerSize)
 {
     d->ownerSize = ownerSize;
     d->contentBounceTailFixUpdate();
@@ -704,7 +704,7 @@ zfint ZFUIScrollerDefault::scrollContentSize(void)
 }
 
 void ZFUIScrollerDefault::scrollOnDragBegin(ZF_IN zfint mousePos,
-                                            ZF_IN const zftimet &mouseTime)
+                                            ZF_IN zftimet mouseTime)
 {
     d->scrollAniNotifyStop();
 
@@ -718,7 +718,7 @@ void ZFUIScrollerDefault::scrollOnDragBegin(ZF_IN zfint mousePos,
     d->aniByPointStopPos = mousePos;
 }
 void ZFUIScrollerDefault::scrollOnDrag(ZF_IN zfint mousePos,
-                                       ZF_IN const zftimet &mouseTime)
+                                       ZF_IN zftimet mouseTime)
 {
     d->scrollDragPrevPrevPos = d->scrollDragPrevPos;
     d->scrollDragPrevPrevTime = d->scrollDragPrevTime;
@@ -765,7 +765,7 @@ void ZFUIScrollerDefault::scrollOnDrag(ZF_IN zfint mousePos,
         d->contentOffset = offset;
     }
 }
-void ZFUIScrollerDefault::scrollOnDragEnd(ZF_IN const zftimet &mouseTime,
+void ZFUIScrollerDefault::scrollOnDragEnd(ZF_IN zftimet mouseTime,
                                           ZF_IN zfbool needScrollAni)
 {
     if(!needScrollAni)
@@ -786,7 +786,7 @@ void ZFUIScrollerDefault::scrollOnDragEnd(ZF_IN const zftimet &mouseTime,
     d->scrollAlignToPageCheckUpdate();
 }
 
-void ZFUIScrollerDefault::scrollAniOnUpdate(ZF_IN const zftimet &time)
+void ZFUIScrollerDefault::scrollAniOnUpdate(ZF_IN zftimet time)
 {
     d->aniLastTime = time;
     switch(d->aniState)

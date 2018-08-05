@@ -572,13 +572,13 @@ public:
         if(autoTrim && this->attachedObject.size() == 1)
         {
             ZFObjectGlobalEventObserver().observerAdd(
-                ZFGlobalEvent::EventAppOnReceiveMemoryWarning(),
+                ZFGlobalEvent::EventAppOnMemoryLow(),
                 this->cacheTrimListener);
         }
         else if(!autoTrim && this->attachedObject.size() == 0)
         {
             ZFObjectGlobalEventObserver().observerRemove(
-                ZFGlobalEvent::EventAppOnReceiveMemoryWarning(),
+                ZFGlobalEvent::EventAppOnMemoryLow(),
                 this->cacheTrimListener);
         }
     }
@@ -673,8 +673,8 @@ ZFMETHOD_DEFINE_0(ZFOperation, zfautoObject, createCache)
 ZFMETHOD_DEFINE_4(ZFOperation, zfautoObject, createCache,
                   ZFMP_IN(ZFOperationParam *, operationParam),
                   ZFMP_IN(ZFOperationResult *, operationResult),
-                  ZFMP_IN_OPT(const zftimet &, cacheExpireTime, zftimetZero()),
-                  ZFMP_IN_OPT(const zftimet &, cacheTime, zftimetZero()))
+                  ZFMP_IN_OPT(zftimet, cacheExpireTime, zftimetZero()),
+                  ZFMP_IN_OPT(zftimet, cacheTime, zftimetZero()))
 {
     zfautoObject operationCacheTmp = this->createCache();
     ZFOperationCache *operationCache = operationCacheTmp.to<ZFOperationCache *>();
@@ -718,7 +718,7 @@ static const ZFClass *_ZFP_ZFOperation_findTypeClass(ZF_IN const ZFClass *operat
     const ZFClass *operationClassToCheck = operationClass;
     while(operationClassToCheck != zfnull && operationClassToCheck != ZFOperation::ClassData())
     {
-        const ZFClass *tmp = ZFClass::classForName(zfsConnectLineFree(operationClassToCheck->className(), desiredTypeName));
+        const ZFClass *tmp = ZFClass::classForName(zfsConnectLineFree(operationClassToCheck->classNameFull(), desiredTypeName));
         if(tmp != zfnull)
         {
             return tmp;

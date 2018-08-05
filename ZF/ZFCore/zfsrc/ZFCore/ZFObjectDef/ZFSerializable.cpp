@@ -280,11 +280,14 @@ zfbool ZFSerializable::serializeToData(ZF_OUT ZFSerializableData &serializableDa
                                        ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
                                        ZF_IN_OPT ZFSerializable *referencedOwnerOrNull /* = zfnull */)
 {
+    zfautoObject referencedObjectHolder;
     ZFSerializable *referencedObject = zfnull;
     ZFStyleable *styleable = ZFCastZFObject(ZFStyleable *, this);
     if(styleable != zfnull && styleable->styleKey() != zfnull)
     {
-        referencedObject = ZFCastZFObject(ZFSerializable *, ZFStyleGet(styleable->styleKey()));
+        referencedObjectHolder = ZFStyleGet(styleable->styleKey());
+        referencedObject = referencedObjectHolder;
+        serializableData.attributeSet(ZFSerializableKeyword_styleKey, styleable->styleKey());
     }
     if(referencedObject == zfnull)
     {
@@ -297,7 +300,7 @@ zfbool ZFSerializable::serializeToData(ZF_OUT ZFSerializableData &serializableDa
     {
         ZFSerializableUtil::errorOccurred(outErrorHint,
             zfText("serialize with a reference style object whose type mismatch, self: %s, style: %s"),
-            this->classData()->className(), referencedObject->classData()->className());
+            this->classData()->classNameFull(), referencedObject->classData()->classNameFull());
         return zffalse;
     }
 
@@ -365,7 +368,7 @@ zfbool ZFSerializable::serializeToData(ZF_OUT ZFSerializableData &serializableDa
     }
     else
     {
-        serializableData.itemClassSet(this->classData()->className());
+        serializableData.itemClassSet(this->classData()->classNameFull());
     }
 
     if(ZFSerializable::editMode() && d != zfnull)
@@ -382,7 +385,7 @@ zfbool ZFSerializable::serializeToData(ZF_OUT ZFSerializableData &serializableDa
 _ZFP_I_ZFSerializablePropertyTypeHolder *ZFSerializable::_ZFP_ZFSerializable_getPropertyTypeHolder(void)
 {
     zfCoreMutexLocker();
-    _ZFP_I_ZFSerializablePropertyTypeHolder *holder = this->classData()->classTagGet<_ZFP_I_ZFSerializablePropertyTypeHolder *>(_ZFP_I_ZFSerializablePropertyTypeHolder::ClassData()->className());
+    _ZFP_I_ZFSerializablePropertyTypeHolder *holder = this->classData()->classTagGet<_ZFP_I_ZFSerializablePropertyTypeHolder *>(_ZFP_I_ZFSerializablePropertyTypeHolder::ClassData()->classNameFull());
     if(holder == zfnull)
     {
         zflockfree_zfblockedAlloc(_ZFP_I_ZFSerializablePropertyTypeHolder, holderTmp);
@@ -436,9 +439,9 @@ _ZFP_I_ZFSerializablePropertyTypeHolder *ZFSerializable::_ZFP_ZFSerializable_get
 
         holder = holderTmp;
         this->classData()->classTagSet(
-            _ZFP_I_ZFSerializablePropertyTypeHolder::ClassData()->className(),
+            _ZFP_I_ZFSerializablePropertyTypeHolder::ClassData()->classNameFull(),
             holderTmp);
-        this->classData()->classDataChangeAutoRemoveTagAdd(_ZFP_I_ZFSerializablePropertyTypeHolder::ClassData()->className());
+        this->classData()->classDataChangeAutoRemoveTagAdd(_ZFP_I_ZFSerializablePropertyTypeHolder::ClassData()->classNameFull());
     }
     return holder;
 }
@@ -523,7 +526,7 @@ zfbool ZFSerializable::serializableOnSerializePropertyFromData(ZF_IN const ZFSer
         {
             ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, propertyData,
                 zfText("object %s not type of %s"),
-                obj.toObject()->objectInfoOfInstance().cString(), property->propertyClassOfRetainProperty()->className());
+                obj.toObject()->objectInfoOfInstance().cString(), property->propertyClassOfRetainProperty()->classNameFull());
             return zffalse;
         }
         property->callbackValueSet(property, this->toObject(), &obj);
@@ -551,7 +554,8 @@ zfbool ZFSerializable::serializableOnSerializePropertyToData(ZF_OUT ZFSerializab
 
     if(property->propertyIsRetainProperty())
     {
-        const zfautoObject *obj = (const zfautoObject *)property->callbackValueGet(property, this->toObject());
+        ZFPropertyCallbackValueGetHolder _valueGetHolder(property, this->toObject());
+        const zfautoObject *obj = (const zfautoObject *)_valueGetHolder.value();
         if(obj == zfnull || !ZFObjectToData(propertyData, *obj, outErrorHint))
         {
             return zffalse;
@@ -568,13 +572,14 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyFromData(ZF_IN cons
                                                                       ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
                                                                       ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
 {
-    const zfautoObject *objHolder = (const zfautoObject *)property->callbackValueGet(property, this->toObject());
+    ZFPropertyCallbackValueGetHolder _valueGetHolder(property, this->toObject());
+    const zfautoObject *objHolder = (const zfautoObject *)_valueGetHolder.value();
     if(objHolder == zfnull)
     {
         ZFSerializableUtil::errorOccurred(outErrorHint,
             zfText("unable to access property %s's value is null while serializing \"%s\""),
             property->propertyName(),
-            this->classData()->className());
+            this->classData()->classNameFull());
         return zffalse;
     }
     ZFObject *obj = *objHolder;
@@ -583,7 +588,7 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyFromData(ZF_IN cons
         ZFSerializableUtil::errorOccurred(outErrorHint,
             zfText("embeded property %s is null while serializing \"%s\""),
             property->propertyName(),
-            this->classData()->className());
+            this->classData()->classNameFull());
         return zffalse;
     }
     else if(!ZFObjectIsSerializable(obj))
@@ -591,7 +596,7 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyFromData(ZF_IN cons
         ZFSerializableUtil::errorOccurred(outErrorHint,
             zfText("not serializable object %s while serializing \"%s\""),
             obj->objectInfoOfInstance().cString(),
-            this->classData()->className());
+            this->classData()->classNameFull());
         return zffalse;
     }
     else
@@ -602,7 +607,7 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyFromData(ZF_IN cons
             ZFSerializableUtil::errorOccurred(outErrorHint,
                 zfText("no class named %s while serializing \"%s\"'s property %s"),
                 propertyData.itemClass(),
-                this->classData()->className(),
+                this->classData()->classNameFull(),
                 property->propertyName());
             return zffalse;
         }
@@ -611,8 +616,8 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyFromData(ZF_IN cons
             ZFSerializableUtil::errorOccurred(outErrorHint,
                 zfText("node %s is not type of %s while serializing \"%s\"'s property %s"),
                 propertyData.itemClass(),
-                property->propertyClassOfRetainProperty()->className(),
-                this->classData()->className(),
+                property->propertyClassOfRetainProperty()->classNameFull(),
+                this->classData()->classNameFull(),
                 property->propertyName());
             return zffalse;
         }
@@ -635,7 +640,8 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyToData(ZF_OUT ZFSer
         return zftrue;
     }
 
-    const zfautoObject *obj = (const zfautoObject *)property->callbackValueGet(property, this->toObject());
+    ZFPropertyCallbackValueGetHolder _valueGetHolder(property, this->toObject());
+    const zfautoObject *obj = (const zfautoObject *)_valueGetHolder.value();
     if(obj == zfnull || !ZFObjectIsSerializable(*obj))
     {
         return zftrue;
@@ -644,7 +650,8 @@ zfbool ZFSerializable::serializableOnSerializeEmbededPropertyToData(ZF_OUT ZFSer
     ZFSerializable *propertyRef = zfnull;
     if(referencedOwnerOrNull != zfnull)
     {
-        const zfautoObject *t = (const zfautoObject *)property->callbackValueGet(property, referencedOwnerOrNull->toObject());
+        ZFPropertyCallbackValueGetHolder _valueGetHolderRef(property, referencedOwnerOrNull->toObject());
+        const zfautoObject *t = (const zfautoObject *)_valueGetHolderRef.value();
         if(t != zfnull)
         {
             propertyRef = t->to<ZFSerializable *>();
@@ -725,90 +732,6 @@ zfbool ZFObjectIsSerializable(ZF_IN ZFObject *obj)
 }
 
 // ============================================================
-zfbool ZFObjectFromString(ZF_OUT zfautoObject &result,
-                          ZF_IN const zfchar *encodedData,
-                          ZF_IN_OPT zfindex encodedDataLen /* = zfindexMax() */,
-                          ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    ZFSerializableData serializableData;
-    if(!ZFSerializableDataFromString(serializableData, encodedData, encodedDataLen, outErrorHint))
-    {
-        return zffalse;
-    }
-    else
-    {
-        return ZFObjectFromData(result, serializableData, outErrorHint);
-    }
-}
-zfautoObject ZFObjectFromString(ZF_IN const zfchar *encodedData,
-                                ZF_IN_OPT zfindex encodedDataLen /* = zfindexMax() */,
-                                ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    zfautoObject result;
-    ZFObjectFromString(result, encodedData, encodedDataLen, outErrorHint);
-    return result;
-}
-
-zfbool ZFObjectToString(ZF_OUT zfstring &encodedData,
-                        ZF_IN ZFObject *obj,
-                        ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    ZFSerializableData serializableData;
-    if(!ZFObjectToData(serializableData, obj, outErrorHint))
-    {
-        return zffalse;
-    }
-    else
-    {
-        return ZFSerializableDataToString(encodedData, serializableData, outErrorHint);
-    }
-}
-zfstring ZFObjectToString(ZF_IN ZFObject *obj,
-                          ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    zfstring ret;
-    ZFObjectToString(ret, obj, outErrorHint);
-    return ret;
-}
-
-// ============================================================
-zfbool ZFObjectFromInput(ZF_OUT zfautoObject &result,
-                         ZF_IN_OUT const ZFInput &input,
-                         ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    ZFSerializableData serializableData;
-    if(!ZFSerializableDataFromInput(serializableData, input, outErrorHint))
-    {
-        return zffalse;
-    }
-    else
-    {
-        return ZFObjectFromData(result, serializableData, outErrorHint);
-    }
-}
-zfautoObject ZFObjectFromInput(ZF_IN_OUT const ZFInput &input,
-                               ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    zfautoObject ret;
-    ZFObjectFromInput(ret, input, outErrorHint);
-    return ret;
-}
-zfbool ZFObjectToOutput(ZF_IN_OUT const ZFOutput &output,
-                        ZF_IN ZFObject *obj,
-                        ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
-{
-    ZFSerializableData serializableData;
-    if(!ZFObjectToData(serializableData, obj, outErrorHint))
-    {
-        return zffalse;
-    }
-    else
-    {
-        return ZFSerializableDataToOutput(output, serializableData, outErrorHint);
-    }
-}
-
-// ============================================================
 zfbool ZFObjectFromData(ZF_OUT zfautoObject &result,
                         ZF_IN const ZFSerializableData &serializableData,
                         ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
@@ -816,7 +739,7 @@ zfbool ZFObjectFromData(ZF_OUT zfautoObject &result,
 {
     result = zfnull;
 
-    const zfchar *serializableClass = ZFSerializableUtil::requireSerializableClass(ZFTypeId_none(), serializableData, outErrorHint, outErrorPos);
+    const zfchar *serializableClass = ZFSerializableUtil::requireItemClass(serializableData, ZFTypeId_none(), outErrorHint, outErrorPos);
     if(serializableClass == zfnull)
     {
         return zffalse;
@@ -925,6 +848,69 @@ ZFSerializableData ZFObjectToData(ZF_IN ZFObject *obj,
     return ZFSerializableData();
 }
 
+zfbool ZFObjectFromString(ZF_OUT zfautoObject &result,
+                          ZF_IN const ZFClass *cls,
+                          ZF_IN const zfchar *src,
+                          ZF_IN_OPT zfindex srcLen /* = zfindexMax() */)
+{
+    if(cls == zfnull || !cls->classIsTypeOf(ZFSerializable::ClassData()))
+    {
+        return zffalse;
+    }
+    const ZFMethod *createMethod = cls->methodForName(ZFSerializableKeyword_serializableNewInstance);
+    if(createMethod == zfnull)
+    {
+        result = cls->newInstance();
+    }
+    else
+    {
+        result = createMethod->execute<zfautoObject>(zfnull);
+    }
+    ZFSerializable *serializable = result;
+    if(serializable == zfnull)
+    {
+        result = zfnull;
+        return zffalse;
+    }
+    if(!serializable->serializeFromString(src, srcLen))
+    {
+        result = zfnull;
+        return zffalse;
+    }
+    else
+    {
+        return zftrue;
+    }
+}
+zfautoObject ZFObjectFromString(ZF_IN const ZFClass *cls,
+                                ZF_IN const zfchar *src,
+                                ZF_IN_OPT zfindex srcLen /* = zfindexMax() */)
+{
+    zfautoObject ret;
+    ZFObjectFromString(ret, cls, src, srcLen);
+    return ret;
+}
+zfbool ZFObjectToString(ZF_IN_OUT zfstring &ret,
+                        ZF_IN ZFObject *obj)
+{
+    if(obj == zfnull)
+    {
+        return zftrue;
+    }
+    ZFSerializable *t = ZFCastZFObject(ZFSerializable *, obj);
+    if(t == zfnull)
+    {
+        return zffalse;
+    }
+    return t->serializeToString(ret);
+}
+zfstring ZFObjectToString(ZF_IN ZFObject *obj)
+{
+    zfstring ret;
+    ZFObjectToString(ret, obj);
+    return ret;
+}
+
 ZF_NAMESPACE_GLOBAL_END
 
 #if _ZFP_ZFOBJECT_METHOD_REG
@@ -934,6 +920,8 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFSerializable, zfbool, serializable)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_3(ZFSerializable, zfbool, serializeFromData, ZFMP_IN(const ZFSerializableData &, serializableData), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_OUT_OPT(ZFSerializableData *, outErrorPos, zfnull))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_3(ZFSerializable, zfbool, serializeToData, ZFMP_OUT(ZFSerializableData &, serializableData), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_IN_OPT(ZFSerializable *, referencedOwnerOrNull, zfnull))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_2(ZFSerializable, zfbool, serializeFromString, ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFSerializable, zfbool, serializeToString, ZFMP_IN_OUT(zfstring &, ret))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFSerializable, void, serializableGetAllSerializablePropertyT, ZFMP_OUT(ZFCoreArray<const ZFProperty *> &, ret))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFSerializable, ZFCoreArrayPOD<const ZFProperty *>, serializableGetAllSerializableProperty)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFSerializable, void, serializableGetAllSerializableEmbededPropertyT, ZFMP_OUT(ZFCoreArray<const ZFProperty *> &, ret))
@@ -944,19 +932,14 @@ ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFSerializable, void, serializableCop
 
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfbool, ZFObjectIsSerializable, ZFMP_IN(ZFObject *, obj))
 
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_4(zfbool, ZFObjectFromString, ZFMP_OUT(zfautoObject &, result), ZFMP_IN(const zfchar *, encodedData), ZFMP_IN_OPT(zfindex, encodedDataLen, zfindexMax()), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfautoObject, ZFObjectFromString, ZFMP_IN(const zfchar *, encodedData), ZFMP_IN_OPT(zfindex, encodedDataLen, zfindexMax()), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFObjectToString, ZFMP_OUT(zfstring &, encodedData), ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfstring, ZFObjectToString, ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFObjectFromInput, ZFMP_OUT(zfautoObject &, result), ZFMP_IN_OUT(const ZFInput &, input), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfautoObject, ZFObjectFromInput, ZFMP_IN_OUT(const ZFInput &, input), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFObjectToOutput, ZFMP_IN_OUT(const ZFOutput &, output), ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfautoObject, ZFObjectFromData, ZFMP_IN(const ZFSerializableData &, serializableData), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_OUT_OPT(ZFSerializableData *, outErrorPos, zfnull))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_4(zfbool, ZFObjectFromData, ZFMP_OUT(zfautoObject &, result), ZFMP_IN(const ZFSerializableData &, serializableData), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_OUT_OPT(ZFSerializableData *, outErrorPos, zfnull))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_4(zfbool, ZFObjectToData, ZFMP_OUT(ZFSerializableData &, serializableData), ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_IN_OPT(ZFSerializable *, referencedOwnerOrNull, zfnull))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_4(ZFSerializableData, ZFObjectToData, ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfbool *, outSuccess, zfnull), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_IN_OPT(ZFSerializable *, referencedOwnerOrNull, zfnull))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_4(zfbool, ZFObjectFromString, ZFMP_OUT(zfautoObject &, result), ZFMP_IN(const ZFClass *, cls), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfautoObject, ZFObjectFromString, ZFMP_IN(const ZFClass *, cls), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfbool, ZFObjectToString, ZFMP_IN_OUT(zfstring &, ret), ZFMP_IN(ZFObject *, obj))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfstring, ZFObjectToString, ZFMP_IN(ZFObject *, obj))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

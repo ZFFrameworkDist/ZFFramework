@@ -48,12 +48,12 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * to add your own type,
  * please refer to #ZFOBJECTIO_DEFINE
  */
-extern ZF_ENV_EXPORT zfbool ZFObjectIOLoad(ZF_OUT zfautoObject &ret,
-                                           ZF_IN const ZFInput &input,
-                                           ZF_OUT_OPT zfstring *outErrorHint = zfnull);
-/** @brief see #ZFObjectIOLoad */
 extern ZF_ENV_EXPORT zfautoObject ZFObjectIOLoad(ZF_IN const ZFInput &input,
                                                  ZF_OUT_OPT zfstring *outErrorHint = zfnull);
+/** @brief see #ZFObjectIOLoad */
+extern ZF_ENV_EXPORT zfbool ZFObjectIOLoadT(ZF_OUT zfautoObject &ret,
+                                            ZF_IN const ZFInput &input,
+                                            ZF_OUT_OPT zfstring *outErrorHint = zfnull);
 /** @brief see #ZFObjectIOLoad */
 extern ZF_ENV_EXPORT zfbool ZFObjectIOSave(ZF_IN_OUT const ZFOutput &output,
                                            ZF_IN ZFObject *obj,
@@ -61,11 +61,26 @@ extern ZF_ENV_EXPORT zfbool ZFObjectIOSave(ZF_IN_OUT const ZFOutput &output,
 
 // ============================================================
 /**
+ * @brief util for impl to check the file's ext from path data
+ */
+extern ZF_ENV_EXPORT const zfchar *ZFObjectIOImplCheckFileExt(ZF_IN const ZFPathInfo &pathInfo);
+/**
+ * @brief util for impl to check whether the path data is a file path with desiredFileExt
+ */
+extern ZF_ENV_EXPORT zfbool ZFObjectIOImplCheck(ZF_IN const ZFPathInfo &pathInfo,
+                                                ZF_IN const zfchar *desiredFileExt);
+
+/**
  * @brief see #ZFObjectIOLoad
  *
  * usage:
  * @code
- *   ZFOBJECTIO_DEFINE(registerSig, fileExt, {
+ *   ZFOBJECTIO_DEFINE(registerSig, {
+ *           // callback to check whether the pathInfo can be used as object IO
+ *           // proto type:
+ *           //   zfbool checker(ZF_IN const ZFPathInfo &pathInfo);
+ *           // pathInfo: ZFCallback::pathInfo
+ *       }, {
  *           // callback to load object from input
  *           // proto type:
  *           //   zfbool fromInput(ZF_OUT zfautoObject &ret,
@@ -77,33 +92,20 @@ extern ZF_ENV_EXPORT zfbool ZFObjectIOSave(ZF_IN_OUT const ZFOutput &output,
  *           //   zfbool toOutput(ZF_IN_OUT const ZFOutput &output,
  *           //                   ZF_IN ZFObject *obj,
  *           //                   ZF_OUT_OPT zfstring *outErrorHint = zfnull);
- *       }, {
- *           // optional
- *           // callback to check whether the pathInfo can be used as object IO
- *           // proto type:
- *           //   zfbool checker(ZF_IN const ZFPathInfo &pathInfo,
- *           //                  ZF_IN_OPT const zfchar *fileExt = zfnull);
- *           // pathInfo: ZFCallback::pathInfo
- *           // fileExt: by default, we will try to detect file ext from pathInfo's pathData,
- *           //          null if not available
  *       })
  * @endcode
  */
-#define ZFOBJECTIO_DEFINE(registerSig, fileExt, fromInputAction, toOutputAction, ...) \
-    _ZFP_ZFOBJECTIO_DEFINE(registerSig, fileExt, fromInputAction, toOutputAction, ##__VA_ARGS__, {return zftrue;})
-
-#define _ZFP_ZFOBJECTIO_DEFINE(registerSig, fileExt_, fromInputAction, toOutputAction, checkerAction, ...) \
-    ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ObjIOReg_##registerSig, ZFLevelZFFrameworkStatic) \
+#define ZFOBJECTIO_DEFINE(registerSig, checkerAction, fromInputAction, toOutputAction) \
+    ZF_STATIC_REGISTER_INIT(ObjIOReg_##registerSig) \
     { \
-        _ZFP_ZFObjectIORegister(ZFM_TOSTRING_DIRECT(registerSig), fileExt_, \
+        _ZFP_ZFObjectIORegister(ZFM_TOSTRING_DIRECT(registerSig), \
             zfself::_ZFP_checker, zfself::_ZFP_fromInput, zfself::_ZFP_toOutput); \
     } \
-    ZF_GLOBAL_INITIALIZER_DESTROY(ObjIOReg_##registerSig) \
+    ZF_STATIC_REGISTER_DESTROY(ObjIOReg_##registerSig) \
     { \
         _ZFP_ZFObjectIOUnregister(ZFM_TOSTRING_DIRECT(registerSig)); \
     } \
-    static zfbool _ZFP_checker(ZF_IN const ZFPathInfo &pathInfo, \
-                               ZF_IN_OPT const zfchar *fileExt = zfnull) \
+    static zfbool _ZFP_checker(ZF_IN const ZFPathInfo &pathInfo) \
     { \
         checkerAction \
     } \
@@ -119,10 +121,9 @@ extern ZF_ENV_EXPORT zfbool ZFObjectIOSave(ZF_IN_OUT const ZFOutput &output,
     { \
         toOutputAction \
     } \
-    ZF_GLOBAL_INITIALIZER_END(ObjIOReg_##registerSig)
+    ZF_STATIC_REGISTER_END(ObjIOReg_##registerSig)
 
-typedef zfbool (*_ZFP_ZFObjectIOCallback_checker)(ZF_IN const ZFPathInfo &pathInfo,
-                                                  ZF_IN_OPT const zfchar *fileExt /* = zfnull */);
+typedef zfbool (*_ZFP_ZFObjectIOCallback_checker)(ZF_IN const ZFPathInfo &pathInfo);
 typedef zfbool (*_ZFP_ZFObjectIOCallback_fromInput)(ZF_OUT zfautoObject &ret,
                                                     ZF_IN_OUT const ZFInput &input,
                                                     ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */);
@@ -130,7 +131,6 @@ typedef zfbool (*_ZFP_ZFObjectIOCallback_toOutput)(ZF_IN_OUT const ZFOutput &out
                                                    ZF_IN ZFObject *obj,
                                                    ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */);
 extern ZF_ENV_EXPORT void _ZFP_ZFObjectIORegister(ZF_IN const zfchar *registerSig,
-                                                  ZF_IN const zfchar *fileExt,
                                                   ZF_IN _ZFP_ZFObjectIOCallback_checker checker,
                                                   ZF_IN _ZFP_ZFObjectIOCallback_fromInput fromInput,
                                                   ZF_IN _ZFP_ZFObjectIOCallback_toOutput toOutput);

@@ -19,6 +19,8 @@
 #include "ZFLua/ZFLuaExecute.h"
 #include "ZFLua/ZFLuaGC.h"
 #include "ZFLua/ZFLuaState.h"
+#include "ZFLua/ZFObjectIO_lua.h"
+#include "ZFLua/ZFPathType_lua.h"
 
 #endif // #ifndef _ZFI_ZFLua_h_
 

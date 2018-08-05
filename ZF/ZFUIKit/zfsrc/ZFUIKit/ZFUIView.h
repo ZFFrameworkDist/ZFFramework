@@ -153,14 +153,6 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0 is the #ZFUIEvent\n
-     * you may resolve the event by #ZFEvent::eventResolvedSet
-     * to prevent the event from being sent to its original receiver
-     */
-    ZFOBSERVER_EVENT(ViewOnEventFilter)
-    /**
-     * @brief see #ZFObject::observerNotify
-     *
      * param0 is the #ZFUIEvent
      */
     ZFOBSERVER_EVENT(ViewOnEvent)
@@ -216,14 +208,13 @@ public:
     // serialize
 public:
     /**
-     * @brief store ref layout param for this view
+     * @brief store ref layout param for this view for reducing serialization output size
      *
-     * typically for impl views,
      * if set, while serializing this view's layout param,
      * the ref one would be used as reference object to filter out contents that didn't change
      * (see #ZFSerializable::serializeToData)\n
-     * by default, all impl child add methods (#internalBgViewAdd series)
-     * would call this method automatically
+     * by default, all children would have it's parent's default layout param (#layoutParamCreate)
+     * as the ref layout param, during adding to parent
      */
     virtual void serializableRefLayoutParamSet(ZF_IN ZFUIViewLayoutParam *serializableRefLayoutParam);
     /** @brief see #serializableRefLayoutParamSet */
@@ -238,11 +229,16 @@ protected:
                                                  ZF_IN ZFSerializable *referencedOwnerOrNull,
                                                  ZF_OUT_OPT zfstring *outErrorHint = zfnull);
     /**
-     * @brief by default, #ZFUIView would serialize all normal child views,
-     *   for some adapter view it may be not necessary,
-     *   you may override this method to disable the auto serialization of child views
+     * @brief whether we should serialize all children
+     *
+     * by default, #ZFUIView would serialize all normal child views,
+     * for some adapter view it may be not necessary,
+     * you may override this method to disable the auto serialization of child views
      */
-    virtual zfbool serializableOnCheckNeedSerializeChildren(void);
+    virtual inline zfbool serializableOnCheckNeedSerializeChildren(void)
+    {
+        return zftrue;
+    }
 
 public:
     // ============================================================
@@ -357,10 +353,10 @@ public:
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUISize, viewSizeMax)
 
     /**
-     * @brief background color, #ZFUIColorTransparent by default
+     * @brief background color, #ZFUIColorZero by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, viewBackgroundColor,
-                                ZFUIColorTransparent())
+                                ZFUIColorZero())
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, viewBackgroundColor)
 
     // ============================================================
@@ -841,6 +837,10 @@ public:
 
 protected:
     /**
+     * @brief called during #layoutRequest
+     */
+    virtual void layoutOnLayoutRequest(ZF_IN ZFUIView *requestByView);
+    /**
      * @brief called by #layoutMeasure to decide the view's size
      *
      * you may override without call super to supply your own layout logic\n
@@ -928,7 +928,7 @@ public:
      */
     ZFMETHOD_DECLARE_3(void, childAdd,
                        ZFMP_IN(ZFUIView *, view),
-                       ZFMP_IN(ZFUISizeParam, sizeParam),
+                       ZFMP_IN(const ZFUISizeParam &, sizeParam),
                        ZFMP_IN_OPT(ZFUIAlignFlags const &, layoutAlign, ZFUIAlign::e_LeftInner | ZFUIAlign::e_TopInner))
     /**
      * @brief remove view or do nothing if view isn't added to this view
@@ -1135,12 +1135,6 @@ public:
                        ZFMP_IN(ZFUIEvent *, event))
 protected:
     /**
-     * @brief see #EventViewOnEventFilter
-     */
-    virtual inline void viewEventOnEventFilter(ZF_IN ZFUIEvent *event)
-    {
-    }
-    /**
      * @brief notified when a ZFUIEvent occurred
      *
      * default behavior is to dispatch event depends on event type\n
@@ -1220,10 +1214,17 @@ protected:
     // ============================================================
     // override
 protected:
+    /**
+     * @brief for a view, copy style would also copy all of it's children
+     */
     zfoverride
-    virtual void observerOnAdd(ZF_IN const zfidentity &eventId);
+    virtual void styleableOnCopyFrom(ZF_IN ZFStyleable *anotherStyleable);
+
+protected:
     zfoverride
-    virtual void observerOnRemove(ZF_IN const zfidentity &eventId);
+    virtual void observerOnAdd(ZF_IN zfidentity eventId);
+    zfoverride
+    virtual void observerOnRemove(ZF_IN zfidentity eventId);
 
 private:
     _ZFP_ZFUIViewPrivate *d;

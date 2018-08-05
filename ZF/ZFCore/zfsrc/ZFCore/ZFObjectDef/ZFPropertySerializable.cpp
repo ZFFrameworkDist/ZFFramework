@@ -23,7 +23,7 @@ ZFTYPEID_DEFINE(ZFProperty, const ZFProperty *, {
             serializableData.resolveMark();
             return zftrue;
         }
-        if(ZFSerializableUtil::requireSerializableClass(ZFTypeId_ZFProperty(), serializableData, outErrorHint, outErrorPos) == zfnull)
+        if(ZFSerializableUtil::requireItemClass(serializableData, ZFTypeId_ZFProperty(), outErrorHint, outErrorPos) == zfnull)
         {
             return zffalse;
         }
@@ -50,7 +50,7 @@ ZFTYPEID_DEFINE(ZFProperty, const ZFProperty *, {
         if(v == zfnull)
         {
             ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, serializableData,
-                zfText("no such property \"%s\" in class \"%s\""), tmpValue, ownerClass->className());
+                zfText("no such property \"%s\" in class \"%s\""), tmpValue, ownerClass->classNameFull());
             return zffalse;
         }
 
@@ -65,12 +65,12 @@ ZFTYPEID_DEFINE(ZFProperty, const ZFProperty *, {
 
         serializableData.itemClassSet(ZFTypeId_ZFProperty());
 
-        serializableData.attributeSet(ZFSerializableKeyword_ZFProperty_owner, v->propertyOwnerClass()->className());
+        serializableData.attributeSet(ZFSerializableKeyword_ZFProperty_owner, v->propertyOwnerClass()->classNameFull());
         serializableData.attributeSet(ZFSerializableKeyword_ZFProperty_property, v->propertyName());
 
         return zftrue;
     }, {
-        ZFCoreArrayPOD<zfindexRange> pos;
+        ZFCoreArrayPOD<ZFIndexRange> pos;
         if(!zfCoreDataPairSplitString(pos, 3, src, srcLen, zfText(":"), zfnull, zfnull, zftrue)) {return zffalse;}
         const ZFClass *cls = ZFClass::classForName(zfstring(src + pos[0].start, pos[0].count));
         if(cls == zfnull)
@@ -82,7 +82,7 @@ ZFTYPEID_DEFINE(ZFProperty, const ZFProperty *, {
     }, {
         if(v)
         {
-            s += v->propertyOwnerClass()->className();
+            s += v->propertyOwnerClass()->classNameFull();
             s += zfText("::");
             s += v->propertyName();
         }

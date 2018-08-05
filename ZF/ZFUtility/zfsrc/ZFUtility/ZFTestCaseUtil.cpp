@@ -11,8 +11,10 @@
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, TestCaseRunAllOnStart)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, TestCaseRunAllOnStop)
+ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(TestCaseRunAllOnStart)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(TestCaseRunAllOnStop)
+ZF_NAMESPACE_END(ZFGlobalEvent)
 
 // ============================================================
 zfbool ZFTestCaseRun(ZF_IN const ZFClass *cls,
@@ -42,14 +44,14 @@ zfbool ZFTestCaseRun(ZF_IN const ZFClass *cls,
     }
     return zftrue;
 }
-zfbool ZFTestCaseRun(ZF_IN const zfchar *clsName,
+zfbool ZFTestCaseRun(ZF_IN const zfchar *classNameFull,
                      ZF_OUT_OPT ZFTestCase **testCase /* = zfnull */)
 {
-    return ZFTestCaseRun(ZFClass::classForName(clsName), testCase);
+    return ZFTestCaseRun(ZFClass::classForName(classNameFull), testCase);
 }
 
 // ============================================================
-static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData);
+static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData);
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFTestCaseRunAllHolder, ZFLevelZFFrameworkEssential)
 {
     this->running = zffalse;
@@ -146,7 +148,7 @@ private:
     }
 ZF_GLOBAL_INITIALIZER_END(ZFTestCaseRunAllHolder)
 
-static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
+static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
     ZF_GLOBAL_INITIALIZER_INSTANCE(ZFTestCaseRunAllHolder)->testCaseRunNext();
 }

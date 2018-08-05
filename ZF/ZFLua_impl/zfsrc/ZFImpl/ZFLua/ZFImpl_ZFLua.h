@@ -39,12 +39,12 @@ extern ZF_ENV_EXPORT lua_State *_ZFP_ZFImpl_ZFLua_luaState(void);
  *   (wrapped directly for ZFObject type,
  *   wrapped by #ZFTypeIdWrapper for non-ZFObject type)
  * -  all global variables are also wrapped by #zfautoObject
- * -  class and namespace are wrapped by lua raw string value as a global variable,
+ * -  class and topmost namespace are wrapped by lua raw string value as a global variable,
  *   and should be registered by #ZFImpl_ZFLua_implSetupScope\n
  *   these things are equal:
  *   -  `MyClass.myFunc(param);`
- *   -  `zfl_callStatic("MyClass::myFunc", param);`
- *   -  `var cls = MyClass; cls.myFunc(param);`
+ *   -  `zfl_callStatic("MyClass.myFunc", param);`
+ *   -  `local cls = MyClass; cls.myFunc(param);`
  * -  member functions are dispatched as `obj:myFunc(param)`,
  *   which equals to `obj.myFunc(obj, param)`
  * -  the method dispatch can be modified by registering #ZFImpl_ZFLua_implDispatch_DEFINE,
@@ -65,6 +65,17 @@ extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaStateChange(ZF_IN lua_State *L);
  *
  * must not be attached more than one time
  */
+extern ZF_ENV_EXPORT void *ZFImpl_ZFLua_luaStateOpen(void);
+/**
+ * @brief see #ZFImpl_ZFLua_luaState
+ */
+extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaStateClose(ZF_IN lua_State *L);
+
+/**
+ * @brief see #ZFImpl_ZFLua_luaState
+ *
+ * must not be attached more than one time
+ */
 extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaStateAttach(ZF_IN lua_State *L);
 /**
  * @brief see #ZFImpl_ZFLua_luaStateAttach
@@ -73,10 +84,15 @@ extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaStateAttach(ZF_IN lua_State *L);
  * all methods registered to L can not be undo
  */
 extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaStateDetach(ZF_IN lua_State *L);
+
 /**
  * @brief return all lua_State that currently registered, for impl or debug use only
  */
-extern ZF_ENV_EXPORT const ZFCoreArrayPOD<lua_State *> &ZFImpl_ZFLua_luaStateAttached(void);
+extern ZF_ENV_EXPORT const ZFCoreArrayPOD<lua_State *> &ZFImpl_ZFLua_luaStateList(void);
+/**
+ * @brief see #ZFImpl_ZFLua_luaStateList
+ */
+extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaStateListT(ZF_IN_OUT ZFCoreArray<lua_State *> &ret);
 
 // ============================================================
 typedef void (*_ZFP_ZFImpl_ZFLua_ImplSetupCallback)(ZF_IN_OUT lua_State *L);
@@ -125,7 +141,7 @@ extern ZF_ENV_EXPORT void ZFImpl_ZFLua_implSetupScope(ZF_IN_OUT lua_State *L, ZF
 /** @brief see #ZFImpl_ZFLua_luaState */
 extern ZF_ENV_EXPORT void ZFImpl_ZFLua_implSetupScope(ZF_IN_OUT lua_State *L, ZF_IN const zfchar **scopeNameList);
 /** @brief see #ZFImpl_ZFLua_luaState */
-extern ZF_ENV_EXPORT void ZFImpl_ZFLua_implSetupObject(ZF_IN_OUT lua_State *L, ZF_IN_OPT zfint objIndex = -1);
+extern ZF_ENV_EXPORT void ZFImpl_ZFLua_implSetupObject(ZF_IN_OUT lua_State *L, ZF_IN_OPT int objIndex = -1);
 
 // ============================================================
 /**
@@ -138,6 +154,12 @@ zfclass ZF_ENV_EXPORT ZFImpl_ZFLua_UnknownParam : zfextends ZFObject
 public:
     /** @brief the value */
     zfstring zfv;
+protected:
+    zfoverride
+    virtual void objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
+    {
+        ret += this->zfv;
+    }
 };
 
 // ============================================================
@@ -159,12 +181,13 @@ zfclassLikePOD ZF_ENV_EXPORT ZFImpl_ZFLua_ImplDispatchInfo
 {
 public:
     lua_State *L; /**< @brief the lua state */
+    int luaParamOffset;  /**< @brief lua offset to first method param */
     zfbool isStatic; /**< @brief whether the method called as static method */
     const zfchar *classOrNamespace; /**< @brief class or namespace text */
     const ZFClass *classOrNull; /**< @brief class if able to find */
     ZFObject *objectOrNull; /**< @brief null for static method or non-null for instance method */
     const zfchar *methodName; /**< @brief method name */
-    const zfautoObject *paramList; /**< @brief param list */
+    zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]; /**< @brief param list */
     zfindex paramCount; /**< @brief param count */
     zfautoObject returnValue; /**< @brief #ZFImpl_ZFLua_implDispatchReturnValueNotSet if no return value, see #returnValueCustom */
     int returnValueCustom; /**< @brief -1 by default, set non-negative to show custom return value specified, see #returnValue */
@@ -173,14 +196,16 @@ public:
 public:
     /** @brief main constructor */
     explicit ZFImpl_ZFLua_ImplDispatchInfo(ZF_IN_OUT lua_State *L,
+                                           ZF_IN int luaParamOffset,
                                            ZF_IN zfbool isStatic,
                                            ZF_IN const zfchar *classOrNamespace,
                                            ZF_IN const ZFClass *classOrNull,
                                            ZF_IN ZFObject *objectOrNull,
                                            ZF_IN const zfchar *methodName,
-                                           ZF_IN const zfautoObject *paramList,
+                                           ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM],
                                            ZF_IN zfindex paramCount)
     : L(L)
+    , luaParamOffset(luaParamOffset)
     , isStatic(isStatic)
     , classOrNamespace(classOrNamespace)
     , classOrNull(classOrNull)
@@ -261,7 +286,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
  * @endcode
  * \n
  * params:
- * -  classOrNamespace : null or empty or #ZFMethodFuncNamespaceGlobal for global scope function,
+ * -  classOrNamespace : null or empty or #ZF_NAMESPACE_GLOBAL_NAME or #ZF_NAMESPACE_GLOBAL_ABBR_NAME for global scope function,
  *   otherwise, should be the class name or namespace
  *   registered by #ZFImpl_ZFLua_implSetupScope
  * -  methodName : the method name
@@ -376,7 +401,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
             return dispatchInfo.dispatchError( \
                 zfText("%s::%s param type mismatch, expect %s, got %s"), \
                 dispatchInfo.classOrNamespace, dispatchInfo.methodName, \
-                desiredClass::ClassData()->className(), \
+                desiredClass::ClassData()->classNameFull(), \
                 ZFObjectInfo(dispatchInfo.paramList[N]->toObject()).cString()); \
         } \
     } while(zffalse)
@@ -401,7 +426,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
             return dispatchInfo.dispatchError( \
                 zfText("%s::%s param type mismatch, expect %s, got %s"), \
                 dispatchInfo.classOrNamespace, dispatchInfo.methodName, \
-                desiredClass::ClassData()->className(), \
+                desiredClass::ClassData()->classNameFull(), \
                 ZFObjectInfo(dispatchInfo.paramList[N]->toObject()).cString()); \
         } \
     } while(zffalse)
@@ -414,7 +439,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
         return dispatchInfo.dispatchError( \
             zfText("%s::%s owner object type mismatch, expect %s, got %s"), \
             dispatchInfo.classOrNamespace, dispatchInfo.methodName, \
-            WrapperType::ClassData()->className(), \
+            WrapperType::ClassData()->classNameFull(), \
             ZFObjectInfo(dispatchInfo.objectOrNull).cString()); \
     } \
     OwnerObjectType objName = _ZFP_##objName->zfv
@@ -428,16 +453,16 @@ extern ZF_ENV_EXPORT void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZF
             return dispatchInfo.dispatchError( \
                 zfText("%s::%s owner object type mismatch, expect %s, got %s"), \
                 dispatchInfo.classOrNamespace, dispatchInfo.methodName, \
-                OwnerZFObjectType::ClassData()->className(), \
+                OwnerZFObjectType::ClassData()->classNameFull(), \
                 ZFObjectInfo(dispatchInfo.objectOrNull).cString()); \
         } \
     } while(zffalse)
 
 // ============================================================
 /** @brief class prefix for #ZFTypeIdWrapper impl */
-#define ZFImpl_ZFLua_PropTypePrefix zfText("v_")
+#define ZFImpl_ZFLua_PropTypePrefix ZFTypeIdWrapperPrefixName
 /** @brief see #ZFImpl_ZFLua_PropTypePrefix */
-#define ZFImpl_ZFLua_PropTypePrefixLen 2
+#define ZFImpl_ZFLua_PropTypePrefixLen ZFTypeIdWrapperPrefixNameLen
 
 // ============================================================
 /**
@@ -448,34 +473,66 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_execute(ZF_IN lua_State *L,
                                                  ZF_IN_OPT zfindex bufLen = zfindexMax(),
                                                  ZF_OUT_OPT zfautoObject *luaResult = zfnull,
                                                  ZF_IN_OPT const ZFCoreArray<zfautoObject> *luaParams = zfnull,
-                                                 ZF_OUT_OPT zfstring *errHint = zfnull);
+                                                 ZF_OUT_OPT zfstring *errHint = zfnull,
+                                                 ZF_IN_OPT const zfchar *chunkInfo = zfnull);
 
 // ============================================================
 // utils
-/**
- * @brief get raw lua object info
- */
+/** @brief see #ZFImpl_ZFLua_luaObjectInfo */
 extern ZF_ENV_EXPORT void ZFImpl_ZFLua_luaObjectInfoT(ZF_OUT zfstring &ret,
                                                       ZF_IN lua_State *L,
-                                                      ZF_IN zfint luaStackOffset,
+                                                      ZF_IN int luaStackOffset,
                                                       ZF_IN_OPT zfbool printLuaType = zffalse);
 /**
  * @brief get raw lua object info
  */
 inline zfstring ZFImpl_ZFLua_luaObjectInfo(ZF_IN lua_State *L,
-                                           ZF_IN zfint luaStackOffset,
+                                           ZF_IN int luaStackOffset,
                                            ZF_IN_OPT zfbool printLuaType = zffalse)
 {
     zfstring ret;
     ZFImpl_ZFLua_luaObjectInfoT(ret, L, luaStackOffset, printLuaType);
     return ret;
 }
+
 /**
  * @brief get params from lua
  */
 extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toObject(ZF_OUT zfautoObject &param,
                                                   ZF_IN lua_State *L,
-                                                  ZF_IN zfint luaStackOffset);
+                                                  ZF_IN int luaStackOffset);
+
+/**
+ * @brief get params from lua
+ *
+ * supports these types:
+ * -  zfautoObject
+ * -  any types that can be converted by #ZFImpl_ZFLua_toCallback
+ * -  any type that can be converted to string by #ZFImpl_ZFLua_toString,
+ *   result would be stored as #ZFImpl_ZFLua_UnknownParam,
+ *   and would be converted to #ZFTypeIdWrapper during function call
+ */
+extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toGeneric(ZF_OUT zfautoObject &param,
+                                                   ZF_IN lua_State *L,
+                                                   ZF_IN int luaStackOffset);
+/**
+ * @brief try to convert to desired type id from unknown type
+ */
+extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_fromUnknown(ZF_OUT zfautoObject &param,
+                                                     ZF_IN const zfchar *typeId,
+                                                     ZF_IN ZFImpl_ZFLua_UnknownParam *unknownType,
+                                                     ZF_OUT_OPT zfstring *errorHint = zfnull);
+
+/**
+ * @brief get params from lua
+ *
+ * supports these types:
+ * -  #v_ZFCallback
+ * -  lua function, converted by ZFCallbackForLua (available in lua code only)
+ */
+extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toCallback(ZF_OUT zfautoObject &param,
+                                                    ZF_IN lua_State *L,
+                                                    ZF_IN int luaStackOffset);
 
 /**
  * @brief get params from lua
@@ -487,7 +544,7 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toObject(ZF_OUT zfautoObject &param,
  */
 extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
                                                   ZF_IN lua_State *L,
-                                                  ZF_IN zfint luaStackOffset,
+                                                  ZF_IN int luaStackOffset,
                                                   ZF_IN_OPT zfbool allowEmpty = zffalse,
                                                   ZF_OUT_OPT const ZFClass **holderCls = zfnull);
 /** @brief see #ZFImpl_ZFLua_toString */
@@ -496,6 +553,12 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
                                                   ZF_IN_OPT zfbool allowEmpty = zffalse,
                                                   ZF_OUT_OPT const ZFClass **holderCls = zfnull);
 
+/** @brief see #ZFImpl_ZFLua_toNumber */
+extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toNumberT(ZF_OUT zfautoObject &ret,
+                                                   ZF_IN lua_State *L,
+                                                   ZF_IN int luaStackOffset,
+                                                   ZF_IN_OPT zfbool allowEmpty = zffalse,
+                                                   ZF_OUT_OPT const ZFClass **holderCls = zfnull);
 /**
  * @brief get params from lua
  *
@@ -518,27 +581,21 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
  * return proper #ZFValue if success, or empty if fail\n
  * if allowEmpty, a #ZFValue::intValueCreate would be returned
  */
-extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toNumber(ZF_OUT zfautoObject &ret,
-                                                  ZF_IN lua_State *L,
-                                                  ZF_IN zfint luaStackOffset,
-                                                  ZF_IN_OPT zfbool allowEmpty = zffalse,
-                                                  ZF_OUT_OPT const ZFClass **holderCls = zfnull);
-/** @brief see #ZFImpl_ZFLua_toNumber */
 inline zfautoObject ZFImpl_ZFLua_toNumber(ZF_IN lua_State *L,
-                                          ZF_IN zfint luaStackOffset,
+                                          ZF_IN int luaStackOffset,
                                           ZF_IN_OPT zfbool allowEmpty = zffalse,
                                           ZF_OUT_OPT const ZFClass **holderCls = zfnull)
 {
     zfautoObject ret;
-    ZFImpl_ZFLua_toNumber(ret, L, luaStackOffset, allowEmpty, holderCls);
+    ZFImpl_ZFLua_toNumberT(ret, L, luaStackOffset, allowEmpty, holderCls);
     return ret;
 }
 
 /** @brief see #ZFImpl_ZFLua_toNumber */
-extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toNumber(ZF_OUT zfautoObject &ret,
-                                                  ZF_IN ZFObject *obj,
-                                                  ZF_IN_OPT zfbool allowEmpty = zffalse,
-                                                  ZF_OUT_OPT const ZFClass **holderCls = zfnull);
+extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toNumberT(ZF_OUT zfautoObject &ret,
+                                                   ZF_IN ZFObject *obj,
+                                                   ZF_IN_OPT zfbool allowEmpty = zffalse,
+                                                   ZF_OUT_OPT const ZFClass **holderCls = zfnull);
 
 /**
  * @brief convert native type to lua type
@@ -558,7 +615,7 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toLuaValue(ZF_IN lua_State *L,
  */
 extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_zfstringAppend(ZF_IN lua_State *L,
                                                         ZF_IN_OUT zfstring &s,
-                                                        ZF_IN_OPT zfint luaParamOffset = 0);
+                                                        ZF_IN_OPT int luaParamOffset = 1);
 
 // ============================================================
 // wrapper for impl
@@ -604,7 +661,7 @@ inline void ZFImpl_ZFLua_luaPush(ZF_IN lua_State *L, ZF_IN const zfautoObject &v
     ZFImpl_ZFLua_luaPush(L, t);
 }
 /** @brief util for impl */
-inline const zfautoObject &ZFImpl_ZFLua_luaGet(ZF_IN lua_State *L, ZF_IN zfint luaStackOffset)
+inline const zfautoObject &ZFImpl_ZFLua_luaGet(ZF_IN lua_State *L, ZF_IN int luaStackOffset)
 {
     return ELuna::convert2CppType<zfautoObject const &>::convertType(L, luaStackOffset);
 }
@@ -612,10 +669,7 @@ inline const zfautoObject &ZFImpl_ZFLua_luaGet(ZF_IN lua_State *L, ZF_IN zfint l
 #define ZFImpl_ZFLua_dummyError "ZFImpl_ZFLua_dummyError"
 /** @endcond */
 /** @brief util for impl */
-inline int ZFImpl_ZFLua_luaError(ZF_IN lua_State *L)
-{
-    return luaL_error(L, ZFImpl_ZFLua_dummyError);
-}
+extern ZF_ENV_EXPORT int ZFImpl_ZFLua_luaError(ZF_IN lua_State *L);
 
 ZF_NAMESPACE_GLOBAL_END
 

@@ -15,6 +15,7 @@
 #ifndef _ZFI_ZFCore_h_
 #define _ZFI_ZFCore_h_
 
+#include "ZFCore/ZFApp.h"
 #include "ZFCore/ZFArray.h"
 #include "ZFCore/ZFAutoReleasePool.h"
 #include "ZFCore/ZFCacheable.h"
@@ -25,7 +26,6 @@
 #include "ZFCore/ZFEnvInfo.h"
 #include "ZFCore/ZFEvent.h"
 #include "ZFCore/ZFFile.h"
-#include "ZFCore/ZFFileBOM.h"
 #include "ZFCore/ZFGlobalEventCenter_common.h"
 #include "ZFCore/ZFHashMap.h"
 #include "ZFCore/ZFHashSet.h"

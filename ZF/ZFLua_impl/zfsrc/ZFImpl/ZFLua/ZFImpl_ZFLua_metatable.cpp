@@ -16,7 +16,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define _ZFP_ZFImpl_ZFLua_metatable_PrepareParam(param, luaStackOffset) \
     zfautoObject _##param; \
     const ZFClass *param##Cls = zfnull; \
-    if(!ZFImpl_ZFLua_toNumber(_##param, L, luaStackOffset, zftrue, &param##Cls)) \
+    if(!ZFImpl_ZFLua_toNumberT(_##param, L, luaStackOffset, zftrue, &param##Cls)) \
     { \
         ZFLuaErrorOccurredTrim(zfText("[LuaMetatable] unknown param type: %s"), \
             ZFImpl_ZFLua_luaObjectInfo(L, luaStackOffset, zftrue).cString()); \
@@ -153,10 +153,8 @@ static zfbool _ZFP_ZFImpl_ZFLua_metatable_concat_action(ZF_IN_OUT zfstring &v, Z
                 return zftrue;
             }
         }
-        if(ZFObjectToString(v, param))
-        {
-            return zftrue;
-        }
+        ZFObjectInfoT(v, param);
+        return zftrue;
     }
     ZFLuaErrorOccurredTrim(zfText("[LuaMetatable] unknown param type: %s"),
         ZFImpl_ZFLua_luaObjectInfo(L, luaStackOffset, zftrue).cString());
@@ -215,8 +213,8 @@ static zfbool _ZFP_ZFImpl_ZFLua_metatable_cmp(ZF_OUT ZFCompareResult &ret, ZF_IN
         {
             zfautoObject v1;
             zfautoObject v2;
-            if(ZFImpl_ZFLua_toNumber(v1, L, 1)
-                && ZFImpl_ZFLua_toNumber(v2, L, 2))
+            if(ZFImpl_ZFLua_toNumberT(v1, L, 1)
+                && ZFImpl_ZFLua_toNumberT(v2, L, 2))
             {
                 ret = ZFComparerDefault(v1, v2);
                 return zftrue;
@@ -287,7 +285,7 @@ static int _ZFP_ZFImpl_ZFLua_metatable_tostring(ZF_IN lua_State *L)
 }
 
 // ============================================================
-void ZFImpl_ZFLua_implSetupObject_metatable(ZF_IN_OUT lua_State *L, ZF_IN_OPT zfint objIndex /* = -1 */)
+void ZFImpl_ZFLua_implSetupObject_metatable(ZF_IN_OUT lua_State *L, ZF_IN_OPT int objIndex /* = -1 */)
 {
     lua_getglobal(L, zfTextA("_ZFP_ZFImpl_ZFLua_implSetupObject"));
     if(!lua_isfunction(L, -1))
@@ -444,7 +442,7 @@ static int _ZFP_ZFImpl_ZFLua_metatableStoreResult(ZF_IN lua_State *L,
         return zftrue;
     }
 
-    zfblockedAlloc(v_zfint, ret, (zfint)n);
+    zfblockedAlloc(v_zfint, ret, (int)n);
     ZFImpl_ZFLua_luaPush(L, ret);
     return 1;
 }

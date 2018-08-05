@@ -424,7 +424,7 @@ extern ZF_ENV_EXPORT void ZFStyleDefaultApplyAutoCopy(ZF_IN ZFStyleable *style);
  * example:
  * @code
  *   // register
- *   ZFSTYLE_PROPERTY_COPY_DEFINE(ZFTypeId_YourPropertyTypeId, {
+ *   ZFSTYLE_PROPERTY_COPY_DEFINE(YourPropertyTypeIdSig, {
  *           // proto type:
  *           //   zfbool copyFrom(ZF_IN ZFObject *propertyOwner,
  *           //                   ZF_IN const ZFProperty *property,
@@ -443,8 +443,15 @@ extern ZF_ENV_EXPORT void ZFStyleDefaultApplyAutoCopy(ZF_IN ZFStyleable *style);
 extern ZF_ENV_EXPORT void ZFStyleSet(ZF_IN const zfchar *styleKey, ZF_IN ZFStyleable *styleValue);
 /**
  * @brief see #ZFStyleSet
+ *
+ * @note the returned object is the original object set by #ZFStyleSet,
+ *   use #ZFStyleable::styleableCopyFrom or #ZFCopyable::copy
+ *   to create new one if necessary,
+ *   you should not modify the original object
+ * @note you may register your own decoder by #ZFSTYLE_DECODER_DEFINE
+ *   to supply additional style
  */
-extern ZF_ENV_EXPORT ZFStyleable *ZFStyleGet(ZF_IN const zfchar *styleKey);
+extern ZF_ENV_EXPORT zfautoObject ZFStyleGet(ZF_IN const zfchar *styleKey);
 /**
  * @brief get all styles, for debug use only, see #ZFStyleSet
  */
@@ -477,7 +484,7 @@ ZFOBSERVER_EVENT_GLOBAL(ZFStyleOnChange)
  * notified when setting an invalid style value\n
  * sender is the styleable object that changing the styleKey,
  * param0 is a #ZFPointerHolder to #ZFProperty if chaning property
- * or null if changing the styleable object itself,
+ * or holds null if changing the styleable object itself,
  * param1 is a #ZFPointerHolder to (const zfchar *)
  * that holds the new styleKey\n
  * \n
@@ -492,14 +499,56 @@ extern ZF_ENV_EXPORT void ZFStyleInvalidCheckDisable(void);
 
 // ============================================================
 /**
+ * @brief register a custom decoder for #ZFStyleGet
+ *
+ * usage:
+ * @code
+ *   // in header file
+ *   / **
+ *    * add your doc here
+ *    * /
+ *   #define ZFStyleDecoder_xxx xxx
+ *
+ *   ZFSTYLE_DECODER_DEFINE(ZFStyleDecoder_xxx, {
+ *       // perform your decode action, proto type:
+ *       //   zfbool decode(ZF_OUT zfautoObject &ret,
+ *       //                 ZF_IN const zfchar *styleKey);
+ *   })
+ * @endcode
+ * all of the decoder would be executed once (order is not ensured) until success,
+ * if none returned true, builtin style map would be searched instead
+ */
+#define ZFSTYLE_DECODER_DEFINE(registerSig, decodeAction, ...) \
+    _ZFP_ZFSTYLE_DECODER_DEFINE(registerSig, decodeAction, ##__VA_ARGS__)
+#define _ZFP_ZFSTYLE_DECODER_DEFINE(registerSig, decodeAction, ...) \
+    ZF_STATIC_REGISTER_INIT(ZFStyleDecoder_##registerSig) \
+    { \
+        _ZFP_ZFStyleDecoderRegister(ZFM_TOSTRING(registerSig), zfself::_ZFP_decode); \
+    } \
+    ZF_STATIC_REGISTER_DESTROY(ZFStyleDecoder_##registerSig) \
+    { \
+        _ZFP_ZFStyleDecoderUnregister(ZFM_TOSTRING(registerSig)); \
+    } \
+    static zfbool _ZFP_decode(ZF_OUT zfautoObject &ret, ZF_IN const zfchar *styleKey) \
+    { \
+        decodeAction __VA_ARGS__ \
+    } \
+    ZF_STATIC_REGISTER_END(ZFStyleDecoder_##registerSig)
+typedef zfbool (*_ZFP_ZFStyleDecoder)(ZF_OUT zfautoObject &ret, ZF_IN const zfchar *styleKey);
+extern ZF_ENV_EXPORT void _ZFP_ZFStyleDecoderRegister(ZF_IN const zfchar *registerSig,
+                                                      ZF_IN _ZFP_ZFStyleDecoder decoder);
+extern ZF_ENV_EXPORT void _ZFP_ZFStyleDecoderUnregister(ZF_IN const zfchar *registerSig);
+
+// ============================================================
+/**
  * @brief see #ZFStyleSet
  */
-#define ZFSTYLE_PROPERTY_COPY_DEFINE(propertyTypeIdSig, stylePropertyCopyAction) \
-    ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(StylePropCp_##propertyTypeIdSig, ZFLevelZFFrameworkNormal) \
+#define ZFSTYLE_PROPERTY_COPY_DEFINE(propertyTypeIdSig, stylePropertyCopyAction, ...) \
+    ZF_STATIC_REGISTER_INIT(StylePropCp_##propertyTypeIdSig) \
     { \
         _ZFP_ZFStylePropertyCopyRegister(ZFTypeId_##propertyTypeIdSig(), zfself::action); \
     } \
-    ZF_GLOBAL_INITIALIZER_DESTROY(StylePropCp_##propertyTypeIdSig) \
+    ZF_STATIC_REGISTER_DESTROY(StylePropCp_##propertyTypeIdSig) \
     { \
         _ZFP_ZFStylePropertyCopyUnregister(ZFTypeId_##propertyTypeIdSig()); \
     } \
@@ -507,9 +556,9 @@ extern ZF_ENV_EXPORT void ZFStyleInvalidCheckDisable(void);
                          ZF_IN const ZFProperty *property, \
                          ZF_IN ZFStyleable *styleValue) \
     { \
-        stylePropertyCopyAction \
+        stylePropertyCopyAction __VA_ARGS__ \
     } \
-    ZF_GLOBAL_INITIALIZER_END(StylePropCp_##propertyTypeIdSig)
+    ZF_STATIC_REGISTER_END(StylePropCp_##propertyTypeIdSig)
 typedef zfbool (*_ZFP_ZFStylePropertyCopyCallback)(ZF_IN ZFObject *propertyOwner,
                                                    ZF_IN const ZFProperty *property,
                                                    ZF_IN ZFStyleable *styleValue);

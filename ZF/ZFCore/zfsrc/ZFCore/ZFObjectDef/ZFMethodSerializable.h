@@ -28,17 +28,15 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * @endcode
  *
  * valid method signature:
- * -  "OwnerClass::methodName" :
+ * -  "OwnerClass.methodName" :
  *   for class member type method
- * -  "OwnerClass::methodName:methodParamTypeId0" :
- *   for class member type method
- * -  "::methodName" :
+ * -  "OwnerClass.methodName:methodParamTypeId0:methodParamTypeId1" :
+ *   for method with params
+ * -  "methodName" :
  *   for function type method with default name space
- * -  "::methodName:methodParamTypeId0" :
+ * -  ".methodName" :
  *   for function type method with default name space
- * -  "MethodNamespace::methodName" :
- *   for function type method with custom name space
- * -  "MethodNamespace::methodName:methodParamTypeId0" :
+ * -  "MethodNamespace0.MethodNamespace1.methodName" :
  *   for function type method with custom name space
  */
 ZFTYPEID_DECLARE(ZFMethod, const ZFMethod *)
@@ -64,7 +62,7 @@ extern ZF_ENV_EXPORT const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *classOr
  * methodSigPos must be successfully decoded by #ZFMethodSigSplit
  */
 extern ZF_ENV_EXPORT const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *methodSig,
-                                                     ZF_IN const ZFCoreArray<zfindexRange> &methodSigPos);
+                                                     ZF_IN const ZFCoreArray<ZFIndexRange> &methodSigPos);
 
 /**
  * @brief split method sig
@@ -81,7 +79,7 @@ extern ZF_ENV_EXPORT const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *methodS
  * -  pos[8] : range of methodParamTypeId6, 0 length if none
  * -  pos[9] : range of methodParamTypeId7, 0 length if none
  */
-extern ZF_ENV_EXPORT zfbool ZFMethodSigSplit(ZF_OUT ZFCoreArray<zfindexRange> &ret,
+extern ZF_ENV_EXPORT zfbool ZFMethodSigSplit(ZF_OUT ZFCoreArray<ZFIndexRange> &ret,
                                              ZF_IN const zfchar *src,
                                              ZF_IN_OPT zfindex srcLen = zfindexMax());
 

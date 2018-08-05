@@ -10,6 +10,7 @@
 #include "ZFCoreStatistic.h"
 #include "ZFCoreStringUtil.h"
 #include "ZFCoreMap.h"
+#include "ZFNamespaceImpl.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 ZF_NAMESPACE_BEGIN(ZFCoreStatistic)
@@ -47,6 +48,6 @@ zfindex invokeCountGet(ZF_IN const zfchar *key)
     return ((count != zfnull) ? *count : 0);
 }
 
-ZF_NAMESPACE_END(ZFCoreStatistic)
+ZF_NAMESPACE_END_WITH_REGISTER(ZFCoreStatistic, ZF_NAMESPACE_GLOBAL)
 ZF_NAMESPACE_GLOBAL_END
 

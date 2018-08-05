@@ -54,7 +54,7 @@ static void _ZFP_ZFStyleLoadImpl(ZF_IN const ZFFilePathInfoData &fileImpl,
                     continue;
                 }
                 zfautoObject styleValue;
-                if(ZFObjectIOLoad(styleValue, ZFInputForPathInfo(ZFPathInfo(pathType, pathDataChild))))
+                if(ZFObjectIOLoadT(styleValue, ZFInputForPathInfo(ZFPathInfo(pathType, pathDataChild))))
                 {
                     ZFFilePathOfWithoutExt(relativePathTmp, relativePathTmp);
                     ZFStyleSet(relativePathTmp, styleValue);
@@ -86,40 +86,26 @@ ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFStyleLoad,
 ZFMETHOD_FUNC_DEFINE_1(zfbool, ZFStyleLoad,
                        ZFMP_IN(const ZFSerializableData &, serializableData))
 {
-    ZFStyleChangeBegin();
-    for(zfindex i = 0; i < serializableData.elementCount(); ++i)
+    if(serializableData.elementCount() > 0)
     {
-        const ZFSerializableData &child = serializableData.elementAtIndex(i);
-        const zfchar *styleKey = ZFSerializableUtil::checkPropertyName(child);
-        if(styleKey != zfnull)
+        ZFStyleChangeBegin();
+        for(zfindex i = 0; i < serializableData.elementCount(); ++i)
         {
-            zfautoObject styleValueHolder = ZFObjectFromData(child);
-            ZFStyleable *styleValue = styleValueHolder;
-            if(styleValue != zfnull)
+            const ZFSerializableData &child = serializableData.elementAtIndex(i);
+            const zfchar *styleKey = ZFSerializableUtil::checkPropertyName(child);
+            if(styleKey != zfnull)
             {
-                ZFStyleSet(styleKey, styleValue);
+                zfautoObject styleValueHolder = ZFObjectFromData(child);
+                ZFStyleable *styleValue = styleValueHolder;
+                if(styleValue != zfnull)
+                {
+                    ZFStyleSet(styleKey, styleValue);
+                }
             }
         }
+        ZFStyleChangeEnd();
     }
-    ZFStyleChangeEnd();
     return zftrue;
-}
-
-// ============================================================
-ZFMETHOD_FUNC_DEFINE_1(zfautoObject, ZFStyleCreate,
-                       ZFMP_IN(const zfchar *, styleKey))
-{
-    ZFStyleable *style = ZFStyleGet(styleKey);
-    if(style != zfnull)
-    {
-        zfautoObject ret = style->classData()->newInstance();
-        ZFStyleable *t = ret;
-        if(t->styleKeySet(styleKey))
-        {
-            return ret;
-        }
-    }
-    return zfnull;
 }
 
 ZF_NAMESPACE_GLOBAL_END

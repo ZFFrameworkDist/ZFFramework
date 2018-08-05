@@ -9,6 +9,9 @@
  * ====================================================================== */
 #include "ZFImpl_ZFLua.h"
 
+#include "ZFCore/ZFSTLWrapper/zfstl_map.h"
+#include "ZFCore/ZFSTLWrapper/zfstl_string.h"
+
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -16,7 +19,7 @@ static void _ZFP_ZFImpl_ZFLua_ZFMethod_setupGlobalMethod(ZF_IN const ZFCoreArray
                                                          ZF_IN const ZFMethod *method)
 {
     if(!method->methodIsFunctionType()
-        || !zfscmpTheSame(method->methodNamespace(), ZFMethodFuncNamespaceGlobal))
+        || method->methodNamespace() != zfnull)
     {
         return ;
     }
@@ -24,7 +27,7 @@ static void _ZFP_ZFImpl_ZFLua_ZFMethod_setupGlobalMethod(ZF_IN const ZFCoreArray
     zfstring code;
     zfstringAppend(code, zfText(
             "function %s(...)\n"
-            "    return zfl_callStatic2('zf', '%s', ...)\n"
+            "    return zfl_callStatic2('', '%s', ...)\n"
             "end\n"
         ), method->methodName(), method->methodName());
     for(zfindex i = 0; i < luaStateList.count(); ++i)
@@ -39,7 +42,7 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange)
     {
         if(data->changedMethod->methodIsFunctionType())
         {
-            const ZFCoreArrayPOD<lua_State *> &luaStateList = ZFImpl_ZFLua_luaStateAttached();
+            const ZFCoreArrayPOD<lua_State *> &luaStateList = ZFImpl_ZFLua_luaStateList();
             for(zfindex i = 0; i < luaStateList.count(); ++i)
             {
                 ZFImpl_ZFLua_implSetupScope(luaStateList[i], data->changedMethod->methodNamespace());
@@ -49,33 +52,53 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange)
         }
     }
 }
-ZFImpl_ZFLua_implSetupCallback_DEFINE(ZFMethod, {
+ZFImpl_ZFLua_implSetupCallback_DEFINE(ZFMethod, ZFM_EXPAND({
         ZFCoreArrayPOD<const ZFMethod *> allMethod = ZFMethodFuncGetAll();
         if(!allMethod.isEmpty())
         {
-            const zfchar **methodNameList = (const zfchar **)zfmalloc(sizeof(const zfchar *) * (allMethod.count() + 1));
-            zfblockedFree(methodNameList);
-
+            zfstlmap<zfstlstringZ, zfbool> methodNamespaceList;
             ZFCoreArrayPOD<lua_State *> luaStateList;
             luaStateList.add(L);
             for(zfindex i = 0; i < allMethod.count(); ++i)
             {
                 const ZFMethod *method = allMethod[i];
-                methodNameList[i] = method->methodNamespace();
+                if(method->methodNamespace() != zfnull)
+                {
+                    zfindex dotPos = zfstringFind(method->methodNamespace(), zfindexMax(), ZFNamespaceSeparator());
+                    if(dotPos == zfindexMax())
+                    {
+                        methodNamespaceList[method->methodNamespace()] = zftrue;
+                    }
+                    else
+                    {
+                        methodNamespaceList[zfstring(method->methodNamespace(), dotPos).cString()] = zftrue;
+                    }
+                }
                 _ZFP_ZFImpl_ZFLua_ZFMethod_setupGlobalMethod(luaStateList, method);
             }
-            methodNameList[allMethod.count()] = zfnull;
 
-            ZFImpl_ZFLua_implSetupScope(L, methodNameList);
+            if(!methodNamespaceList.empty())
+            {
+                const zfchar **tmp = (const zfchar **)zfmalloc(sizeof(const zfchar *) * (allMethod.count() + 1));
+                zfblockedFree(tmp);
+                zfindex i = 0;
+                for(zfstlmap<zfstlstringZ, zfbool>::iterator it = methodNamespaceList.begin(); it != methodNamespaceList.end(); ++it)
+                {
+                    tmp[i] = it->first.c_str();
+                    ++i;
+                }
+                tmp[i] = zfnull;
+                ZFImpl_ZFLua_implSetupScope(L, tmp);
+            }
         }
 
         ZFClassDataChangeObserver.observerAdd(
             ZFGlobalEvent::EventClassDataChange(),
             ZFCallbackForFunc(_ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange));
 
-        ZFImpl_ZFLua_implSetupScope(L, ZFLuaFuncNamespaceGlobal);
-        ZFImpl_ZFLua_implSetupScope(L, ZFMethodFuncNamespaceGlobal);
-    }, {
+        ZFImpl_ZFLua_implSetupScope(L, ZF_NAMESPACE_GLOBAL_NAME);
+        ZFImpl_ZFLua_implSetupScope(L, ZF_NAMESPACE_GLOBAL_ABBR_NAME);
+    }), {
         ZFClassDataChangeObserver.observerRemove(
             ZFGlobalEvent::EventClassDataChange(),
             ZFCallbackForFunc(_ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange));

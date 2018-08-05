@@ -101,8 +101,8 @@ void errorOccurredWhile(ZF_OUT_OPT zfstring *outErrorHint,
 #endif
 }
 
-const zfchar *checkSerializableClass(ZF_IN const zfchar *desiredClass,
-                                     ZF_IN const ZFSerializableData &serializableData)
+const zfchar *checkItemClass(ZF_IN const ZFSerializableData &serializableData,
+                             ZF_IN const zfchar *desiredClass)
 {
     const zfchar *serializableClass = serializableData.itemClass();
     if(zfscmpTheSame(desiredClass, ZFTypeId_none()))
@@ -121,12 +121,12 @@ const zfchar *checkSerializableClass(ZF_IN const zfchar *desiredClass,
         }
     }
 }
-const zfchar *requireSerializableClass(ZF_IN const zfchar *desiredClass,
-                                       ZF_IN const ZFSerializableData &serializableData,
-                                       ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
-                                       ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
+const zfchar *requireItemClass(ZF_IN const ZFSerializableData &serializableData,
+                               ZF_IN const zfchar *desiredClass,
+                               ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
+                               ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
 {
-    const zfchar *ret = checkSerializableClass(desiredClass, serializableData);
+    const zfchar *ret = checkItemClass(serializableData, desiredClass);
     if(ret == zfnull)
     {
         if(desiredClass == zfnull || *desiredClass == '\0')
@@ -289,6 +289,6 @@ zfbool printResolveStatus(ZF_IN const ZFSerializableData &serializableData,
     return ret;
 }
 
-ZF_NAMESPACE_END(ZFSerializableUtil)
+ZF_NAMESPACE_END_WITH_REGISTER(ZFSerializableUtil, ZF_NAMESPACE_GLOBAL)
 ZF_NAMESPACE_GLOBAL_END
 

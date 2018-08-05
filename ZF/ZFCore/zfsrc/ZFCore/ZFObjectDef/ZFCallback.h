@@ -206,11 +206,9 @@ public:
      */
     zffinal zfindex objectRetainCount(void) const;
 
-    /**
-     * @brief get a short info about the callback
-     */
+    /** @brief see #objectInfo */
     virtual void objectInfoT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoT */
+    /** @brief return object info */
     zffinal inline zfstring objectInfo(void) const
     {
         zfstring ret;
@@ -362,13 +360,6 @@ public:
     /**
      * @brief see #ZFTypeId_ZFCallback
      */
-    zffinal void callbackSerializeCustomDisable(void)
-    {
-        this->callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomTypeDisable);
-    }
-    /**
-     * @brief see #ZFTypeId_ZFCallback
-     */
     zffinal const zfchar *callbackSerializeCustomType(void) const;
     /**
      * @brief see #ZFTypeId_ZFCallback
@@ -385,6 +376,21 @@ public:
      * @brief see #ZFTypeId_ZFCallback
      */
     zffinal const ZFSerializableData *callbackSerializeCustomData(void) const;
+
+    /**
+     * @brief see #ZFTypeId_ZFCallback
+     */
+    zffinal void callbackSerializeCustomDisable(ZF_IN zfbool disable)
+    {
+        this->callbackSerializeCustomTypeSet(disable ? ZFCallbackSerializeCustomTypeDisable : zfnull);
+    }
+    /**
+     * @brief see #ZFTypeId_ZFCallback
+     */
+    zffinal zfbool callbackSerializeCustomDisabled(void) const
+    {
+        return zfscmpTheSame(this->callbackSerializeCustomType(), ZFCallbackSerializeCustomTypeDisable);
+    }
 
     // ============================================================
     // local path logic

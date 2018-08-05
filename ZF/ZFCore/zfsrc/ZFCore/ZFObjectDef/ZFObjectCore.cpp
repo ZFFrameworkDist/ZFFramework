@@ -108,7 +108,7 @@ ZFAny ZFObject::objectHolded(void)
 
 void ZFObject::objectInfoOfInstanceT(ZF_IN_OUT zfstring &ret)
 {
-    ret += this->classData()->className();
+    ret += this->classData()->classNameFull();
     ret += zfText("(");
     zfsFromPointerT(ret, this);
     ret += zfText(")");
@@ -152,16 +152,17 @@ zfautoObject ZFObject::invoke(ZF_IN const zfchar *methodName
     for(zfindex i = 0; i < methodList.count(); ++i)
     {
         const ZFMethod *m = methodList[i];
-        if(m->methodGenericInvoker()(m, this, &errorHintTmp, ret
-                , param0
-                , param1
-                , param2
-                , param3
-                , param4
-                , param5
-                , param6
-                , param7
-            ))
+        zfautoObject paramList[ZFMETHOD_MAX_PARAM] = {
+            param0,
+            param1,
+            param2,
+            param3,
+            param4,
+            param5,
+            param6,
+            param7,
+        };
+        if(m->methodGenericInvoker()(m, this, &errorHintTmp, ret, paramList))
         {
             if(success != zfnull)
             {
@@ -202,7 +203,7 @@ void ZFObject::tagSet(ZF_IN const zfchar *key,
     if(ZFBitTest(d->objectInstanceState, ZFObjectInstanceStateOnDealloc) && tag != zfnull)
     {
         zfCoreCriticalMessageTrim(zfTextA("[ZFObject] you must not set tag while object is deallocating, class: %s, tag: %s"),
-            zfsCoreZ2A(this->classData()->className()),
+            zfsCoreZ2A(this->classData()->classNameFull()),
             zfsCoreZ2A(key));
         return ;
     }
@@ -289,7 +290,7 @@ void ZFObject::tagRemoveAll(void)
 }
 
 
-void ZFObject::observerOnAdd(ZF_IN const zfidentity &eventId)
+void ZFObject::observerOnAdd(ZF_IN zfidentity eventId)
 {
     if(zffalse)
     {
@@ -307,7 +308,7 @@ void ZFObject::observerOnAdd(ZF_IN const zfidentity &eventId)
         ZFBitSet(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectPropertyValueOnUpdate);
     }
 }
-void ZFObject::observerOnRemove(ZF_IN const zfidentity &eventId)
+void ZFObject::observerOnRemove(ZF_IN zfidentity eventId)
 {
     if(zffalse)
     {
@@ -405,20 +406,18 @@ ZFObject *ZFObject::_ZFP_ZFObjectCheckOnInit(void)
 }
 void ZFObject::_ZFP_ZFObjectCheckRelease(void)
 {
-    if(!this->objectIsInternal())
+    if(ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectBeforeDealloc)
+        || ZFBitTest(_ZFP_ZFObject_stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectBeforeDealloc))
     {
-        if(ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectBeforeDealloc)
-            || ZFBitTest(_ZFP_ZFObject_stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectBeforeDealloc))
+        if(d->objectRetainCount == 1)
         {
-            if(d->objectRetainCount == 1)
+            this->observerNotify(ZFObject::EventObjectBeforeDealloc());
+            this->tagRemoveAll();
+            if(d->objectRetainCount > 1)
             {
-                this->observerNotify(ZFObject::EventObjectBeforeDealloc());
-                if(d->objectRetainCount > 1)
-                {
-                    this->objectOnRelease();
-                    this->observerRemoveAll(ZFObject::EventObjectBeforeDealloc());
-                    return ;
-                }
+                this->objectOnRelease();
+                this->observerRemoveAll(ZFObject::EventObjectBeforeDealloc());
+                return ;
             }
         }
     }
@@ -605,18 +604,19 @@ ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, tagRemove, ZFMP_IN(co
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, zfautoObject, tagRemoveAndGet, ZFMP_IN(const zfchar *, key))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, void, tagRemoveAll)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, const ZFObserverHolder &, observerHolder)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_6(ZFObject, zfidentity, observerAdd, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, observer), ZFMP_IN_OPT(ZFObject *, userData, zfnull), ZFMP_IN_OPT(ZFObject *, owner, zfnull), ZFMP_IN_OPT(zfbool, autoRemoveAfterActivate, zffalse), ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_6(ZFObject, zfidentity, observerAdd, ZFMP_IN(zfidentity, eventId), ZFMP_IN(const ZFListener &, observer), ZFMP_IN_OPT(ZFObject *, userData, zfnull), ZFMP_IN_OPT(ZFObject *, owner, zfnull), ZFMP_IN_OPT(zfbool, autoRemoveAfterActivate, zffalse), ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, zfidentity, observerAdd, ZFMP_IN(const ZFObserverAddParam &, param))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_2(ZFObject, void, observerRemove, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, callback))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerRemove, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN(const ZFListener &, callback), ZFMP_IN(ZFObject *, userData), ZFMP_IN_OPT(ZFComparer<ZFObject *>::Comparer, userDataComparer, ZFComparerCheckEqual))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerMoveToFirst, ZFMP_IN(zfidentity, taskId))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_2(ZFObject, void, observerRemove, ZFMP_IN(zfidentity, eventId), ZFMP_IN(const ZFListener &, callback))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerRemove, ZFMP_IN(zfidentity, eventId), ZFMP_IN(const ZFListener &, callback), ZFMP_IN(ZFObject *, userData), ZFMP_IN_OPT(ZFComparer<ZFObject *>::Comparer, userDataComparer, ZFComparerCheckEqual))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveByTaskId, ZFMP_IN(zfidentity, taskId))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveByOwner, ZFMP_IN(ZFObject *, owner))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveAll, ZFMP_IN(const zfidentity &, eventId))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, observerRemoveAll, ZFMP_IN(zfidentity, eventId))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, void, observerRemoveAll)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, zfbool, observerHasAdd)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, zfbool, observerHasAdd, ZFMP_IN(const zfidentity &, eventId))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_3(ZFObject, void, observerNotify, ZFMP_IN(const zfidentity &, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerNotifyWithCustomSender, ZFMP_IN(ZFObject *, customSender), ZFMP_IN(const zfidentity &, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, zfbool, observerHasAdd, ZFMP_IN(zfidentity, eventId))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_3(ZFObject, void, observerNotify, ZFMP_IN(zfidentity, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerNotifyWithCustomSender, ZFMP_IN(ZFObject *, customSender), ZFMP_IN(zfidentity, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, ZFObjectInstanceState, objectInstanceState)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, zfbool, objectIsPrivate)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, objectIsPrivateSet, ZFMP_IN(zfbool, value))

@@ -15,7 +15,7 @@
 #ifndef _ZFI_ZFPropertyDeclare_h_
 #define _ZFI_ZFPropertyDeclare_h_
 
-#include "ZFProperty.h"
+#include "ZFPropertyCallbackDefaultImpl.h"
 #include "zfautoObjectFwd.h"
 #include "ZFMethodDeclare.h"
 
@@ -31,7 +31,7 @@ zfclassFwd ZFClass;
 /**
  * @brief get property by name, or null if not registered
  */
-extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const zfchar *clsName,
+extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const zfchar *classNameOrFullName,
                                                      ZF_IN const zfchar *propertyName);
 /**
  * @brief get property by name, or null if not registered
@@ -150,7 +150,7 @@ extern ZF_ENV_EXPORT const ZFProperty *ZFPropertyGet(ZF_IN const ZFClass *cls,
         _ZFP_ZFPROPERTY_GETTER(GetterAccessType, Type, Name) \
         /** @brief see @ref Name */ \
         _ZFP_ZFPROPERTY_SETTER_RETAIN(SetterAccessType, Type, Name) \
-        _ZFP_ZFPROPERTY_DECLARE_RETAIN(Type, ZFTypeId_ZFObject(), Name, \
+        _ZFP_ZFPROPERTY_DECLARE_RETAIN(Type, zftTraits<Type>::TrType::ClassData()->classNameFull(), Name, \
                                        InitValueOrEmpty) \
     public:
 
@@ -413,9 +413,10 @@ public:
                     , propertyClassOfRetainProperty \
                     , zfself::_ZFP_propCbAccessed_##Name \
                     , zfself::_ZFP_propCbIsInit_##Name \
-                    , _ZFP_propCbDValueSet<zfself::PropHT_##Name, zfself::PropVT_##Name> \
-                    , zfself::_ZFP_propCbGet_##Name \
                     , zfself::_ZFP_propCbReset_##Name \
+                    , _ZFP_propCbDValueSet<zfself::PropHT_##Name, zfself::PropVT_##Name> \
+                    , zfself::_ZFP_propCbGet_retain_##Name \
+                    , _ZFP_propCbDValueGetRelease_dummy \
                     , _ZFP_propCbDCompare<zfself::PropHT_##Name> \
                     , _ZFP_propCbDGetInfo<zfself::PropHT_##Name> \
                     , _ZFP_propCbDValueStore<PropHT_##Name> \
@@ -445,9 +446,10 @@ public:
                     , propertyClassOfRetainProperty \
                     , zfself::_ZFP_propCbAccessed_##Name \
                     , zfself::_ZFP_propCbIsInit_##Name \
-                    , _ZFP_propCbDValueSet<zfself::PropHT_##Name, zfself::PropVT_##Name> \
-                    , _ZFP_propCbDValueGet<zfself::PropHT_##Name, zfself::PropVT_##Name> \
                     , zfself::_ZFP_propCbReset_##Name \
+                    , _ZFP_propCbDValueSet<zfself::PropHT_##Name, zfself::PropVT_##Name> \
+                    , _ZFP_propCbDValueGet_assign<zfself::PropHT_##Name, zfself::PropVT_##Name> \
+                    , _ZFP_propCbDValueGetRelease_dummy \
                     , _ZFP_propCbDCompare<zfself::PropHT_##Name> \
                     , _ZFP_propCbDGetInfo<zfself::PropHT_##Name> \
                     , _ZFP_propCbDValueStore<PropHT_##Name> \
@@ -545,8 +547,9 @@ public:
                 return zftrue; \
             } \
         } \
-        static const void *_ZFP_propCbGet_##Name(ZF_IN const ZFProperty *property, \
-                                                 ZF_IN ZFObject *ownerObj) \
+        static const void *_ZFP_propCbGet_retain_##Name(ZF_IN const ZFProperty *property, \
+                                                        ZF_IN ZFObject *ownerObj, \
+                                                        ZF_IN_OUT void *&valueToken) \
         { \
             zfCoreMutexLocker(); \
             zfself *t = ZFCastZFObjectUnchecked(zfself *, ownerObj); \
@@ -557,10 +560,10 @@ public:
 #define _ZFP_ZFPROPERTY_VALUE_DECLARE_ASSIGN(Type, ZFTypeId_noneOrType, Name, \
                                              InitValueOrEmpty) \
     public: \
-        /** @brief original type for the property */ \
+        /** @cond ZFPrivateDoc */ \
         typedef Type PropVT_##Name; \
-        /** @brief value holder type for the property */ \
         typedef Type PropHT_##Name; \
+        /** @endcond */ \
     private: \
         zffinal zfclassNotPOD _ZFP_PropV_##Name \
         { \
@@ -680,7 +683,7 @@ public:
             notAutoRegister, \
             AccessType, ZFMethodTypeVirtual, \
             void, _ZFP_ZFPROPERTY_SETTER_NAME(Type, Name), ZF_CALLER_LINE \
-            , ZFMP_IN(Type const &, propertyValue) \
+            , _ZFP_MtdP_EXPAND(ZFMP_IN(Type const &, propertyValue)) \
             , _ZFP_ZFMP_DUMMY() \
             , _ZFP_ZFMP_DUMMY() \
             , _ZFP_ZFMP_DUMMY() \
@@ -710,7 +713,7 @@ public:
             notAutoRegister, \
             AccessType, ZFMethodTypeVirtual, \
             void, _ZFP_ZFPROPERTY_SETTER_NAME(Type, Name), ZF_CALLER_LINE \
-            , ZFMP_IN(Type const &, propertyValue) \
+            , _ZFP_MtdP_EXPAND(ZFMP_IN(Type const &, propertyValue)) \
             , _ZFP_ZFMP_DUMMY() \
             , _ZFP_ZFMP_DUMMY() \
             , _ZFP_ZFMP_DUMMY() \

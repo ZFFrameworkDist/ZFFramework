@@ -292,7 +292,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFFilePathInfoUnregister(ZF_IN const zfchar *path
         , callbackIsError_ \
         , callbackSize_ \
     ) \
-    ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFFilePathInfoReg_##registerSig, ZFLevelZFFrameworkStatic) \
+    ZF_STATIC_REGISTER_INIT(ZFFilePathInfoReg_##registerSig) \
     { \
         ZFFilePathInfoData data; \
         data.callbackIsExist = callbackIsExist_; \
@@ -317,19 +317,17 @@ extern ZF_ENV_EXPORT void _ZFP_ZFFilePathInfoUnregister(ZF_IN const zfchar *path
         data.callbackSize = callbackSize_; \
         _ZFP_ZFFilePathInfoRegister(pathType, data); \
     } \
-    ZF_GLOBAL_INITIALIZER_DESTROY(ZFFilePathInfoReg_##registerSig) \
+    ZF_STATIC_REGISTER_DESTROY(ZFFilePathInfoReg_##registerSig) \
     { \
         _ZFP_ZFFilePathInfoUnregister(pathType); \
     } \
-    ZF_GLOBAL_INITIALIZER_END(ZFFilePathInfoReg_##registerSig)
+    ZF_STATIC_REGISTER_END(ZFFilePathInfoReg_##registerSig)
 
 /**
  * @brief get data registered by #ZFPATHTYPE_FILEIO_REGISTER
  */
 extern ZF_ENV_EXPORT const ZFFilePathInfoData *ZFFilePathInfoDataGet(ZF_IN const zfchar *pathType);
-/**
- * @brief get all data registered by #ZFPATHTYPE_FILEIO_REGISTER
- */
+/** @brief see #ZFFilePathInfoDataGetAll */
 extern ZF_ENV_EXPORT void ZFFilePathInfoDataGetAllT(ZF_OUT ZFCoreArrayPOD<const zfchar *> &ret);
 /**
  * @brief get all data registered by #ZFPATHTYPE_FILEIO_REGISTER
@@ -344,28 +342,19 @@ inline ZFCoreArrayPOD<const zfchar *> ZFFilePathInfoDataGetAll(void)
 // ============================================================
 // utils
 /**
- * @brief util to check BOM size
- *
- * if success, return BOM size and seek to the position right after BOM\n
- * if fail, return 0 and try to seek to begin of file
+ * @brief util to make a child path info relative to existing one,
+ *   see also #ZFFilePathInfoCallbackToChild
  */
-extern ZF_ENV_EXPORT zfindex ZFFilePathInfoBOMCheck(ZF_IN_OUT const ZFFilePathInfoData &impl,
-                                                    ZF_IN_OUT ZFToken token,
-                                                    ZF_IN_OPT const ZFFileBOMList &autoSkipBOMTable = ZFFileBOMListDefault());
+ZFMETHOD_FUNC_DECLARE_3(zfbool, ZFFilePathInfoMakeT,
+                        ZFMP_OUT(ZFPathInfo &, ret),
+                        ZFMP_IN(const ZFPathInfo &, pathInfo),
+                        ZFMP_IN(const zfchar *, childPath))
 /**
- * @brief fseek accorrding to BOM size
+ * @brief see #ZFFilePathInfoMakeT
  */
-extern ZF_ENV_EXPORT zfbool ZFFilePathInfoBOMSeek(ZF_IN_OUT const ZFFilePathInfoData &impl,
-                                                  ZF_IN_OUT ZFToken token,
-                                                  ZF_IN zfindex BOMSize,
-                                                  ZF_IN zfindex byteSize,
-                                                  ZF_IN ZFSeekPos pos);
-/**
- * @brief ftell accorrding to BOM size
- */
-extern ZF_ENV_EXPORT zfindex ZFFilePathInfoBOMTell(ZF_IN_OUT const ZFFilePathInfoData &impl,
-                                                   ZF_IN ZFToken token,
-                                                   ZF_IN zfindex BOMSize);
+ZFMETHOD_FUNC_DECLARE_2(ZFPathInfo, ZFFilePathInfoMake,
+                        ZFMP_IN(const ZFPathInfo &, pathInfo),
+                        ZFMP_IN(const zfchar *, childPath))
 
 // ============================================================
 // ZFInputForPathInfo
@@ -377,7 +366,6 @@ extern ZF_ENV_EXPORT zfindex ZFFilePathInfoBOMTell(ZF_IN_OUT const ZFFilePathInf
  *   <node>
  *       <ZFPathInfo category="pathInfo" ... />
  *       <ZFFileOpenOptionFlags category="flags" ... /> // optional, ZFFileOpenOption::e_Read by default
- *       <zfstring category="autoSkipBOMTable" ... /> // optional, ZFFileBOMListDefault by default
  *   </node>
  * @endcode
  */
@@ -389,24 +377,27 @@ extern ZF_ENV_EXPORT zfindex ZFFilePathInfoBOMTell(ZF_IN_OUT const ZFFilePathInf
  * param:
  * -  (const ZFPathInfo &)pathInfo: see #ZFPathInfo
  * -  (ZFFileOpenOption)flags: flags to open file
- * -  (const ZFFileBOMList &)autoSkipBOMTable: BOM to skip,
- *   if not empty, BOM would be discarded and BOM's size would be ignored while calculating the file's size
  *
  * auto open and auto close files, may return a null callback if open file error\n
  * \n
  * note, additional impl can be attached by #ZFPATHTYPE_FILEIO_REGISTER
  */
-ZFMETHOD_FUNC_DECLARE_3(ZFInput, ZFInputForPathInfo,
+ZFMETHOD_FUNC_DECLARE_2(ZFInput, ZFInputForPathInfo,
                         ZFMP_IN(const ZFPathInfo &, pathInfo),
-                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read),
-                        ZFMP_IN_OPT(const ZFFileBOMList &, autoSkipBOMTable, ZFFileBOMListDefault()))
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read))
 /**
  * @brief see #ZFInputForPathInfo
  */
-ZFMETHOD_FUNC_DECLARE_3(ZFInput, ZFInputForPathInfoString,
+ZFMETHOD_FUNC_DECLARE_2(ZFInput, ZFInputForPathInfoString,
                         ZFMP_IN(const zfchar *, pathInfoString),
-                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read),
-                        ZFMP_IN_OPT(const ZFFileBOMList &, autoSkipBOMTable, ZFFileBOMListDefault()))
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read))
+/**
+ * @brief see #ZFInputForPathInfo
+ */
+ZFMETHOD_FUNC_DECLARE_3(zfbool, ZFInputForPathInfoStringT,
+                        ZFMP_IN_OUT(ZFCallback &, ret),
+                        ZFMP_IN(const zfchar *, pathInfoString),
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read))
 /**
  * @brief see #ZFInputForPathInfo
  *
@@ -414,12 +405,11 @@ ZFMETHOD_FUNC_DECLARE_3(ZFInput, ZFInputForPathInfoString,
  * -  allow set #ZFCallbackSerializeCustomTypeDisable
  * -  less extra copy on pathInfo
  */
-ZFMETHOD_FUNC_DECLARE_5(zfbool, ZFInputForPathInfoT,
+ZFMETHOD_FUNC_DECLARE_4(zfbool, ZFInputForPathInfoT,
                         ZFMP_IN_OUT(ZFCallback &, ret),
                         ZFMP_IN(const zfchar *, pathType),
                         ZFMP_IN(const zfchar *, pathData),
-                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read),
-                        ZFMP_IN_OPT(const ZFFileBOMList &, autoSkipBOMTable, ZFFileBOMListDefault()))
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read))
 
 // ============================================================
 // ZFOutputForPathInfo
@@ -458,6 +448,13 @@ ZFMETHOD_FUNC_DECLARE_2(ZFOutput, ZFOutputForPathInfoString,
                         ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Create))
 /**
  * @brief see #ZFOutputForPathInfo
+ */
+ZFMETHOD_FUNC_DECLARE_3(zfbool, ZFOutputForPathInfoStringT,
+                        ZFMP_IN_OUT(ZFCallback &, ret),
+                        ZFMP_IN(const zfchar *, pathInfoString),
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Create))
+/**
+ * @brief see #ZFOutputForPathInfo
  *
  * this method is designed for performance for further impl, by:
  * -  allow set #ZFCallbackSerializeCustomTypeDisable
@@ -479,7 +476,6 @@ ZFMETHOD_FUNC_DECLARE_4(zfbool, ZFOutputForPathInfoT,
  *   <node>
  *       <zfstring category="filePath" ... />
  *       <ZFFileOpenOptionFlags category="flags" ... /> // optional, ZFFileOpenOption::e_Read by default
- *       <zfstring category="autoSkipBOMTable" ... /> // optional, ZFFileBOMListDefault by default
  *   </node>
  * @endcode
  */
@@ -492,27 +488,23 @@ ZFMETHOD_FUNC_DECLARE_4(zfbool, ZFOutputForPathInfoT,
  * -  (const ZFPathInfo &)pathInfo: see #ZFPathInfo
  * -  (const zfchar *)localPath: local file path to use
  * -  (ZFFileOpenOption)flags: flags to open file
- * -  (const ZFFileBOMList &)autoSkipBOMTable: BOM to skip,
- *   if not empty, BOM would be discarded and BOM's size would be ignored while calculating the file's size
  *
  * auto open and auto close files, may return a null callback if open file error\n
  * \n
  * note, additional impl can be attached by #ZFPATHTYPE_FILEIO_REGISTER
  */
-ZFMETHOD_FUNC_DECLARE_4(ZFInput, ZFInputForLocalFile,
+ZFMETHOD_FUNC_DECLARE_3(ZFInput, ZFInputForLocalFile,
                         ZFMP_IN(const ZFPathInfo &, pathInfo),
                         ZFMP_IN(const zfchar *, localPath),
-                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read),
-                        ZFMP_IN_OPT(const ZFFileBOMList &, autoSkipBOMTable, ZFFileBOMListDefault()))
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read))
 /**
  * @brief see #ZFInputForLocalFile
  */
-ZFMETHOD_FUNC_DECLARE_5(zfbool, ZFInputForLocalFileT,
+ZFMETHOD_FUNC_DECLARE_4(zfbool, ZFInputForLocalFileT,
                         ZFMP_OUT(ZFCallback &, ret),
                         ZFMP_IN(const ZFPathInfo &, pathInfo),
                         ZFMP_IN(const zfchar *, localPath),
-                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read),
-                        ZFMP_IN_OPT(const ZFFileBOMList &, autoSkipBOMTable, ZFFileBOMListDefault()))
+                        ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Read))
 
 // ============================================================
 // ZFOutputForLocalFile
@@ -545,6 +537,16 @@ ZFMETHOD_FUNC_DECLARE_3(ZFOutput, ZFOutputForLocalFile,
                         ZFMP_IN(const ZFPathInfo &, pathInfo),
                         ZFMP_IN(const zfchar *, localPath),
                         ZFMP_IN_OPT(ZFFileOpenOptionFlags, flags, ZFFileOpenOption::e_Create))
+
+// ============================================================
+/**
+ * @brief see #ZFSTYLE_DECODER_DEFINE
+ *
+ * styleKey should start with '@' and holds a #ZFPathInfo,
+ * the result style object would be created by
+ * #ZFInputForPathInfo and #ZFObjectIOLoad
+ */
+#define ZFStyleDecoder_pathInfo pathInfo
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFFile_pathInfo_h_

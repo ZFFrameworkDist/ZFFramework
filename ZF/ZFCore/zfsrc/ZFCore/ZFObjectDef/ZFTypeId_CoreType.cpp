@@ -117,7 +117,7 @@ zfbool zfflagsFromString(ZF_OUT zfflags &ret,
         }
         return zffalse;
     }
-    ZFCoreArrayPOD<zfindexRange> pos;
+    ZFCoreArrayPOD<ZFIndexRange> pos;
     zfstring separatorTokens;
     separatorTokens += separatorToken;
     if(!zfCoreDataPairSplitString(pos, zfindexMax(), src, srcLen, separatorTokens, zfnull, zfnull, zffalse, outErrorPos))
@@ -166,7 +166,7 @@ zfbool zfstringFromData(ZF_OUT const zfchar * &v,
                         ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
                         ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
 {
-    if(ZFSerializableUtil::requireSerializableClass(ZFTypeId_zfstring(), serializableData, outErrorHint, outErrorPos) == zfnull)
+    if(ZFSerializableUtil::requireItemClass(serializableData, ZFTypeId_zfstring(), outErrorHint, outErrorPos) == zfnull)
     {
         return zffalse;
     }
@@ -310,7 +310,7 @@ _ZFP_ZFTYPEID_DEFINE_int_allow_negative(zftimet, zftimet)
 
 // ============================================================
 ZFTYPEID_DEFINE(zfidentity, zfidentity, {
-        if(ZFSerializableUtil::requireSerializableClass(ZFTypeId_zfidentity(), serializableData, outErrorHint, outErrorPos) == zfnull)
+        if(ZFSerializableUtil::requireItemClass(serializableData, ZFTypeId_zfidentity(), outErrorHint, outErrorPos) == zfnull)
         {
             return zffalse;
         }
@@ -347,7 +347,7 @@ ZFTYPEID_DEFINE(zfidentity, zfidentity, {
             v = zfidentityInvalid();
             return zftrue;
         }
-        v = ZFIdMapGetId(srcLen == zfindexMax() ? src : zfstring(src, srcLen).cString());
+        v = ZFIdMapGetId(srcLen == zfindexMax() || src[srcLen] == '\0' ? src : zfstring(src, srcLen).cString());
         return (v != zfidentityInvalid());
     }, {
         if(v == zfidentityInvalid())
@@ -470,8 +470,8 @@ ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFSeekPos, ZFSeekPos, {
     })
 
 // ============================================================
-ZFTYPEID_DEFINE_BY_STRING_CONVERTER(zfindexRange, zfindexRange, {
-        v = zfindexRangeZero();
+ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFIndexRange, ZFIndexRange, {
+        v = ZFIndexRangeZero();
         ZFCoreArrayPOD<zfindex> pair;
         if(!zfCoreDataPairSplitInt(pair, 2, src, srcLen))
         {

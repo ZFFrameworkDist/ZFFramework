@@ -18,13 +18,15 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define _ZFP_ZFUIViewStateAni_DEBUG 0
 
 // ============================================================
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniOnInit)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniOnDealloc)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniViewAttach)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniViewDetach)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniViewAniPrepare)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniViewAniStart)
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFUIViewStateAniImpl, StateAniViewAniStop)
+ZF_NAMESPACE_BEGIN(ZFUIViewStateAniImpl)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniOnInit)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniOnDealloc)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniViewAttach)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniViewDetach)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniViewAniPrepare)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniViewAniStart)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(StateAniViewAniStop)
+ZF_NAMESPACE_END_WITH_REGISTER(ZFUIViewStateAniImpl, ZF_NAMESPACE_GLOBAL)
 
 // ============================================================
 // ZFUIViewStateAniFilter
@@ -230,7 +232,7 @@ private:
         zfCoreAssertWithMessage(ani != zfnull,
             zfTextA("%s not type of %s"),
             zfsCoreZ2A(aniList->getFirst()->objectInfoOfInstance().cString()),
-            zfsCoreZ2A(ZFAnimation::ClassData()->className()));
+            zfsCoreZ2A(ZFAnimation::ClassData()->classNameFull()));
         taskData.ani = ani;
         ani->observerAdd(ZFAnimation::EventAniOnStopOrOnInvalid(), this->viewAniOnStopListener, view->objectHolder());
 

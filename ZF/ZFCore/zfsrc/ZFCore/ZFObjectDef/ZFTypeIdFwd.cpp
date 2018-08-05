@@ -9,6 +9,7 @@
  * ====================================================================== */
 #include "ZFTypeIdFwd.h"
 #include "ZFObjectImpl.h"
+#include "ZFListenerDeclare.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_string.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -35,7 +36,7 @@ void _ZFP_ZFTypeIdRegister(ZF_IN const zfchar *typeId,
     zfCoreAssert(m.find(typeId) == m.end());
     m[typeId] = typeIdData;
 }
-void _ZFP_ZFTypeIdUnregister(ZF_IN const zfchar *typeId)
+ZFTypeIdBase *_ZFP_ZFTypeIdUnregister(ZF_IN const zfchar *typeId)
 {
     zfCoreMutexLocker();
     zfstlmap<zfstlstringZ, ZFTypeIdBase *> &m = ZF_STATIC_INITIALIZER_INSTANCE(ZFTypeIdHolder)->m;
@@ -43,7 +44,7 @@ void _ZFP_ZFTypeIdUnregister(ZF_IN const zfchar *typeId)
     zfCoreAssert(it != m.end());
     ZFTypeIdBase *t = it->second;
     m.erase(it);
-    zfdelete(t);
+    return t;
 }
 const ZFTypeIdBase *ZFTypeIdGet(ZF_IN const zfchar *typeId)
 {
@@ -78,13 +79,28 @@ public:
     ZFObject *obj;
     void *v;
     _ZFP_PropAliasDetachCallback detachCallback;
-
+    ZFListener ownerOnDeallocListener;
 protected:
     zfoverride
     virtual void objectOnDeallocPrepare(void)
     {
-        this->detachCallback(this->obj, this->v);
+        this->cleanup();
         zfsuper::objectOnDeallocPrepare();
+    }
+    ZFLISTENER_INLINE(ownerOnDealloc)
+    {
+        this->cleanup();
+    }
+private:
+    void cleanup(void)
+    {
+        if(this->detachCallback != zfnull)
+        {
+            this->obj->observerRemove(ZFObject::EventObjectBeforeDealloc(), this->ownerOnDeallocListener);
+            _ZFP_PropAliasDetachCallback detachCallbackTmp = this->detachCallback;
+            this->detachCallback = zfnull;
+            detachCallbackTmp(this->obj, this->v);
+        }
     }
 };
 
@@ -102,16 +118,28 @@ void _ZFP_PropAliasAttach(ZF_IN ZFObject *obj,
         d->obj = obj;
         d->v = v;
         d->detachCallback = detachCallback;
+        d->ownerOnDeallocListener = ZFCallbackForMemberMethod(d, ZFMethodAccess(_ZFP_I_PropAliasHolder, ownerOnDealloc));
+        obj->observerAdd(ZFObject::EventObjectBeforeDealloc(), d->ownerOnDeallocListener);
         obj->tagSet(key, d);
         zfRelease(d);
     }
     else
     {
-        d->detachCallback(d->obj, d->v);
+        _ZFP_PropAliasDetachCallback detachCallbackOld = d->detachCallback;
+        ZFObject *objOld = d->obj;
+        void *vOld = d->v;
         d->obj = obj;
         d->v = v;
         d->detachCallback = detachCallback;
+        detachCallbackOld(objOld, vOld);
     }
+}
+void _ZFP_PropAliasDetach(ZF_IN ZFObject *obj,
+                          ZF_IN const zfchar *typeName)
+{
+    zfstring key = zfText("_ZFP_PropTypeAlias_");
+    key += typeName;
+    obj->tagRemove(key);
 }
 
 void _ZFP_ZFTypeIdWrapperMarkConst(ZF_IN_OUT_OPT ZFObject *zfv)

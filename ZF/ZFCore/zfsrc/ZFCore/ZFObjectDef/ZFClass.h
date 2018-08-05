@@ -99,18 +99,19 @@ public:
      *   -  have #ZFOBJECT_REGISTER defined,
      *      or match the situation described in #ZFOBJECT_REGISTER
      *
-     * @see ZFOBJECT_DECLARE, ZFOBJECT_REGISTER, newInstanceForName
+     * @see ZFOBJECT_DECLARE, ZFOBJECT_REGISTER
+     *
+     * @note the className may be simple format ("MyObject")
+     *   or full format ("Scope0.Scope1.MyObject"),
+     *   while in simple format,
+     *   the class must be placed in global scope (#ZF_NAMESPACE_GLOBAL)
      */
-    static const ZFClass *classForName(ZF_IN const zfchar *className);
-
+    static const ZFClass *classForName(ZF_IN const zfchar *classNameOrFullName);
     /**
-     * @brief convenient method to create a new instance by name
-     * @return new instance or zfnull if class not found
-     * @note must have ZFClass map set up,
-     *   for more information, please refer to #classForName and #ZFOBJECT_REGISTER
-     * @see ZFOBJECT_DECLARE, ZFOBJECT_REGISTER, classForName
+     * @brief find class with explicit namespace, see #classForName
      */
-    static zfautoObject newInstanceForName(ZF_IN const zfchar *className);
+    static const ZFClass *classForName(ZF_IN const zfchar *className,
+                                       ZF_IN const zfchar *classNamespace);
 
     // ============================================================
     // instance observer
@@ -167,11 +168,9 @@ public:
     // ============================================================
     // class info
 public:
-    /**
-     * @brief return a short string describe the object
-     */
+    /** @brief see #objectInfo */
     void objectInfoT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoT */
+    /** @brief return object info */
     zfstring objectInfo(void) const
     {
         zfstring ret;
@@ -179,11 +178,11 @@ public:
         return ret;
     }
 
+    /** @brief see #objectInfoOfInheritTree */
+    void objectInfoOfInheritTreeT(ZF_IN_OUT zfstring &ret) const;
     /**
      * @brief return a string describe the class inherit tree, debug use only
      */
-    void objectInfoOfInheritTreeT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoOfInheritTreeT */
     zfstring objectInfoOfInheritTree(void) const
     {
         zfstring ret;
@@ -199,11 +198,25 @@ public:
 
 public:
     /**
+     * @brief class namespace, ensured null for global scope class
+     */
+    inline const zfchar *classNamespace(void) const
+    {
+        return this->classNamespaceCache;
+    }
+    /**
      * @brief class name, e.g. "ZFObject"
      */
     inline const zfchar *className(void) const
     {
         return this->classNameCache;
+    }
+    /**
+     * @brief class full name, e.g. "NS0.NS1.YourObject"
+     */
+    inline const zfchar *classNameFull(void) const
+    {
+        return this->classNameFullCache;
     }
 
     /**
@@ -273,11 +286,33 @@ public:
      * create object by specified params,
      * the object must have proper #ZFObject::objectOnInit
      * declared as #ZFOBJECT_ON_INIT_DECLARE_1 series,
-     * and params are passed accorrding to #ZFMethod::methodGenericInvoke
+     * and params are passed accorrding to #ZFMethodGenericInvoker
      * @note this method do much reflection steps to find proper objectOnInit,
      *   which may cause performance issue,
      *   use with caution,
-     *   or use #newInstanceGenericWithMethod if available
+     *   or use #newInstanceGenericBegin if available:
+     *   @code
+     *     zfautoObject result;
+     *     ZFCoreArrayPOD<const ZFMethod *> objectOnInitMethodList;
+     *     cls->methodForNameGetAllT(objectOnInitMethodList, zfText("objectOnInit"));
+     *     // you may do your extra method filters before actual alloc the object
+     *     ZFToken token = cls->newInstanceGenericBegin();
+     *     if(token != zfnull)
+     *     {
+     *         for(zfindex i = 0; i < objectOnInitMethodList.count(); ++i)
+     *         {
+     *             if(cls->newInstanceGenericCheck(token, objectOnInitMethodList[i], params...))
+     *             {
+     *                 result = cls->newInstanceGenericEnd(token, zftrue);
+     *                 break;
+     *             }
+     *         }
+     *         if(result == zfnull)
+     *         {
+     *             cls->newInstanceGenericEnd(token, zffalse);
+     *         }
+     *     }
+     *   @endcode
      * @note if all params are #ZFMethodGenericInvokerDefaultParam, this method would call
      *   original #ZFObject::objectOnInit instead (same as #newInstance)
      */
@@ -291,19 +326,16 @@ public:
                                     , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
                                     , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
                                     ) const; /* ZFMETHOD_MAX_PARAM */
-    /**
-     * @brief see #newInstanceGeneric
-     */
-    zfautoObject newInstanceGenericWithMethod(ZF_IN const ZFMethod *objectOnInitMethod
-                                              , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
-                                              , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
-                                              ) const; /* ZFMETHOD_MAX_PARAM */
+    /** @brief see #newInstanceGeneric */
+    ZFToken newInstanceGenericBegin(void) const;
+    /** @brief see #newInstanceGeneric */
+    zfbool newInstanceGenericCheck(ZF_IN ZFToken token
+                                   , ZF_IN const ZFMethod *objectOnInitMethod
+                                   , ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]
+                                   ) const; /* ZFMETHOD_MAX_PARAM */
+    /** @brief see #newInstanceGeneric */
+    zfautoObject newInstanceGenericEnd(ZF_IN ZFToken token,
+                                       ZF_IN zfbool objectOnInitMethodInvokeSuccess) const;
 
     /**
      * @brief get implemented interface count
@@ -379,9 +411,7 @@ public:
                                   ) const;
     /** @brief see #methodForName */
     const ZFMethod *methodForName(ZF_IN const zfchar *methodName) const;
-    /**
-     * @brief get all method with name, ignoring method id
-     */
+    /** @brief see #methodForNameGetAll */
     void methodForNameGetAllT(ZF_IN_OUT ZFCoreArray<const ZFMethod *> &ret,
                               ZF_IN const zfchar *methodName) const;
     /**
@@ -498,7 +528,8 @@ public:
     // private
 public:
     static ZFClass *_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
-                                         ZF_IN const zfchar *name,
+                                         ZF_IN const zfchar *classNamespace,
+                                         ZF_IN const zfchar *className,
                                          ZF_IN const ZFClass *parent,
                                          ZF_IN _ZFP_ZFObjectConstructor constructor,
                                          ZF_IN _ZFP_ZFObjectDestructor destructor,
@@ -535,10 +566,10 @@ public:
     }
 
     void _ZFP_ZFClass_methodAndPropertyAutoRegister(void) const;
-    void _ZFP_ZFClass_methodRegister(ZF_IN const ZFMethod *method);
+    void _ZFP_ZFClass_methodRegister(ZF_IN const ZFMethod *method) const;
     void _ZFP_ZFClass_methodUnregister(ZF_IN const ZFMethod *method);
-    zfbool _ZFP_ZFClass_propertyRegister(ZF_IN const ZFProperty *zfproperty);
-    void _ZFP_ZFClass_propertyUnregister(ZF_IN const ZFProperty *zfproperty);
+    zfbool _ZFP_ZFClass_propertyRegister(ZF_IN const ZFProperty *zfproperty) const;
+    void _ZFP_ZFClass_propertyUnregister(ZF_IN const ZFProperty *zfproperty) const;
     void _ZFP_ZFClass_propertyAutoInitRegister(ZF_IN const ZFProperty *property) const;
     void _ZFP_ZFClass_propertyAutoInitAction(ZF_IN ZFObject *owner) const;
     void _ZFP_ZFClass_propertyInitStepRegister(ZF_IN const ZFProperty *property) const;
@@ -552,7 +583,9 @@ public:
 private:
     _ZFP_ZFClassPrivate *d;
     friend zfclassFwd _ZFP_ZFClassPrivate;
+    const zfchar *classNamespaceCache;
     const zfchar *classNameCache;
+    const zfchar *classNameFullCache;
     const ZFClass *classParentCache;
 };
 
@@ -560,7 +593,8 @@ private:
 zfclassLikePOD ZF_ENV_EXPORT _ZFP_ZFClassRegisterHolder
 {
 public:
-    _ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *name,
+    _ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *classNamespace,
+                               ZF_IN const zfchar *className,
                                ZF_IN const ZFClass *parent,
                                ZF_IN _ZFP_ZFObjectConstructor constructor,
                                ZF_IN _ZFP_ZFObjectDestructor destructor,
@@ -576,18 +610,16 @@ public:
 
 // ============================================================
 zfclassFwd ZFFilterForZFClass;
-/**
- * @brief get all class currently registered, for debug use only
- */
-extern ZF_ENV_EXPORT void ZFClassGetAll(ZF_OUT ZFCoreArray<const ZFClass *> &ret,
-                                        ZF_IN_OPT const ZFFilterForZFClass *classFilter = zfnull);
+/** @brief see #ZFClassGetAll */
+extern ZF_ENV_EXPORT void ZFClassGetAllT(ZF_OUT ZFCoreArray<const ZFClass *> &ret,
+                                         ZF_IN_OPT const ZFFilterForZFClass *classFilter = zfnull);
 /**
  * @brief get all class currently registered, for debug use only
  */
 inline ZFCoreArrayPOD<const ZFClass *> ZFClassGetAll(ZF_IN_OPT const ZFFilterForZFClass *classFilter = zfnull)
 {
     ZFCoreArrayPOD<const ZFClass *> ret;
-    ZFClassGetAll(ret, classFilter);
+    ZFClassGetAllT(ret, classFilter);
     return ret;
 }
 
@@ -641,7 +673,7 @@ public:
     {
         if(cls)
         {
-            return zfsCoreZ2A(cls->className());
+            return zfsCoreZ2A(cls->classNameFull());
         }
         else
         {

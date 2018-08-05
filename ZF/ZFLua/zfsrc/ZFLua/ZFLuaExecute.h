@@ -32,29 +32,30 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * to invoke the method without knowing all actual types\n
  * \n
  * here is a list of functions available in lua to communicate with ZFFramework:
- * -  `zfAlloc("ClassName")`
- *   or `ClassName()`
- *   or `ClassName.zfAlloc()`\n
- *   alloc a ZFObject type (no extra init param supported)\n
- *   "ClassName" can be #v_ZFClass, or converted by #ZFImpl_ZFLua_toString
+ * -  `zfAlloc("ClassName" [params...])`
+ *   or `ClassName([params...])`
+ *   or `ClassName.zfAlloc([params...])`\n
+ *   alloc a ZFObject type\n
+ *   "ClassName" can be #v_ZFClass, #v_zfstring, or native lua string\n
+ *   if extra init param passed,
+ *   your class must supplys reflectable #ZFObject::objectOnInit
  * -  invoker
  *   -  `ret = zfl_call(obj, "functionName", param0, param1, ...)`
  *     or `obj:functionName(param0, param1, ...)`\n
  *     call object's instance method, params are optional\n
  *     for "functionName", see #ZFTypeId_ZFMethod\n
- *     "functionName" can be #v_ZFMethod, or converted by #ZFImpl_ZFLua_toString,
+ *     "functionName" can be #v_ZFMethod, #v_zfstring, or native lua string,
  *     while other types must exactly match the original types
- *   -  `ret = zfl_callStatic("::methodName", param0, param1, ...)`
- *     or `ret = zfl_callStatic("ClassOrNamespace::methodName", param0, param1, ...)`
+ *   -  `ret = zfl_callStatic("methodName", param0, param1, ...)`
  *     or `ret = zfl_callStatic2("ClassOrNamespace", "methodName", param0, param1, ...)`
  *     or `ret = ClassOrNamespace.methodName(param0, param1, ...)`\n
  *     call global function or static class member method, params are optional\n
  *     for "functionName", see #ZFTypeId_ZFMethod\n
- *     "functionName" can be #v_ZFMethod, or converted by #ZFImpl_ZFLua_toString,
+ *     "functionName" can be #v_ZFMethod, #v_zfstring, #v_ZFClass, or native lua string,
  *     while other types must exactly match the original types\n
  *     these namespace are considered as the same:
- *     -  #ZFMethodFuncNamespaceGlobal
- *     -  #ZFLuaFuncNamespaceGlobal
+ *     -  #ZF_NAMESPACE_GLOBAL_NAME
+ *     -  #ZF_NAMESPACE_GLOBAL_ABBR_NAME
  *     -  empty string
  *   -  while calling functions with lua raw string, such as `func('abc')`,
  *     we will try to convert to proper param type by string converter,
@@ -76,7 +77,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *     return the associated `YourTypeName` that holds the value\n
  *     "YourTypeName" represents the type name in #ZFTYPEID_DECLARE\n
  *     "yourTypeData" store string datas that would be decoded by YourTypeNameFromString\n
- *     "yourTypeData" are converted by #ZFImpl_ZFLua_toString\n
+ *     "yourTypeData" can be #v_zfstring, or native lua string\n
  *     if your value holder supplys reflectable #ZFObject::objectOnInit
  *     (#ZFOBJECT_ON_INIT_DECLARE_2 series),
  *     the value holder can also be constructed by function like call:
@@ -89,7 +90,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *     then the methods can be invoked directly to your value type
  * -  value converter
  *   -  `zfl_luaValue(v)`\n
- *     convert a value to lua's raw value, by #ZFImpl_ZFLua_toString or #ZFImpl_ZFLua_toNumber,
+ *     convert a value to lua's raw value,
  *     the result lua value can be:
  *     -  lua string
  *     -  lua integer
@@ -101,20 +102,23 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *     the lua function's proto type must be:
  *     @code
  *       function myLuaCallback(listenerData, userData)
- *       endfunction
+ *       end
  *     @endcode
- *   -  `output:output(string [, byteSize])`\n
- *     write to output callback
- *   -  `input:input(string, byteSize)`\n
- *     read from input callback
+ *     \n
+ *     further more, lua function can be converted to #ZFListener implicitly
+ *     @code
+ *       button:observerAdd(ZFUIButton.EventButtonOnClick(), function (listenerData, userData)
+ *           end)
+ *     @endcode
+ *   -  `output:log(fmt, ...)`\n
+ *     write to output callback, typically usage:\n
+ *     `zfLogT():log(fmt, xxx):log(fmt, xxx)`
  * -  array
  *   -  `ZFCoreArrayCreate([a, b, c, ...])`\n
  *     create a array, params support these types:
  *     -  zfautoObject
- *     -  any types that can be converted by #ZFImpl_ZFLua_toNumber
- *       (stored as #ZFValue)
- *     -  any types that can be converted by #ZFImpl_ZFLua_toString
- *       (stored as #v_zfstring)
+ *     -  native lua number (stored as #ZFValue)
+ *     -  native lua string (stored as #v_zfstring)
  * -  param and return value
  *   -  simply use lua standard logic to process params and return values,
  *     here's some example:
@@ -129,22 +133,38 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * -  util
  *   -  `zfstringAppend(s, fmt, ...)`
  *     or `zfstringWithFormat(fmt, ...)`\n
- *     fmt would be converted by #ZFImpl_ZFLua_toString,
+ *     fmt can be #v_zfstring, or native lua string,
  *     while only "%s" supported\n
  *     following va_args support:
  *     -  #ZFObject, would be converted by #ZFObject::objectInfo
- *     -  lua string type, converted by #ZFImpl_ZFLua_toString
- *     -  any lua type, converted by #ZFImpl_ZFLua_luaObjectInfo
+ *     -  lua string type
+ *     -  any lua type that supports convert to string
  *
  *     note: the va_args support params up to #ZFMETHOD_MAX_PARAM
  *   -  `zfText('lua string')`\n
  *     same as `zfstring('lua string')`
  * -  path info
- *   -  `zfl_pathInfo()`\n
+ *   -  `zfl_L()`\n
+ *     lua_State of current chunk, stored as #v_VoidPointer
+ *   -  `ZFLuaPathInfo()`\n
  *     return path info of current context, null if not available
- *   -  `ZFLuaImport(localFilePath [, luaParams, L])`\n
+ *   -  `ZFLuaImport(localFilePath [, param0, param1, ...])`
+ *     or `ZFLuaImport(inputCallback [, param0, param1, ...])`\n
  *     util method for #ZFLuaExecute + #ZFInputForLocalFile
- *   -  `ZFLuaRes(localFilePath)`\n
+ *   -  `ZFLuaImportOnce(localFilePath [, param0, param1, ...])`
+ *     or `ZFLuaImportOnce(inputCallback [, param0, param1, ...])`\n
+ *     same as ZFLuaImport, but only run once for each input with same #ZFCallback::callbackId,
+ *     you may also use ZFLuaImportOnceReset to reset the cache state\n
+ *     this is useful to load #ZFDynamic contents from lua code
+ *   -  `ZFLuaImportAll(localFilePath [, importCallback, importCallbackUserData, recursive])`
+ *     or `ZFLuaImportAll(pathInfo [, importCallback, importCallbackUserData, recursive])`\n
+ *     util method to import all lua files under specified path,
+ *     files are looped by #ZFFilePathInfoCallbackFindFirst,
+ *     and lua files are imported by ZFLuaImportOnce\n
+ *     importCallback's param0 holds a #v_ZFPathInfo that points to the file
+ *     which would be loaded
+ *   -  `ZFLuaRes(localFilePath)`
+ *     or `ZFLuaRes(inputCallback)`\n
  *     util method for #ZFObjectIOLoad + #ZFInputForLocalFile
  * -  debug helper
  *   -  `zfLog(fmt, ...)`
@@ -168,9 +188,8 @@ ZFMETHOD_FUNC_DECLARE_3(zfautoObject, ZFLuaExecute,
                         ZFMP_IN_OPT(const ZFCoreArray<zfautoObject> *, luaParams, zfnull),
                         ZFMP_IN_OPT(void *, L, zfnull))
 /** @brief see #ZFLuaExecute */
-ZFMETHOD_FUNC_DECLARE_4(zfautoObject, ZFLuaExecute,
+ZFMETHOD_FUNC_DECLARE_3(zfautoObject, ZFLuaExecute,
                         ZFMP_IN(const zfchar *, buf),
-                        ZFMP_IN_OPT(zfindex, bufLen, zfindexMax()),
                         ZFMP_IN_OPT(const ZFCoreArray<zfautoObject> *, luaParams, zfnull),
                         ZFMP_IN_OPT(void *, L, zfnull))
 

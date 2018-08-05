@@ -76,22 +76,20 @@ public:
     /**
      * @brief first matched index
      *
-     * would be #zfindexRangeZero if not supported
+     * would be #ZFIndexRangeZero if not supported
      */
-    zfindexRange matchedRange;
+    ZFIndexRange matchedRange;
     /**
      * @brief matched name groups
      *
      * would be empty if not supported
      */
-    ZFCoreArrayPOD<zfindexRange> namedGroups;
+    ZFCoreArrayPOD<ZFIndexRange> namedGroups;
 
 public:
-    /**
-     * @brief get a short info
-     */
+    /** @brief see #objectInfo */
     void objectInfoT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoT */
+    /** @brief return object info */
     inline zfstring objectInfo(void) const
     {
         zfstring ret;
@@ -125,9 +123,9 @@ public:
  * @code
  *   <ZFRegExpResult>
  *       <zfbool name="matched" value="xxx" /> // optional, false by default
- *       <zfindexRange name="matchedRange" value="xxx" /> // optional, zfindexRangeZero by default
+ *       <ZFIndexRange name="matchedRange" value="xxx" /> // optional, ZFIndexRangeZero by default
  *       <ZFCoreArray name="namedGroups"> // optional, empty by default
- *           <zfindexRange /> // each namedGroups
+ *           <ZFIndexRange /> // each namedGroups
  *       </ZFCoreArray>
  *   </ZFRegExpResult>
  * @endcode

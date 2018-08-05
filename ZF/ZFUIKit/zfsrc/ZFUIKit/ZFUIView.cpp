@@ -70,6 +70,7 @@ public:
     ZFUIViewChildLayerEnum viewLayer;
     ZFUIViewLayoutParam *layoutParam; // retain
     ZFUIViewLayoutParam *serializableRefLayoutParam; // retain
+    zfautoObject serializableRefLayoutParamCache;
 
     _ZFP_ZFUIViewInternalViewAutoSerializeTagMapType internalViewAutoSerializeTags;
 
@@ -136,6 +137,7 @@ public:
     , viewLayer(ZFUIViewChildLayer::e_Normal)
     , layoutParam(zfnull)
     , serializableRefLayoutParam(zfnull)
+    , serializableRefLayoutParamCache()
     , internalViewAutoSerializeTags()
     , scaleForImpl(1)
     , scaleFixed(1)
@@ -224,14 +226,11 @@ public:
         zfCoreAssertWithMessageTrim(view->viewParent() == zfnull, zfTextA("[ZFUIView] add child which already has parent, you should remove it first"));
         zfRetain(view);
 
-        if(childLayer != ZFUIViewChildLayer::e_Normal)
+        if(this->serializableRefLayoutParamCache == zfnull)
         {
-            view->serializableRefLayoutParamSet(owner->layoutParamCreate().to<ZFUIViewLayoutParam *>());
+            this->serializableRefLayoutParamCache = owner->layoutParamCreate();
         }
-        else
-        {
-            view->serializableRefLayoutParamSet(zfnull);
-        }
+        view->serializableRefLayoutParamSet(this->serializableRefLayoutParamCache);
 
         zfbool layoutParamNeedRelease = zffalse;
         if(layoutParam == zfnull)
@@ -497,7 +496,7 @@ public:
         {
             ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
                 zfText("%s not type of %s"),
-                internalView.toObject()->objectInfoOfInstance().cString(), ZFUIView::ClassData()->className());
+                internalView.toObject()->objectInfoOfInstance().cString(), ZFUIView::ClassData()->classNameFull());
             return zffalse;
         }
         ZFUIView *internalViewTmp = internalView.to<ZFUIView *>();
@@ -695,7 +694,6 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewOnAddToParent)
 ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewOnRemoveFromParent)
 ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewScaleOnChange)
 ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewFocusOnChange)
-ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewOnEventFilter)
 ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewOnEvent)
 ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewLayoutOnLayoutRequest)
 ZFOBSERVER_EVENT_REGISTER(ZFUIView, ViewLayoutOnMeasureFinish)
@@ -754,7 +752,7 @@ zfbool ZFUIView::serializableOnSerializeFromData(ZF_IN const ZFSerializableData 
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
                     zfText("%s not type of %s"),
-                    element.toObject()->objectInfoOfInstance().cString(), ZFUIView::ClassData()->className());
+                    element.toObject()->objectInfoOfInstance().cString(), ZFUIView::ClassData()->classNameFull());
                 return zffalse;
             }
             ZFUIView *child = element.to<ZFUIView *>();
@@ -779,7 +777,7 @@ zfbool ZFUIView::serializableOnSerializeFromData(ZF_IN const ZFSerializableData 
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
                     zfText("%s not type of %s"),
-                    layoutParam.toObject()->objectInfoOfInstance().cString(), ZFUIViewLayoutParam::ClassData()->className());
+                    layoutParam.toObject()->objectInfoOfInstance().cString(), ZFUIViewLayoutParam::ClassData()->classNameFull());
                 return zffalse;
             }
 
@@ -832,33 +830,22 @@ zfbool ZFUIView::serializableOnSerializeToData(ZF_IN_OUT ZFSerializableData &ser
     if(d->layoutParam != zfnull && this->viewParent() != zfnull)
     {
         ZFUIViewLayoutParam *refLayoutParam = ((ref == zfnull) ? zfnull : ref->d->layoutParam);
-        zfbool needAdd = zffalse;
-
+        if(refLayoutParam == zfnull)
+        {
+            refLayoutParam = d->serializableRefLayoutParam;
+        }
         if(refLayoutParam != zfnull)
-        {
-            if(ZFObjectCompare(d->layoutParam, refLayoutParam) != ZFCompareTheSame)
-            {
-                needAdd = zftrue;
-            }
-        }
-        else
-        {
-            if(d->serializableRefLayoutParam == zfnull || ZFObjectCompare(d->layoutParam, d->serializableRefLayoutParam) != ZFCompareTheSame)
-            {
-                refLayoutParam = d->serializableRefLayoutParam;
-                needAdd = zftrue;
-            }
-        }
-
-        if(needAdd)
         {
             ZFSerializableData categoryData;
             if(!ZFObjectToData(categoryData, d->layoutParam, outErrorHint, refLayoutParam))
             {
                 return zffalse;
             }
-            categoryData.categorySet(ZFSerializableKeyword_ZFUIView_layoutParam);
-            serializableData.elementAdd(categoryData);
+            if(categoryData.attributeCount() > 0 || categoryData.elementCount() > 0)
+            {
+                categoryData.categorySet(ZFSerializableKeyword_ZFUIView_layoutParam);
+                serializableData.elementAdd(categoryData);
+            }
         }
     }
 
@@ -909,20 +896,16 @@ zfbool ZFUIView::serializableOnSerializeToData(ZF_IN_OUT ZFSerializableData &ser
     }
     return zftrue;
 }
-zfbool ZFUIView::serializableOnCheckNeedSerializeChildren(void)
-{
-    return zftrue;
-}
 
 // ============================================================
 // properties
 ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIView, zfstring, viewDelegateClass)
 {
-    zfautoObject viewDelegateTmp = ZFClass::newInstanceForName(this->viewDelegateClass());
-    if(!this->viewDelegateSupported() && viewDelegateTmp != zfnull)
+    const ZFClass *cls = ZFClass::classForName(this->viewDelegateClass());
+    zfautoObject viewDelegateTmp;
+    if(cls != zfnull)
     {
-        zfCoreCriticalMessage(zfTextA("viewDelegate not supported"));
-        return ;
+        viewDelegateTmp = cls->newInstance();
     }
     this->viewDelegateSet(viewDelegateTmp);
 }
@@ -1146,7 +1129,7 @@ void ZFUIView::objectOnDeallocPrepare(void)
 
 zfidentity ZFUIView::objectHash(void)
 {
-    zfidentity hash = zfidentityHash(zfidentityCalcString(this->classData()->className()) , this->childCount());
+    zfidentity hash = zfidentityHash(zfidentityCalcString(this->classData()->classNameFull()) , this->childCount());
     for(zfindex i = 0; i < this->childCount(); ++i)
     {
         hash = zfidentityHash(hash, this->childAtIndex(i)->objectHash());
@@ -1362,6 +1345,11 @@ void ZFUIView::viewDelegateSet(ZF_IN ZFUIView *viewDelegate)
 {
     if(viewDelegate == d->viewDelegate)
     {
+        return ;
+    }
+    if(!this->viewDelegateSupported() && viewDelegate != zfnull)
+    {
+        zfCoreCriticalMessage(zfTextA("viewDelegate not supported"));
         return ;
     }
     zfCoreAssertWithMessage(viewDelegate != this, zfTextA("you must not set viewDelegate to self"));
@@ -1674,21 +1662,13 @@ ZFMETHOD_DEFINE_0(ZFUIView, void, layoutRequest)
         {
             ZFBitTest(d->viewDelegate->d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_layoutRequested);
         }
-        if(ZFBitTest(d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_layoutOnLayoutRequest)
-            || ZFBitTest(_ZFP_ZFUIView_stateFlags, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_layoutOnLayoutRequest))
-        {
-            this->observerNotify(ZFUIView::EventViewLayoutOnLayoutRequest(), this);
-        }
+        this->layoutOnLayoutRequest(this);
 
         ZFUIView *view = this->viewParentVirtual();
         while(view != zfnull && !ZFBitTest(view->d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_layoutRequested))
         {
             ZFBitSet(view->d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_layoutRequested);
-            if(ZFBitTest(view->d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_layoutOnLayoutRequest)
-                || ZFBitTest(_ZFP_ZFUIView_stateFlags, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_layoutOnLayoutRequest))
-            {
-                view->observerNotify(ZFUIView::EventViewLayoutOnLayoutRequest(), this);
-            }
+            view->layoutOnLayoutRequest(this);
             view = view->viewParentVirtual();
         }
 
@@ -1878,6 +1858,14 @@ ZFMETHOD_DEFINE_0(ZFUIView, ZFUIRect, layoutedFrameFixed)
     return ret;
 }
 
+void ZFUIView::layoutOnLayoutRequest(ZF_IN ZFUIView *requestByView)
+{
+    if(ZFBitTest(d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_layoutOnLayoutRequest)
+        || ZFBitTest(_ZFP_ZFUIView_stateFlags, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_layoutOnLayoutRequest))
+    {
+        this->observerNotify(ZFUIView::EventViewLayoutOnLayoutRequest(), requestByView);
+    }
+}
 void ZFUIView::layoutOnLayout(ZF_IN const ZFUIRect &bounds)
 {
     for(zfindex i = 0; i < this->childCount(); ++i)
@@ -1903,6 +1891,42 @@ ZFMETHOD_DEFINE_3(ZFUIView, ZFUIView *, childFindById,
         return zfnull;
     }
 
+    if(!findRecursively)
+    {
+        for(zfindex i = 0; i < d->layerNormal.views.count(); ++i)
+        {
+            if(zfscmpTheSame(d->layerNormal.views[i]->viewId().cString(), viewId))
+            {
+                return d->layerNormal.views[i];
+            }
+        }
+        if(includeInternalViews)
+        {
+            for(zfindex i = 0; i < d->layerInternalImpl.views.count(); ++i)
+            {
+                if(zfscmpTheSame(d->layerInternalImpl.views[i]->viewId().cString(), viewId))
+                {
+                    return d->layerInternalImpl.views[i];
+                }
+            }
+            for(zfindex i = 0; i < d->layerInternalBg.views.count(); ++i)
+            {
+                if(zfscmpTheSame(d->layerInternalBg.views[i]->viewId().cString(), viewId))
+                {
+                    return d->layerInternalBg.views[i];
+                }
+            }
+            for(zfindex i = 0; i < d->layerInternalFg.views.count(); ++i)
+            {
+                if(zfscmpTheSame(d->layerInternalFg.views[i]->viewId().cString(), viewId))
+                {
+                    return d->layerInternalFg.views[i];
+                }
+            }
+        }
+        return zfnull;
+    }
+
     ZFCoreArrayPOD<ZFUIView *> toFind;
     toFind.add(this);
     while(!toFind.isEmpty())
@@ -1912,10 +1936,6 @@ ZFMETHOD_DEFINE_3(ZFUIView, ZFUIView *, childFindById,
         if(zfscmpTheSame(view->viewId().cString(), viewId))
         {
             return view;
-        }
-        if(!findRecursively)
-        {
-            continue;
         }
         toFind.addFrom(view->childArray());
         if(includeInternalViews)
@@ -1944,7 +1964,7 @@ ZFMETHOD_DEFINE_3(ZFUIView, void, childAdd,
 }
 ZFMETHOD_DEFINE_3(ZFUIView, void, childAdd,
                   ZFMP_IN(ZFUIView *, view),
-                  ZFMP_IN(ZFUISizeParam, sizeParam),
+                  ZFMP_IN(const ZFUISizeParam &, sizeParam),
                   ZFMP_IN_OPT(ZFUIAlignFlags const &, layoutAlign, ZFUIAlign::e_LeftInner | ZFUIAlign::e_TopInner))
 {
     this->childAdd(view);
@@ -2297,14 +2317,6 @@ ZFMETHOD_DEFINE_1(ZFUIView, void, viewEventSend,
     zfRetain(this);
     zfblockedRelease(this);
 
-    this->viewEventOnEventFilter(event);
-    this->observerNotify(ZFUIView::EventViewOnEventFilter(), event);
-
-    if(event->eventResolved())
-    {
-        return ;
-    }
-
     this->viewEventOnEvent(event);
     this->observerNotify(ZFUIView::EventViewOnEvent(), event);
 }
@@ -2398,7 +2410,23 @@ void ZFUIView::viewPropertyOnUpdate(void)
 
 // ============================================================
 // override
-void ZFUIView::observerOnAdd(ZF_IN const zfidentity &eventId)
+void ZFUIView::styleableOnCopyFrom(ZF_IN ZFStyleable *anotherStyleable)
+{
+    zfsuperI(ZFStyleable)::styleableOnCopyFrom(anotherStyleable);
+    ZFUIView *ref = ZFCastZFObject(ZFUIView *, anotherStyleable);
+    if(ref == zfnull || this->childCount() != 0)
+    {
+        return ;
+    }
+    for(zfindex i = 0; i < ref->childCount(); ++i)
+    {
+        zfautoObject child = ref->childAtIndex(i)->copy();
+        zfautoObject childLayoutParam = ref->childAtIndex(i)->layoutParam()->copy();
+        this->childAdd(child, childLayoutParam);
+    }
+}
+
+void ZFUIView::observerOnAdd(ZF_IN zfidentity eventId)
 {
     zfsuper::observerOnAdd(eventId);
     if(eventId == ZFUIView::EventViewPropertyOnUpdate())
@@ -2430,7 +2458,7 @@ void ZFUIView::observerOnAdd(ZF_IN const zfidentity &eventId)
         ZFBitSet(d->stateFlag, _ZFP_ZFUIViewPrivate::stateFlag_observerHasAddFlag_viewOnRemoveFromParent);
     }
 }
-void ZFUIView::observerOnRemove(ZF_IN const zfidentity &eventId)
+void ZFUIView::observerOnRemove(ZF_IN zfidentity eventId)
 {
     zfsuper::observerOnRemove(eventId);
     if(eventId == ZFUIView::EventViewPropertyOnUpdate())

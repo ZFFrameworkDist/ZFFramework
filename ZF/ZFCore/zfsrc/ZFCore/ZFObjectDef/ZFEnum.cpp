@@ -43,7 +43,7 @@ zfbool ZFEnum::serializableOnSerializeFromData(ZF_IN const ZFSerializableData &s
             if(enumValue == ZFEnumInvalid())
             {
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, serializableData,
-                    zfText("invalid value %s for enum %s"), valueString, this->classData()->className());
+                    zfText("invalid value %s for enum %s"), valueString, this->classData()->classNameFull());
                 return zffalse;
             }
         }
@@ -102,7 +102,20 @@ void ZFEnum::objectOnInit(ZF_IN ZFEnum *another)
 
 void ZFEnum::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
 {
-    ret += this->classData()->className();
+    if(this->classData()->classNamespace() != zfnull)
+    {
+        ret += this->classData()->classNamespace();
+        ret += ZFNamespaceSeparator();
+    }
+    if(this->enumIsFlags()
+        && zfsncmp(this->classData()->className(), ZFTypeIdWrapperPrefixName, ZFTypeIdWrapperPrefixNameLen) == 0)
+    {
+        ret += this->classData()->className() + ZFTypeIdWrapperPrefixNameLen;
+    }
+    else
+    {
+        ret += this->classData()->className();
+    }
     ret += zfText("::");
     if(this->enumValue() == ZFEnumInvalid())
     {
@@ -209,7 +222,7 @@ zfbool ZFEnum::wrappedValueToData(ZF_OUT ZFSerializableData &serializableData,
 zfbool ZFEnum::wrappedValueFromString(ZF_IN const zfchar *src,
                                       ZF_IN_OPT zfindex srcLen /* = zfindexMax() */)
 {
-    if(zfscmpTheSame(ZFEnumNameInvalid(), srcLen == zfindexMax() ? src : zfstring(src, srcLen).cString()))
+    if(zfsncmp(ZFEnumNameInvalid(), src, srcLen == zfindexMax() ? zfslen(src) : srcLen) == 0)
     {
         this->enumValueSet(ZFEnumInvalid());
         return zftrue;
@@ -270,7 +283,7 @@ public:
     static _ZFP_I_ZFEnum_stringConverterDataHolder *setup(ZF_IN const ZFClass *enumClass)
     {
         zfCoreMutexLocker();
-        _ZFP_I_ZFEnum_stringConverterDataHolder *ret = enumClass->classTagGet<_ZFP_I_ZFEnum_stringConverterDataHolder *>(_ZFP_I_ZFEnum_stringConverterDataHolder::ClassData()->className());
+        _ZFP_I_ZFEnum_stringConverterDataHolder *ret = enumClass->classTagGet<_ZFP_I_ZFEnum_stringConverterDataHolder *>(_ZFP_I_ZFEnum_stringConverterDataHolder::ClassData()->classNameFull());
         if(ret == zfnull)
         {
             const ZFMethod *enumCountMethod = enumClass->methodForName(zfText("EnumCount"));
@@ -279,7 +292,7 @@ public:
             zfCoreAssert(enumCountMethod != zfnull && enumValueAtIndexMethod != zfnull && enumNameAtIndexMethod != zfnull);
 
             ret = zfAlloc(_ZFP_I_ZFEnum_stringConverterDataHolder);
-            enumClass->classTagSet(_ZFP_I_ZFEnum_stringConverterDataHolder::ClassData()->className(), ret);
+            enumClass->classTagSet(_ZFP_I_ZFEnum_stringConverterDataHolder::ClassData()->classNameFull(), ret);
             zfRelease(ret);
 
             ret->enumCount = enumCountMethod->execute<zfindex>(zfnull);
@@ -372,11 +385,6 @@ ZFMETHOD_USER_REGISTER_DETAIL_1(ZFEnum_objectOnInit_zfuint, ZFEnum::_ZFP_ZFEnum_
     protected, ZFMethodTypeVirtual,
     void, zfText("objectOnInit")
     , ZFMP_IN(zfuint, value)
-    )
-ZFMETHOD_USER_REGISTER_DETAIL_1(ZFEnum_objectOnInit_ZFEnum, ZFEnum::_ZFP_ZFEnum_objectOnInit_ZFEnum, ZFEnum::ClassData(),
-    protected, ZFMethodTypeVirtual,
-    void, zfText("objectOnInit")
-    , ZFMP_IN(ZFEnum *, another)
     )
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFEnum, zfindex, enumCount)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFEnum, zfindex, enumIndexForValue, ZFMP_IN(zfuint, value))

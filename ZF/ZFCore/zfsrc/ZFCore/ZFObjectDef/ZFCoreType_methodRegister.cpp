@@ -113,10 +113,10 @@ ZFEXPORT_ENUM_DEFINE(ZFLevel
 // ============================================================
 // ZFCoreStatistic
 ZF_NAMESPACE_BEGIN(ZFCoreStatistic)
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_WITH_NS_1(ZFCoreStatistic, void, invokeCountLog, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_WITH_NS_1(ZFCoreStatistic, void, invokeCountRemove, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_WITH_NS_0(ZFCoreStatistic, void, invokeCountRemoveAll)
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_WITH_NS_1(ZFCoreStatistic, zfindex, invokeCountGet, ZFMP_IN(const zfchar *, key))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(void, invokeCountLog, ZFMP_IN(const zfchar *, key))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(void, invokeCountRemove, ZFMP_IN(const zfchar *, key))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(void, invokeCountRemoveAll)
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfindex, invokeCountGet, ZFMP_IN(const zfchar *, key))
 ZF_NAMESPACE_END(ZFCoreStatistic)
 
 // ============================================================
@@ -178,6 +178,17 @@ ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfindex, zfstringFindLastNotOf, ZFMP_IN(c
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfindex, zfstringFindLastNotOf, ZFMP_IN(const zfstring &, src), ZFMP_IN(zfchar, find))
 
 // ============================================================
+// namespace
+ZFEXPORT_VAR_READONLY_DEFINE(const zfchar *, ZFNamespaceSeparator, ZFNamespaceSeparator())
+ZFEXPORT_VAR_READONLY_DEFINE(zfindex, ZFNamespaceSeparatorLen, ZFNamespaceSeparatorLen())
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(const zfchar *, ZFNamespaceSkipGlobal, ZFMP_IN(const zfchar *, ns))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFNamespaceSplit, ZFMP_OUT(ZFCoreArray<ZFIndexRange> &, ret), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(void, ZFNamespaceGetAllT, ZFMP_OUT(ZFCoreArray<const zfchar *> &, ret))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFCoreArrayPOD<const zfchar *>, ZFNamespaceGetAll)
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(void, ZFNamespaceGetAllT, ZFMP_OUT(ZFCoreArray<const zfchar *> &, ret), ZFMP_IN(const zfchar *, parent), ZFMP_IN_OPT(zfbool, recursive, zffalse))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(ZFCoreArrayPOD<const zfchar *>, ZFNamespaceGetAll, ZFMP_IN(const zfchar *, parent), ZFMP_IN_OPT(zfbool, recursive, zffalse))
+
+// ============================================================
 // core type
 ZFEXPORT_VAR_READONLY_DEFINE(zfindex, zfindexMax, zfindexMax())
 ZFEXPORT_VAR_READONLY_DEFINE(zfindex, zfindexZero, zfindexZero())
@@ -193,16 +204,16 @@ ZFEXPORT_VAR_READONLY_DEFINE(zfidentity, zfidentityZero, zfidentityZero())
 ZFEXPORT_VAR_READONLY_DEFINE(zfidentity, zfidentityInvalid, zfidentityInvalid())
 ZFEXPORT_ENUM_DEFINE(ZFCompareResult, ZFCompareUncomparable, ZFCompareSmaller, ZFCompareTheSame, ZFCompareGreater)
 ZFEXPORT_ENUM_DEFINE(ZFSeekPos, ZFSeekPosBegin, ZFSeekPosCur, ZFSeekPosCurReversely, ZFSeekPosEnd)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_zfindexRange, zfindex, start)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_zfindexRange, zfindex, count)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFIndexRange, zfindex, start)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFIndexRange, zfindex, count)
 
 ZFEXPORT_VAR_READONLY_VALUEREF_DEFINE(zfiterator, zfiteratorInvalid, zfiteratorInvalid())
 
-ZFEXPORT_VAR_READONLY_VALUEREF_DEFINE(zfindexRange, zfindexRangeZero, zfindexRangeZero())
-ZFEXPORT_VAR_READONLY_VALUEREF_DEFINE(zfindexRange, zfindexRangeMax, zfindexRangeMax())
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfindexRange, zfindexRangeMake, ZFMP_IN(zfindex, start), ZFMP_IN(zfindex, count))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(ZFCompareResult, zfindexRangeIsEqual, ZFMP_IN(const zfindexRange &, e0), ZFMP_IN(const zfindexRange &, e1))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfbool, zfindexRangeContain, ZFMP_IN(const zfindexRange &, range), ZFMP_IN(zfindex, index))
+ZFEXPORT_VAR_READONLY_VALUEREF_DEFINE(ZFIndexRange, ZFIndexRangeZero, ZFIndexRangeZero())
+ZFEXPORT_VAR_READONLY_VALUEREF_DEFINE(ZFIndexRange, ZFIndexRangeMax, ZFIndexRangeMax())
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(ZFIndexRange, ZFIndexRangeMake, ZFMP_IN(zfindex, start), ZFMP_IN(zfindex, count))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(ZFCompareResult, ZFIndexRangeIsEqual, ZFMP_IN(const ZFIndexRange &, e0), ZFMP_IN(const ZFIndexRange &, e1))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfbool, ZFIndexRangeContain, ZFMP_IN(const ZFIndexRange &, range), ZFMP_IN(zfindex, index))
 
 ZFEXPORT_VAR_READONLY_DEFINE(ZFToken, ZFTokenInvalid, ZFTokenInvalid())
 

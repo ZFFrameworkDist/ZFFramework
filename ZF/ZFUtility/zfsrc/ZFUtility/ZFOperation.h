@@ -151,7 +151,7 @@ public:
                                 ZFOperationCacheExpireTimeDisable)
 
     /**
-     * @brief whether invoke #cacheTrim when receive #ZFGlobalEvent::EventAppOnReceiveMemoryWarning, true by default
+     * @brief whether invoke #cacheTrim when receive #ZFGlobalEvent::EventAppOnMemoryLow, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, cacheTrimWhenReceiveMemoryWarning, zftrue)
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, cacheTrimWhenReceiveMemoryWarning)
@@ -221,8 +221,8 @@ public:
     ZFMETHOD_DECLARE_4(zfautoObject, createCache,
                        ZFMP_IN(ZFOperationParam *, operationParam),
                        ZFMP_IN(ZFOperationResult *, operationResult),
-                       ZFMP_IN_OPT(const zftimet &, cacheExpireTime, zftimetZero()),
-                       ZFMP_IN_OPT(const zftimet &, cacheTime, zftimetZero()))
+                       ZFMP_IN_OPT(zftimet, cacheExpireTime, zftimetZero()),
+                       ZFMP_IN_OPT(zftimet, cacheTime, zftimetZero()))
 
     /**
      * @brief create progress

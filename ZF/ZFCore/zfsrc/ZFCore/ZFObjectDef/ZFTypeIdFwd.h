@@ -25,10 +25,14 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *   ensured empty string
  */
 #define ZFTypeId_none() zfText("")
-/**
- * @brief type id for retain property, see #ZFProperty::propertyTypeId
- */
-#define ZFTypeId_ZFObject() zfText("ZFObject")
+
+// ============================================================
+/** @brief class prefix for subclass of #ZFTypeIdWrapper */
+#define ZFTypeIdWrapperPrefix v_
+/** @brief see #ZFTypeIdWrapperPrefix */
+#define ZFTypeIdWrapperPrefixName zfText("v_")
+/** @brief see #ZFTypeIdWrapperPrefix */
+#define ZFTypeIdWrapperPrefixNameLen 2 // zfslen(zfText("v_"))
 
 // ============================================================
 zfclassFwd ZFSerializableData;
@@ -54,7 +58,8 @@ public:
      *
      * if available:
      * -  if the type is ZFObject type, set v to #zfautoObjectNull and return true,
-     *   the value would be serialized by #ZFObjectFromString series later
+     *   the value would be serialized as #ZFSerializable
+     *   according to object class
      * -  if the type is not ZFObject type,
      *   impl should set v to proper holder type (#ZFTypeIdWrapper)
      *   and return true
@@ -65,14 +70,12 @@ public:
 // ============================================================
 extern ZF_ENV_EXPORT void _ZFP_ZFTypeIdRegister(ZF_IN const zfchar *typeId,
                                                 ZF_IN ZFTypeIdBase *typeIdData);
-extern ZF_ENV_EXPORT void _ZFP_ZFTypeIdUnregister(ZF_IN const zfchar *typeId);
+extern ZF_ENV_EXPORT ZFTypeIdBase *_ZFP_ZFTypeIdUnregister(ZF_IN const zfchar *typeId);
 /**
  * @brief access type id data
  */
 extern ZF_ENV_EXPORT const ZFTypeIdBase *ZFTypeIdGet(ZF_IN const zfchar *typeId);
-/**
- * @brief access type id data
- */
+/** @brief see #ZFTypeIdGetAll */
 extern ZF_ENV_EXPORT void ZFTypeIdGetAllT(ZF_OUT ZFCoreArray<const ZFTypeIdBase *> &ret);
 /**
  * @brief access type id data
@@ -161,15 +164,19 @@ public:
      * this method may or may not access the original value\n
      * must first check whether it's available to access
      * by #ZFTypeId::Value::accessAvailable\n
+     * after access, we may (not ensured) call #accessFinish
+     * to allow impl to do some cleanup steps
      */
     template<typename T_Access = T_Type>
     zfclassNotPOD Value
     {
     public:
         /** @brief try access as raw value, see #ZFTypeId::Value */
-        static zfbool accessAvailable(ZF_IN ZFObject *obj);
+        static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj);
         /** @brief try access as raw value, see #ZFTypeId::Value */
-        static T_Access access(ZF_IN ZFObject *obj);
+        static T_Access access(ZF_IN_OUT zfautoObject &obj);
+        /** @brief finish access as raw value, see #ZFTypeId::Value */
+        static void accessFinish(ZF_IN_OUT zfautoObject &obj);
     };
     /*
      * if available, the templates above should handle these types,
@@ -196,6 +203,8 @@ public:
  * to achieve this, you must:
  * -  specialize template #ZFTypeId
  * -  use this macro to register your type
+ *
+ * note, type id can only be registered within global namespace (#ZF_NAMESPACE_GLOBAL)
  */
 #define ZFTYPEID_ID_DATA_REGISTER(TypeName, Type) \
     ZF_STATIC_REGISTER_INIT(PropTIReg_##TypeName) \
@@ -205,12 +214,12 @@ public:
             zfnew(ZFTypeId<_ZFP_PropTypeW2_##TypeName>)); \
         ZFMethodFuncUserRegister_0(dummy, { \
                 return ZFTypeId_##TypeName(); \
-            }, const zfchar *, ZFTypeId_##TypeName); \
+            }, ZF_NAMESPACE_GLOBAL_NAME, const zfchar *, ZFM_TOSTRING(ZFTypeId_##TypeName)); \
     } \
     ZF_STATIC_REGISTER_DESTROY(PropTIReg_##TypeName) \
     { \
         ZFMethodFuncUserUnregister(ZFMethodFuncGet(zfnull, ZFM_TOSTRING(ZFTypeId_##TypeName))); \
-        _ZFP_ZFTypeIdUnregister(ZFTypeId_##TypeName()); \
+        zfdelete(_ZFP_ZFTypeIdUnregister(ZFTypeId_##TypeName())); \
     } \
     ZF_STATIC_REGISTER_END(PropTIReg_##TypeName)
 
@@ -339,26 +348,32 @@ public:
         zfclassNotPOD Value \
         { \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return (ZFCastZFObject(v_##TypeName *, obj) != zfnull); \
             } \
-            static T_Access access(ZF_IN ZFObject *obj) \
+            static T_Access access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return ZFCastZFObject(v_##TypeName *, obj)->zfv; \
+            } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
             } \
         }; \
         template<typename T_Access> \
         zfclassNotPOD Value<T_Access, 1> \
         { \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return (ZFCastZFObject(v_##TypeName *, obj) != zfnull); \
             } \
-            static typename zftTraits<T_Access>::TrNoRef access(ZF_IN ZFObject *obj) \
+            static typename zftTraits<T_Access>::TrNoRef access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return &(ZFCastZFObject(v_##TypeName *, obj)->zfv); \
+            } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
             } \
         }; \
     }; \
@@ -548,26 +563,32 @@ public:
         zfclassNotPOD Value \
         { \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return (ZFCastZFObject(v_##TypeName *, obj) != zfnull); \
             } \
-            static T_Access access(ZF_IN ZFObject *obj) \
+            static T_Access access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return ZFCastZFObject(v_##TypeName *, obj)->zfv; \
+            } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
             } \
         }; \
         template<typename T_Access> \
         zfclassNotPOD Value<T_Access, 1> \
         { \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return (ZFCastZFObject(v_##TypeName *, obj) != zfnull); \
             } \
-            static typename zftTraits<T_Access>::TrNoRef access(ZF_IN ZFObject *obj) \
+            static T_Access access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return &(ZFCastZFObject(v_##TypeName *, obj)->zfv); \
+            } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
             } \
         }; \
     }; \
@@ -691,13 +712,16 @@ public:
         zfclassNotPOD Value \
         { \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return zffalse; \
             } \
-            static typename zftTraits<T_Access>::TrNoRef access(ZF_IN ZFObject *obj) \
+            static typename zftTraits<T_Access>::TrNoRef access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return typename zftTraits<T_Access>::TrNoRef(); \
+            } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
             } \
         }; \
     }; \
@@ -752,11 +776,11 @@ public:
         zfclassNotPOD Value \
         { \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return (obj != zfnull && ZFTypeId<AliasToType>::Value<AliasToType const &>::accessAvailable(obj)); \
             } \
-            static T_Access access(ZF_IN ZFObject *obj) \
+            static T_Access access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 AliasToType const &aliasValue = ZFTypeId<AliasToType>::Value<AliasToType const &>::access(obj); \
                 _ZFP_PropTypeW_##TypeName *v = zfnew(_ZFP_PropTypeW_##TypeName); \
@@ -764,15 +788,21 @@ public:
                 _ZFP_PropAliasAttach(obj, v, ZFM_TOSTRING(Type), _ZFP_PropAliasOnDetach); \
                 return *v; \
             } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
+                _ZFP_PropAliasDetach(obj, ZFM_TOSTRING(Type)); \
+            } \
         private: \
             static void _ZFP_PropAliasOnDetach(ZF_IN ZFObject *obj, \
                                                ZF_IN void *v) \
             { \
+                zfautoObject objTmp = obj; \
                 _ZFP_PropTypeW_##TypeName *vTmp = (_ZFP_PropTypeW_##TypeName *)v; \
-                if(ZFTypeId<AliasToType>::Value<AliasToType &>::accessAvailable(obj)) \
+                if(ZFTypeId<AliasToType>::Value<AliasToType &>::accessAvailable(objTmp)) \
                 { \
-                    AliasToType &aliasValue = ZFTypeId<AliasToType>::Value<AliasToType &>::access(obj); \
+                    AliasToType &aliasValue = ZFTypeId<AliasToType>::Value<AliasToType &>::access(objTmp); \
                     aliasValue = (AliasToType)*vTmp; \
+                    ZFTypeId<AliasToType>::Value<AliasToType &>::accessFinish(objTmp); \
                 } \
                 zfdelete(vTmp); \
             } \
@@ -783,11 +813,11 @@ public:
         private: \
              typedef typename zftTraits<T_Access>::TrNoRef _TrNoRef; \
         public: \
-            static zfbool accessAvailable(ZF_IN ZFObject *obj) \
+            static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj) \
             { \
                 return (obj != zfnull && ZFTypeId<AliasToType>::Value<AliasToType const &>::accessAvailable(obj)); \
             } \
-            static T_Access access(ZF_IN ZFObject *obj) \
+            static T_Access access(ZF_IN_OUT zfautoObject &obj) \
             { \
                 AliasToType const &aliasValue = ZFTypeId<AliasToType>::Value<AliasToType const &>::access(obj); \
                 _ZFP_PropTypeW_##TypeName *v = zfnew(_ZFP_PropTypeW_##TypeName); \
@@ -797,16 +827,22 @@ public:
                 _ZFP_PropAliasAttach(obj, p, ZFM_TOSTRING(Type), _ZFP_PropAliasOnDetach); \
                 return *p; \
             } \
+            static void accessFinish(ZF_IN_OUT zfautoObject &obj) \
+            { \
+                _ZFP_PropAliasDetach(obj, ZFM_TOSTRING(Type)); \
+            } \
         private: \
             static void _ZFP_PropAliasOnDetach(ZF_IN ZFObject *obj, \
                                                ZF_IN void *v) \
             { \
+                zfautoObject objTmp = obj; \
                 _TrNoRef *p = (_TrNoRef *)v; \
                 _ZFP_PropTypeW_##TypeName *vTmp = (_ZFP_PropTypeW_##TypeName *)*p; \
-                if(ZFTypeId<AliasToType>::Value<AliasToType &>::accessAvailable(obj)) \
+                if(ZFTypeId<AliasToType>::Value<AliasToType &>::accessAvailable(objTmp)) \
                 { \
-                    AliasToType &aliasValue = ZFTypeId<AliasToType>::Value<AliasToType &>::access(obj); \
+                    AliasToType &aliasValue = ZFTypeId<AliasToType>::Value<AliasToType &>::access(objTmp); \
                     aliasValue = (AliasToType)*vTmp; \
+                    ZFTypeId<AliasToType>::Value<AliasToType &>::accessFinish(objTmp); \
                 } \
                 zfdelete(vTmp); \
                 zfdelete(p); \
@@ -830,6 +866,8 @@ extern ZF_ENV_EXPORT void _ZFP_PropAliasAttach(ZF_IN ZFObject *obj,
                                                ZF_IN void *v,
                                                ZF_IN const zfchar *typeName,
                                                ZF_IN _ZFP_PropAliasDetachCallback detachCallback);
+extern ZF_ENV_EXPORT void _ZFP_PropAliasDetach(ZF_IN ZFObject *obj,
+                                               ZF_IN const zfchar *typeName);
 
 extern ZF_ENV_EXPORT void _ZFP_ZFTypeIdWrapperMarkConst(ZF_IN_OUT_OPT ZFObject *zfv);
 template<typename T_Type, int isConst = (zffalse

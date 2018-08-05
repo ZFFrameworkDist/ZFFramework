@@ -287,7 +287,6 @@ public:
      * -  for assign property, it points to (const YourPropertyType *)
      *
      * called when first time accessed, and each time setter is called
-     * @note for #ZFPropertyDynamicRegister, old property value would always null
      */
     ZFOBSERVER_EVENT(ObjectPropertyValueOnUpdate)
 
@@ -321,6 +320,8 @@ public:
         return this->objectHolded().to<T_ZFObject>();
     }
 
+    /** @brief see #objectInfoOfInstance */
+    virtual void objectInfoOfInstanceT(ZF_IN_OUT zfstring &ret);
     /**
      * @brief return a short string describe the object instance
      *
@@ -328,8 +329,6 @@ public:
      *   ClassName(0x123456)
      * @see objectInfo
      */
-    virtual void objectInfoOfInstanceT(ZF_IN_OUT zfstring &ret);
-    /** @brief see #objectInfoOfInstanceT */
     virtual inline zfstring objectInfoOfInstance(void)
     {
         zfstring ret;
@@ -337,11 +336,9 @@ public:
         return ret;
     }
 
-    /**
-     * @brief return a short string describe the object
-     */
+    /** @brief see #objectInfo */
     virtual void objectInfoT(ZF_IN_OUT zfstring &ret);
-    /** @brief see #objectInfoT */
+    /** @brief return object info */
     virtual inline zfstring objectInfo(void)
     {
         zfstring ret;
@@ -396,7 +393,7 @@ public:
 public:
     /* ZFMETHOD_MAX_PARAM */
     /**
-     * @brief util method to perform #ZFMethod::methodGenericInvoke,
+     * @brief util method to perform #ZFMethodGenericInvoker,
      *   do nothing if fail
      */
     virtual zfautoObject invoke(ZF_IN const zfchar *methodName
@@ -460,6 +457,7 @@ public:
      *   which may break unrelated modules' additional logic,
      *   remove only if necessary\n
      *   typically, you should remove exactly the one you have added
+     * @note this method would be called during #EventObjectBeforeDealloc and #objectOnDeallocPrepare
      */
     zffinal void tagRemoveAll(void);
 
@@ -475,32 +473,43 @@ public:
     /**
      * @brief see #observerNotify
      */
-    zffinal inline zfidentity observerAdd(ZF_IN const zfidentity &eventId,
+    zffinal inline zfidentity observerAdd(ZF_IN zfidentity eventId,
                                           ZF_IN const ZFListener &observer,
                                           ZF_IN_OPT ZFObject *userData = zfnull,
                                           ZF_IN_OPT ZFObject *owner = zfnull,
                                           ZF_IN_OPT zfbool autoRemoveAfterActivate = zffalse,
                                           ZF_IN_OPT ZFLevel observerLevel = ZFLevelAppNormal)
     {
-        return this->observerHolder().observerAdd(eventId, observer, userData, owner, autoRemoveAfterActivate, observerLevel);
+        return this->observerHolder().observerAdd(
+            eventId,
+            observer,
+            userData,
+            owner,
+            autoRemoveAfterActivate,
+            observerLevel);
     }
     /**
      * @brief see #observerNotify
      */
     zffinal inline zfidentity observerAdd(ZF_IN const ZFObserverAddParam &param)
     {
-        return this->observerHolder().observerAdd(
-            param.eventId(),
-            param.observer(),
-            param.userData(),
-            param.owner(),
-            param.autoRemoveAfterActivate(),
-            param.observerLevel());
+        return this->observerHolder().observerAdd(param);
+    }
+    /**
+     * @brief move observer to head of same #ZFLevel
+     *
+     * by default, all newly added observer would be appended to tail of same level,
+     * which means it would be called last of the same level,
+     * you may use this method to make it to be called first for same level
+     */
+    zffinal inline void observerMoveToFirst(ZF_IN zfidentity taskId)
+    {
+        return this->observerHolder().observerMoveToFirst(taskId);
     }
     /**
      * @brief see #observerNotify
      */
-    zffinal inline void observerRemove(ZF_IN const zfidentity &eventId,
+    zffinal inline void observerRemove(ZF_IN zfidentity eventId,
                                        ZF_IN const ZFListener &callback,
                                        ZF_IN_OPT ZFObject *userData = zfnull,
                                        ZF_IN_OPT ZFComparer<ZFObject *>::Comparer userDataComparer = ZFComparerCheckEqual)
@@ -529,7 +538,7 @@ public:
      *   remove only if necessary\n
      *   typically, you should remove exactly the one you have added
      */
-    zffinal inline void observerRemoveAll(ZF_IN const zfidentity &eventId)
+    zffinal inline void observerRemoveAll(ZF_IN zfidentity eventId)
     {
         this->observerHolder().observerRemoveAll(eventId);
     }
@@ -555,7 +564,7 @@ public:
     /**
      * @brief true if any observer with eventId has been added
      */
-    zffinal inline zfbool observerHasAdd(ZF_IN const zfidentity &eventId)
+    zffinal inline zfbool observerHasAdd(ZF_IN zfidentity eventId)
     {
         return this->observerHolder().observerHasAdd(eventId);
     }
@@ -563,7 +572,8 @@ public:
      * @brief notify the observer with eventId
      *
      * the #ZFListener would be executed\n
-     * it's ensured the first added observer would be executed first\n
+     * it's ensured the first added observer would be executed first
+     * unless #observerMoveToFirst is called\n
      * use #ZFGlobalEventCenter or #ZFObjectGlobalEventObserver for global observer\n
      * for instance observer:
      * @code
@@ -602,7 +612,7 @@ public:
      * if you want to notify in main thread,
      * you may use #ZFObserverNotifyInMainThread for short
      */
-    zffinal inline void observerNotify(ZF_IN const zfidentity &eventId,
+    zffinal inline void observerNotify(ZF_IN zfidentity eventId,
                                        ZF_IN_OPT ZFObject *param0 = zfnull,
                                        ZF_IN_OPT ZFObject *param1 = zfnull)
     {
@@ -612,7 +622,7 @@ public:
      * @brief see #observerNotify
      */
     zffinal inline void observerNotifyWithCustomSender(ZF_IN ZFObject *customSender,
-                                                       ZF_IN const zfidentity &eventId,
+                                                       ZF_IN zfidentity eventId,
                                                        ZF_IN_OPT ZFObject *param0 = zfnull,
                                                        ZF_IN_OPT ZFObject *param1 = zfnull)
     {
@@ -623,19 +633,17 @@ protected:
     /**
      * @brief called when add first observer
      */
-    virtual void observerOnAdd(ZF_IN const zfidentity &eventId);
+    virtual void observerOnAdd(ZF_IN zfidentity eventId);
     /**
      * @brief called when remove last observer
      */
-    virtual void observerOnRemove(ZF_IN const zfidentity &eventId);
+    virtual void observerOnRemove(ZF_IN zfidentity eventId);
     /**
      * @brief notified when #observerNotify
      *
      * ensured called before any other registered observer
      */
-    virtual inline void observerOnEvent(ZF_IN const zfidentity &eventId,
-                                        ZF_IN ZFObject *param0,
-                                        ZF_IN ZFObject *param1)
+    virtual inline void observerOnEvent(ZF_IN_OUT ZFListenerData &listenerData)
     {
     }
 

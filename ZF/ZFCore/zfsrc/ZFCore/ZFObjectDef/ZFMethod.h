@@ -92,11 +92,6 @@ zfclassFwd ZFClass;
             (this, obj ZFM_REPEAT(N, ZFM_REPEAT_NAME, ZFM_COMMA, ZFM_COMMA)); \
     }
 
-/**
- * @brief max param supported by ZFMethod
- */
-#define ZFMETHOD_MAX_PARAM 8
-
 // ============================================================
 #define _ZFP_ZFMethodNoDefaultParam ZFM_EMPTY
 #define _ZFP_ZFMethodDefaultParam(DefaultValue) \
@@ -105,6 +100,8 @@ zfclassFwd ZFClass;
 // tricks to solve recursive macro
 #define _ZFP_MtdM_EMPTY(...)
 #define _ZFP_MtdM_EXPAND(...) __VA_ARGS__
+#define _ZFP_MtdP_EXPAND(...) __VA_ARGS__
+#define _ZFP_MtdD_EXPAND(...) __VA_ARGS__
 /**
  * @brief macro to wrap param types for #ZFMETHOD_INLINE_0 series
  *
@@ -137,11 +134,6 @@ zfclassFwd ZFClass;
 
 #define _ZFP_ZFMP_DUMMY() \
     _ZFP_MtdM_EMPTY, ParamType, paramName, _ZFP_MtdM_EMPTY, _ZFP_ZFMethodNoDefaultParam
-
-/** @brief see #ZFMETHOD_FUNC_DECLARE_0 */
-#define ZFMethodFuncNamespaceGlobalId ZF_NAMESPACE_GLOBAL_ID
-/** @brief see #ZFMETHOD_FUNC_DECLARE_0 */
-#define ZFMethodFuncNamespaceGlobal ZFM_TOSTRING(ZFMethodFuncNamespaceGlobalId)
 
 /**
  * @brief callback to access method param's default value,
@@ -299,14 +291,9 @@ public:
     /* ZFMETHOD_MAX_PARAM */
 
 public:
-    /**
-     * @brief get a short info about the method
-     *
-     * may look like this: \n
-     *   OwnerClass::MethodName
-     */
+    /** @brief see #objectInfo */
     void objectInfoT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoT */
+    /** @brief return object info */
     zfstring objectInfo(void) const
     {
         zfstring ret;
@@ -525,38 +512,20 @@ public:
         return this->_ZFP_ZFMethod_methodGenericInvoker;
     }
     /**
-     * @brief util method to invoke #methodGenericInvoker
+     * @brief util method to invoke #ZFMethodGenericInvoker
      */
-    inline zfautoObject methodGenericInvoke(ZF_IN_OPT ZFObject *ownerObjOrNull = zfnull
-                                            , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
-                                            , ZF_OUT_OPT zfbool *success = zfnull
-                                            , ZF_OUT_OPT zfstring *errorHint = zfnull
-                                            ) const
-    {
-        zfautoObject ret;
-        zfbool t = this->methodGenericInvoker()(this, ownerObjOrNull, errorHint, ret
-                , param0
-                , param1
-                , param2
-                , param3
-                , param4
-                , param5
-                , param6
-                , param7
-            );
-        if(success != zfnull)
-        {
-            *success = t;
-        }
-        return ret;
-    }
+    zfautoObject methodGenericInvoke(ZF_IN_OPT ZFObject *ownerObjOrNull = zfnull
+                                     , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
+                                     , ZF_OUT_OPT zfbool *success = zfnull
+                                     , ZF_OUT_OPT zfstring *errorHint = zfnull
+                                     ) const;
     /* ZFMETHOD_MAX_PARAM */
     /**
      * @brief see #methodGenericInvokerSet
@@ -618,11 +587,12 @@ public:
         return (this->_ZFP_ZFMethod_methodOwnerClass == zfnull);
     }
     /**
-     * @brief get the method namespace, for func type only
+     * @brief get the method namespace, for func type only,
+     *   ensured null for global scope (#ZF_NAMESPACE_GLOBAL)
      */
     inline const zfchar *methodNamespace(void) const
     {
-        return this->_ZFP_ZFMethod_methodNamespace.cString();
+        return (this->_ZFP_ZFMethod_methodNamespace.isEmpty() ? zfnull : this->_ZFP_ZFMethod_methodNamespace.cString());
     }
 
 public:
@@ -671,7 +641,6 @@ extern ZF_ENV_EXPORT ZFMethod *_ZFP_ZFMethodRegister(ZF_IN zfbool methodIsUserRe
                                                      , ZF_IN const ZFClass *methodOwnerClass
                                                      , ZF_IN ZFMethodPrivilegeType methodPrivilegeType
                                                      , ZF_IN const zfchar *methodNamespace
-                                                     , ZF_IN const zfchar *methodExtSig
                                                      , ZF_IN const zfchar *methodName
                                                      , ZF_IN const zfchar *returnTypeId
                                                      , ZF_IN const zfchar *returnTypeName
@@ -687,7 +656,6 @@ extern ZF_ENV_EXPORT ZFMethod *_ZFP_ZFMethodRegisterV(ZF_IN zfbool methodIsUserR
                                                       , ZF_IN const ZFClass *methodOwnerClass
                                                       , ZF_IN ZFMethodPrivilegeType methodPrivilegeType
                                                       , ZF_IN const zfchar *methodNamespace
-                                                      , ZF_IN const zfchar *methodExtSig
                                                       , ZF_IN const zfchar *methodName
                                                       , ZF_IN const zfchar *returnTypeId
                                                       , ZF_IN const zfchar *returnTypeName
@@ -708,7 +676,6 @@ public:
                                 , ZF_IN const ZFClass *methodOwnerClass
                                 , ZF_IN ZFMethodPrivilegeType methodPrivilegeType
                                 , ZF_IN const zfchar *methodNamespace
-                                , ZF_IN const zfchar *methodExtSig
                                 , ZF_IN const zfchar *methodName
                                 , ZF_IN const zfchar *returnTypeId
                                 , ZF_IN const zfchar *returnTypeName
@@ -725,7 +692,6 @@ public:
                                 , ZF_IN const ZFClass *methodOwnerClass
                                 , ZF_IN ZFMethodPrivilegeType methodPrivilegeType
                                 , ZF_IN const zfchar *methodNamespace
-                                , ZF_IN const zfchar *methodExtSig
                                 , ZF_IN const zfchar *methodName
                                 , ZF_IN const zfchar *returnTypeId
                                 , ZF_IN const zfchar *returnTypeName
@@ -739,18 +705,16 @@ public:
 
 // ============================================================
 zfclassFwd ZFFilterForZFMethod;
-/**
- * @brief get all method currently registered, for debug use only
- */
-extern ZF_ENV_EXPORT void ZFMethodGetAll(ZF_OUT ZFCoreArray<const ZFMethod *> &ret,
-                                         ZF_IN_OPT const ZFFilterForZFMethod *methodFilter = zfnull);
+/** @brief see #ZFMethodGetAll */
+extern ZF_ENV_EXPORT void ZFMethodGetAllT(ZF_OUT ZFCoreArray<const ZFMethod *> &ret,
+                                          ZF_IN_OPT const ZFFilterForZFMethod *methodFilter = zfnull);
 /**
  * @brief get all method currently registered, for debug use only
  */
 inline ZFCoreArrayPOD<const ZFMethod *> ZFMethodGetAll(ZF_IN_OPT const ZFFilterForZFMethod *methodFilter = zfnull)
 {
     ZFCoreArrayPOD<const ZFMethod *> ret;
-    ZFMethodGetAll(ret, methodFilter);
+    ZFMethodGetAllT(ret, methodFilter);
     return ret;
 }
 

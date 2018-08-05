@@ -24,25 +24,16 @@ ZF_STATIC_INITIALIZER_INIT(ZFClassDataHolder)
 }
 ZF_STATIC_INITIALIZER_DESTROY(ZFClassDataHolder)
 {
-    ZFCoreArrayPOD<ZFClass *> allClassDelayed;
-    this->delayDeleteMap.allValueT(allClassDelayed);
-    this->delayDeleteMap.removeAll();
+    ZFCoreMap classMapTmp = this->classMap;
+    ZFCoreMap delayDeleteMapTmp = this->delayDeleteMap;
+    this->classMap = ZFCoreMap();
+    this->delayDeleteMap = ZFCoreMap();
 
-    ZFCoreArrayPOD<ZFClass *> allClass;
-    this->classMap.allValueT(allClass);
-    this->classMap.removeAll();
-
-    for(zfindex i = 0; i < allClassDelayed.count(); ++i)
-    {
-        zfdelete(allClassDelayed[i]);
-    }
-    for(zfindex i = 0; i < allClass.count(); ++i)
-    {
-        zfdelete(allClass[i]);
-    }
+    delayDeleteMapTmp.removeAll();
+    classMapTmp.removeAll();
 }
-ZFCoreMap classMap; // ZFClass *
-ZFCoreMap delayDeleteMap; // ZFClass *
+ZFCoreMap classMap; // <classNameFull, ZFClass *>
+ZFCoreMap delayDeleteMap; // <classNameFull, ZFClass *>
 /*
  * delay delete a class
  * ZFClass may be registered by different module,
@@ -99,7 +90,9 @@ public:
     zfautoObject classDynamicRegisterUserData;
     _ZFP_ZFObjectConstructor constructor;
     _ZFP_ZFObjectDestructor destructor;
+    zfstring classNamespace;
     zfstring className;
+    zfstring classNameFull;
     const ZFClass *classParent;
     zfbool isInterface;
     zfbool isPrivateClass;
@@ -170,6 +163,8 @@ public:
     };
     zfstldeque<ZFCorePointerForObject<_ZFP_ZFClassPrivate::InstanceObserverData *> > instanceObserver;
     zfstldeque<_ZFP_ZFClassPrivate::InstanceObserverData *> instanceObserverCached;
+
+public:
     void _instanceObserverDoAdd(ZF_IN_OUT zfstldeque<_ZFP_ZFClassPrivate::InstanceObserverData *> &buf,
                                 ZF_IN _ZFP_ZFClassPrivate::InstanceObserverData *data)
     {
@@ -251,7 +246,9 @@ public:
     , classDynamicRegisterUserData()
     , constructor(zfnull)
     , destructor(zfnull)
+    , classNamespace()
     , className()
+    , classNameFull()
     , classParent(zfnull)
     , isInterface(zffalse)
     , isPrivateClass(zffalse)
@@ -329,12 +326,25 @@ ZF_GLOBAL_INITIALIZER_END(ZFClassTagClearLevelHigh)
 const ZFClass *ZFClass::classForName(ZF_IN const zfchar *className)
 {
     zfCoreMutexLocker();
-    return _ZFP_ZFClassMap.get<const ZFClass *>(className);
+    return _ZFP_ZFClassMap.get<const ZFClass *>(ZFNamespaceSkipGlobal(className));
 }
-zfautoObject ZFClass::newInstanceForName(ZF_IN const zfchar *className)
+const ZFClass *ZFClass::classForName(ZF_IN const zfchar *className,
+                                     ZF_IN const zfchar *classNamespace)
 {
-    const ZFClass *cls = ZFClass::classForName(className);
-    return ((cls != zfnull) ? cls->newInstance() : zfautoObjectNull());
+    zfCoreMutexLocker();
+    classNamespace = ZFNamespaceSkipGlobal(classNamespace);
+    if(classNamespace != zfnull)
+    {
+        zfstring classNameFull;
+        classNameFull += classNamespace;
+        classNameFull += ZFNamespaceSeparator();
+        classNameFull += className;
+        return _ZFP_ZFClassMap.get<const ZFClass *>(classNameFull);
+    }
+    else
+    {
+        return _ZFP_ZFClassMap.get<const ZFClass *>(className);
+    }
 }
 
 // ============================================================
@@ -401,7 +411,7 @@ void ZFClass::_ZFP_ZFClass_instanceObserverNotify(ZF_IN ZFObject *obj) const
     if(!d->instanceObserverCached.empty())
     {
         ZFListenerData listenerData(ZFObject::EventObjectAfterAlloc(), obj);
-        for(zfstlsize i = 0; i < d->instanceObserverCached.size(); ++i)
+        for(zfstlsize i = 0; i < d->instanceObserverCached.size() && !listenerData.eventFiltered; ++i)
         {
             _ZFP_ZFClassPrivate::InstanceObserverData &data = *(d->instanceObserverCached[i]);
             data.observer.execute(listenerData, data.userData.toObject());
@@ -442,7 +452,7 @@ static void _ZFP_ZFClassGetInfo(ZF_IN_OUT zfstring &s,
     {
         s += zfText("(abstract)");
     }
-    s += cls->className();
+    s += cls->classNameFull();
 }
 void ZFClass::objectInfoT(ZF_IN_OUT zfstring &ret) const
 {
@@ -456,7 +466,7 @@ void ZFClass::objectInfoT(ZF_IN_OUT zfstring &ret) const
             {
                 ret += zfText(", ");
             }
-            ret += this->implementedInterfaceAtIndex(i)->className();
+            ret += this->implementedInterfaceAtIndex(i)->classNameFull();
         }
         ret += '>';
     }
@@ -592,66 +602,68 @@ zfautoObject ZFClass::newInstanceGeneric(
         return this->newInstance();
     }
 
-    zfCoreMutexLocker();
     ZFCoreArrayPOD<const ZFMethod *> objectOnInitMethodList;
     this->methodForNameGetAllT(objectOnInitMethodList, zfText("objectOnInit"));
-    if(objectOnInitMethodList.isEmpty())
+    ZFToken token = this->newInstanceGenericBegin();
+    if(token != zfnull)
     {
-        return zfnull;
-    }
-    ZFObject *obj = d->objectConstruct();
-    zfautoObject dummy;
-    for(zfindex i = 0; i < objectOnInitMethodList.count(); ++i)
-    {
-        const ZFMethod *m = objectOnInitMethodList[i];
-        if(m->methodGenericInvoker()(m, obj, zfnull, dummy
-                , param0, param1, param2, param3, param4, param5, param6, param7
-            ))
+        zfautoObject paramList[ZFMETHOD_MAX_PARAM] = {
+            param0,
+            param1,
+            param2,
+            param3,
+            param4,
+            param5,
+            param6,
+            param7,
+        };
+        for(zfindex i = 0; i < objectOnInitMethodList.count(); ++i)
         {
-            zflockfree_zfblockedRelease(obj);
-            return obj;
+            if(this->newInstanceGenericCheck(token, objectOnInitMethodList[i], paramList))
+            {
+                return this->newInstanceGenericEnd(token, zftrue);
+            }
         }
+        this->newInstanceGenericEnd(token, zffalse);
     }
-    d->destructor(obj);
-    return zfnull;
+    return zfautoObjectNull();
 }
-zfautoObject ZFClass::newInstanceGenericWithMethod(ZF_IN const ZFMethod *objectOnInitMethod
-                                                   , ZF_IN_OPT ZFObject *param0 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param1 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param2 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param3 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param4 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param5 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param6 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   , ZF_IN_OPT ZFObject *param7 /* = ZFMethodGenericInvokerDefaultParam() */
-                                                   ) const /* ZFMETHOD_MAX_PARAM */
+ZFToken ZFClass::newInstanceGenericBegin(void) const
 {
-    if(objectOnInitMethod == zfnull)
+    zfCoreMutexLocker();
+    return (ZFToken)d->objectConstruct();
+}
+zfbool ZFClass::newInstanceGenericCheck(ZF_IN ZFToken token
+                                        , ZF_IN const ZFMethod *objectOnInitMethod
+                                        , ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]
+                                        ) const
+{
+    if(objectOnInitMethod == zfnull
+        || !this->classIsTypeOf(objectOnInitMethod->methodOwnerClass())
+        || !zfscmpTheSame(objectOnInitMethod->methodName(), zfText("objectOnInit"))
+        )
     {
-        return this->newInstanceGeneric(param0, param1, param2, param3, param4, param5, param6, param7);
+        return zffalse;
     }
-    zfCoreAssertWithMessageTrim(
-            this->classIsTypeOf(objectOnInitMethod->methodOwnerClass()),
-            zfTextA("[ZFClass] class %s has no such objectOnInitMethod %s"),
-            zfsCoreZ2A(this->objectInfo().cString()),
-            zfsCoreZ2A(objectOnInitMethod->objectInfo().cString())
-        );
-    zfCoreAssertWithMessageTrim(
-            zfscmpTheSame(objectOnInitMethod->methodName(), zfText("objectOnInit")),
-            zfTextA("[ZFClass] method %s is not objectOnInitMethod"),
-            zfsCoreZ2A(objectOnInitMethod->objectInfo().cString())
-        );
-    ZFObject *obj = d->objectConstruct();
-    zfautoObject dummy;
-    if(objectOnInitMethod->methodGenericInvoker()(objectOnInitMethod, obj, zfnull, dummy
-            , param0, param1, param2, param3, param4, param5, param6, param7
-        ))
+    ZFObject *obj = (ZFObject *)token;
+    zfautoObject methodRetDummy;
+    return objectOnInitMethod->methodGenericInvoker()(objectOnInitMethod, obj, zfnull, methodRetDummy, paramList);
+}
+zfautoObject ZFClass::newInstanceGenericEnd(ZF_IN ZFToken token,
+                                            ZF_IN zfbool objectOnInitMethodInvokeSuccess) const
+{
+    ZFObject *obj = (ZFObject *)token;
+    if(objectOnInitMethodInvokeSuccess)
     {
+        obj->_ZFP_ZFObjectCheckOnInit();
         zflockfree_zfblockedRelease(obj);
         return obj;
     }
-    d->destructor(obj);
-    return zfnull;
+    else
+    {
+        d->destructor(obj);
+        return zfnull;
+    }
 }
 
 zfindex ZFClass::implementedInterfaceCount(void) const
@@ -957,22 +969,14 @@ ZFClass::~ZFClass(void)
         abort();
     }
 
-    for(zfstlmap<const ZFClass *, zfbool>::iterator it = d->allChildren.begin(); it != d->allChildren.end(); ++it)
-    {
-        it->first->d->allParent.erase(this);
-    }
-    for(zfstlmap<const ZFClass *, zfbool>::iterator it = d->allParent.begin(); it != d->allParent.end(); ++it)
-    {
-        it->first->d->allChildren.erase(this);
-    }
-
     zfdelete(d);
     d = zfnull;
 }
 /** @endcond */
 
 ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
-                                       ZF_IN const zfchar *name,
+                                       ZF_IN const zfchar *classNamespace,
+                                       ZF_IN const zfchar *className,
                                        ZF_IN const ZFClass *parent,
                                        ZF_IN _ZFP_ZFObjectConstructor constructor,
                                        ZF_IN _ZFP_ZFObjectDestructor destructor,
@@ -982,14 +986,23 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
                                        ZF_IN ZFObject *classDynamicRegisterUserData)
 {
     zfCoreMutexLocker();
-    ZFCorePointerBase *d = _ZFP_ZFClassMap.get(name);
+    classNamespace = ZFNamespaceSkipGlobal(classNamespace);
+    zfstring classNameFull;
+    if(classNamespace != zfnull)
+    {
+        classNameFull += classNamespace;
+        classNameFull += ZFNamespaceSeparator();
+    }
+    classNameFull += className;
+
+    ZFCorePointerBase *d = _ZFP_ZFClassMap.get(classNameFull);
     ZFClass *cls = zfnull;
     if(d != zfnull)
     {
         cls = d->pointerValueT<ZFClass *>();
         if(cls->d->isInterface != isInterface || cls->d->classParent != parent)
         {
-            zfCoreCriticalMessageTrim(zfTextA("[ZFClass] register a class that already registered: %s"), zfsCoreZ2A(name));
+            zfCoreCriticalMessageTrim(zfTextA("[ZFClass] register a class that already registered: %s"), zfsCoreZ2A(className));
             return zfnull;
         }
         ++(cls->d->refCount);
@@ -997,7 +1010,7 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
     else
     {
         cls = zfnew(ZFClass);
-        _ZFP_ZFClassMap.set(name, ZFCorePointerForPointerRef<ZFClass *>(cls));
+        _ZFP_ZFClassMap.set(classNameFull, ZFCorePointerForObject<ZFClass *>(cls));
 
         if(ZFCoreLibDestroyFlag)
         {
@@ -1009,8 +1022,12 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
         cls->d->constructor = constructor;
         cls->d->destructor = destructor;
 
-        cls->d->className = name;
+        cls->d->classNamespace = classNamespace;
+        cls->d->className = className;
+        cls->d->classNameFull = classNameFull;
+        cls->classNamespaceCache = (cls->d->classNamespace.isEmpty() ? zfnull : cls->d->classNamespace.cString());
         cls->classNameCache = cls->d->className.cString();
+        cls->classNameFullCache = cls->d->classNameFull.cString();
 
         cls->d->classParent = parent;
         cls->classParentCache = parent;
@@ -1020,12 +1037,12 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
         {
             const zfchar *filter = zfText("_ZFP_");
             const zfindex filterLen = zfslen(filter);
-            cls->d->isPrivateClass = (zfsncmp(name, filter, filterLen) == 0);
+            cls->d->isPrivateClass = (zfsncmp(className, filter, filterLen) == 0);
         }
         {
             const zfchar *filter = zfText("_ZFP_I_");
             const zfindex filterLen = zfslen(filter);
-            cls->d->isInternalClass = (zfsncmp(name, filter, filterLen) == 0);
+            cls->d->isInternalClass = (zfsncmp(className, filter, filterLen) == 0);
         }
     }
 
@@ -1048,8 +1065,8 @@ void ZFClass::_ZFP_ZFClassUnregister(ZF_IN zfbool *ZFCoreLibDestroyFlag, ZF_IN c
     }
     zfCoreMutexLocker();
 
-    zfiterator it = _ZFP_ZFClassMap.iteratorForKey(cls->className());
-    if(!_ZFP_ZFClassMap.iteratorIsValid(it))
+    zfiterator itClass = _ZFP_ZFClassMap.iteratorForKey(cls->classNameFull());
+    if(!_ZFP_ZFClassMap.iteratorIsValid(itClass))
     {
         zfCoreCriticalShouldNotGoHere();
         return ;
@@ -1057,18 +1074,38 @@ void ZFClass::_ZFP_ZFClassUnregister(ZF_IN zfbool *ZFCoreLibDestroyFlag, ZF_IN c
 
     _ZFP_ZFClassDataChangeNotify(ZFClassDataChangeTypeDetach, cls, zfnull, zfnull);
 
-    cls->d->ZFCoreLibDestroyFlag.removeElement(ZFCoreLibDestroyFlag);
-    --(cls->d->refCount);
-    if(cls->d->refCount == 0)
+    _ZFP_ZFClassPrivate *d = cls->d;
+    d->ZFCoreLibDestroyFlag.removeElement(ZFCoreLibDestroyFlag);
+    --(d->refCount);
+    if(d->refCount != 0)
     {
-        _ZFP_ZFClassMap.iteratorRemove(it);
-        _ZFP_ZFClassDelayDeleteMap.set(cls->className(),
-            ZFCorePointerForPointerRef<ZFClass *>(cls->_ZFP_ZFClass_removeConst()));
+        return ;
+    }
 
-        if(!cls->d->internalTypesNeedAutoRegister)
+    _ZFP_ZFClassDelayDeleteMap.set(cls->classNameFull(),
+        *_ZFP_ZFClassMap.iteratorGet(itClass));
+    _ZFP_ZFClassMap.iteratorRemove(itClass);
+
+    if(!d->internalTypesNeedAutoRegister)
+    {
+        ZFMethodUserUnregister(cls->methodForName(zfText("ClassData")));
+    }
+
+    d->classDynamicRegisterUserData = zfnull;
+    cls->classTagRemoveAll();
+    cls->instanceObserverRemoveAll();
+
+    for(zfstlmap<const ZFClass *, zfbool>::iterator it = d->allChildren.begin(); it != d->allChildren.end(); ++it)
+    {
+        it->first->d->allParent.erase(cls);
+        if(it->first->d->classParent == cls)
         {
-            ZFMethodUserUnregister(cls->methodForName(zfText("ClassData")));
+            it->first->d->classParent = zfnull;
         }
+    }
+    for(zfstlmap<const ZFClass *, zfbool>::iterator it = d->allParent.begin(); it != d->allParent.end(); ++it)
+    {
+        it->first->d->allChildren.erase(cls);
     }
 }
 
@@ -1328,7 +1365,7 @@ void ZFClass::_ZFP_ZFClassInitFinish_instanceObserverCache(ZF_IN ZFClass *cls)
         zfstldeque<ZFCorePointerForObject<_ZFP_ZFClassPrivate::InstanceObserverData *> > &parentInstanceObserver = it->first->d->instanceObserver;
         for(zfstlsize i = 0; i < parentInstanceObserver.size(); ++i)
         {
-            cls->d->instanceObserverCached.push_back(parentInstanceObserver[i].pointerValueGet());
+            cls->d->instanceObserverCached.push_back(parentInstanceObserver[i]);
         }
     }
 }
@@ -1376,7 +1413,7 @@ void ZFClass::_ZFP_ZFClass_methodAndPropertyAutoRegister(void) const
     }
 }
 
-void ZFClass::_ZFP_ZFClass_methodRegister(ZF_IN const ZFMethod *method)
+void ZFClass::_ZFP_ZFClass_methodRegister(ZF_IN const ZFMethod *method) const
 {
     zfstlvector<const ZFMethod *> &methodList = d->methodMap[method->methodName()];
     methodList.push_back(method);
@@ -1403,7 +1440,7 @@ void ZFClass::_ZFP_ZFClass_methodUnregister(ZF_IN const ZFMethod *method)
     }
 }
 
-zfbool ZFClass::_ZFP_ZFClass_propertyRegister(ZF_IN const ZFProperty *zfproperty)
+zfbool ZFClass::_ZFP_ZFClass_propertyRegister(ZF_IN const ZFProperty *zfproperty) const
 {
     if(d->propertyMap.isContain(zfproperty->propertyName()))
     {
@@ -1416,7 +1453,7 @@ zfbool ZFClass::_ZFP_ZFClass_propertyRegister(ZF_IN const ZFProperty *zfproperty
         return zftrue;
     }
 }
-void ZFClass::_ZFP_ZFClass_propertyUnregister(ZF_IN const ZFProperty *zfproperty)
+void ZFClass::_ZFP_ZFClass_propertyUnregister(ZF_IN const ZFProperty *zfproperty) const
 {
     d->propertyMap.remove(zfproperty->propertyName());
     d->propertyList.removeElement(zfproperty);
@@ -1442,7 +1479,7 @@ void ZFClass::_ZFP_ZFClass_propertyAutoInitAction(ZF_IN ZFObject *owner) const
     for(zfstlmap<const ZFProperty *, zfbool>::iterator it = d->propertyAutoInitMap.begin(); it != d->propertyAutoInitMap.end(); ++it)
     {
         const ZFProperty *property = it->first;
-        property->callbackValueGet(property, owner);
+        ZFPropertyCallbackValueGetHolder _valueGetHolder(property, owner);
     }
 }
 void ZFClass::_ZFP_ZFClass_propertyInitStepRegister(ZF_IN const ZFProperty *property) const
@@ -1512,7 +1549,8 @@ _ZFP_ZFObjectDestructor ZFClass::_ZFP_objectDestructor(void) const
 }
 
 // ============================================================
-_ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *name,
+_ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *classNamespace,
+                                                       ZF_IN const zfchar *className,
                                                        ZF_IN const ZFClass *parent,
                                                        ZF_IN _ZFP_ZFObjectConstructor constructor,
                                                        ZF_IN _ZFP_ZFObjectDestructor destructor,
@@ -1525,7 +1563,8 @@ _ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *name,
 {
     cls = ZFClass::_ZFP_ZFClassRegister(
         &ZFCoreLibDestroyFlag,
-        name,
+        classNamespace,
+        className,
         parent,
         constructor,
         destructor,
@@ -1540,8 +1579,8 @@ _ZFP_ZFClassRegisterHolder::~_ZFP_ZFClassRegisterHolder(void)
 }
 
 // ============================================================
-void ZFClassGetAll(ZF_OUT ZFCoreArray<const ZFClass *> &ret,
-                   ZF_IN_OPT const ZFFilterForZFClass *classFilter /* = zfnull */)
+void ZFClassGetAllT(ZF_OUT ZFCoreArray<const ZFClass *> &ret,
+                    ZF_IN_OPT const ZFFilterForZFClass *classFilter /* = zfnull */)
 {
     zfCoreMutexLocker();
     if(classFilter == zfnull)
@@ -1563,7 +1602,10 @@ void ZFClassGetAll(ZF_OUT ZFCoreArray<const ZFClass *> &ret,
 }
 
 // ============================================================
-ZFOBSERVER_EVENT_GLOBAL_REGISTER(ZFGlobalEvent, ClassDataChange)
+ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
+ZFOBSERVER_EVENT_GLOBAL_REGISTER(ClassDataChange)
+ZF_NAMESPACE_END(ZFGlobalEvent)
+
 ZFObserverHolder &_ZFP_ZFClassDataChangeObserverRef(void)
 {
     static ZFObserverHolder d;
@@ -1621,7 +1663,7 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClassInstanceObserverAddParam, zfb
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClassInstanceObserverAddParam, void, observeAllChildTypeSet, ZFMP_IN(zfbool const &, observeAllChildType))
 
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_STATIC_1(ZFClass, v_ZFClass, const ZFClass *, classForName, ZFMP_IN(const zfchar *, className))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_STATIC_1(ZFClass, v_ZFClass, zfautoObject, newInstanceForName, ZFMP_IN(const zfchar *, className))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_STATIC_2(ZFClass, v_ZFClass, const ZFClass *, classForName, ZFMP_IN(const zfchar *, className), ZFMP_IN(const zfchar *, classNamespace))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_5(v_ZFClass, void, instanceObserverAdd,
     ZFMP_IN(const ZFListener &, observer), ZFMP_IN_OPT(ZFObject *, userData, zfnull), ZFMP_IN_OPT(ZFObject *, owner, zfnull), ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal), ZFMP_IN_OPT(zfbool, observeAllChildType, zftrue))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, void, instanceObserverAdd, ZFMP_IN(const ZFClassInstanceObserverAddParam &, param))
@@ -1633,7 +1675,9 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, void, classDataChangeAutoRe
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, void, objectInfoOfInheritTreeT, ZFMP_IN_OUT(zfstring &, ret))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, zfstring, objectInfoOfInheritTree)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, zfbool, classIsTypeOf, ZFMP_IN(const ZFClass *, cls))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, const zfchar *, classNamespace)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, const zfchar *, className)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, const zfchar *, classNameFull)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, const ZFClass *, parentClass)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, zfbool, classIsAbstract)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, zfbool, classIsInterface)
@@ -1649,17 +1693,6 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_8(v_ZFClass, zfautoObject, newInstanceGe
     , ZFMP_IN_OPT(ZFObject *, param5, ZFMethodGenericInvokerDefaultParam())
     , ZFMP_IN_OPT(ZFObject *, param6, ZFMethodGenericInvokerDefaultParam())
     , ZFMP_IN_OPT(ZFObject *, param7, ZFMethodGenericInvokerDefaultParam())
-    ) /* ZFMETHOD_MAX_PARAM */
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_8(v_ZFClass, zfautoObject, newInstanceGenericWithMethod
-    , ZFMP_IN(const ZFMethod *, objectOnInitMethod)
-    , ZFMP_IN_OPT(ZFObject *, param0, ZFMethodGenericInvokerDefaultParam())
-    , ZFMP_IN_OPT(ZFObject *, param1, ZFMethodGenericInvokerDefaultParam())
-    , ZFMP_IN_OPT(ZFObject *, param2, ZFMethodGenericInvokerDefaultParam())
-    , ZFMP_IN_OPT(ZFObject *, param3, ZFMethodGenericInvokerDefaultParam())
-    , ZFMP_IN_OPT(ZFObject *, param4, ZFMethodGenericInvokerDefaultParam())
-    , ZFMP_IN_OPT(ZFObject *, param5, ZFMethodGenericInvokerDefaultParam())
-    , ZFMP_IN_OPT(ZFObject *, param6, ZFMethodGenericInvokerDefaultParam())
-    /* , ZFMP_IN_OPT(ZFObject *, param7, ZFMethodGenericInvokerDefaultParam()) */
     ) /* ZFMETHOD_MAX_PARAM */
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, zfindex, implementedInterfaceCount)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, const ZFClass *, implementedInterfaceAtIndex, ZFMP_IN(zfindex, index))
@@ -1700,7 +1733,7 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, void, classTagRemove, ZFMP_
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFClass, zfautoObject, classTagRemoveAndGet, ZFMP_IN(const zfchar *, key))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFClass, void, classTagRemoveAll)
 
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFClassGetAll, ZFMP_OUT(ZFCoreArray<const ZFClass *> &, ret), ZFMP_IN_OPT(const ZFFilterForZFClass *, classFilter, zfnull))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFClassGetAllT, ZFMP_OUT(ZFCoreArray<const ZFClass *> &, ret), ZFMP_IN_OPT(const ZFFilterForZFClass *, classFilter, zfnull))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFCoreArrayPOD<const ZFClass *>, ZFClassGetAll, ZFMP_IN_OPT(const ZFFilterForZFClass *, classFilter, zfnull))
 
 ZF_NAMESPACE_GLOBAL_END

@@ -32,7 +32,7 @@ public:
     _ZFP_ZFCallbackTagMap callbackTagMap;
     ZFCallbackType callbackType;
     ZFObject *callbackOwnerObj; // assign only
-    zfbool callbackOwnerObjectRetainFlag;
+    zfuint callbackOwnerObjectRetainFlag;
     const ZFMethod *callbackMethod;
     ZFFuncAddrType callbackRawFunc;
     zfchar *serializableCustomType;
@@ -46,7 +46,7 @@ public:
     , callbackTagMap()
     , callbackType(ZFCallbackTypeDummy)
     , callbackOwnerObj(zfnull)
-    , callbackOwnerObjectRetainFlag(zffalse)
+    , callbackOwnerObjectRetainFlag(0)
     , callbackMethod(zfnull)
     , callbackRawFunc(zfnull)
     , serializableCustomType(zfnull)
@@ -57,7 +57,7 @@ public:
     ~_ZFP_ZFCallbackPrivate(void)
     {
         zffree(this->callbackId);
-        if(this->callbackOwnerObjectRetainFlag)
+        if(this->callbackOwnerObjectRetainFlag != 0)
         {
             zfRelease(this->callbackOwnerObj);
         }
@@ -343,15 +343,18 @@ void ZFCallback::callbackOwnerObjectRetain(void) const
     if(d != zfnull && d->callbackOwnerObj != zfnull && !d->callbackOwnerObjectRetainFlag)
     {
         zfRetain(d->callbackOwnerObj);
-        d->callbackOwnerObjectRetainFlag = zftrue;
+        ++(d->callbackOwnerObjectRetainFlag);
     }
 }
 void ZFCallback::callbackOwnerObjectRelease(void) const
 {
-    if(d != zfnull && d->callbackOwnerObjectRetainFlag)
+    if(d != zfnull && d->callbackOwnerObjectRetainFlag > 0)
     {
-        d->callbackOwnerObjectRetainFlag = zffalse;
-        zfRelease(d->callbackOwnerObj);
+        --(d->callbackOwnerObjectRetainFlag);
+        if(d->callbackOwnerObjectRetainFlag == 0)
+        {
+            zfRetainChange(d->callbackOwnerObj, zfnull);
+        }
     }
 }
 
@@ -521,6 +524,8 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeC
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const zfchar *, callbackSerializeCustomType)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomDataSet, ZFMP_IN(const ZFSerializableData &, customData))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFSerializableData *, callbackSerializeCustomData)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomDisable, ZFMP_IN(zfbool, disable))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, zfbool, callbackSerializeCustomDisabled)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFPathInfo *, pathInfo)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, pathInfoSet, ZFMP_IN(const ZFPathInfo *, pathInfo))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, pathInfoSet, ZFMP_IN(const zfchar *, pathType), ZFMP_IN(const zfchar *, pathData))

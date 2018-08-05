@@ -30,9 +30,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 /**
  * @brief util to export global variable
  *
- * te variable are exported as #ZFMETHOD_FUNC_DECLARE_0,
- * and can only be exported to global #ZFMethodFuncNamespaceGlobal namespace,
- * fr other namespace, you may declare #ZFMETHOD_FUNC_DECLARE_WITH_NS_0 manually\n
+ * the variable are exported as #ZFMETHOD_FUNC_DECLARE_0\n
  * usage:
  * @code
  *   // in header file
@@ -195,14 +193,16 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define ZFEXPORT_ENUM_DEFINE(EnumName, enumValues, ...) \
     _ZFP_ZFEXPORT_ENUM_DEFINE(ZF_CALLER_LINE, EnumName, enumValues, ##__VA_ARGS__)
 
+#define _ZFP_ZFEXPORT_ENUM_DEFINE_EXPAND(...) __VA_ARGS__
 #define _ZFP_ZFEXPORT_ENUM_DEFINE(...) \
-    ZFM_EXPAND(_ZFP_ZFEXPORT_ENUM_DEFINE_(__VA_ARGS__))
+    _ZFP_ZFEXPORT_ENUM_DEFINE_EXPAND(_ZFP_ZFEXPORT_ENUM_DEFINE_(__VA_ARGS__))
 #define _ZFP_ZFEXPORT_ENUM_DEFINE_(DECLARE_LINE, EnumName, enumValues, ...) \
-    ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFEXPORT_ENUM_##EnumName##_##DECLARE_LINE, ZFLevelZFFrameworkNormal) \
+    ZF_STATIC_REGISTER_INIT(ZFEXPORT_ENUM_##EnumName##_##DECLARE_LINE) \
     { \
+        typedef EnumName _EnumName; \
         ZFM_FIX_PARAM(_ZFP_ZFEXPORT_ENUM_EXPAND, ZFM_EMPTY, enumValues, ##__VA_ARGS__) \
     } \
-    ZF_GLOBAL_INITIALIZER_DESTROY(ZFEXPORT_ENUM_##EnumName##_##DECLARE_LINE) \
+    ZF_STATIC_REGISTER_DESTROY(ZFEXPORT_ENUM_##EnumName##_##DECLARE_LINE) \
     { \
         for(zfindex i = 0; i < m.count(); ++i) \
         { \
@@ -210,10 +210,10 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         } \
     } \
     ZFCoreArrayPOD<const ZFMethod *> m; \
-    ZF_GLOBAL_INITIALIZER_END(ZFEXPORT_ENUM_##EnumName##_##DECLARE_LINE)
+    ZF_STATIC_REGISTER_END(ZFEXPORT_ENUM_##EnumName##_##DECLARE_LINE)
 #define _ZFP_ZFEXPORT_ENUM_EXPAND(v) \
     { \
-        ZFMethodFuncUserRegister_0(resultMethod, {return v;}, zfint, v); \
+        ZFMethodFuncUserRegister_0(resultMethod, {return v;}, ZF_NAMESPACE_CURRENT(), _EnumName, ZFM_TOSTRING(v)); \
         m.add(resultMethod); \
     }
 

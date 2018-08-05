@@ -19,7 +19,7 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFMethod, const ZFMethod *, {
-        ZFCoreArrayPOD<zfindexRange> pos;
+        ZFCoreArrayPOD<ZFIndexRange> pos;
         if(!ZFMethodSigSplit(pos, src, srcLen))
         {
             return zffalse;
@@ -29,17 +29,18 @@ ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFMethod, const ZFMethod *, {
     }, {
         if(v->methodIsFunctionType())
         {
-            if(!zfscmpTheSame(v->methodNamespace(), ZFMethodFuncNamespaceGlobal))
+            if(v->methodNamespace() != zfnull)
             {
                 s += v->methodNamespace();
+                s += ZFNamespaceSeparator();
             }
         }
         else
         {
-            s += v->methodOwnerClass()->className();
+            s += v->methodOwnerClass()->classNameFull();
+            s += ZFNamespaceSeparator();
         }
 
-        s += zfText("::");
         s += v->methodName();
 
         for(zfindex i = 0; i < v->methodParamCount(); ++i)
@@ -98,7 +99,7 @@ const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *classOrNamespace,
     }
 }
 const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *methodSig,
-                                ZF_IN const ZFCoreArray<zfindexRange> &methodSigPos)
+                                ZF_IN const ZFCoreArray<ZFIndexRange> &methodSigPos)
 {
     if(methodSig == zfnull || methodSigPos.count() != ZFMETHOD_MAX_PARAM + 2)
     {
@@ -156,37 +157,47 @@ const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *methodSig,
     }
 }
 
-zfbool ZFMethodSigSplit(ZF_OUT ZFCoreArray<zfindexRange> &ret,
+zfbool ZFMethodSigSplit(ZF_OUT ZFCoreArray<ZFIndexRange> &ret,
                         ZF_IN const zfchar *src,
                         ZF_IN_OPT zfindex srcLen /* = zfindexMax() */)
 {
-    ZFCoreArrayPOD<zfindexRange> pos;
+    ret.removeAll();
+    ret.add(ZFIndexRangeZero()); // add placeholder for method scope
     if(!zfCoreDataPairSplitString(
-        pos,
+        ret,
         zfHint("desiredCountOrIndexMax")zfindexMax(),
         src, srcLen,
         zfHint("separatorTokens")zfText(":"),
         zfHint("leftToken")zfnull, zfHint("rightToken")zfnull,
         zfHint("allowEmptyItem")zftrue)
-        || pos.count() < 3
-        || pos[1].count != 0
-        || pos[2].count == 0)
+        || ret.count() > 1 + ZFMETHOD_MAX_PARAM
+        || ret.count() <= 1
+        || ret[1].count == 0
+        )
     {
         return zffalse;
     }
 
-    // [Scope]::methodName[:methodParamTypeId0]
-    ret.add(pos[0]);
-    ret.add(pos[2]);
-    for(zfindex i = 3; i < pos.count(); ++i)
-    {
-        ret.add(pos[i]);
+    // [Scope0.Scope1.]methodName[:methodParamTypeId0]
+    zfindex dotPos = zfstringFindReversely(src, ret[1].count, ZFNamespaceSeparator());
+    if(dotPos == 0)
+    { // .methodName
+        ret[1].start += 1;
+        ret[1].count -= 1;
     }
-    while(ret.count() < (ZFMETHOD_MAX_PARAM + 2))
-    {
-        ret.add(zfindexRangeZero());
+    else if(dotPos != zfindexMax())
+    { // [Scope0.]Scope1.methodName
+        ret[0].start = 0;
+        ret[0].count = dotPos;
+        zfindex offset = dotPos + 1 - ret[1].start;
+        ret[1].start += offset;
+        ret[1].count -= offset;
     }
 
+    while(ret.count() < (ZFMETHOD_MAX_PARAM + 2))
+    {
+        ret.add(ZFIndexRangeZero());
+    }
     return zftrue;
 }
 
@@ -206,8 +217,8 @@ ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_8(const ZFMethod *, ZFMethodFromSig, ZFMP_I
     /* ZFMETHOD_MAX_PARAM , ZFMP_IN_OPT(const zfchar *, methodParamTypeId6, zfnull) */
     /* ZFMETHOD_MAX_PARAM , ZFMP_IN_OPT(const zfchar *, methodParamTypeId7, zfnull) */
     )
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(const ZFMethod *, ZFMethodFromSig, ZFMP_IN(const zfchar *, methodSig), ZFMP_IN(const ZFCoreArray<zfindexRange> &, methodSigPos))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFMethodSigSplit, ZFMP_OUT(ZFCoreArray<zfindexRange> &, ret), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(const ZFMethod *, ZFMethodFromSig, ZFMP_IN(const zfchar *, methodSig), ZFMP_IN(const ZFCoreArray<ZFIndexRange> &, methodSigPos))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFMethodSigSplit, ZFMP_OUT(ZFCoreArray<ZFIndexRange> &, ret), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

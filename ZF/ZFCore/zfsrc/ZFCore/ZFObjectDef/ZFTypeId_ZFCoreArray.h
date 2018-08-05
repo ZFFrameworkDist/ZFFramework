@@ -27,11 +27,13 @@ public:
     template<typename T_Type>
     static zfbool from(ZF_OUT ZFCoreArray<zfautoObject> &holder, ZF_IN const ZFCoreArray<T_Type> &v);
     template<typename T_Type>
-    static zfbool to(ZF_IN const ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<T_Type> &v);
+    static zfbool to(ZF_IN_OUT ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<T_Type> &v);
     template<typename T_Type>
-    static zfbool accessAvailable(ZF_IN ZFObject *obj);
+    static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj);
     template<typename T_Type>
-    static T_ZFCoreArray *access(ZF_IN ZFObject *obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback);
+    static T_ZFCoreArray *access(ZF_IN_OUT zfautoObject &obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback);
+    template<typename T_Type>
+    static void accessFinish(ZF_IN_OUT zfautoObject &obj);
 };
 
 template<>
@@ -41,11 +43,13 @@ public:
     template<typename T_Type>
     static zfbool from(ZF_OUT ZFCoreArray<zfautoObject> &holder, ZF_IN const ZFCoreArray<zfautoObject> &v);
     template<typename T_Type>
-    static zfbool to(ZF_IN const ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<zfautoObject> &v);
+    static zfbool to(ZF_IN_OUT ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<zfautoObject> &v);
     template<typename T_Type>
-    static zfbool accessAvailable(ZF_IN ZFObject *obj);
+    static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj);
     template<typename T_Type>
-    static ZFCoreArray<zfautoObject> *access(ZF_IN ZFObject *obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback);
+    static ZFCoreArray<zfautoObject> *access(ZF_IN_OUT zfautoObject &obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback);
+    template<typename T_Type>
+    static void accessFinish(ZF_IN_OUT zfautoObject &obj);
 };
 
 // ============================================================
@@ -252,7 +256,7 @@ public:
     };
     static inline const zfchar *TypeId(void)
     {
-        return (TypeIdSerializable ? ZFTypeId_ZFCoreArray() : ZFTypeId_none());
+        return ZFTypeId_ZFCoreArray();
     }
     zfoverride
     virtual zfbool typeIdSerializable(void) const
@@ -291,26 +295,34 @@ public:
     zfclassNotPOD Value
     {
     public:
-        static zfbool accessAvailable(ZF_IN ZFObject *obj)
+        static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj)
         {
             return _ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template accessAvailable<T_Type>(obj);
         }
-        static T_Access access(ZF_IN ZFObject *obj)
+        static T_Access access(ZF_IN_OUT zfautoObject &obj)
         {
             return *_ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template access<T_Type>(obj, _ZFP_PropAliasOnDetach);
+        }
+        static void accessFinish(ZF_IN_OUT zfautoObject &obj)
+        {
+            _ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template accessFinish<T_Type>(obj);
         }
     };
     template<typename T_Access>
     zfclassNotPOD Value<T_Access, 1>
     {
     public:
-        static zfbool accessAvailable(ZF_IN ZFObject *obj)
+        static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj)
         {
             return _ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template accessAvailable<T_Type>(obj);
         }
-        static typename zftTraits<T_Access>::TrNoRef access(ZF_IN ZFObject *obj)
+        static typename zftTraits<T_Access>::TrNoRef access(ZF_IN_OUT zfautoObject &obj)
         {
             return _ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template access<T_Type>(obj, _ZFP_PropAliasOnDetach);
+        }
+        static void accessFinish(ZF_IN_OUT zfautoObject &obj)
+        {
+            _ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template accessFinish<T_Type>(obj);
         }
     };
 private:
@@ -337,7 +349,7 @@ public:
     };
     static inline const zfchar *TypeId(void)
     {
-        return (TypeIdSerializable ? ZFTypeId_ZFCoreArray() : ZFTypeId_none());
+        return ZFTypeId_ZFCoreArray();
     }
     zfoverride
     virtual zfbool typeIdSerializable(void) const
@@ -373,26 +385,34 @@ public:
     zfclassNotPOD Value
     {
     public:
-        static zfbool accessAvailable(ZF_IN ZFObject *obj)
+        static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj)
         {
             return _ZFP_ZFCoreArrayConvert<ZFCoreArrayPOD<T_Type> >::template accessAvailable<T_Type>(obj);
         }
-        static T_Access access(ZF_IN ZFObject *obj)
+        static T_Access access(ZF_IN_OUT zfautoObject &obj)
         {
             return *_ZFP_ZFCoreArrayConvert<ZFCoreArrayPOD<T_Type> >::template access<T_Type>(obj, _ZFP_PropAliasOnDetach);
+        }
+        static void accessFinish(ZF_IN_OUT zfautoObject &obj)
+        {
+            _ZFP_ZFCoreArrayConvert<ZFCoreArrayPOD<T_Type> >::template accessFinish<T_Type>(obj);
         }
     };
     template<typename T_Access>
     zfclassNotPOD Value<T_Access, 1>
     {
     public:
-        static zfbool accessAvailable(ZF_IN ZFObject *obj)
+        static zfbool accessAvailable(ZF_IN_OUT zfautoObject &obj)
         {
             return _ZFP_ZFCoreArrayConvert<ZFCoreArrayPOD<T_Type> >::template accessAvailable<T_Type>(obj);
         }
-        static typename zftTraits<T_Access>::TrNoRef access(ZF_IN ZFObject *obj)
+        static typename zftTraits<T_Access>::TrNoRef access(ZF_IN_OUT zfautoObject &obj)
         {
             return _ZFP_ZFCoreArrayConvert<ZFCoreArrayPOD<T_Type> >::template access<T_Type>(obj, _ZFP_PropAliasOnDetach);
+        }
+        static void accessFinish(ZF_IN_OUT zfautoObject &obj)
+        {
+            _ZFP_ZFCoreArrayConvert<ZFCoreArrayPOD<T_Type> >::template accessFinish<T_Type>(obj);
         }
     };
 private:
@@ -428,7 +448,7 @@ zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::from(ZF_OUT ZFCoreArray<zfautoObj
 
 template<typename T_ZFCoreArray>
 template<typename T_Type>
-zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::to(ZF_IN const ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<T_Type> &v)
+zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::to(ZF_IN_OUT ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<T_Type> &v)
 {
     typedef T_Type const & T_Type_;
     for(zfindex i = 0; i < holder.count(); ++i)
@@ -438,13 +458,14 @@ zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::to(ZF_IN const ZFCoreArray<zfauto
             return zffalse;
         }
         v.add(ZFTypeId<T_Type>::template Value<T_Type_>::access(holder[i]));
+        ZFTypeId<T_Type>::template Value<T_Type_>::accessFinish(holder[i]);
     }
     return zftrue;
 }
 
 template<typename T_ZFCoreArray>
 template<typename T_Type>
-zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::accessAvailable(ZF_IN ZFObject *obj)
+zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::accessAvailable(ZF_IN_OUT zfautoObject &obj)
 {
     v_ZFCoreArray *holder = ZFCastZFObject(v_ZFCoreArray *, obj);
     if(holder == zfnull)
@@ -464,13 +485,20 @@ zfbool _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::accessAvailable(ZF_IN ZFObject *o
 
 template<typename T_ZFCoreArray>
 template<typename T_Type>
-T_ZFCoreArray *_ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::access(ZF_IN ZFObject *obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback)
+T_ZFCoreArray *_ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::access(ZF_IN_OUT zfautoObject &obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback)
 {
     v_ZFCoreArray *holder = ZFCastZFObjectUnchecked(v_ZFCoreArray *, obj);
     T_ZFCoreArray *tmp = zfnew(T_ZFCoreArray);
     _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::template to<T_Type>(holder->zfv, *tmp);
     _ZFP_PropAliasAttach(obj, tmp, zfText("ZFCoreArray"), detachCallback);
     return tmp;
+}
+
+template<typename T_ZFCoreArray>
+template<typename T_Type>
+void _ZFP_ZFCoreArrayConvert<T_ZFCoreArray>::accessFinish(ZF_IN_OUT zfautoObject &obj)
+{
+    _ZFP_PropAliasDetach(obj, zfText("ZFCoreArray"));
 }
 
 // ============================================================
@@ -482,22 +510,27 @@ zfbool _ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::from(ZF_OUT ZFCoreAr
 }
 
 template<typename T_Type>
-zfbool _ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::to(ZF_IN const ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<zfautoObject> &v)
+zfbool _ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::to(ZF_IN_OUT ZFCoreArray<zfautoObject> &holder, ZF_OUT ZFCoreArray<zfautoObject> &v)
 {
     v = holder;
     return zftrue;
 }
 
 template<typename T_Type>
-zfbool _ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::accessAvailable(ZF_IN ZFObject *obj)
+zfbool _ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::accessAvailable(ZF_IN_OUT zfautoObject &obj)
 {
     return (ZFCastZFObject(v_ZFCoreArray *, obj) != zfnull);
 }
 
 template<typename T_Type>
-ZFCoreArray<zfautoObject> *_ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::access(ZF_IN ZFObject *obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback)
+ZFCoreArray<zfautoObject> *_ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::access(ZF_IN_OUT zfautoObject &obj, ZF_IN _ZFP_PropAliasDetachCallback detachCallback)
 {
     return &(ZFCastZFObjectUnchecked(v_ZFCoreArray *, obj)->zfv);
+}
+
+template<typename T_Type>
+void _ZFP_ZFCoreArrayConvert<ZFCoreArray<zfautoObject> >::accessFinish(ZF_IN_OUT zfautoObject &obj)
+{
 }
 
 /** @endcond */
@@ -513,7 +546,7 @@ zfbool ZFCoreArrayFromString(ZF_OUT ZFCoreArray<T_Type> &v,
                              ZF_IN const zfchar *src,
                              ZF_IN_OPT zfindex srcLen = zfindexMax())
 {
-    ZFCoreArrayPOD<zfindexRange> pos;
+    ZFCoreArrayPOD<ZFIndexRange> pos;
     if(!zfCoreDataPairSplitString(pos, zfindexMax(), src, srcLen, zfText(","), zfText("["), zfText("]"), zftrue))
     {
         return zffalse;
@@ -590,7 +623,7 @@ zfbool ZFCoreArrayFromData(ZF_OUT ZFCoreArray<T_Type> &v,
 {
     v.removeAll();
 
-    if(!ZFSerializableUtil::requireSerializableClass(ZFTypeId_ZFCoreArray(), serializableData, outErrorHint, outErrorPos))
+    if(!ZFSerializableUtil::requireItemClass(serializableData, ZFTypeId_ZFCoreArray(), outErrorHint, outErrorPos))
     {
         return zffalse;
     }

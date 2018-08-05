@@ -1,9 +1,12 @@
 WORK_DIR=$(cd "$(dirname "$0")"; pwd)
 CONFIG_FILE_PATH=$1
 DST_PATH=$2
-if test "x-$CONFIG_FILE_PATH" = "x-" ; then
+printUsage() {
     echo "usage:"
     echo "  zfproj_creator.sh CONFIG_FILE_PATH [ZF_OUTPUT]"
+    echo "  zfproj_creator.sh -app PROJ_NAME OUTPUT_PATH"
+    echo "  zfproj_creator.sh -lib PROJ_NAME OUTPUT_PATH"
+    echo "  zfproj_creator.sh -impl PROJ_NAME OUTPUT_PATH"
     echo ""
     echo "config file format:"
     echo "  these are required:"
@@ -35,10 +38,83 @@ if test "x-$CONFIG_FILE_PATH" = "x-" ; then
     echo "            ZF/"
     echo "                YourProjName/"
     echo "                    zfproj/"
+}
+
+if test "x-$CONFIG_FILE_PATH" = "x-" ; then
+    printUsage
     exit 1
+elif test "x-$CONFIG_FILE_PATH" = "x--app" || test "x-$CONFIG_FILE_PATH" = "x--lib" || test "x-$CONFIG_FILE_PATH" = "x--impl" ; then
+    PROJ_NAME=$2
+    OUTPUT_PATH=$3
+    if test "x-$PROJ_NAME" = "x-" || test "x-$OUTPUT_PATH" = "x-" ; then
+        printUsage
+        exit 1
+    fi
+    if test "x-$CONFIG_FILE_PATH" = "x--app" ; then
+        _CONFIG_FILE_PATH="$OUTPUT_PATH/$PROJ_NAME/$PROJ_NAME/zfscript/zfautoscript_zfproj.txt"
+        ZF_TYPE=app
+        ZF_OUTPUT="../.."
+        ZF_INPLACE_SRC="\$ZF_NAME"
+    elif test "x-$CONFIG_FILE_PATH" = "x--lib" ; then
+        _CONFIG_FILE_PATH="$OUTPUT_PATH/ZFModule/ZF/$PROJ_NAME/zfscript/zfautoscript_zfproj.txt"
+        ZF_TYPE=lib
+        ZF_OUTPUT=".."
+        ZF_INPLACE_SRC="ZFModule/ZF/\$ZF_NAME"
+    elif test "x-$CONFIG_FILE_PATH" = "x--impl" ; then
+        _CONFIG_FILE_PATH="$OUTPUT_PATH/ZFModule/ZF/$PROJ_NAME/zfscript/zfautoscript_zfproj.txt"
+        ZF_TYPE=impl
+        ZF_OUTPUT=".."
+        ZF_INPLACE_SRC="ZFModule/ZF/\$ZF_NAME"
+    fi
+    mkdir -p "${_CONFIG_FILE_PATH%[/\\]*}"
+    rm "$_CONFIG_FILE_PATH" >/dev/null 2>&1
+    _configFileTemplate() {
+        # ZFTAG_ADD_MODULE
+        echo "ZF_NAME = $PROJ_NAME"
+        echo "ZF_TYPE = $ZF_TYPE"
+        echo ""
+        echo "ZF_OUTPUT = $ZF_OUTPUT"
+        echo "ZF_INPLACE = 1"
+        echo "ZF_INPLACE_SRC = $ZF_INPLACE_SRC"
+        echo ""
+        echo "ZF_LIB += ZFCore"
+        echo "# ZF_LIB += ZFAlgorithm"
+        echo "# ZF_LIB += ZFUtility"
+        echo "# ZF_LIB += ZFUIKit"
+        echo "# ZF_LIB += ZFUIWidget"
+        echo "# ZF_LIB += ZFLua"
+        echo "# ZF_LIB += ZFUIWebKit"
+        echo ""
+        echo "ZF_IMPL += ZF_impl"
+        echo "# ZF_IMPL += ZFCore_impl"
+        echo "# ZF_IMPL += ZFAlgorithm_impl"
+        echo "# ZF_IMPL += ZFUIKit_impl"
+        echo "# ZF_IMPL += ZFLua_impl"
+        echo "# ZF_IMPL += ZFUIWebKit_impl"
+        echo ""
+        echo "# ZF_LIB_EXT += https://github.com/ZFFramework/ZFModuleDemo_lib ZFModuleDemo_lib master"
+        echo ""
+        echo "# ZF_IMPL_EXT += https://github.com/ZFFramework/ZFModuleDemo_impl"
+        echo ""
+    }
+    _configFileTemplate > "$_CONFIG_FILE_PATH"
+    echo "config file created: $_CONFIG_FILE_PATH"
+    echo "    use 'zfproj_recursive.sh $OUTPUT_PATH $OUTPUT_PATH' to create entire project folder structure"
+    echo "    or use 'zfproj_recursive.sh $OUTPUT_PATH' to update existing proejct inplace"
+    exit 0
 fi
+
 if ! test -e "$CONFIG_FILE_PATH" ; then
     echo "config file not exist: $CONFIG_FILE_PATH"
+    exit 1
+fi
+
+# ============================================================
+# command check
+_rsync_exist=0
+rsync --version >/dev/null 2>&1 && _rsync_exist=1 || _rsync_exist=0
+if ! test "x-$_rsync_exist" = "x-1" ; then
+    echo "rsync not found"
     exit 1
 fi
 
@@ -62,12 +138,14 @@ _CONFIG_FILE_PATH=$ZF_ROOT_PATH/_tmp/zfproj_creator.tmp
 mkdir -p "${_CONFIG_FILE_PATH%[/\\]*}" >/dev/null 2>&1
 cp "$CONFIG_FILE_PATH" "$_CONFIG_FILE_PATH"
 cat "$_CONFIG_FILE_PATH" \
+    | sed -E 's/^#.*//g' \
     | sed -E 's#^ +##g' \
     | sed -E 's# +$##g' \
     | sed -E 's# +([\+=]+)#\1#g' \
     | sed -E 's#([\+=]+) +#\1#g' \
     | sed -E 's# +#\|#g' \
     | sed -E 's#^([a-zA-Z_0-9]+)\+=(.*)$#\1=\"\$\1 \2\"#g' \
+    | sed -E 's#^(.+)$#export \1#g' \
       >"$_CONFIG_FILE_PATH"
 source "$_CONFIG_FILE_PATH"
 rm "$_CONFIG_FILE_PATH" >/dev/null 2>&1
@@ -171,50 +249,30 @@ if test "x-$ZF_TYPE" = "x-impl" ; then
     fi
 fi
 if test 1 = 1 ; then
+    printState() {
+        for i in $(seq 0 32) ; do
+            cmd="echo \$${1}_${i}"
+            require=`eval $cmd`
+            if test "x-$require" = "x-" ; then
+                break
+            fi
+            cmd="echo \$${2}_${i}"
+            name=`eval $cmd`
+            echo "    ${2}_${i} = ${name}"
+        done
+    }
     echo "configs:"
-    echo "    ZFTT_C_app_proj=$ZFTT_C_app_proj"
-    echo "    ZFTT_C_lib_proj=$ZFTT_C_lib_proj"
-    echo "    ZFTT_C_impl_proj=$ZFTT_C_impl_proj"
-    echo "    ZFTT_R_proj_name=$ZFTT_R_proj_name"
-    echo "    ZFTT_R_proj_name=$ZFTT_R_proj_name"
-    echo "    ZFTT_C_lib_require_0=$ZFTT_C_lib_require_0 \t ZFTT_R_lib_name_0=$ZFTT_R_lib_name_0"
-    echo "    ZFTT_C_lib_require_1=$ZFTT_C_lib_require_1 \t ZFTT_R_lib_name_1=$ZFTT_R_lib_name_1"
-    echo "    ZFTT_C_lib_require_2=$ZFTT_C_lib_require_2 \t ZFTT_R_lib_name_2=$ZFTT_R_lib_name_2"
-    echo "    ZFTT_C_lib_require_3=$ZFTT_C_lib_require_3 \t ZFTT_R_lib_name_3=$ZFTT_R_lib_name_3"
-    echo "    ZFTT_C_lib_require_4=$ZFTT_C_lib_require_4 \t ZFTT_R_lib_name_4=$ZFTT_R_lib_name_4"
-    echo "    ZFTT_C_lib_require_5=$ZFTT_C_lib_require_5 \t ZFTT_R_lib_name_5=$ZFTT_R_lib_name_5"
-    echo "    ZFTT_C_lib_require_6=$ZFTT_C_lib_require_6 \t ZFTT_R_lib_name_6=$ZFTT_R_lib_name_6"
-    echo "    ZFTT_C_lib_require_7=$ZFTT_C_lib_require_7 \t ZFTT_R_lib_name_7=$ZFTT_R_lib_name_7"
-    echo "    ..."
-    echo "    ZFTT_C_impl_require_0=$ZFTT_C_impl_require_0 \t ZFTT_R_impl_name_0=$ZFTT_R_impl_name_0"
-    echo "    ZFTT_C_impl_require_1=$ZFTT_C_impl_require_1 \t ZFTT_R_impl_name_1=$ZFTT_R_impl_name_1"
-    echo "    ZFTT_C_impl_require_2=$ZFTT_C_impl_require_2 \t ZFTT_R_impl_name_2=$ZFTT_R_impl_name_2"
-    echo "    ZFTT_C_impl_require_3=$ZFTT_C_impl_require_3 \t ZFTT_R_impl_name_3=$ZFTT_R_impl_name_3"
-    echo "    ZFTT_C_impl_require_4=$ZFTT_C_impl_require_4 \t ZFTT_R_impl_name_4=$ZFTT_R_impl_name_4"
-    echo "    ZFTT_C_impl_require_5=$ZFTT_C_impl_require_5 \t ZFTT_R_impl_name_5=$ZFTT_R_impl_name_5"
-    echo "    ZFTT_C_impl_require_6=$ZFTT_C_impl_require_6 \t ZFTT_R_impl_name_6=$ZFTT_R_impl_name_6"
-    echo "    ZFTT_C_impl_require_7=$ZFTT_C_impl_require_7 \t ZFTT_R_impl_name_7=$ZFTT_R_impl_name_7"
-    echo "    ..."
-    echo "    ZFTT_C_lib_ext_require_0=$ZFTT_C_lib_ext_require_0 \t ZFTT_R_lib_ext_name_0=$ZFTT_R_lib_ext_name_0"
-    echo "    ZFTT_C_lib_ext_require_1=$ZFTT_C_lib_ext_require_1 \t ZFTT_R_lib_ext_name_1=$ZFTT_R_lib_ext_name_1"
-    echo "    ZFTT_C_lib_ext_require_2=$ZFTT_C_lib_ext_require_2 \t ZFTT_R_lib_ext_name_2=$ZFTT_R_lib_ext_name_2"
-    echo "    ZFTT_C_lib_ext_require_3=$ZFTT_C_lib_ext_require_3 \t ZFTT_R_lib_ext_name_3=$ZFTT_R_lib_ext_name_3"
-    echo "    ZFTT_C_lib_ext_require_4=$ZFTT_C_lib_ext_require_4 \t ZFTT_R_lib_ext_name_4=$ZFTT_R_lib_ext_name_4"
-    echo "    ZFTT_C_lib_ext_require_5=$ZFTT_C_lib_ext_require_5 \t ZFTT_R_lib_ext_name_5=$ZFTT_R_lib_ext_name_5"
-    echo "    ZFTT_C_lib_ext_require_6=$ZFTT_C_lib_ext_require_6 \t ZFTT_R_lib_ext_name_6=$ZFTT_R_lib_ext_name_6"
-    echo "    ZFTT_C_lib_ext_require_7=$ZFTT_C_lib_ext_require_7 \t ZFTT_R_lib_ext_name_7=$ZFTT_R_lib_ext_name_7"
-    echo "    ..."
-    echo "    ZFTT_C_impl_ext_require_0=$ZFTT_C_impl_ext_require_0 \t ZFTT_R_impl_ext_name_0=$ZFTT_R_impl_ext_name_0"
-    echo "    ZFTT_C_impl_ext_require_1=$ZFTT_C_impl_ext_require_1 \t ZFTT_R_impl_ext_name_1=$ZFTT_R_impl_ext_name_1"
-    echo "    ZFTT_C_impl_ext_require_2=$ZFTT_C_impl_ext_require_2 \t ZFTT_R_impl_ext_name_2=$ZFTT_R_impl_ext_name_2"
-    echo "    ZFTT_C_impl_ext_require_3=$ZFTT_C_impl_ext_require_3 \t ZFTT_R_impl_ext_name_3=$ZFTT_R_impl_ext_name_3"
-    echo "    ZFTT_C_impl_ext_require_4=$ZFTT_C_impl_ext_require_4 \t ZFTT_R_impl_ext_name_4=$ZFTT_R_impl_ext_name_4"
-    echo "    ZFTT_C_impl_ext_require_5=$ZFTT_C_impl_ext_require_5 \t ZFTT_R_impl_ext_name_5=$ZFTT_R_impl_ext_name_5"
-    echo "    ZFTT_C_impl_ext_require_6=$ZFTT_C_impl_ext_require_6 \t ZFTT_R_impl_ext_name_6=$ZFTT_R_impl_ext_name_6"
-    echo "    ZFTT_C_impl_ext_require_7=$ZFTT_C_impl_ext_require_7 \t ZFTT_R_impl_ext_name_7=$ZFTT_R_impl_ext_name_7"
-    echo "    ..."
-    echo "    ZFTT_C_needUIKit=$ZFTT_C_needUIKit"
-    echo "    ZFTT_C_needUIWebKit=$ZFTT_C_needUIWebKit"
+    echo "    ZFTT_C_app_proj = $ZFTT_C_app_proj"
+    echo "    ZFTT_C_lib_proj = $ZFTT_C_lib_proj"
+    echo "    ZFTT_C_impl_proj = $ZFTT_C_impl_proj"
+    echo "    ZFTT_R_proj_name = $ZFTT_R_proj_name"
+    echo "    ZFTT_R_proj_name = $ZFTT_R_proj_name"
+    echo "    ZFTT_C_needUIKit = $ZFTT_C_needUIKit"
+    echo "    ZFTT_C_needUIWebKit = $ZFTT_C_needUIWebKit"
+    printState "ZFTT_C_lib_require" "ZFTT_R_lib_name"
+    printState "ZFTT_C_impl_require" "ZFTT_R_impl_name"
+    printState "ZFTT_C_lib_ext_require" "ZFTT_R_lib_ext_name"
+    printState "ZFTT_C_impl_ext_require" "ZFTT_R_impl_ext_name"
 fi
 
 # tmp dir
@@ -322,7 +380,7 @@ while ((1)) ; do
             fi
             condNameList=`echo "$exist" | sed -E 's#.*\{(ZFTT_C_[a-zA-Z_0-9]+)\}.*#\1#g'`
             for condName in $condNameList ; do
-                printf "\r%s    processing: $fileName\t$condName" $(tput el)
+                printf "\r%s    processing: $fileName $condName" $(tput el)
                 cond="echo \$$condName"
                 cond=`eval $cond`
                 if test "x-$cond" = "x-1" ; then
@@ -353,7 +411,7 @@ while ((1)) ; do
             fi
             condNameList=`echo "$exist" | sed -E 's#.*\{(ZFTT_R_[a-zA-Z_0-9]+)\}.*#\1#g'`
             for condName in $condNameList ; do
-                printf "\r%s    processing: $fileName\t$condName" $(tput el)
+                printf "\r%s    processing: $fileName $condName" $(tput el)
                 cond="echo \$$condName"
                 cond=`eval $cond`
                 cat "$f" \

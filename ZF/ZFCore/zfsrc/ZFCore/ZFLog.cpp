@@ -40,20 +40,22 @@ protected:
 protected:
     zfoverride
     virtual void format(ZF_IN_OUT zfstring &ret,
-                        ZF_IN zfself::OutputStep outputStep,
+                        ZF_IN ZFOutputFormatStepEnum outputStep,
                         ZF_IN const zfchar *src,
                         ZF_IN zfindex srcLen,
-                        ZF_IN zfindex writtenLen)
+                        ZF_IN zfindex writtenLen,
+                        ZF_IN zfindex outputCount,
+                        ZF_IN_OUT_OPT void *&state)
     {
         switch(outputStep)
         {
-            case OutputStepBegin:
+            case ZFOutputFormatStep::e_OnInit:
                 if(_ZFP_ZFLogMutex != zfnull)
                 {
                     _ZFP_ZFLogMutex->mutexLock();
                 }
                 break;
-            case OutputStepEnd:
+            case ZFOutputFormatStep::e_OnDealloc:
                 if(this->autoEndl)
                 {
                     ret += zfText("\n");
@@ -65,8 +67,8 @@ protected:
                     _ZFP_ZFLogMutex->mutexUnlock();
                 }
                 break;
-            case OutputStepAction:
-                if(this->autoSpace && writtenLen > 0)
+            case ZFOutputFormatStep::e_OnOutput:
+                if(this->autoSpace && outputCount > 0)
                 {
                     ret += zfText(" ");
                 }
@@ -135,7 +137,7 @@ static zfindex _ZFP_zfLogOnOutput(ZF_IN const void *src, ZF_IN zfindex size)
 ZFOutput zfLogTrimT(void)
 {
     ZFOutput ret;
-    ret.callbackSerializeCustomDisable();
+    ret.callbackSerializeCustomDisable(zftrue);
     ZFOutputForFormatT(ret, ZFCallbackForFunc(_ZFP_zfLogOnOutput), _ZFP_ZFLogFormatHolder);
     return ret;
 }

@@ -159,7 +159,7 @@ public:
     // class
 public:
     /** @brief see #ZFSerializable */
-    zffinal void itemClassSet(ZF_IN const zfchar *clsName);
+    zffinal void itemClassSet(ZF_IN const zfchar *classNameFull);
     /** @brief see #ZFSerializable */
     zffinal const zfchar *itemClass(void) const;
 
@@ -456,11 +456,11 @@ public:
     // ============================================================
     // other functions
 public:
+    /** @brief see #objectInfo */
+    zffinal void objectInfoT(ZF_IN_OUT zfstring &ret) const;
     /**
      * @brief get a short info
      */
-    zffinal void objectInfoT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoT */
     zffinal zfstring objectInfo(void) const
     {
         zfstring ret;

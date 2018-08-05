@@ -15,7 +15,7 @@
 #ifndef _ZFI_ZFFile_fwd_h_
 #define _ZFI_ZFFile_fwd_h_
 
-#include "ZFFileBOM.h"
+#include "ZFObject.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -105,11 +105,9 @@ public:
     }
 
 public:
-    /**
-     * @brief get a short info
-     */
+    /** @brief see #objectInfo */
     void objectInfoT(ZF_IN_OUT zfstring &ret) const;
-    /** @brief see #objectInfoT */
+    /** @brief return object info */
     inline zfstring objectInfo(void) const
     {
         zfstring ret;
@@ -160,8 +158,6 @@ ZFOUTPUT_TYPE(ZFFileFindData, {output << v.objectInfo();})
 #define ZFSerializableKeyword_ZFFileCallback_pathInfo zfText("pathInfo")
 /** @brief keyword for serialize */
 #define ZFSerializableKeyword_ZFFileCallback_flags zfText("flags")
-/** @brief keyword for serialize */
-#define ZFSerializableKeyword_ZFFileCallback_autoSkipBOMTable zfText("autoSkipBOMTable")
 /** @brief keyword for serialize */
 #define ZFSerializableKeyword_ZFFileCallback_filePath zfText("filePath")
 

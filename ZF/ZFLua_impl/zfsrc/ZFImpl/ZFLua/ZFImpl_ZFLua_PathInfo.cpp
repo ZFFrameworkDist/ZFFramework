@@ -7,11 +7,98 @@
  * Distributed under MIT license:
  *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
  * ====================================================================== */
-#include "ZFImpl_ZFLua.h"
+#include "ZFImpl_ZFLua_PathInfo.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-static void _ZFP_ZFImpl_ZFLua_implSetupPathInfo_escape(ZF_OUT zfstring &ret,
+// ============================================================
+ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFImpl_ZFLua_implPathInfoData, ZFLevelZFFrameworkEssential)
+{
+    this->needUpdateGlobalFunc = zftrue;
+}
+zfbool needUpdateGlobalFunc;
+ZFCoreArray<zfstring> luaFuncName;
+ZFCoreArray<zfstring> luaFuncBody;
+ZF_GLOBAL_INITIALIZER_END(ZFImpl_ZFLua_implPathInfoData)
+
+// ============================================================
+static void _ZFP_ZFImpl_ZFLua_implPathInfoSetup_escape(ZF_OUT zfstring &ret,
+                                                       ZF_IN const zfchar *p);
+void ZFImpl_ZFLua_implPathInfoSetup(ZF_IN lua_State *L,
+                                    ZF_OUT zfstring &ret,
+                                    ZF_IN const ZFPathInfo *pathInfo)
+{
+    if(pathInfo == zfnull ||  pathInfo->pathType.isEmpty() || pathInfo->pathData.isEmpty())
+    {
+        return ;
+    }
+    ZF_GLOBAL_INITIALIZER_CLASS(ZFImpl_ZFLua_implPathInfoData) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFImpl_ZFLua_implPathInfoData);
+    ZFCoreArray<zfstring> &luaFuncName = d->luaFuncName;
+
+    if(d->needUpdateGlobalFunc)
+    {
+        zfstring cmd;
+        if(luaFuncName.isEmpty())
+        {
+            cmd += zfText("_ZFP_l=nil;");
+        }
+        else
+        {
+            cmd += zfText("function _ZFP_l(zfl_l)");
+            cmd += zfText("    return ");
+            for(zfindex i = 0; i < d->luaFuncBody.count(); ++i)
+            {
+                cmd += d->luaFuncBody[i];
+                cmd += ',';
+            }
+            cmd += zfText("    nil;");
+            cmd += zfText("end;");
+        }
+        ZFImpl_ZFLua_execute(L, cmd);
+    }
+    if(luaFuncName.isEmpty())
+    {
+        return ;
+    }
+
+    // no endl, to prevent native lua error from having wrong line number
+    ret += zfText("local ");
+    for(zfindex i = 0; i < luaFuncName.count(); ++i)
+    {
+        if(i != 0)
+        {
+            ret += zfText(",");
+        }
+        ret += luaFuncName[i];
+    }
+    ret += zfText("=_ZFP_l(ZFPathInfo('");
+    _ZFP_ZFImpl_ZFLua_implPathInfoSetup_escape(ret, pathInfo->pathType);
+    ret += ZFSerializableKeyword_ZFPathInfo_separator;
+    _ZFP_ZFImpl_ZFLua_implPathInfoSetup_escape(ret, pathInfo->pathData);
+    ret += zfText("'));");
+}
+void _ZFP_ZFImpl_ZFLua_implPathInfoRegister(ZF_IN const zfchar *luaFuncName,
+                                            ZF_IN const zfchar *luaFuncBody)
+{
+    ZF_GLOBAL_INITIALIZER_CLASS(ZFImpl_ZFLua_implPathInfoData) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFImpl_ZFLua_implPathInfoData);
+    d->needUpdateGlobalFunc = zftrue;
+    d->luaFuncName.add(luaFuncName);
+    d->luaFuncBody.add(luaFuncBody);
+}
+void _ZFP_ZFImpl_ZFLua_implPathInfoUnregister(ZF_IN const zfchar *luaFuncName)
+{
+    ZF_GLOBAL_INITIALIZER_CLASS(ZFImpl_ZFLua_implPathInfoData) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFImpl_ZFLua_implPathInfoData);
+    zfindex index = d->luaFuncName.find(luaFuncName);
+    if(index == zfindexMax())
+    {
+        d->luaFuncName.remove(index);
+        d->luaFuncBody.remove(index);
+        d->needUpdateGlobalFunc = zftrue;
+    }
+}
+
+// ============================================================
+static void _ZFP_ZFImpl_ZFLua_implPathInfoSetup_escape(ZF_OUT zfstring &ret,
                                                        ZF_IN const zfchar *p)
 {
     const zfchar *pL = p;
@@ -19,10 +106,8 @@ static void _ZFP_ZFImpl_ZFLua_implSetupPathInfo_escape(ZF_OUT zfstring &ret,
     {
         if(*p == '\'')
         {
-            if(p != pL)
-            {
-                ret.append(pL, p - pL);
-            }
+            ret.append(pL, p - pL);
+            pL = p + 1;
             ret += zfText("\\'");
         }
         ++p;
@@ -32,130 +117,6 @@ static void _ZFP_ZFImpl_ZFLua_implSetupPathInfo_escape(ZF_OUT zfstring &ret,
         ret.append(pL, p - pL);
     }
 }
-static int _ZFP_ZFLuaLocalAction(ZF_IN lua_State *L, ZF_IN zfbool isImport);
-static int _ZFP_ZFLuaImport(ZF_IN lua_State *L)
-{
-    return _ZFP_ZFLuaLocalAction(L, zftrue);
-}
-static int _ZFP_ZFLuaRes(ZF_IN lua_State *L)
-{
-    return _ZFP_ZFLuaLocalAction(L, zffalse);
-}
-static int _ZFP_ZFLuaLocalAction(ZF_IN lua_State *L, ZF_IN zfbool isImport)
-{
-    zfblockedAlloc(v_ZFCallback, ret);
-    zfautoObject pathInfoHolder;
-    ZFImpl_ZFLua_toObject(pathInfoHolder, L, 1);
-    v_ZFPathInfo *pathInfo = pathInfoHolder;
-    if(pathInfo == zfnull)
-    {
-        if(isImport)
-        {
-            ZFLuaErrorOccurredTrim(
-                zfText("[ZFLuaImport] unable to access pathInfo, got: %s"),
-                ZFImpl_ZFLua_luaObjectInfo(L, 1, zftrue).cString());
-            return ZFImpl_ZFLua_luaError(L);
-        }
-        else
-        {
-            ZFImpl_ZFLua_luaPush(L, ret);
-            return 1;
-        }
-    }
-
-    zfstring localFilePath;
-    if(!ZFImpl_ZFLua_toString(localFilePath, L, 2))
-    {
-        if(isImport)
-        {
-            ZFLuaErrorOccurredTrim(
-                zfText("[ZFLua] unable to access localFilePath, got: %s"),
-                ZFImpl_ZFLua_luaObjectInfo(L, 2, zftrue).cString());
-            return ZFImpl_ZFLua_luaError(L);
-        }
-        else
-        {
-            ZFImpl_ZFLua_luaPush(L, ret);
-            return 1;
-        }
-    }
-
-    ret->zfv.callbackSerializeCustomDisable();
-    ZFInputForLocalFileT(ret->zfv, pathInfo->zfv, localFilePath);
-    if(!ret->zfv.callbackIsValid())
-    {
-        if(isImport)
-        {
-            ZFLuaErrorOccurredTrim(
-                zfText("[ZFLua] unable to load local file \"%s\" relative to \"%s\""),
-                localFilePath.cString(),
-                ZFPathInfoToString(pathInfo->zfv).cString());
-            return ZFImpl_ZFLua_luaError(L);
-        }
-        else
-        {
-            ZFImpl_ZFLua_luaPush(L, ret);
-            return 1;
-        }
-    }
-
-    ZFImpl_ZFLua_luaPush(L, ret);
-    return 1;
-}
-void ZFImpl_ZFLua_implSetupPathInfo(ZF_OUT zfstring &ret,
-                                    ZF_IN const ZFPathInfo *pathInfo)
-{
-    if(pathInfo == zfnull ||  pathInfo->pathType.isEmpty() || pathInfo->pathData.isEmpty())
-    {
-        return ;
-    }
-    // no endl, to prevent native lua error from having wrong line number
-    ret += zfText(
-            "local function zfl_pathInfo()"
-            "    return ZFPathInfo('"
-        );
-    _ZFP_ZFImpl_ZFLua_implSetupPathInfo_escape(ret, pathInfo->pathType);
-    ret += ZFSerializableKeyword_ZFPathInfo_separator;
-    _ZFP_ZFImpl_ZFLua_implSetupPathInfo_escape(ret, pathInfo->pathData);
-    ret += zfText(
-            "');"
-            "end;"
-            "local function ZFLuaImport(localFilePath, ...)"
-            "    return ZFLuaExecute(_ZFP_ZFLuaImport(zfl_pathInfo(), localFilePath), ...);"
-            "end;"
-            "local function ZFLuaRes(localFilePath)"
-            "    return ZFObjectIOLoad(_ZFP_ZFLuaRes(zfl_pathInfo(), localFilePath));"
-            "end;"
-        );
-}
-
-// ============================================================
-ZFImpl_ZFLua_implSetupCallback_DEFINE(PathInfo, {
-        ZFImpl_ZFLua_luaCFunctionRegister(L, zfText("_ZFP_ZFLuaImport"), _ZFP_ZFLuaImport);
-        ZFImpl_ZFLua_luaCFunctionRegister(L, zfText("_ZFP_ZFLuaRes"), _ZFP_ZFLuaRes);
-
-        /*
-         * the default version,
-         * would be hide by local one
-         */
-        ZFImpl_ZFLua_execute(L, zfText(
-                "function zfl_pathInfo()\n"
-                "    return zfnull;\n"
-                "end\n"
-            ));
-
-        ZFImpl_ZFLua_execute(L, zfText(
-                "function ZFLuaImport(localFilePath, ...)\n"
-                "    error('ZFLuaImport can only be called within file context', 2);\n"
-                "    return zffalse;\n"
-                "end\n"
-                "local function ZFLuaRes(localFilePath)\n"
-                "    error('ZFLuaRes can only be called within file context', 2);\n"
-                "    return zffalse;\n"
-                "end;\n"
-            ));
-    }, {
-    })
 
 ZF_NAMESPACE_GLOBAL_END
 

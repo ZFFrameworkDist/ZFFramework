@@ -19,6 +19,9 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 /** @cond ZFPrivateDoc */
+ZFEXPORT_VAR_READONLY_DECLARE(const zfchar *, ZFNamespaceSeparator)
+ZFEXPORT_VAR_READONLY_DECLARE(zfindex, ZFNamespaceSeparatorLen)
+
 ZFEXPORT_VAR_READONLY_DECLARE(zfindex, zfindexMax)
 ZFEXPORT_VAR_READONLY_DECLARE(zfindex, zfindexZero)
 ZFEXPORT_VAR_READONLY_DECLARE(zfint, zfintZero)
@@ -34,8 +37,8 @@ ZFEXPORT_VAR_READONLY_DECLARE(zfidentity, zfidentityInvalid)
 
 ZFEXPORT_VAR_READONLY_VALUEREF_DECLARE(zfiterator, zfiteratorInvalid, zfiteratorInvalid())
 
-ZFEXPORT_VAR_READONLY_VALUEREF_DECLARE(zfindexRange, zfindexRangeZero, zfindexRangeZero())
-ZFEXPORT_VAR_READONLY_VALUEREF_DECLARE(zfindexRange, zfindexRangeMax, zfindexRangeMax())
+ZFEXPORT_VAR_READONLY_VALUEREF_DECLARE(ZFIndexRange, ZFIndexRangeZero, ZFIndexRangeZero())
+ZFEXPORT_VAR_READONLY_VALUEREF_DECLARE(ZFIndexRange, ZFIndexRangeMax, ZFIndexRangeMax())
 
 ZFEXPORT_VAR_READONLY_DECLARE(zfindex, ZFVERSION_MAIN)
 ZFEXPORT_VAR_READONLY_DECLARE(zfindex, ZFVERSION_SUB)
