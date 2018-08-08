@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZFFramework'
-  s.version          = '0.4.0'
+  s.version          = '0.4.1'
   s.summary          = 'cross-platform C++ app framework'
   s.description      = <<-DESC
 see http://ZFFramework.com for more info
@@ -55,7 +55,7 @@ for ZF_MODULE_NAME list, please refer to https://github.com/ZFFramework/ZFFramew
       CMD
   s.xcconfig         = {
       'USER_HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/Headers/Public/ZFFramework"',
-      'OTHER_LDFLAGS' => '-ObjC -all_load',
+      'OTHER_LDFLAGS' => '-ObjC -force_load "${TARGET_BUILD_DIR}/ZFFramework/libZFFramework.a"',
   }
   s.preserve_paths   = '**/*'
 
