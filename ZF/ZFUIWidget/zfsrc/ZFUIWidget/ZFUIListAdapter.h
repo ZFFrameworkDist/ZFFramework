@@ -81,15 +81,31 @@ public:
         return this->_ZFP_ZFUIListAdapter_listContainerSize;
     }
 
-private:
-    zfint _ZFP_ZFUIListAdapter_cellSizeHint;
 public:
     /**
-     * @brief list cell's size hint
+     * @brief list cell's hint size,
+     *   use -1 to measure by list cell,
+     *   #ZFUIGlobalStyle::itemSizeListCell by default
+     *
+     * setting #cellSizeFill would override this property,
+     * and use #listContainerSize to layout each cell
      */
-    ZFMETHOD_INLINE_0(zfint, cellSizeHint)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, cellSizeHint, ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell())
+    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(zfint, cellSizeHint)
     {
-        return this->_ZFP_ZFUIListAdapter_cellSizeHint;
+        this->listAdapterNotifyReload();
+    }
+
+    /**
+     * @brief if #cellSizeHint not set, whether fill cell size to #listContainerSize,
+     *   false by default
+     *
+     * this property is useful when combined with #ZFUIScrollView::scrollAlignToPageHorizontal series
+     */
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, cellSizeFill, zffalse)
+    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(zfbool, cellSizeFill)
+    {
+        this->listAdapterNotifyReload();
     }
 
     // ============================================================
@@ -121,14 +137,11 @@ public:
      * util it's coming to visible\n
      * return a -1 size to measure the cell automatically,
      * otherwise, the cell's size is fixed\n
-     * return #cellSizeHint by default
+     * return #cellSizeHint accorrding to #cellSizeFill by default
      */
-    ZFMETHOD_INLINE_2(zfint, cellSizeAtIndex,
-                      ZFMP_IN(zfindex, index),
-                      ZFMP_IN(ZFUIListCell *, cell))
-    {
-        return this->cellSizeHint();
-    }
+    ZFMETHOD_DECLARE_2(zfint, cellSizeAtIndex,
+                       ZFMP_IN(zfindex, index),
+                       ZFMP_IN(ZFUIListCell *, cell))
 
     // ============================================================
     // list update callback
@@ -159,9 +172,9 @@ protected:
      *
      * see #cellCacheOnRecycle for more info
      */
-    virtual zfautoObject cellCacheOnAccess(ZF_IN zfindex index)
+    virtual inline zfautoObject cellCacheOnAccess(ZF_IN zfindex index)
     {
-        return zfnull;
+        return zfautoObjectNull();
     }
     zffinal inline void _ZFP_ZFUIListAdapter_cellCacheOnRecycle(ZF_IN ZFUIListCell *cell)
     {
@@ -181,10 +194,15 @@ protected:
     virtual inline void cellCacheOnRecycle(ZF_IN ZFUIListCell *cell)
     {
     }
+
+public:
     /** @brief see #cellCacheOnRecycle */
-    zffinal zfautoObject cellCacheDefaultAccess(ZF_IN const zfchar *key);
+    ZFMETHOD_DECLARE_1(zfautoObject, cellCacheDefaultAccess,
+                       ZFMP_IN(const zfchar *, key))
     /** @brief see #cellCacheOnRecycle */
-    zffinal void cellCacheDefaultRecycle(ZF_IN const zfchar *key, ZF_IN ZFUIListCell *cell);
+    ZFMETHOD_DECLARE_2(void, cellCacheDefaultRecycle,
+                       ZFMP_IN(const zfchar *, key),
+                       ZFMP_IN(ZFUIListCell *, cell))
 
 private:
     friend zfclassFwd _ZFP_ZFUIListViewPrivate;

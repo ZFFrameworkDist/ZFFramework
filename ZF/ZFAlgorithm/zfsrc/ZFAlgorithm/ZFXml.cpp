@@ -22,7 +22,6 @@ ZFTYPEID_ACCESS_ONLY_DEFINE(ZFXmlVisitCallback, ZFXmlVisitCallback)
 ZFEXPORT_VAR_READONLY_DEFINE(ZFXmlVisitCallback, ZFXmlVisitCallbackDefault, ZFXmlVisitCallbackForOutput())
 
 // ============================================================
-/** @cond ZFPrivateDoc */
 zfbool ZFXmlOutputToken::operator == (ZF_IN ZFXmlOutputToken const &ref) const
 {
     return (zftrue
@@ -30,8 +29,8 @@ zfbool ZFXmlOutputToken::operator == (ZF_IN ZFXmlOutputToken const &ref) const
             && this->xmlIndentToken == ref.xmlIndentToken
             && this->xmlDeclarationTagLeft == ref.xmlDeclarationTagLeft
             && this->xmlDeclarationTagRight == ref.xmlDeclarationTagRight
-            && this->xmlDOCTYPETagLeft == ref.xmlDOCTYPETagLeft
-            && this->xmlDOCTYPETagRight == ref.xmlDOCTYPETagRight
+            && this->xmlDocTypeTagLeft == ref.xmlDocTypeTagLeft
+            && this->xmlDocTypeTagRight == ref.xmlDocTypeTagRight
             && this->xmlPITagLeft == ref.xmlPITagLeft
             && this->xmlPITagRight == ref.xmlPITagRight
             && this->xmlElementBeginTagLeft == ref.xmlElementBeginTagLeft
@@ -63,7 +62,6 @@ zfbool ZFXmlOutputFlags::operator == (ZF_IN ZFXmlOutputFlags const &ref) const
             && this->xmlAttributeUseSingleQuote == ref.xmlAttributeUseSingleQuote
         );
 }
-/** @endcond */
 ZFTYPEID_ACCESS_ONLY_DEFINE(ZFXmlOutputFlags, ZFXmlOutputFlags)
 
 // ============================================================
@@ -169,9 +167,9 @@ static zfbool _ZFP_ZFXmlOutputAttributeNeedNewLine(ZF_IN const ZFXmlItem &xmlAtt
             && data.siblingIndex > 0
             && (data.siblingIndex % flags.xmlElementAttributeCountBeforeAddNewLine) == 0));
 }
-zfclass _ZFP_ZFXmlOutputOwner : zfextends ZFObject
+zfclass _ZFP_I_ZFXmlOutputOwner : zfextends ZFObject
 {
-    ZFOBJECT_DECLARE(_ZFP_ZFXmlOutputOwner, ZFObject)
+    ZFOBJECT_DECLARE(_ZFP_I_ZFXmlOutputOwner, ZFObject)
 
 public:
     ZFOutput outputCallback;
@@ -194,10 +192,10 @@ public:
                 return this->onVisitXmlDocument(data);
             case ZFXmlType::e_XmlDeclaration:
                 return this->onVisitXmlDeclaration(data);
-            case ZFXmlType::e_XmlDOCTYPE:
-                return this->onVisitXmlDOCTYPE(data);
-            case ZFXmlType::e_XmlProcessingInstruction:
-                return this->onVisitXmlProcessingInstruction(data);
+            case ZFXmlType::e_XmlDocType:
+                return this->onVisitXmlDocType(data);
+            case ZFXmlType::e_XmlPI:
+                return this->onVisitXmlPI(data);
             default:
                 return zffalse;
         }
@@ -232,7 +230,8 @@ private:
                 this->add(data.xmlItem.xmlName());
                 break;
             case ZFXmlVisitType::e_Exit:
-                if(!data.xmlItem.xmlAttributeFirst().xmlIsNull())
+                if(!data.xmlItem.xmlAttributeFirst().xmlIsNull()
+                    && _ZFP_ZFXmlOutputElementUseSingleTag(data.xmlItem, flags, data))
                 {
                     this->add(zfText(" "));
                 }
@@ -402,7 +401,7 @@ private:
         }
         return zftrue;
     }
-    zfbool onVisitXmlDOCTYPE(ZF_IN const ZFXmlVisitData &data)
+    zfbool onVisitXmlDocType(ZF_IN const ZFXmlVisitData &data)
     {
         switch(data.xmlVisitType)
         {
@@ -413,12 +412,12 @@ private:
                 }
                 this->add(flags.xmlGlobalLineBeginToken);
                 this->addIndent(flags.xmlToken.xmlIndentToken, data.depth);
-                this->add(flags.xmlToken.xmlDOCTYPETagLeft);
+                this->add(flags.xmlToken.xmlDocTypeTagLeft);
                 this->add(zfText(" "));
                 this->add(data.xmlItem.xmlValue());
                 break;
             case ZFXmlVisitType::e_Exit:
-                this->add(flags.xmlToken.xmlDOCTYPETagRight);
+                this->add(flags.xmlToken.xmlDocTypeTagRight);
                 break;
             case ZFXmlVisitType::e_ExitChildren:
             default:
@@ -427,7 +426,7 @@ private:
         }
         return zftrue;
     }
-    zfbool onVisitXmlProcessingInstruction(ZF_IN const ZFXmlVisitData &data)
+    zfbool onVisitXmlPI(ZF_IN const ZFXmlVisitData &data)
     {
         switch(data.xmlVisitType)
         {
@@ -489,11 +488,11 @@ ZFMETHOD_FUNC_DEFINE_2(ZFXmlVisitCallback, ZFXmlVisitCallbackForOutput,
     {
         return ZFCallbackNull();
     }
-    _ZFP_ZFXmlOutputOwner *owner = zfAlloc(_ZFP_ZFXmlOutputOwner);
+    _ZFP_I_ZFXmlOutputOwner *owner = zfAlloc(_ZFP_I_ZFXmlOutputOwner);
     owner->outputCallback = outputCallback;
     owner->flags = flags;
     ZFXmlVisitCallback callback = ZFCallbackForMemberMethod(
-        owner, ZFMethodAccess(_ZFP_ZFXmlOutputOwner, onVisit));
+        owner, ZFMethodAccess(_ZFP_I_ZFXmlOutputOwner, onVisit));
     callback.callbackOwnerObjectRetain();
     zfRelease(owner);
     return callback;
@@ -981,7 +980,6 @@ ZFXmlItem::~ZFXmlItem(void)
     }
 }
 
-/** @cond ZFPrivateDoc */
 ZFXmlItem &ZFXmlItem::operator = (ZF_IN const ZFXmlItem &ref)
 {
     _ZFP_ZFXmlItemPrivate *dTmp = d;
@@ -998,7 +996,6 @@ zfbool ZFXmlItem::operator == (ZF_IN const ZFXmlItem &ref) const
 {
     return (d == ref.d || (d->xmlType == ZFXmlType::e_XmlNull && ref.d->xmlType == ZFXmlType::e_XmlNull));
 }
-/** @endcond */
 
 // ============================================================
 void ZFXmlItem::objectInfoT(ZF_IN_OUT zfstring &ret) const

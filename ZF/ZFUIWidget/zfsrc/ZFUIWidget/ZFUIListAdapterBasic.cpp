@@ -7,11 +7,18 @@
  * Distributed under MIT license:
  *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
  * ====================================================================== */
-#include "ZFCacheable.h"
+#include "ZFUIListAdapterBasic.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFOBJECT_REGISTER(ZFCacheable)
+ZFOBJECT_REGISTER(ZFUIListAdapterBasicParam)
+
+ZFOBJECT_REGISTER(ZFUIListAdapterBasic)
+
+ZFOBSERVER_EVENT_REGISTER(ZFUIListAdapterBasic, ListCellCount)
+ZFOBSERVER_EVENT_REGISTER(ZFUIListAdapterBasic, ListCellAtIndex)
+ZFOBSERVER_EVENT_REGISTER(ZFUIListAdapterBasic, ListCellSizeAtIndex)
+ZFOBSERVER_EVENT_REGISTER(ZFUIListAdapterBasic, ListCellCacheOnAccess)
 
 ZF_NAMESPACE_GLOBAL_END
 

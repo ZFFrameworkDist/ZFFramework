@@ -9,7 +9,7 @@
  * ====================================================================== */
 #include "ZFTypeId_CoreType.h"
 #include "ZFObjectImpl.h"
-#include "ZFSerializableDataStringConverter.h"
+#include "ZFSerializableDataSerializableConverter.h"
 #include "ZFIdMap.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -1094,9 +1094,9 @@ ZFTYPEID_DEFINE(ZFSerializableData, ZFSerializableData, {
         serializableData = v;
         return zftrue;
     }, {
-        return ZFSerializableDataFromString(v, src, srcLen, zfnull);
+        return ZFSerializableDataFromZfsd(v, src, srcLen);
     }, {
-        return ZFSerializableDataToString(s, v, zfnull);
+        return ZFSerializableDataToZfsd(s, v, zfnull, zffalse);
     })
 ZFOUTPUT_TYPE_DEFINE(ZFSerializableData, {
         output.execute(v.objectInfo());
@@ -1121,7 +1121,7 @@ ZFTYPEID_ACCESS_ONLY_DEFINE(ZFFilterForZFObject, ZFFilterForZFObject)
 ZFTYPEID_ACCESS_ONLY_DEFINE(ZFMethodGenericInvoker, ZFMethodGenericInvoker)
 
 ZFTYPEID_ACCESS_ONLY_DEFINE(VoidPointer, void *)
-ZFTYPEID_ALIAS_DEFINE(VoidPointer, void *, VoidPointerConst, const void *)
+ZFTYPEID_ACCESS_ONLY_DEFINE(VoidPointerConst, const void *)
 
 ZF_NAMESPACE_GLOBAL_END
 

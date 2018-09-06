@@ -1,3 +1,11 @@
+# 0.5.0
+* optimize serializable output
+* optimize cache impl
+* optimize native window attach impl
+* optimize UI module performance
+* optimize list view impl
+* change zfsynchronize API names
+
 # 0.4.1
 * update project files
 * fix `all_load` problem for iOS project

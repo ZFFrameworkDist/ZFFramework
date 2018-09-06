@@ -19,6 +19,7 @@
 @interface _ZFP_ZFUIViewImpl_sys_iOS_View : UIView
 @property (nonatomic, assign) ZFUIView *_ZFP_ownerZFUIView;
 @property (nonatomic, strong) UIView *_ZFP_nativeImplView;
+@property (nonatomic, assign) CGRect _ZFP_nativeImplViewFrame;
 @property (nonatomic, assign) CGRect _ZFP_frame;
 @property (nonatomic, strong) NSMutableArray *_ZFP_mouseRecords; // UITouch
 @property (nonatomic, assign) BOOL _ZFP_uiEnable;
@@ -105,9 +106,7 @@
         UIView *child = [children objectAtIndex:i];
         if(child == self._ZFP_nativeImplView)
         {
-            ZFUIRect rect;
-            ZFPROTOCOL_ACCESS(ZFUIView)->notifyLayoutNativeImplView(self._ZFP_ownerZFUIView, rect);
-            child.frame = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(rect);
+            child.frame = self._ZFP_nativeImplViewFrame;
         }
         else if([child isKindOfClass:[_ZFP_ZFUIViewImpl_sys_iOS_View class]])
         {
@@ -136,10 +135,13 @@
     {
         [self._ZFP_mouseRecords addObject:touch];
 
-        ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, ev);
+        zfautoObject evHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+        ZFUIMouseEvent *ev = evHolder;
+        ev->eventResolvedSet(zffalse);
         ev->mouseId = (zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseDown;
         ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
 }
@@ -163,10 +165,13 @@
 
     for(UITouch *touch in self._ZFP_mouseRecords)
     {
-        ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, ev);
+        zfautoObject evHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+        ZFUIMouseEvent *ev = evHolder;
+        ev->eventResolvedSet(zffalse);
         ev->mouseId = (zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseMove;
         ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
 }
@@ -184,10 +189,13 @@
     {
         [self._ZFP_mouseRecords removeObject:touch];
 
-        ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, ev);
+        zfautoObject evHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+        ZFUIMouseEvent *ev = evHolder;
+        ev->eventResolvedSet(zffalse);
         ev->mouseId = (zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseUp;
         ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
 }
@@ -205,10 +213,13 @@
     {
         [self._ZFP_mouseRecords removeObject:touch];
 
-        ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, ev);
+        zfautoObject evHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+        ZFUIMouseEvent *ev = evHolder;
+        ev->eventResolvedSet(zffalse);
         ev->mouseId = (zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseCancel;
         ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
 }
@@ -272,14 +283,14 @@ static void _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged(ZF_IN UIView *nativ
     }
 }
 
-@implementation UIView (_ZFP_ZFUIViewImpl_sys_iOS_MethodSwizzling)
+@implementation UIResponder (_ZFP_ZFUIViewImpl_sys_iOS_MethodSwizzling)
 - (BOOL)_ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_becomeFirstResponder
 {
     BOOL old = self.isFirstResponder;
     BOOL ret = [self _ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_becomeFirstResponder];
-    if(!old && self.isFirstResponder)
+    if(!old && self.isFirstResponder && [self isKindOfClass:[UIView class]])
     {
-        _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged(self);
+        _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged((UIView *)self);
     }
     return ret;
 }
@@ -287,9 +298,9 @@ static void _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged(ZF_IN UIView *nativ
 {
     BOOL old = self.isFirstResponder;
     BOOL ret = [self _ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_resignFirstResponder];
-    if(old && !self.isFirstResponder)
+    if(old && !self.isFirstResponder && [self isKindOfClass:[UIView class]])
     {
-        _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged(self);
+        _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged((UIView *)self);
     }
     return ret;
 }
@@ -298,13 +309,13 @@ static void _ZFP_ZFUIViewImpl_sys_iOS_notifyViewFocusChanged(ZF_IN UIView *nativ
 static void _ZFP_ZFUIViewImpl_sys_iOS_methodSwizzlePrepare(void)
 {
     {
-        Method methodOrg =  class_getInstanceMethod([UIView class], @selector(becomeFirstResponder));
-        Method methodNew = class_getInstanceMethod([UIView class], @selector(_ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_becomeFirstResponder));
+        Method methodOrg =  class_getInstanceMethod([UIResponder class], @selector(becomeFirstResponder));
+        Method methodNew = class_getInstanceMethod([UIResponder class], @selector(_ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_becomeFirstResponder));
         method_exchangeImplementations(methodOrg, methodNew);
     }
     {
-        Method methodOrg =  class_getInstanceMethod([UIView class], @selector(resignFirstResponder));
-        Method methodNew = class_getInstanceMethod([UIView class], @selector(_ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_resignFirstResponder));
+        Method methodOrg =  class_getInstanceMethod([UIResponder class], @selector(resignFirstResponder));
+        Method methodNew = class_getInstanceMethod([UIResponder class], @selector(_ZFP_ZFUIViewImpl_sys_iOS_methodSwizzling_resignFirstResponder));
         method_exchangeImplementations(methodOrg, methodNew);
     }
 }
@@ -405,6 +416,12 @@ public:
         {
             [nativeView insertSubview:nativeView._ZFP_nativeImplView atIndex:virtualIndex];
         }
+    }
+    virtual void nativeImplViewFrameSet(ZF_IN ZFUIView *view,
+                                        ZF_IN const ZFUIRect &rect)
+    {
+        _ZFP_ZFUIViewImpl_sys_iOS_View *nativeView = (__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView();
+        nativeView._ZFP_nativeImplViewFrame = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(rect);
     }
     virtual zffloat nativeViewScaleForImpl(ZF_IN void *nativeView)
     {

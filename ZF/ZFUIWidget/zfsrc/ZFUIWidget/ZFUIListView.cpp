@@ -117,7 +117,6 @@ public:
         if(this->listAdapter != zfnull)
         {
             this->listAdapter->_ZFP_ZFUIListAdapter_listOrientation = this->pimplOwner->listOrientation();
-            this->listAdapter->_ZFP_ZFUIListAdapter_cellSizeHint = this->pimplOwner->cellSizeHint();
             this->listAdapter->_ZFP_ZFUIListAdapter_listContainerSize = this->pimplOwner->scrollArea().size;
         }
     }
@@ -186,13 +185,19 @@ public:
             ZFUIListCellUpdaterParam updateParam;
             updateParam.cell = cell;
             updateParam.cellIndex = index;
-            updateParam.cellCount = this->listAdapter->cellCount();
+            updateParam.cellCount = this->cellCount;
             updateParam.listOrientation = this->listAdapter->listOrientation();
             updateParam.listContainerSize = this->listAdapter->listContainerSize();
             updateParam.cellSizeHint = this->listAdapter->cellSizeHint();
             for(zfindex i = 0; i < this->pimplOwner->cellUpdater()->count(); ++i)
             {
-                this->pimplOwner->cellUpdater()->get<ZFUIListCellUpdater *>(i)->cellOnUpdate(updateParam);
+                ZFObject *cellUpdater = this->pimplOwner->cellUpdater()->get(i);
+                cellUpdater->to<ZFUIListCellUpdater *>()->cellOnUpdate(updateParam);
+                if(cellUpdater->observerHasAdd(ZFUIListCellUpdater::EventCellOnUpdate()))
+                {
+                    zfblockedAlloc(v_ZFUIListCellUpdaterParam, param0, updateParam);
+                    cellUpdater->observerNotify(ZFUIListCellUpdater::EventCellOnUpdate(), param0);
+                }
             }
         }
         this->listAdapter->cellOnUpdate(index, cell);
@@ -203,7 +208,9 @@ public:
         {
             for(zfindex i = 0; i < this->pimplOwner->cellUpdater()->count(); ++i)
             {
-                this->pimplOwner->cellUpdater()->get<ZFUIListCellUpdater *>(i)->cellOnRecycle(cell);
+                ZFObject *cellUpdater = this->pimplOwner->cellUpdater()->get(i);
+                cellUpdater->to<ZFUIListCellUpdater *>()->cellOnRecycle(cell);
+                cellUpdater->observerNotify(ZFUIListCellUpdater::EventCellOnRecycle(), cell);
             }
         }
         this->listAdapter->cellCacheOnRecycle(cell);
@@ -1065,7 +1072,28 @@ public:
         }
         else
         {
-            zfint cellSizeHint = zfmMax(this->pimplOwner->cellSizeHint(), ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell());
+            zfint cellSizeHint = this->listAdapter->cellSizeHint();
+            if(this->listAdapter->cellSizeFill())
+            {
+                switch(this->listAdapter->listOrientation())
+                {
+                    case ZFUIOrientation::e_Left:
+                    case ZFUIOrientation::e_Right:
+                        cellSizeHint = this->listAdapter->listContainerSize().width;
+                        break;
+                    case ZFUIOrientation::e_Top:
+                    case ZFUIOrientation::e_Bottom:
+                        cellSizeHint = this->listAdapter->listContainerSize().height;
+                        break;
+                    default:
+                        zfCoreCriticalShouldNotGoHere();
+                        break;
+                }
+            }
+            else if(cellSizeHint < 0)
+            {
+                cellSizeHint = ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell();
+            }
             this->cellSizeList.capacitySet(this->cellCount);
             for(zfindex i = this->cellSizeList.count(); i < this->cellCount; ++i)
             {
@@ -1414,13 +1442,6 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIListView, ZFUIOrientationEnum, listOrie
         this->listReload();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIListView, zfint, cellSizeHint)
-{
-    if(this->cellSizeHint() != propertyValueOld)
-    {
-        this->listReload();
-    }
-}
 ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIListView, zfbool, listBounce)
 {
     if(this->listBounce() != propertyValueOld)
@@ -1481,6 +1502,72 @@ ZFSerializablePropertyType ZFUIListView::serializableOnCheckPropertyType(ZF_IN c
     }
 }
 
+zfbool ZFUIListView::serializableOnSerializeFromData(ZF_IN const ZFSerializableData &serializableData,
+                                                     ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */,
+                                                     ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
+{
+    if(!zfsuperI(ZFSerializable)::serializableOnSerializeFromData(serializableData, outErrorHint, outErrorPos)) {return zffalse;}
+
+    this->listAdapterSet(zfnull);
+
+    for(zfindex i = 0; i < serializableData.elementCount(); ++i)
+    {
+        const ZFSerializableData &categoryData = serializableData.elementAtIndex(i);
+        if(categoryData.resolved()) {continue;}
+        const zfchar *category = ZFSerializableUtil::checkCategory(categoryData);
+        if(!zfscmpTheSame(category, ZFSerializableKeyword_ZFUIListView_listAdapter)) {continue;}
+
+        zfautoObject element;
+        if(!ZFObjectFromData(element, categoryData, outErrorHint, outErrorPos))
+        {
+            return zffalse;
+        }
+        if(element != zfnull
+            && !element.toObject()->classData()->classIsTypeOf(ZFUIListAdapter::ClassData()))
+        {
+            ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, categoryData,
+                zfText("%s not type of %s"),
+                element.toObject()->objectInfoOfInstance().cString(), ZFUIListAdapter::ClassData()->classNameFull());
+            return zffalse;
+        }
+
+        this->listAdapterSet(element);
+        categoryData.resolveMark();
+    }
+    return zftrue;
+}
+zfbool ZFUIListView::serializableOnSerializeToData(ZF_IN_OUT ZFSerializableData &serializableData,
+                                                   ZF_IN ZFSerializable *referencedOwnerOrNull,
+                                                   ZF_OUT_OPT zfstring *outErrorHint /* = zfnull */)
+{
+    if(!zfsuperI(ZFSerializable)::serializableOnSerializeToData(serializableData, referencedOwnerOrNull, outErrorHint)) {return zffalse;}
+    zfself *ref = ZFCastZFObject(zfself *, referencedOwnerOrNull);
+
+    if(!this->listAdapterSerializable() || this->listAdapter() == zfnull)
+    {
+        return zftrue;
+    }
+
+    ZFSerializableData categoryData;
+    if(!ZFObjectToData(categoryData, this->listAdapter()->toObject(), outErrorHint,
+        ref ? ZFCastZFObject(ZFSerializable *, ref->listAdapter()) : zfnull))
+    {
+        return zffalse;
+    }
+
+    if(!(
+        ref != zfnull && ref->listAdapter() != zfnull
+        && this->listAdapter()->classData()->classIsTypeOf(ref->listAdapter()->classData())
+        && categoryData.elementCount() == 0 && categoryData.attributeCount() == 0
+        ))
+    {
+        categoryData.categorySet(ZFSerializableKeyword_ZFUIListView_listAdapter);
+        serializableData.elementAdd(categoryData);
+    }
+
+    return zftrue;
+}
+
 void ZFUIListView::layoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds)
 {
     if(!d->listQuickReloadRequested && this->layoutedFrame().size != this->layoutedFramePrev().size)
@@ -1488,7 +1575,7 @@ void ZFUIListView::layoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds)
         d->listQuickReloadRequested = zftrue;
         d->cellNeedUpdate = zftrue;
     }
-    if((d->listReloadRequested || d->listQuickReloadRequested) && d->listAdapter != zfnull)
+    if(d->listReloadRequested || d->listQuickReloadRequested)
     {
         d->listAdapterSettingUpdate();
     }
@@ -1519,14 +1606,14 @@ void ZFUIListView::viewChildOnRemove(ZF_IN ZFUIView *child,
     zfsuper::viewChildOnRemove(child, layer);
 }
 
-void ZFUIListView::scrollAreaMarginOnChange(void)
+void ZFUIListView::scrollAreaOnChange(void)
 {
-    zfsuper::scrollAreaMarginOnChange();
+    zfsuper::scrollAreaOnChange();
     if(!d->listQuickReloadRequested)
     {
         d->listQuickReloadRequested = zftrue;
-        this->layoutRequest();
     }
+    d->listAdapterSettingUpdate();
 }
 void ZFUIListView::scrollContentFrameOnChange(void)
 {

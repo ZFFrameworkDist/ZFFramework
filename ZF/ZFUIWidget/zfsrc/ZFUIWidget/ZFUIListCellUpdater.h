@@ -32,16 +32,38 @@ public:
     ZFUISize listContainerSize; /**< @brief owner list container's size */
     zfint cellSizeHint; /**< @brief list cell's size hint */
 };
+ZFTYPEID_ACCESS_ONLY_DECLARE(ZFUIListCellUpdaterParam, ZFUIListCellUpdaterParam)
+ZFCORE_POD_COMPARER_DECLARE(ZFUIListCellUpdaterParam)
 
 // ============================================================
+zfclassFwd ZFUIListView;
+zfclassFwd _ZFP_ZFUIListViewPrivate;
 /**
  * @brief abstract list cell updater to update #ZFUIListCell
  */
-zfclass ZF_ENV_EXPORT ZFUIListCellUpdater : zfextends ZFStyleableObject
+zfinterface ZF_ENV_EXPORT ZFUIListCellUpdater : zfextends ZFInterface
 {
-    ZFOBJECT_DECLARE(ZFUIListCellUpdater, ZFStyleableObject)
+    ZFINTERFACE_DECLARE(ZFUIListCellUpdater, ZFInterface)
 
 public:
+    // ============================================================
+    // events
+    /**
+     * @brief see #ZFObject::observerNotify
+     *
+     * called when #cellOnUpdate,
+     * param0 is #v_ZFUIListCellUpdaterParam
+     */
+    ZFOBSERVER_EVENT(CellOnUpdate)
+    /**
+     * @brief see #ZFObject::observerNotify
+     *
+     * called when #cellOnRecycle,
+     * param0 is #ZFUIListCell
+     */
+    ZFOBSERVER_EVENT(CellOnRecycle)
+
+protected:
     /**
      * @brief called to update cell style
      */
@@ -59,9 +81,16 @@ public:
     /**
      * @brief util method for impl to achieve cache logic
      */
-    zffinal zfautoObject itemCacheAccess(ZF_IN const zfchar *key);
+    ZFMETHOD_DECLARE_1(zfautoObject, itemCacheAccess,
+                       ZFMP_IN(const zfchar *, key))
     /** @brief see #itemCacheAccess */
-    zffinal void itemCacheRecycle(ZF_IN const zfchar *key, ZF_IN ZFObject *cache);
+    ZFMETHOD_DECLARE_2(void, itemCacheRecycle,
+                       ZFMP_IN(const zfchar *, key),
+                       ZFMP_IN(ZFObject *, cache))
+
+private:
+    friend zfclassFwd _ZFP_ZFUIListViewPrivate;
+    friend zfclassFwd ZFUIListView;
 };
 
 ZF_NAMESPACE_GLOBAL_END

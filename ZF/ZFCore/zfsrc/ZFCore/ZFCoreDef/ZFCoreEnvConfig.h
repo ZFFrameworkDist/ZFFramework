@@ -29,8 +29,8 @@
  * @brief version of ZFFramework, e.g. '0.1.0'
  */
 #define ZF_ENV_ZFVERSION_MAIN()       0
-#define ZF_ENV_ZFVERSION_SUB()        4
-#define ZF_ENV_ZFVERSION_MINOR()      1
+#define ZF_ENV_ZFVERSION_SUB()        5
+#define ZF_ENV_ZFVERSION_MINOR()      0
 
 #define ZF_ENV_ZFVERSION() _ZFP_ZF_ENV_ZFVERSION(ZF_ENV_ZFVERSION_MAIN(), ZF_ENV_ZFVERSION_SUB(), ZF_ENV_ZFVERSION_MINOR())
 #define _ZFP_ZF_ENV_ZFVERSION(vMain, vSub, vMinor) ZFM_TOSTRING(vMain) zfText(".") ZFM_TOSTRING(vSub) zfText(".") ZFM_TOSTRING(vMinor)
@@ -74,6 +74,8 @@ INPUT                  += ../../../ZF/ZFUIWebKit_impl/zfsrc
 INPUT                  += ../../../ZF/ZFUIWidget/zfsrc
 INPUT                  += ../../../ZF/ZFUtility/zfsrc
 INPUT                  += ../../../ZF/ZF_impl/zfsrc
+
+FILE_PATTERNS          = *.h *.hpp
 
 INCLUDE_PATH           =
 INCLUDE_PATH           += ../../../ZF/ZFAlgorithm/zfsrc
@@ -300,6 +302,7 @@ EXPAND_AS_DEFINED     += ZFEXPORT_VAR_READONLY_ALIAS_DECLARE
 EXPAND_AS_DEFINED     += ZFEXPORT_VAR_READONLY_VALUEREF_DECLARE
 EXPAND_AS_DEFINED     += _ZFP_ZFValue_method_DECLARE
 EXPAND_AS_DEFINED     += _ZFP_ZFValueEditable_method_DECLARE
+EXPAND_AS_DEFINED     += ZFCACHEHOLDER_DECLARE
 
 EXCLUDE_PATTERNS      += */*.java
 EXCLUDE_PATTERNS      += */_repo/*

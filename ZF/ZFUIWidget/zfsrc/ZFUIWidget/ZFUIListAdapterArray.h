@@ -19,12 +19,23 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
+/** @brief keyword for serialize */
+#define ZFSerializableKeyword_ZFUIListAdapterArray_cell zfText("ZFSerializableKeyword_ZFUIListAdapterArray_cell")
+
 /**
  * @brief basic list adapter which hold all list cells directly (with no recycle logic)
+ *
+ * serializable data:
+ * @code
+ *   <ZFUIListAdapterArray>
+ *       <SomeView category="cell" />
+ *       ... // each cell
+ *   </ZFUIListAdapterArray>
+ * @endcode
  */
-zfclass ZF_ENV_EXPORT ZFUIListAdapterArray : zfextends ZFObject, zfimplements ZFUIListAdapter
+zfclass ZF_ENV_EXPORT ZFUIListAdapterArray : zfextends ZFStyleableObject, zfimplements ZFUIListAdapter
 {
-    ZFOBJECT_DECLARE(ZFUIListAdapterArray, ZFObject)
+    ZFOBJECT_DECLARE(ZFUIListAdapterArray, ZFStyleableObject)
     ZFIMPLEMENTS_DECLARE(ZFUIListAdapter)
 
 protected:
@@ -99,39 +110,15 @@ public:
     }
 
 public:
-    /**
-     * @brief whether to override default list cell size hint, false by default
-     *
-     * if true, #cellSizeHintOverrideValue would be used instead of #ZFUIListAdapter::cellSizeHint
-     */
-    ZFPROPERTY_ASSIGN(zfbool, cellSizeHintOverride)
-    /**
-     * @brief valid only if #cellSizeHintOverride, -1 by default, see #ZFUIListAdapter::cellSizeAtIndex
-     */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, cellSizeHintOverrideValue, -1)
-
-public:
-    ZFMETHOD_INLINE_0(zfindex, cellCount)
+    zfoverride
+    virtual zfindex cellCount(void)
     {
         return d->count();
     }
-    ZFMETHOD_INLINE_1(zfautoObject, cellAtIndex,
-                      ZFMP_IN(zfindex, index))
+    zfoverride
+    virtual zfautoObject cellAtIndex(ZF_IN zfindex index)
     {
         return d->get(index);
-    }
-    ZFMETHOD_INLINE_2(zfint, cellSizeAtIndex,
-                      ZFMP_IN(zfindex, index),
-                      ZFMP_IN(ZFUIListCell *, cell))
-    {
-        if(this->cellSizeHintOverride())
-        {
-            return this->cellSizeHintOverrideValue();
-        }
-        else
-        {
-            return zfsuperI(ZFUIListAdapter)::cellSizeAtIndex(index, cell);
-        }
     }
 
 protected:
@@ -140,6 +127,16 @@ protected:
     {
         return d->get(index);
     }
+
+protected:
+    zfoverride
+    virtual zfbool serializableOnSerializeFromData(ZF_IN const ZFSerializableData &serializableData,
+                                                   ZF_OUT_OPT zfstring *outErrorHint = zfnull,
+                                                   ZF_OUT_OPT ZFSerializableData *outErrorPos = zfnull);
+    zfoverride
+    virtual zfbool serializableOnSerializeToData(ZF_IN_OUT ZFSerializableData &serializableData,
+                                                 ZF_IN ZFSerializable *referencedOwnerOrNull,
+                                                 ZF_OUT_OPT zfstring *outErrorHint = zfnull);
 
 private:
     ZFArrayEditable *d;

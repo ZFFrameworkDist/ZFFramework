@@ -9,13 +9,36 @@
  * ====================================================================== */
 #include "ZFObjectSmartPointer.h"
 #include "ZFObjectImpl.h"
-#include "ZFSynchronize.h"
+#include "zfsynchronize.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_string.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_vector.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
+
+static ZFCoreQueuePOD<ZFObjectHolder *> _ZFP_ZFObjectCache_objectHolder;
+static ZFCoreQueuePOD<v_ZFProperty *> _ZFP_ZFObjectCache_prop0;
+static ZFCoreQueuePOD<v_VoidPointerConst *> _ZFP_ZFObjectCache_prop1;
+ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFObjectCacheAutoClean, ZFLevelZFFrameworkStatic)
+{
+}
+ZF_GLOBAL_INITIALIZER_DESTROY(ZFObjectCacheAutoClean)
+{
+    while(!_ZFP_ZFObjectCache_objectHolder.isEmpty())
+    {
+        zfRelease(_ZFP_ZFObjectCache_objectHolder.queueTake());
+    }
+    while(!_ZFP_ZFObjectCache_prop0.isEmpty())
+    {
+        zfRelease(_ZFP_ZFObjectCache_prop0.queueTake());
+    }
+    while(!_ZFP_ZFObjectCache_prop1.isEmpty())
+    {
+        zfRelease(_ZFP_ZFObjectCache_prop1.queueTake());
+    }
+}
+ZF_GLOBAL_INITIALIZER_END(ZFObjectCacheAutoClean)
 
 // ============================================================
 // _ZFP_ZFObjectPrivate
@@ -26,16 +49,15 @@ public:
     zfuint objectRetainCount;
     ZFObjectInstanceState objectInstanceState;
     ZFObjectHolder *objectHolder;
-    ZFObjectMutexImpl *mutexImpl;
+    void *mutexImpl;
     _ZFP_ZFObjectTagMapType tagMap;
     zfstlvector<const ZFProperty *> propertyAccessed;
     enum {
-        stateFlag_mutexImplAvailable = 1 << 0,
-        stateFlag_objectIsPrivate = 1 << 1,
-        stateFlag_objectIsInternal = 1 << 2,
-        stateFlag_observerHasAddFlag_objectAfterAlloc = 1 << 3,
-        stateFlag_observerHasAddFlag_objectBeforeDealloc = 1 << 4,
-        stateFlag_observerHasAddFlag_objectPropertyValueOnUpdate = 1 << 5,
+        stateFlag_objectIsPrivate = 1 << 0,
+        stateFlag_objectIsInternal = 1 << 1,
+        stateFlag_observerHasAddFlag_objectAfterAlloc = 1 << 2,
+        stateFlag_observerHasAddFlag_objectBeforeDealloc = 1 << 3,
+        stateFlag_observerHasAddFlag_objectPropertyValueOnUpdate = 1 << 4,
     };
     zfuint stateFlags;
 
@@ -49,10 +71,6 @@ public:
     , propertyAccessed()
     , stateFlags(0)
     {
-        if(_ZFP_ZFObjectMutexImplCheckCallbackRef != zfnull && _ZFP_ZFObjectMutexImplCheckCallbackRef())
-        {
-            ZFBitSet(this->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_mutexImplAvailable);
-        }
         if(cls->classIsPrivate())
         {
             ZFBitSet(this->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsPrivate);
@@ -97,7 +115,15 @@ ZFObjectHolder *ZFObject::objectHolder(void)
     zfCoreMutexLocker();
     if(d->objectHolder == zfnull)
     {
-        d->objectHolder = zfAlloc(ZFObjectHolder, this);
+        if(_ZFP_ZFObjectCache_objectHolder.isEmpty())
+        {
+            d->objectHolder = zfAlloc(ZFObjectHolder);
+        }
+        else
+        {
+            d->objectHolder = _ZFP_ZFObjectCache_objectHolder.queueTake();
+        }
+        d->objectHolder->objectHoldedSet(this);
     }
     return d->objectHolder;
 }
@@ -149,9 +175,10 @@ zfautoObject ZFObject::invoke(ZF_IN const zfchar *methodName
     ZFCoreArrayPOD<const ZFMethod *> methodList = this->classData()->methodForNameGetAll(methodName);
     zfstring errorHintTmp;
     zfautoObject ret;
+    const ZFMethod *m = zfnull;
     for(zfindex i = 0; i < methodList.count(); ++i)
     {
-        const ZFMethod *m = methodList[i];
+        m = methodList[i];
         zfautoObject paramList[ZFMETHOD_MAX_PARAM] = {
             param0,
             param1,
@@ -184,16 +211,16 @@ zfautoObject ZFObject::invoke(ZF_IN const zfchar *methodName
     else
     {
         zfstringAppend(errorHint,
-            zfText("no matching method to call, methodName: %s, last error reason: %s"),
+            zfText("no matching method to call, last error reason: %s, for method: %s"),
             methodName,
-            errorHintTmp.cString());
+            errorHintTmp.cString(),
+            m ? m->objectInfo().cString() : ZFTOKEN_zfnull);
     }
     return zfautoObjectNull();
 }
 
 zfbool ZFObject::tagHasSet(void)
 {
-    zfCoreMutexLocker();
     return !(d->tagMap.empty());
 }
 void ZFObject::tagSet(ZF_IN const zfchar *key,
@@ -327,54 +354,61 @@ void ZFObject::observerOnRemove(ZF_IN zfidentity eventId)
     }
 }
 
-zfbool ZFObject::_ZFP_ZFObjectLockIsAvailable(void)
-{
-    return ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_mutexImplAvailable);
-}
 void ZFObject::_ZFP_ZFObjectLock(void)
 {
     if(d->mutexImpl)
     {
-        d->mutexImpl->mutexImplLock();
+        _ZFP_ZFObjectMutexImplLock(d->mutexImpl);
     }
-    else if(ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_mutexImplAvailable))
+    else
     {
         zfCoreMutexLock();
-        if(d->mutexImpl == zfnull)
+        if(_ZFP_ZFObjectMutexImplInit)
         {
-            d->mutexImpl = _ZFP_ZFObjectMutexImplInitCallbackRef();
+            if(d->mutexImpl == zfnull)
+            {
+                d->mutexImpl = _ZFP_ZFObjectMutexImplInit();
+            }
         }
         zfCoreMutexUnlock();
-        d->mutexImpl->mutexImplLock();
+        if(d->mutexImpl)
+        {
+            _ZFP_ZFObjectMutexImplLock(d->mutexImpl);
+        }
     }
 }
 void ZFObject::_ZFP_ZFObjectUnlock(void)
 {
     if(d->mutexImpl)
     {
-        d->mutexImpl->mutexImplUnlock();
+        _ZFP_ZFObjectMutexImplUnlock(d->mutexImpl);
     }
-    // else should not go here
 }
 zfbool ZFObject::_ZFP_ZFObjectTryLock(void)
 {
     if(d->mutexImpl)
     {
-        return d->mutexImpl->mutexImplTryLock();
-    }
-    else if(ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_mutexImplAvailable))
-    {
-        zfCoreMutexLock();
-        if(d->mutexImpl == zfnull)
-        {
-            d->mutexImpl = _ZFP_ZFObjectMutexImplInitCallbackRef();
-        }
-        zfCoreMutexUnlock();
-        return d->mutexImpl->mutexImplTryLock();
+        return _ZFP_ZFObjectMutexImplTryLock(d->mutexImpl);
     }
     else
     {
-        return zffalse;
+        zfCoreMutexLock();
+        if(_ZFP_ZFObjectMutexImplInit)
+        {
+            if(d->mutexImpl == zfnull)
+            {
+                d->mutexImpl = _ZFP_ZFObjectMutexImplInit();
+            }
+        }
+        zfCoreMutexUnlock();
+        if(d->mutexImpl)
+        {
+            return _ZFP_ZFObjectMutexImplTryLock(d->mutexImpl);
+        }
+        else
+        {
+            return zffalse;
+        }
     }
 }
 
@@ -465,14 +499,22 @@ void ZFObject::objectOnDealloc(void)
 
     if(d->mutexImpl)
     {
-        _ZFP_ZFObjectMutexImplCleanupCallbackRef(d->mutexImpl);
+        _ZFP_ZFObjectMutexImplDealloc(d->mutexImpl);
         d->mutexImpl = zfnull;
     }
 
     if(d->objectHolder)
     {
         d->objectHolder->objectHoldedSet(zfnull);
-        zfRelease(d->objectHolder);
+        if(d->objectHolder->objectRetainCount() == 1
+            && _ZFP_ZFObjectCache_objectHolder.count() < 32)
+        {
+            _ZFP_ZFObjectCache_objectHolder.queuePut(d->objectHolder);
+        }
+        else
+        {
+            zfRelease(d->objectHolder);
+        }
     }
 
     zfpoolDelete(d);
@@ -508,31 +550,9 @@ zfbool ZFObject::objectIsPrivate(void)
     return ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsPrivate)
         || ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsInternal);
 }
-void ZFObject::objectIsPrivateSet(ZF_IN zfbool value)
-{
-    if(value)
-    {
-        ZFBitSet(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsPrivate);
-    }
-    else
-    {
-        ZFBitUnset(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsPrivate);
-    }
-}
 zfbool ZFObject::objectIsInternal(void)
 {
     return ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsInternal);
-}
-void ZFObject::objectIsInternalSet(ZF_IN zfbool value)
-{
-    if(value)
-    {
-        ZFBitSet(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsInternal);
-    }
-    else
-    {
-        ZFBitUnset(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsInternal);
-    }
 }
 
 void ZFObject::_ZFP_ZFObject_objectPropertyValueAttach(ZF_IN const ZFProperty *property)
@@ -552,17 +572,36 @@ void ZFObject::_ZFP_ZFObject_objectPropertyValueDetach(ZF_IN const ZFProperty *p
 
 void ZFObject::objectPropertyValueOnUpdate(ZF_IN const ZFProperty *property, ZF_IN const void *oldValue)
 {
-    if(!ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_objectIsInternal)
+    if(!this->objectIsInternal()
         && (ZFBitTest(d->stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectPropertyValueOnUpdate)
             || ZFBitTest(_ZFP_ZFObject_stateFlags, _ZFP_ZFObjectPrivate::stateFlag_observerHasAddFlag_objectPropertyValueOnUpdate)))
     {
-        ZFPointerHolder *param0 = ZFPointerHolder::cacheGet();
-        param0->holdedData = property;
-        ZFPointerHolder *param1 = ZFPointerHolder::cacheGet();
-        param1->holdedData = oldValue;
-        this->observerNotify(ZFObject::EventObjectPropertyValueOnUpdate(), param0, param1);
-        ZFPointerHolder::cacheAdd(param0);
-        ZFPointerHolder::cacheAdd(param1);
+        if(_ZFP_ZFObjectCache_prop0.isEmpty())
+        {
+            v_ZFProperty *param0 = zfAlloc(v_ZFProperty, property);
+            v_VoidPointerConst *param1 = zfAlloc(v_VoidPointerConst, oldValue);
+            this->observerNotify(ZFObject::EventObjectPropertyValueOnUpdate(), param0, param1);
+            _ZFP_ZFObjectCache_prop0.queuePut(param0);
+            _ZFP_ZFObjectCache_prop1.queuePut(param1);
+        }
+        else
+        {
+            v_ZFProperty *param0 = _ZFP_ZFObjectCache_prop0.queueTake();
+            param0->zfv = property;
+            v_VoidPointerConst *param1 = _ZFP_ZFObjectCache_prop1.queueTake();
+            param1->zfv = oldValue;
+            this->observerNotify(ZFObject::EventObjectPropertyValueOnUpdate(), param0, param1);
+            if(_ZFP_ZFObjectCache_prop0.count() < 8)
+            {
+                _ZFP_ZFObjectCache_prop0.queuePut(param0);
+                _ZFP_ZFObjectCache_prop1.queuePut(param1);
+            }
+            else
+            {
+                zfRelease(param0);
+                zfRelease(param1);
+            }
+        }
     }
 }
 
@@ -619,9 +658,7 @@ ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_3(ZFObject, void, observerNotify, ZFMP_
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_4(ZFObject, void, observerNotifyWithCustomSender, ZFMP_IN(ZFObject *, customSender), ZFMP_IN(zfidentity, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, ZFObjectInstanceState, objectInstanceState)
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, zfbool, objectIsPrivate)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, objectIsPrivateSet, ZFMP_IN(zfbool, value))
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFObject, zfbool, objectIsInternal)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFObject, void, objectIsInternalSet, ZFMP_IN(zfbool, value))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

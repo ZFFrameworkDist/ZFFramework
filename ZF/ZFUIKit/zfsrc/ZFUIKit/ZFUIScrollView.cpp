@@ -77,6 +77,8 @@ public:
 
     zfint scrollOverrideFlag;
 
+    ZFUIRect scrollContentFrameCache;
+
 protected:
     _ZFP_ZFUIScrollViewPrivate(void)
     : pimplOwner(zfnull)
@@ -106,6 +108,7 @@ protected:
     , autoScrollSpeedY(0)
     , autoScrollStartFlag(zffalse)
     , scrollOverrideFlag(0)
+    , scrollContentFrameCache(ZFUIRectZero())
     {
     }
 
@@ -123,10 +126,15 @@ public:
 public:
     void scrollAreaUpdate(void)
     {
-        this->scrollArea = this->pimplOwner->layoutedFrame();
-        this->scrollArea.point = ZFUIPointZero();
-        ZFUIRectApplyMargin(this->scrollArea, this->scrollArea, this->pimplOwner->nativeImplViewMargin());
-        ZFUIRectApplyMargin(this->scrollArea, this->scrollArea, this->scrollAreaMargin);
+        ZFUIRect newValue = ZFUIRectZero();
+        newValue.size = this->pimplOwner->layoutedFrame().size;
+        ZFUIRectApplyMargin(newValue, newValue, this->pimplOwner->nativeImplViewMargin());
+        ZFUIRectApplyMargin(newValue, newValue, this->scrollAreaMargin);
+        if(newValue != this->scrollArea)
+        {
+            this->scrollArea = newValue;
+            this->pimplOwner->scrollAreaOnChange();
+        }
     }
 
 public:
@@ -324,9 +332,12 @@ public:
         ZFUIRect frame = this->pimplOwner->scrollContentFrame();
         frame.point.x += this->pimplOwner->scrollAreaMargin().left;
         frame.point.y += this->pimplOwner->scrollAreaMargin().top;
-        ZFPROTOCOL_ACCESS(ZFUIScrollView)->scrollViewScrollContentFrameSet(
-            this->pimplOwner,
-            ZFUIRectApplyScale(frame, this->pimplOwner->scaleFixed()));
+        ZFUIRectApplyScale(frame, frame, this->pimplOwner->scaleFixed());
+        if(frame != this->scrollContentFrameCache)
+        {
+            this->scrollContentFrameCache = frame;
+            ZFPROTOCOL_ACCESS(ZFUIScrollView)->scrollViewScrollContentFrameSet(this->pimplOwner, frame);
+        }
     }
 private:
     void scrollContentFrameUpdate(void)
@@ -554,6 +565,7 @@ private:
                     this->notifyScrollOnScroll();
                     break;
                 case _ZFP_ZFUIScrollViewActionScrollEnd:
+                    this->scrollContentFrameUpdate();
                     this->notifyScrollOnScrollEnd();
                     break;
                 default:
@@ -600,7 +612,7 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollOnDragEnd)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollOnScrollBegin)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollOnScroll)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollOnScrollEnd)
-ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollAreaMarginOnChange)
+ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollAreaOnChange)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollContentFrameOnChange)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollAutoScrollOnStart)
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollView, ScrollAutoScrollOnStop)
@@ -960,10 +972,10 @@ void ZFUIScrollView::viewEventOnWheelEvent(ZF_IN ZFUIWheelEvent *wheelEvent)
     }
 }
 
-void ZFUIScrollView::nativeImplViewMarginOnChange(void)
+void ZFUIScrollView::nativeImplViewMarginOnUpdate(void)
 {
     d->scrollAreaUpdate();
-    zfsuper::nativeImplViewMarginOnChange();
+    zfsuper::nativeImplViewMarginOnUpdate();
 }
 
 static void _ZFP_ZFUIScrollView_scrollChildToVisible(ZF_OUT zfint &offset,
@@ -1059,7 +1071,6 @@ ZFMETHOD_DEFINE_1(ZFUIScrollView, void, scrollAreaMarginAdd,
     {
         ZFUIMarginInc(d->scrollAreaMargin, d->scrollAreaMargin, margin);
         this->layoutRequest();
-        this->scrollAreaMarginOnChange();
     }
 }
 ZFMETHOD_DEFINE_1(ZFUIScrollView, void, scrollAreaMarginRemove,
@@ -1069,7 +1080,6 @@ ZFMETHOD_DEFINE_1(ZFUIScrollView, void, scrollAreaMarginRemove,
     {
         ZFUIMarginDec(d->scrollAreaMargin, d->scrollAreaMargin, margin);
         this->layoutRequest();
-        this->scrollAreaMarginOnChange();
     }
 }
 ZFMETHOD_DEFINE_0(ZFUIScrollView, const ZFUIMargin &, scrollAreaMargin)

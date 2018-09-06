@@ -74,16 +74,16 @@
 #include "ZFObjectDef/ZFPropertyUtil.h"
 #include "ZFObjectDef/ZFSerializable.h"
 #include "ZFObjectDef/ZFSerializableData.h"
-#include "ZFObjectDef/ZFSerializableDataStringConverter.h"
+#include "ZFObjectDef/ZFSerializableDataSerializableConverter.h"
 #include "ZFObjectDef/ZFSerializableUtil.h"
 #include "ZFObjectDef/ZFStyleable.h"
-#include "ZFObjectDef/ZFSynchronize.h"
 #include "ZFObjectDef/ZFTypeHolder.h"
 #include "ZFObjectDef/ZFTypeId.h"
 #include "ZFObjectDef/ZFTypeIdDynamicRegister.h"
 #include "ZFObjectDef/zfautoObject.h"
 #include "ZFObjectDef/zfautoObjectFwd.h"
 #include "ZFObjectDef/zfnullObject.h"
+#include "ZFObjectDef/zfsynchronize.h"
 
 #endif // #ifndef _ZFI_ZFObject_h_
 

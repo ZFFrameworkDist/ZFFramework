@@ -118,25 +118,54 @@ public:
             ZFCastStatic(jobject, nativeImplView),
             (jint)virtualIndex);
     }
-    virtual zffloat nativeViewScaleForImpl(ZF_IN void *nativeView)
+    virtual void nativeImplViewFrameSet(ZF_IN ZFUIView *view,
+                                        ZF_IN const ZFUIRect &rect)
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
-        static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsZFUIView, zfTextA("native_nativeViewScaleForImpl"),
-            JNIGetMethodSig(JNIType::S_float, JNIParamTypeContainer()
+        static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsZFUIView, zfTextA("native_nativeImplViewFrameSet"),
+            JNIGetMethodSig(JNIType::S_void, JNIParamTypeContainer()
                 .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
+                .add(JNIType::S_int)
+                .add(JNIType::S_int)
+                .add(JNIType::S_int)
+                .add(JNIType::S_int)
             ).c_str());
-        return JNIUtilCallStaticFloatMethod(jniEnv, this->jclsZFUIView, jmId,
-            ZFCastStatic(jobject, nativeView));
+        JNIUtilCallStaticVoidMethod(jniEnv, this->jclsZFUIView, jmId,
+            ZFCastStatic(jobject, view->nativeView()),
+            rect.point.x,
+            rect.point.y,
+            rect.size.width,
+            rect.size.height);
+    }
+    virtual zffloat nativeViewScaleForImpl(ZF_IN void *nativeView)
+    {
+        static zffloat t = -1;
+        if(t <= 0)
+        {
+            JNIEnv *jniEnv = JNIGetJNIEnv();
+            static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsZFUIView, zfTextA("native_nativeViewScaleForImpl"),
+                JNIGetMethodSig(JNIType::S_float, JNIParamTypeContainer()
+                    .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
+                ).c_str());
+            t = (zffloat)JNIUtilCallStaticFloatMethod(jniEnv, this->jclsZFUIView, jmId,
+                ZFCastStatic(jobject, nativeView));
+        }
+        return t;
     }
     virtual zffloat nativeViewScaleForPhysicalPixel(ZF_IN void *nativeView)
     {
-        JNIEnv *jniEnv = JNIGetJNIEnv();
-        static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsZFUIView, zfTextA("native_nativeViewScaleForPhysicalPixel"),
-            JNIGetMethodSig(JNIType::S_float, JNIParamTypeContainer()
-                .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
-            ).c_str());
-        return JNIUtilCallStaticFloatMethod(jniEnv, this->jclsZFUIView, jmId,
-            ZFCastStatic(jobject, nativeView));
+        static zffloat t = -1;
+        if(t <= 0)
+        {
+            JNIEnv *jniEnv = JNIGetJNIEnv();
+            static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsZFUIView, zfTextA("native_nativeViewScaleForPhysicalPixel"),
+                JNIGetMethodSig(JNIType::S_float, JNIParamTypeContainer()
+                    .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
+                ).c_str());
+            t = (zffloat)JNIUtilCallStaticFloatMethod(jniEnv, this->jclsZFUIView, jmId,
+                ZFCastStatic(jobject, nativeView));
+        }
+        return t;
     }
 
     // ============================================================
@@ -300,17 +329,20 @@ public:
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
         static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsZFUIView, zfTextA("native_measureNativeView"),
-            JNIGetMethodSig(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object), JNIParamTypeContainer()
+            JNIGetMethodSig(JNIType::S_array(JNIType::S_int), JNIParamTypeContainer()
                 .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
                 .add(JNIType::S_int)
                 .add(JNIType::S_int)
             ).c_str());
-        jobject jobjSize = JNIUtilCallStaticObjectMethod(jniEnv, this->jclsZFUIView, jmId,
+        jintArray jobjSize = (jintArray)JNIUtilCallStaticObjectMethod(jniEnv, this->jclsZFUIView, jmId,
             ZFCastStatic(jobject, nativeView),
             (jint)sizeHint.width,
             (jint)sizeHint.height);
-        JNIBlockedDeleteLocalRef(jobjSize);
-        ret = ZFImpl_sys_Android_ZFUISizeFromZFAndroidSize(jobjSize);
+        jint *jarrSize = JNIUtilGetIntArrayElements(jniEnv, jobjSize, NULL);
+        ret.width = (zfint)jarrSize[0];
+        ret.height = (zfint)jarrSize[1];
+        JNIUtilReleaseIntArrayElements(jniEnv, jobjSize, jarrSize, JNI_ABORT);
+        JNIUtilDeleteLocalRef(jniEnv, jobjSize);
     }
 
 private:
@@ -322,59 +354,56 @@ ZF_NAMESPACE_GLOBAL_END
 
 // ============================================================
 // native methods for ZFUIView
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUIView, native_1notifyNeedLayout,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUIView)
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUIView,
+                         void, native_1notifyNeedLayout,
+                         JNIPointer zfjniPointerOwnerZFUIView)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->notifyNeedLayout(
         ZFCastZFObject(ZFUIView *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUIView)));
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUIView, native_1notifyLayoutRootView,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUIView,
-                   jobject jobjRect)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUIView,
+                         void, native_1notifyLayoutRootView,
+                         JNIPointer zfjniPointerOwnerZFUIView,
+                         jint rect_x, jint rect_y, jint rect_width, jint rect_height)
 {
     ZFPROTOCOL_ACCESS(ZFUIView)->notifyLayoutRootView(
         ZFCastZFObject(ZFUIView *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUIView)),
-        ZFImpl_sys_Android_ZFUIRectFromZFAndroidRect(jobjRect));
+        ZFUIRectMake((zfint)rect_x, (zfint)rect_y, (zfint)rect_width, (zfint)rect_height));
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUIView, native_1notifyLayoutNativeImplView,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUIView,
-                   jobject jobjRect)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUIView,
+                         void, native_1notifyUIEvent_1mouse,
+                         JNIPointer zfjniPointerOwnerZFUIView,
+                         jint mouseId,
+                         jint mouseAction,
+                         jint mousePointX,
+                         jint mousePointY)
 {
-    ZFUIRect nativeImplViewRect;
-    ZFPROTOCOL_ACCESS(ZFUIView)->notifyLayoutNativeImplView(
-        ZFCastZFObject(ZFUIView *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUIView)),
-        nativeImplViewRect);
-    ZFImpl_sys_Android_ZFUIRectToZFAndroidRect(nativeImplViewRect, jobjRect);
-}
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUIView, native_1notifyUIEvent_1mouse,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUIView,
-                   jint mouseId,
-                   jint mouseAction,
-                   jint mousePointX,
-                   jint mousePointY)
-{
-    ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, event);
+    zfautoObject eventHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+    ZFUIMouseEvent *event = eventHolder;
+    event->eventResolvedSet(zffalse);
     event->mouseId = mouseId;
     event->mouseAction = (ZFUIMouseActionEnum)mouseAction;
     event->mousePoint = ZFUIPointMake(mousePointX, mousePointY);
+    event->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
     ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(
         ZFCastZFObject(ZFUIView *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUIView)),
         event);
 }
+JNI_METHOD_DECLARE_END()
 
-JNI_METHOD_DECLARE(jboolean, ZFImpl_sys_Android_JNI_ID_ZFUIView, native_1notifyUIEvent_1key,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUIView,
-                   jint keyId,
-                   jint keyAction,
-                   jint keyCode,
-                   jint keyCodeRaw)
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUIView,
+                         jboolean, native_1notifyUIEvent_1key,
+                         JNIPointer zfjniPointerOwnerZFUIView,
+                         jint keyId,
+                         jint keyAction,
+                         jint keyCode,
+                         jint keyCodeRaw)
 {
-    ZFCACHEABLE_ACCESS(ZFUIKeyEvent, ZFUIKeyEvent, event);
+    zfautoObject eventHolder = ZFUIKeyEvent::cacheHolder()->cacheGet(ZFUIKeyEvent::ClassData());
+    ZFUIKeyEvent *event = eventHolder;
+    event->eventResolvedSet(zffalse);
     event->keyId = keyId;
     event->keyAction = (ZFUIKeyActionEnum)keyAction;
     event->keyCode = (ZFUIKeyCodeEnum)keyCode;
@@ -384,6 +413,7 @@ JNI_METHOD_DECLARE(jboolean, ZFImpl_sys_Android_JNI_ID_ZFUIView, native_1notifyU
         event);
     return event->eventResolved();
 }
+JNI_METHOD_DECLARE_END()
 
 #endif // #if ZF_ENV_sys_Android
 

@@ -21,6 +21,7 @@
 #include "ZFMethodFuncDeclare.h"
 #include "ZFObjectUtil.h"
 #include "ZFSerializableUtil.h"
+#include "ZFSerializableDataSerializableConverter.h"
 #include "ZFPropertyCallbackDefaultImpl.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -331,13 +332,13 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER_WITH_CUSTOM_WRAPPER(TypeName, Type, serializeFromAction, serializeToAction) \
     ZFTYPEID_DEFINE_WITH_CUSTOM_WRAPPER(TypeName, Type, ZFM_EXPAND(serializeFromAction), ZFM_EXPAND(serializeToAction), { \
         ZFSerializableData serializableData; \
-        return (ZFSerializableDataFromString(serializableData, src, srcLen) \
+        return (ZFSerializableDataFromZfsd(serializableData, src, srcLen) \
             && TypeName##FromData(v, serializableData)); \
     }, { \
         ZFSerializableData serializableData; \
         if(TypeName##ToData(serializableData, v)) \
         { \
-            return ZFSerializableDataToString(s, serializableData); \
+            return ZFSerializableDataToZfsd(s, serializableData, zfnull, zffalse); \
         } \
         else \
         { \

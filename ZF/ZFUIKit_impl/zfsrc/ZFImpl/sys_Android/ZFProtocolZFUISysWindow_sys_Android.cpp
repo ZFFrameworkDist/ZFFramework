@@ -110,9 +110,9 @@ public:
             );
     }
 
-    virtual ZFUISysWindow *modalWindowShow(ZF_IN ZFUISysWindow *sysWindowOwner)
+    virtual zfautoObject modalWindowShow(ZF_IN ZFUISysWindow *sysWindowOwner)
     {
-        ZFUISysWindow *modalWindow = zfRetain(ZFUISysWindow::ClassData()->newInstance().to<ZFUISysWindow *>());
+        zfautoObject modalWindow = ZFUISysWindow::ClassData()->newInstance();
 
         JNIEnv *jniEnv = JNIGetJNIEnv();
         static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, zfTextA("native_modalWindowShow"),
@@ -122,7 +122,7 @@ public:
             ).c_str());
         JNIUtilCallStaticVoidMethod(jniEnv, this->jclsOwner, jmId,
             ZFCastStatic(jobject, sysWindowOwner->nativeWindow()),
-            JNIConvertZFObjectToJNIType(jniEnv, modalWindow));
+            JNIConvertZFObjectToJNIType(jniEnv, modalWindow.toObject()));
 
         return modalWindow;
     }
@@ -185,59 +185,66 @@ ZFPROTOCOL_IMPLEMENTATION_REGISTER(ZFUISysWindowImpl_sys_Android)
 
 ZF_NAMESPACE_GLOBAL_END
 
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUISysWindow, native_1notifyMeasureWindow,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUISysWindow,
-                   jint refWidth,
-                   jint refHeight,
-                   jobject resultRect)
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
+                         void, native_1notifyMeasureWindow,
+                         JNIPointer zfjniPointerOwnerZFUISysWindow,
+                         jint refWidth,
+                         jint refHeight,
+                         jintArray resultRect)
 {
     ZFUIRect result = ZFPROTOCOL_ACCESS(ZFUISysWindow)->notifyMeasureWindow(
         ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow)),
         ZFUIRectMake(0, 0, refWidth, refHeight),
         ZFUIMarginZero());
-    ZFImpl_sys_Android_ZFUIRectToZFAndroidRect(result, resultRect);
+    jint buf[] = {(jint)result.point.x, (jint)result.point.y, (jint)result.size.width, (jint)result.size.height};
+    JNIUtilSetIntArrayRegion(jniEnv, resultRect, 0, 4, buf);
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUISysWindow, native_1notifyOnCreate,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUISysWindow,
-                   jobject nativeWindow)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
+                         void, native_1notifyOnCreate,
+                         JNIPointer zfjniPointerOwnerZFUISysWindow,
+                         jobject nativeWindow)
 {
     jobject nativeWindowGlobalRef = JNIUtilNewGlobalRef(jniEnv, nativeWindow);
     ZFPROTOCOL_ACCESS(ZFUISysWindow)->notifyOnCreate(
         ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow)),
         ZFCastStatic(void *, nativeWindowGlobalRef));
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUISysWindow, native_1notifyOnDestroy,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUISysWindow)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
+                         void, native_1notifyOnDestroy,
+                         JNIPointer zfjniPointerOwnerZFUISysWindow)
 {
     ZFUISysWindow *window = ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow));
     jobject nativeWindowGlobalRef = ZFCastStatic(jobject, window->nativeWindow());
     ZFPROTOCOL_ACCESS(ZFUISysWindow)->notifyOnDestroy(window);
     JNIUtilDeleteGlobalRef(jniEnv, nativeWindowGlobalRef);
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUISysWindow, native_1notifyOnResume,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUISysWindow)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
+                         void, native_1notifyOnResume,
+                         JNIPointer zfjniPointerOwnerZFUISysWindow)
 {
     ZFPROTOCOL_ACCESS(ZFUISysWindow)->notifyOnResume(
         ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow)));
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUISysWindow, native_1notifyOnPause,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUISysWindow)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
+                         void, native_1notifyOnPause,
+                         JNIPointer zfjniPointerOwnerZFUISysWindow)
 {
     ZFPROTOCOL_ACCESS(ZFUISysWindow)->notifyOnPause(
         ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow)));
 }
-JNI_METHOD_DECLARE(void, ZFImpl_sys_Android_JNI_ID_ZFUISysWindow, native_1notifyOnRotate,
-                   JNIEnv *jniEnv, jclass jniCls,
-                   JNIPointer zfjniPointerOwnerZFUISysWindow)
+JNI_METHOD_DECLARE_END()
+JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
+                         void, native_1notifyOnRotate,
+                         JNIPointer zfjniPointerOwnerZFUISysWindow)
 {
     ZFPROTOCOL_ACCESS(ZFUISysWindow)->notifyOnRotate(
         ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow)));
 }
+JNI_METHOD_DECLARE_END()
 
 #endif // #if ZF_ENV_sys_Android
 

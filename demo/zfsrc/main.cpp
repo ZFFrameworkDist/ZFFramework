@@ -13,6 +13,7 @@
 #include "ZFUIKit.h"
 #include "ZFUIWidget.h"
 #include "ZFUIWebKit.h"
+#include "ZFLua.h"
 
 #include "ZFCore/protocol/ZFProtocolZFThreadTaskRequest.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
@@ -217,7 +218,7 @@ static void _ZFP_ZFFramework_test_prepareTestCaseSubModuleTest(ZF_IN ZFUIView *c
     containerView->childAdd(button);
 
     ZFLISTENER_LOCAL(onClickButton, {
-        const ZFClass *testCase = userData->tagGet<ZFPointerHolder *>(zfText("testCase"))->holdedDataPointer<const ZFClass *>();
+        const ZFClass *testCase = userData->tagGet<v_ZFClass *>(zfText("testCase"))->zfv;
         ZFUIView *containerView = userData->tagGet(zfText("containerView"))->objectHolded();
         ZFTestCase *running = zfnull;
         containerView->viewUIEnableTreeSet(zffalse);
@@ -236,7 +237,7 @@ static void _ZFP_ZFFramework_test_prepareTestCaseSubModuleTest(ZF_IN ZFUIView *c
         }
     })
     zfblockedAlloc(ZFObject, userData);
-    userData->tagSet(zfText("testCase"), zflineAlloc(ZFPointerHolder, testCase));
+    userData->tagSet(zfText("testCase"), zflineAlloc(v_ZFClass, testCase));
     userData->tagSet(zfText("containerView"), containerView->objectHolder());
     button->observerAdd(ZFUIButton::EventButtonOnClick(), onClickButton, userData);
     button->buttonLabelTextSet(zfstring(testCase->classNameFull() + zfslen(subModuleName) + 1));

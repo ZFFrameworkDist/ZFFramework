@@ -89,7 +89,6 @@ static void _ZFP_ZFCallbackPrivateDataChange(_ZFP_ZFCallbackPrivate *&oldData, _
 
 // ============================================================
 // ZFCallback
-/** @cond ZFPrivateDoc */
 ZFCallback::ZFCallback(void)
 : d(zfnull)
 , _ZFP_ZFCallbackCached_callbackType(_ZFP_ZFCallbackCachedTypeDummy)
@@ -166,7 +165,6 @@ ZFCallback ZFCallback::_ZFP_ZFCallbackCreate(ZF_IN ZFCallbackType callbackType,
     _ZFP_ZFCallbackCachedDataSetup(callback, callback.d);
     return callback;
 }
-/** @endcond */
 
 zfindex ZFCallback::objectRetainCount(void) const
 {
@@ -193,6 +191,28 @@ void ZFCallback::objectInfoT(ZF_IN_OUT zfstring &ret) const
         default:
             zfCoreCriticalShouldNotGoHere();
             break;
+    }
+    if(this->callbackOwnerObject() != zfnull)
+    {
+        ret += zfText(", owner: ");
+        this->callbackOwnerObject()->objectInfoT(ret);
+    }
+    if(d != zfnull && !d->callbackTagMap.empty())
+    {
+        ret += zfText(", tags: ");
+        _ZFP_ZFCallbackTagMap &m = d->callbackTagMap;
+        for(_ZFP_ZFCallbackTagMap::iterator it = m.begin(); it != m.end(); ++it)
+        {
+            if(it != m.begin())
+            {
+                ret += zfText(", ");
+            }
+            ret += zfText("<");
+            ret += it->first.c_str();
+            ret += zfText(", ");
+            ZFObjectInfoT(ret, it->second);
+            ret += zfText(">");
+        }
     }
 }
 

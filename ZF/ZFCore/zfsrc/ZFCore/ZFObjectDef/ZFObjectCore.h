@@ -209,13 +209,13 @@ zfclassFwd ZFObjectHolder;
  *   @endcode
  * -  ZFObject is synchronizable object, you can make it mutable by:
  *   @code
- *     zfsynchronized(obj)
  *     {
+ *         zfsynchronize(obj)
  *         // mutable operation
  *     }
  *   @endcode
  *   for advanced mutable operation, use ZFMutex instead\n
- *   for global mutable operation, use #zfsynchronize instead
+ *   for global mutable operation, use #zfCoreMutexLock instead
  *
  * \n
  * ADVANCED:\n
@@ -279,8 +279,8 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0 is a #ZFPointerHolder holds a (const ZFProperty *) value\n
-     * param1 is a #ZFPointerHolder holds the old property value
+     * param0 is #v_ZFProperty that value changes\n
+     * param1 is #v_VoidPointerConst holds the old property value
      * (holds null when first time accessed)\n
      * the param1 holds these types:
      * -  for retain property, it points to (const zfautoObject *)
@@ -648,7 +648,6 @@ protected:
     }
 
 public:
-    zfbool _ZFP_ZFObjectLockIsAvailable(void);
     void _ZFP_ZFObjectLock(void);
     void _ZFP_ZFObjectUnlock(void);
     zfbool _ZFP_ZFObjectTryLock(void);
@@ -775,19 +774,11 @@ public:
      */
     virtual zfbool objectIsPrivate(void);
     /**
-     * @brief see #objectIsPrivate
-     */
-    virtual void objectIsPrivateSet(ZF_IN zfbool value);
-    /**
      * @brief whether this object is internal object or its class is #ZFClass::classIsInternal
      *
      * if #objectIsInternal, then it is also #objectIsPrivate
      */
     virtual zfbool objectIsInternal(void);
-    /**
-     * @brief see #objectIsInternal
-     */
-    virtual void objectIsInternalSet(ZF_IN zfbool value);
 
 public:
     zffinal void _ZFP_ZFObject_objectPropertyValueAttach(ZF_IN const ZFProperty *property);

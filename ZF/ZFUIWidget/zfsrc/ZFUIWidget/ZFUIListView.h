@@ -21,6 +21,9 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
 // ZFUIListView
+/** @brief keyword for serialize */
+#define ZFSerializableKeyword_ZFUIListView_listAdapter zfText("listAdapter")
+
 zfclassFwd _ZFP_ZFUIListViewPrivate;
 /**
  * @brief linear container view that layout children in linear by specified orientation
@@ -35,7 +38,17 @@ zfclassFwd _ZFP_ZFUIListViewPrivate;
  * see #ZFUIListAdapter for more info\n
  * list view itself won't supplly any separator or margins or border radius,
  * you must supply by the list adapter,
- * see #ZFUIListCell for more info
+ * see #ZFUIListCell for more info \n
+ * \n
+ * serializable data:
+ * @code
+ *   <ZFUIListView>
+ *       <ListAdapterClass category="listAdapter" /> // used only if #listAdapterSerializable
+ *       <ZFArrayEditable name="cellUpdater"> // all cell updater
+ *           ...
+ *       </ZFArrayEditable>
+ *   </ZFUIListView>
+ * @endcode
  */
 zfclass ZF_ENV_EXPORT ZFUIListView : zfextends ZFUIScrollView
 {
@@ -76,7 +89,11 @@ public:
     // ============================================================
     // properties
     /**
-     * @brief list adapter, no auto retain
+     * @brief list adapter
+     *
+     * no auto retain by default, use #listAdapterSetAutoRetain if necessary\n
+     * by default, the list adapter won't be serialized during the list view's serialization,
+     * you can enable it by #listAdapterSerializable
      */
     ZFPROPERTY_ASSIGN(ZFUIListAdapter *, listAdapter)
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIListAdapter *, listAdapter)
@@ -89,6 +106,11 @@ public:
      */
     ZFMETHOD_DECLARE_1(void, listAdapterSetAutoRetain,
                        ZFMP_IN(ZFUIListAdapter *, listAdapter))
+
+    /**
+     * @brief whether the #listAdapter is serializable, false by default
+     */
+    ZFPROPERTY_ASSIGN(zfbool, listAdapterSerializable)
 
     /**
      * @brief list updater to update list cells, holds #ZFUIListCellUpdater
@@ -104,15 +126,6 @@ public:
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIOrientationEnum, listOrientation,
                                 ZFUIOrientation::e_Top)
     ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIOrientationEnum, listOrientation)
-
-    /**
-     * @brief list cell's hint size which would be passed to #ZFUIListAdapter,
-     *   use -1 to measure by list cell,
-     *   #ZFUIGlobalStyle::itemSizeListCell by default
-     */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, cellSizeHint,
-                                ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, cellSizeHint)
 
     /**
      * @brief whether auto update #ZFUIScrollView::scrollBounceVertical series accorrding to #listOrientation,
@@ -152,6 +165,14 @@ protected:
     {
         return zffalse;
     }
+    zfoverride
+    virtual zfbool serializableOnSerializeFromData(ZF_IN const ZFSerializableData &serializableData,
+                                                   ZF_OUT_OPT zfstring *outErrorHint = zfnull,
+                                                   ZF_OUT_OPT ZFSerializableData *outErrorPos = zfnull);
+    zfoverride
+    virtual zfbool serializableOnSerializeToData(ZF_IN_OUT ZFSerializableData &serializableData,
+                                                 ZF_IN ZFSerializable *referencedOwnerOrNull,
+                                                 ZF_OUT_OPT zfstring *outErrorHint = zfnull);
 
 protected:
     zfoverride
@@ -167,7 +188,7 @@ protected:
                                    ZF_IN ZFUIViewChildLayerEnum layer);
 
     zfoverride
-    virtual void scrollAreaMarginOnChange(void);
+    virtual void scrollAreaOnChange(void);
     zfoverride
     virtual void scrollContentFrameOnChange(void);
 

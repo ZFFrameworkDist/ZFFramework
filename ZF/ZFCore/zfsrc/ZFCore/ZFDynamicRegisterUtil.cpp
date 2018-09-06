@@ -151,7 +151,6 @@ ZFDynamic::ZFDynamic(ZF_IN const zfchar *regTag)
 {
     this->regTag(regTag);
 }
-/** @cond ZFPrivateDoc */
 ZFDynamic::ZFDynamic(ZF_IN const ZFDynamic &ref)
 : d(ref.d)
 {
@@ -180,7 +179,6 @@ zfbool ZFDynamic::operator == (ZF_IN const ZFDynamic &ref) const
 {
     return (d == ref.d);
 }
-/** @endcond */
 
 void ZFDynamic::exportTag(ZF_IN_OUT const ZFOutput &output)
 {
@@ -574,7 +572,6 @@ ZFDynamic &ZFDynamic::onInit(ZF_IN const ZFListener &onInitCallback,
         d->error(zfText("invalid callback"));
         return *this;
     }
-    zfCoreMutexLocker();
     ZF_GLOBAL_INITIALIZER_CLASS(ZFDynamicOnInit) *g = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFDynamicOnInit);
     if(g->onInitMap.find(d->cls) != g->onInitMap.end())
     {
@@ -609,7 +606,6 @@ ZFDynamic &ZFDynamic::onDealloc(ZF_IN const ZFListener &onDeallocCallback,
         d->error(zfText("invalid callback"));
         return *this;
     }
-    zfCoreMutexLocker();
     ZF_GLOBAL_INITIALIZER_CLASS(ZFDynamicOnInit) *g = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFDynamicOnInit);
     if(g->onDeallocMap.find(d->cls) != g->onDeallocMap.end())
     {

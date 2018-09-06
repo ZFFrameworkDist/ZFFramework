@@ -11,13 +11,6 @@
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-#if 1
-    #define _ZFP_ZFCore_ZFThread_test_outputDetailSteps(format, ...) \
-        zfLogTrim(format, ##__VA_ARGS__)
-#else
-    #define _ZFP_ZFCore_ZFThread_test_outputDetailSteps(format, ...)
-#endif
-
 // ============================================================
 zfclass ZFCore_ZFThread_test : zfextends ZFFramework_test_TestCase
 {
@@ -28,7 +21,7 @@ protected:
     virtual void testCaseOnStart(void)
     {
         zfsuper::testCaseOnStart();
-        ZFFramework_test_protocolCheck(ZFThread)
+        ZFFramework_test_protocolCheck(ZFThread);
 
         zfLogTrim(zfText("============================================================"));
         zfLogTrim(zfText("ZFThread"));
@@ -42,7 +35,7 @@ protected:
             {
                 for(zfindex j = 0; j < 10; ++j)
                 {
-                    _ZFP_ZFCore_ZFThread_test_outputDetailSteps(zfText("  async thread: %zi %zi"), i, j);
+                    zfLogTrim(zfText("  async thread: %zi %zi"), i, j);
                     ZFThread::sleep((zftimet)20);
                 }
                 ZFThread::sleep((zftimet)300);
@@ -54,7 +47,7 @@ protected:
         {
             for(zfindex j = 0; j < 10; ++j)
             {
-                _ZFP_ZFCore_ZFThread_test_outputDetailSteps(zfText("  main: %zi %zi"), i, j);
+                zfLogTrim(zfText("  main: %zi %zi"), i, j);
                 ZFThread::sleep((zftimet)20);
             }
             ZFThread::sleep((zftimet)190);
@@ -71,13 +64,13 @@ protected:
             zfLogTrim(zfText("sync thread begin"));
             for(zfindex i = 0; i < 5; ++i)
             {
-                zfsynchronizeLock();
+                zfCoreMutexLock();
                 for(zfindex j = 0; j < 10; ++j)
                 {
-                    _ZFP_ZFCore_ZFThread_test_outputDetailSteps(zfText("  sync thread: %zi %zi"), i, j);
+                    zfLogTrim(zfText("  sync thread: %zi %zi"), i, j);
                     ZFThread::sleep((zftimet)20);
                 }
-                zfsynchronizeUnlock();
+                zfCoreMutexUnlock();
                 ZFThread::sleep((zftimet)200);
             }
             zfLogTrim(zfText("sync thread end"));
@@ -85,13 +78,13 @@ protected:
         taskId = ZFThreadExecuteInNewThread(syncFunc);
         for(zfindex i = 0; i < 5; ++i)
         {
-            zfsynchronizeLock();
+            zfCoreMutexLock();
             for(zfindex j = 0; j < 10; ++j)
             {
-                _ZFP_ZFCore_ZFThread_test_outputDetailSteps(zfText("  main:   %zi %zi"), i, j);
+                zfLogTrim(zfText("  main:   %zi %zi"), i, j);
                 ZFThread::sleep((zftimet)20);
             }
-            zfsynchronizeUnlock();
+            zfCoreMutexUnlock();
             ZFThread::sleep((zftimet)190);
         }
         zfLogTrim(zfText("main thread wait sync thread begin"));

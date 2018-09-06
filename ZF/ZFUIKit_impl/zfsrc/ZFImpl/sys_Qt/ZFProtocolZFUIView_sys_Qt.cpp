@@ -45,31 +45,6 @@ public:
     : ownerZFUIView(zfnull)
     {
     }
-
-public:
-    virtual void setGeometry(const QRect &rect)
-    {
-        QLayout::setGeometry(rect);
-        if(this->ownerZFUIView == zfnull)
-        {
-            return ;
-        }
-        QWidget *nativeImplView = ZFCastStatic(QWidget *, this->ownerZFUIView->nativeImplView());
-        for(zfindex i = 0; i < this->layoutItemList.count(); ++i)
-        {
-            const ZFImpl_sys_Qt_QLayoutItemHolder &item = this->layoutItemList[i];
-            if(item.widget == nativeImplView)
-            {
-                ZFUIRect nativeImplViewRect;
-                ZFPROTOCOL_ACCESS(ZFUIView)->notifyLayoutNativeImplView(this->ownerZFUIView, nativeImplViewRect);
-                QRect t = ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIRectToQRect(nativeImplViewRect);
-                if(item.layoutItem->geometry() != t)
-                {
-                    item.layoutItem->setGeometry(t);
-                }
-            }
-        }
-    }
 };
 
 class _ZFP_ZFUIViewImpl_sys_Qt_ChildChangeObserverHolder : public QObject
@@ -217,8 +192,11 @@ public:
             case QEvent::Wheel:
             {
                 QWheelEvent *eventTmp = (QWheelEvent *)event;
-                ZFCACHEABLE_ACCESS(ZFUIWheelEvent, ZFUIWheelEvent, wheelEvent);
                 QPoint eventSteps = eventTmp->angleDelta() / 8 / 15;
+
+                zfautoObject eventHolder = ZFUIWheelEvent::cacheHolder()->cacheGet(ZFUIWheelEvent::ClassData());
+                ZFUIWheelEvent *wheelEvent = eventHolder;
+                wheelEvent->eventResolvedSet(zffalse);
                 wheelEvent->wheelX = -eventSteps.x();
                 wheelEvent->wheelY = -eventSteps.y();
                 if(wheelEvent->wheelX != 0 || wheelEvent->wheelY != 0)
@@ -348,10 +326,13 @@ public:
 private:
     void mouseEventResolve(QMouseEvent *event, ZFUIMouseActionEnum mouseAction)
     {
-        ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, ev);
+        zfautoObject evHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+        ZFUIMouseEvent *ev = evHolder;
+        ev->eventResolvedSet(zffalse);
         ev->mouseId = (zfidentity)event->button();
         ev->mouseAction = mouseAction;
         ev->mousePoint = ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIPointFromQPoint(event->pos());
+        ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         switch(event->button())
         {
             case Qt::RightButton:
@@ -370,7 +351,9 @@ private:
     }
     void mouseHoverEventResolve(const ZFUIPoint &pos, ZFUIMouseActionEnum mouseAction)
     {
-        ZFCACHEABLE_ACCESS(ZFUIMouseEvent, ZFUIMouseEvent, ev);
+        zfautoObject evHolder = ZFUIMouseEvent::cacheHolder()->cacheGet(ZFUIMouseEvent::ClassData());
+        ZFUIMouseEvent *ev = evHolder;
+        ev->eventResolvedSet(zffalse);
         ev->mouseId = 0;
         ev->mouseAction = mouseAction;
         ev->mousePoint = pos;
@@ -402,7 +385,9 @@ private:
     {
         if(this->_ZFP_viewUIEnableTree && this->_ZFP_viewUIEnable)
         {
-            ZFCACHEABLE_ACCESS(ZFUIKeyEvent, ZFUIKeyEvent, ev);
+            zfautoObject evHolder = ZFUIKeyEvent::cacheHolder()->cacheGet(ZFUIKeyEvent::ClassData());
+            ZFUIKeyEvent *ev = evHolder;
+            ev->eventResolvedSet(zffalse);
             ev->keyId = (zfidentity)event->key();
             ev->keyAction = keyAction;
             ev->keyCode = ZFUIViewImpl_sys_Qt_ZFUIKeyCodeFromQKeyCode(event->key());
@@ -491,6 +476,16 @@ public:
         nativeView->_ZFP_focusProxyToken = _ZFP_ZFUIViewImpl_sys_Qt_FocusProxy_attach(
             view, nativeView, nativeView->_ZFP_nativeImplView, nativeView->_ZFP_focusProxyToken);
         _ZFP_ZFUIViewImpl_sys_Qt_FocusProxy_viewFocusableSet(nativeView->_ZFP_focusProxyToken, view->viewFocusable());
+    }
+    virtual void nativeImplViewFrameSet(ZF_IN ZFUIView *view,
+                                        ZF_IN const ZFUIRect &rect)
+    {
+        _ZFP_ZFUIViewImpl_sys_Qt_View *nativeView = ZFCastStatic(_ZFP_ZFUIViewImpl_sys_Qt_View *, view->nativeView());
+        QRect frame = ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIRectToQRect(rect);
+        if(nativeView->_ZFP_nativeImplView->geometry() != frame)
+        {
+            nativeView->_ZFP_nativeImplView->setGeometry(frame);
+        }
     }
     virtual zffloat nativeViewScaleForImpl(ZF_IN void *nativeView)
     {

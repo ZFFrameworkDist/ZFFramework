@@ -11,7 +11,6 @@ package com.ZFFramework.Android.ZFUIKit_impl;
 
 import com.ZFFramework.Android.NativeUtil.ZFAndroidLog;
 import com.ZFFramework.Android.NativeUtil.ZFAndroidRect;
-import com.ZFFramework.Android.ZF_impl.ZFEnum;
 import com.ZFFramework.Android.ZF_impl.ZFMainEntry;
 import android.app.Activity;
 import android.content.Context;
@@ -46,8 +45,8 @@ public final class ZFUISysWindow extends Activity {
     private boolean _isMainWindow = false;
     private long _zfjniPointerOwnerZFUISysWindow = 0;
     private MainLayout _containerView = null;
-    private int _sysWindowOrientation = ZFEnum.e("ZFUIOrientation", "Top");
-    private int _sysWindowOrientationFlags = ZFEnum.e("ZFUIOrientation", "Top");
+    private int _sysWindowOrientation = ZFUIOrientation.e_Top;
+    private int _sysWindowOrientationFlags = ZFUIOrientation.e_Top;
 
     // ============================================================
     public static void native_nativeMainWindowCreate(long zfjniPointerOwnerZFUISysWindow) {
@@ -83,10 +82,10 @@ public final class ZFUISysWindow extends Activity {
         if(nativeWindow == null) {
             int nativeOrientation = ZFMainEntry.mainEntryActivity().getResources().getConfiguration().orientation;
             if(nativeOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                return ZFEnum.e("ZFUIOrientation", "Left");
+                return ZFUIOrientation.e_Left;
             }
             else {
-                return ZFEnum.e("ZFUIOrientation", "Top");
+                return ZFUIOrientation.e_Top;
             }
         }
         return ((ZFUISysWindow)nativeWindow)._sysWindowOrientation;
@@ -96,10 +95,10 @@ public final class ZFUISysWindow extends Activity {
         ZFUISysWindow nativeWindowTmp = (ZFUISysWindow)nativeWindow;
         nativeWindowTmp._sysWindowOrientationFlags = sysWindowOrientationFlags;
 
-        boolean left = ((sysWindowOrientationFlags & ZFEnum.e("ZFUIOrientation", "Left")) != 0);
-        boolean top = ((sysWindowOrientationFlags & ZFEnum.e("ZFUIOrientation", "Top")) != 0);
-        boolean right = ((sysWindowOrientationFlags & ZFEnum.e("ZFUIOrientation", "Right")) != 0);
-        boolean bottom = ((sysWindowOrientationFlags & ZFEnum.e("ZFUIOrientation", "Bottom")) != 0);
+        boolean left = ((sysWindowOrientationFlags & ZFUIOrientation.e_Left) != 0);
+        boolean top = ((sysWindowOrientationFlags & ZFUIOrientation.e_Top) != 0);
+        boolean right = ((sysWindowOrientationFlags & ZFUIOrientation.e_Right) != 0);
+        boolean bottom = ((sysWindowOrientationFlags & ZFUIOrientation.e_Bottom) != 0);
 
         int count = 0;
         if(left) {++count;}
@@ -127,7 +126,7 @@ public final class ZFUISysWindow extends Activity {
     private static native void native_notifyMeasureWindow(long zfjniPointerOwnerZFUISysWindow,
                                                           int refWidth,
                                                           int refHeight,
-                                                          Object resultRect);
+                                                          int[] resultRect);
     private static native void native_notifyOnCreate(long zfjniPointerOwnerZFUISysWindow,
                                                      Object nativeWindow);
     private static native void native_notifyOnDestroy(long zfjniPointerOwnerZFUISysWindow);
@@ -149,11 +148,11 @@ public final class ZFUISysWindow extends Activity {
             this.setBackgroundColor(Color.WHITE);
         }
 
-        private static ZFAndroidRect _rectCache = new ZFAndroidRect();
+        private static int[] _rectCache = new int[4];
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             ZFUIOnScreenKeyboardState.keyboardFrameUpdate(((Activity)getContext()).getWindow(), _rectCache);
-            int keyboardHeight = _rectCache.height;
+            int keyboardHeight = _rectCache[3];
 
             int width = MeasureSpec.getSize(widthMeasureSpec);
             int height = MeasureSpec.getSize(heightMeasureSpec);
@@ -162,10 +161,10 @@ public final class ZFUISysWindow extends Activity {
 
             if(_owner != null && _owner._zfjniPointerOwnerZFUISysWindow != 0) {
                 ZFUISysWindow.native_notifyMeasureWindow(_owner._zfjniPointerOwnerZFUISysWindow, width, height, _rectCache);
-                _left = _rectCache.x;
-                _top = _rectCache.y;
-                _right = _rectCache.x + _rectCache.width;
-                _bottom = _rectCache.y + _rectCache.height;
+                _left = _rectCache[0];
+                _top = _rectCache[1];
+                _right = _rectCache[0] + _rectCache[2];
+                _bottom = _rectCache[1] + _rectCache[3];
             }
 
             int childWidthSpec = MeasureSpec.makeMeasureSpec(_right - _left, MeasureSpec.EXACTLY);
@@ -234,19 +233,19 @@ public final class ZFUISysWindow extends Activity {
         int sysWindowOrientationOld = _sysWindowOrientation;
         switch(((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getOrientation()) {
             case Surface.ROTATION_0:
-                _sysWindowOrientation = ZFEnum.e("ZFUIOrientation", "Top");
+                _sysWindowOrientation = ZFUIOrientation.e_Top;
                 break;
             case Surface.ROTATION_90:
-                _sysWindowOrientation = ZFEnum.e("ZFUIOrientation", "Right");
+                _sysWindowOrientation = ZFUIOrientation.e_Right;
                 break;
             case Surface.ROTATION_180:
-                _sysWindowOrientation = ZFEnum.e("ZFUIOrientation", "Bottom");
+                _sysWindowOrientation = ZFUIOrientation.e_Bottom;
                 break;
             case Surface.ROTATION_270:
-                _sysWindowOrientation = ZFEnum.e("ZFUIOrientation", "Left");
+                _sysWindowOrientation = ZFUIOrientation.e_Left;
                 break;
             default:
-                _sysWindowOrientation = ZFEnum.e("ZFUIOrientation", "Top");
+                _sysWindowOrientation = ZFUIOrientation.e_Top;
                 break;
         }
 

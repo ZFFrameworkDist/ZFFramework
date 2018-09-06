@@ -7,20 +7,11 @@
  * Distributed under MIT license:
  *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
  * ====================================================================== */
-#include "ZFEvent.h"
+#include "ZFProtocolZFUISysWindowEmbedNativeView.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
-ZFOBJECT_REGISTER(ZFEvent)
 
-void ZFEvent::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
-{
-    zfsuper::objectInfoOnAppend(ret);
-    if(this->eventResolved())
-    {
-        ret += zfText(" (resolved)");
-    }
-    ZFClassUtil::objectPropertyInfo(ret, this);
-}
+ZFPROTOCOL_INTERFACE_REGISTER(ZFUISysWindowEmbedNativeView)
 
 ZF_NAMESPACE_GLOBAL_END
 

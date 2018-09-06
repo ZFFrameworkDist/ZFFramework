@@ -10,9 +10,7 @@
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import com.ZFFramework.Android.NativeUtil.ZFAndroidLog;
-import com.ZFFramework.Android.NativeUtil.ZFAndroidSize;
 import com.ZFFramework.Android.NativeUtil.ZFAndroidUI;
-import com.ZFFramework.Android.ZF_impl.ZFEnum;
 import com.ZFFramework.Android.ZF_impl.ZFMainEntry;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -39,16 +37,16 @@ public final class ZFUITextView extends TextView {
     public static void native_textAppearanceSet(Object nativeTextView,
                                                 int textAppearance) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
-        if(textAppearance == ZFEnum.e("ZFUITextAppearance", "Normal")) {
+        if(textAppearance == ZFUITextAppearance.e_Normal) {
             nativeTextViewTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
         }
-        else if(textAppearance == ZFEnum.e("ZFUITextAppearance", "Bold")) {
+        else if(textAppearance == ZFUITextAppearance.e_Bold) {
             nativeTextViewTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         }
-        else if(textAppearance == ZFEnum.e("ZFUITextAppearance", "Italic")) {
+        else if(textAppearance == ZFUITextAppearance.e_Italic) {
             nativeTextViewTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
         }
-        else if(textAppearance == ZFEnum.e("ZFUITextAppearance", "BoldItalic")) {
+        else if(textAppearance == ZFUITextAppearance.e_BoldItalic) {
             nativeTextViewTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
         }
         else {
@@ -59,13 +57,13 @@ public final class ZFUITextView extends TextView {
     public static void native_textAlignSet(Object nativeTextView,
                                            int textAlign) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
-        if((textAlign & ZFEnum.e("ZFUIAlign", "LeftInner")) == ZFEnum.e("ZFUIAlign", "LeftInner")) {
+        if((textAlign & ZFUIAlign.e_LeftInner) == ZFUIAlign.e_LeftInner) {
             nativeTextViewTmp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
-        else if((textAlign & ZFEnum.e("ZFUIAlign", "RightInner")) == ZFEnum.e("ZFUIAlign", "RightInner")) {
+        else if((textAlign & ZFUIAlign.e_RightInner) == ZFUIAlign.e_RightInner) {
             nativeTextViewTmp.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         }
-        else if(textAlign == ZFEnum.e("ZFUIAlign", "Center")) {
+        else if(textAlign == ZFUIAlign.e_Center) {
             nativeTextViewTmp.setGravity(Gravity.CENTER);
         }
         else {
@@ -107,27 +105,27 @@ public final class ZFUITextView extends TextView {
     public static void native_textTruncateModeSet(Object nativeTextView,
                                                   int textTruncateMode) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
-        if(textTruncateMode == ZFEnum.e("ZFUITextTruncateMode", "Disable")) {
+        if(textTruncateMode == ZFUITextTruncateMode.e_Disable) {
             nativeTextViewTmp.setEllipsize(TruncateAt.END);
         }
-        else if(textTruncateMode == ZFEnum.e("ZFUITextTruncateMode", "Tail")) {
+        else if(textTruncateMode == ZFUITextTruncateMode.e_Tail) {
             nativeTextViewTmp.setEllipsize(TruncateAt.END);
         }
-        else if(textTruncateMode == ZFEnum.e("ZFUITextTruncateMode", "Middle")) {
+        else if(textTruncateMode == ZFUITextTruncateMode.e_Middle) {
             nativeTextViewTmp.setEllipsize(TruncateAt.MIDDLE);
         }
-        else if(textTruncateMode == ZFEnum.e("ZFUITextTruncateMode", "Head")) {
+        else if(textTruncateMode == ZFUITextTruncateMode.e_Head) {
             nativeTextViewTmp.setEllipsize(TruncateAt.START);
         }
         else {
             ZFAndroidLog.shouldNotGoHere();
         }
     }
-    private static ZFAndroidSize _native_measureNativeTextView_sizeCache = new ZFAndroidSize();
-    public static Object native_measureNativeTextView(Object nativeTextView,
-                                                      int maxWidthOrNegative,
-                                                      int maxHeightOrNegative,
-                                                      int textSize) {
+    private static int[] _native_measureNativeTextView_sizeCache = new int[2]; // width, height
+    public static int[] native_measureNativeTextView(Object nativeTextView,
+                                                     int maxWidthOrNegative,
+                                                     int maxHeightOrNegative,
+                                                     int textSize) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         int widthOld = nativeTextViewTmp.getMeasuredWidth();
         int heightOld = nativeTextViewTmp.getMeasuredHeight();
@@ -150,10 +148,8 @@ public final class ZFUITextView extends TextView {
             nativeTextViewTmp.setTextSize(TypedValue.COMPLEX_UNIT_PX, savedTextSize);
         }
 
-        int padding = (int)(2 * ZFAndroidUI.screenDensity(nativeTextViewTmp.getContext()));
-        _native_measureNativeTextView_sizeCache.set(
-            nativeTextViewTmp.getMeasuredWidth() + padding,
-            nativeTextViewTmp.getMeasuredHeight() + padding);
+        _native_measureNativeTextView_sizeCache[0] = nativeTextViewTmp.getMeasuredWidth();
+        _native_measureNativeTextView_sizeCache[1] = nativeTextViewTmp.getMeasuredHeight();
 
         // measured size must be restored, otherwise text's draw step would cause strange error
         nativeTextViewTmp.setMeasuredDimension(widthOld, heightOld);

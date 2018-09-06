@@ -240,12 +240,12 @@ public:
         {
             return ;
         }
-        const ZFProperty *property = listenerData.param0->to<ZFPointerHolder *>()->holdedDataPointer<const ZFProperty *>();
+        const ZFProperty *property = listenerData.param0->to<v_ZFProperty *>()->zfv;
         if(property->propertyOwnerClass() == ZFPropertyAniSetting::ClassData())
         {
             return ;
         }
-        const void *oldValue = listenerData.param1->to<ZFPointerHolder *>()->holdedData;
+        const void *oldValue = listenerData.param1->to<v_VoidPointerConst *>()->zfv;
         if(oldValue == zfnull)
         {
             return ;
@@ -448,8 +448,8 @@ ZFMETHOD_FUNC_DEFINE_8(void, ZFPropertyAni,
     zfautoObject toValue;
     if(property->propertyIsRetainProperty())
     {
-        if(!ZFObjectFromString(fromValue, property->propertyClassOfRetainProperty(), fromValueString)
-            || !ZFObjectFromString(toValue, property->propertyClassOfRetainProperty(), toValueString))
+        if(!ZFSerializeFromString(fromValue, property->propertyClassOfRetainProperty(), fromValueString)
+            || !ZFSerializeFromString(toValue, property->propertyClassOfRetainProperty(), toValueString))
         {
             return ;
         }

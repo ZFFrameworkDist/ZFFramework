@@ -11,9 +11,7 @@ package com.ZFFramework.Android.ZFUIKit_impl;
 
 import java.lang.ref.WeakReference;
 import com.ZFFramework.Android.NativeUtil.ZFAndroidLog;
-import com.ZFFramework.Android.NativeUtil.ZFAndroidSize;
 import com.ZFFramework.Android.NativeUtil.ZFAndroidUI;
-import com.ZFFramework.Android.ZF_impl.ZFEnum;
 import com.ZFFramework.Android.ZF_impl.ZFMainEntry;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -69,16 +67,16 @@ public final class ZFUITextEdit extends EditText {
     public static void native_textEditKeyboardTypeSet(Object nativeTextEdit,
                                                       int textEditKeyboardType) {
         ZFUITextEdit nativeTextEditTmp = (ZFUITextEdit)nativeTextEdit;
-        if(textEditKeyboardType == ZFEnum.e("ZFUITextEditKeyboardType", "Normal")) {
+        if(textEditKeyboardType == ZFUITextEditKeyboardType.e_Normal) {
             nativeTextEditTmp.setInputType(EditorInfo.TYPE_CLASS_TEXT);
         }
-        else if(textEditKeyboardType == ZFEnum.e("ZFUITextEditKeyboardType", "CharBased")) {
+        else if(textEditKeyboardType == ZFUITextEditKeyboardType.e_CharBased) {
             nativeTextEditTmp.setInputType(EditorInfo.TYPE_CLASS_TEXT);
         }
-        else if(textEditKeyboardType == ZFEnum.e("ZFUITextEditKeyboardType", "PhonePad")) {
+        else if(textEditKeyboardType == ZFUITextEditKeyboardType.e_PhonePad) {
             nativeTextEditTmp.setInputType(EditorInfo.TYPE_CLASS_PHONE);
         }
-        else if(textEditKeyboardType == ZFEnum.e("ZFUITextEditKeyboardType", "NumberPad")) {
+        else if(textEditKeyboardType == ZFUITextEditKeyboardType.e_NumberPad) {
             nativeTextEditTmp.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
         }
         else {
@@ -88,23 +86,23 @@ public final class ZFUITextEdit extends EditText {
     public static void native_textEditKeyboardReturnTypeSet(Object nativeTextEdit,
                                                             int textEditKeyboardReturnType) {
         ZFUITextEdit nativeTextEditTmp = (ZFUITextEdit)nativeTextEdit;
-        if(textEditKeyboardReturnType == ZFEnum.e("ZFUITextEditKeyboardReturnType", "Normal")) {
+        if(textEditKeyboardReturnType == ZFUITextEditKeyboardReturnType.e_Normal) {
             nativeTextEditTmp.setImeOptions(EditorInfo.IME_ACTION_NONE);
         }
-        else if(textEditKeyboardReturnType == ZFEnum.e("ZFUITextEditKeyboardReturnType", "Next")) {
+        else if(textEditKeyboardReturnType == ZFUITextEditKeyboardReturnType.e_Next) {
             nativeTextEditTmp.setImeActionLabel(null, 0);
             nativeTextEditTmp.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         }
-        else if(textEditKeyboardReturnType == ZFEnum.e("ZFUITextEditKeyboardReturnType", "Search")) {
+        else if(textEditKeyboardReturnType == ZFUITextEditKeyboardReturnType.e_Search) {
             nativeTextEditTmp.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         }
-        else if(textEditKeyboardReturnType == ZFEnum.e("ZFUITextEditKeyboardReturnType", "Done")) {
+        else if(textEditKeyboardReturnType == ZFUITextEditKeyboardReturnType.e_Done) {
             nativeTextEditTmp.setImeOptions(EditorInfo.IME_ACTION_DONE);
         }
-        else if(textEditKeyboardReturnType == ZFEnum.e("ZFUITextEditKeyboardReturnType", "Go")) {
+        else if(textEditKeyboardReturnType == ZFUITextEditKeyboardReturnType.e_Go) {
             nativeTextEditTmp.setImeOptions(EditorInfo.IME_ACTION_GO);
         }
-        else if(textEditKeyboardReturnType == ZFEnum.e("ZFUITextEditKeyboardReturnType", "Send")) {
+        else if(textEditKeyboardReturnType == ZFUITextEditKeyboardReturnType.e_Send) {
             nativeTextEditTmp.setImeOptions(EditorInfo.IME_ACTION_SEND);
         }
         else {
@@ -139,16 +137,16 @@ public final class ZFUITextEdit extends EditText {
     public static void native_textAppearanceSet(Object nativeTextEdit,
                                                 int textAppearance) {
         ZFUITextEdit nativeTextEditTmp = (ZFUITextEdit)nativeTextEdit;
-        if(textAppearance == ZFEnum.e("ZFUITextAppearance", "Normal")) {
+        if(textAppearance == ZFUITextAppearance.e_Normal) {
             nativeTextEditTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
         }
-        else if(textAppearance == ZFEnum.e("ZFUITextAppearance", "Bold")) {
+        else if(textAppearance == ZFUITextAppearance.e_Bold) {
             nativeTextEditTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         }
-        else if(textAppearance == ZFEnum.e("ZFUITextAppearance", "Italic")) {
+        else if(textAppearance == ZFUITextAppearance.e_Italic) {
             nativeTextEditTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
         }
-        else if(textAppearance == ZFEnum.e("ZFUITextAppearance", "BoldItalic")) {
+        else if(textAppearance == ZFUITextAppearance.e_BoldItalic) {
             nativeTextEditTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
         }
         else {
@@ -159,13 +157,13 @@ public final class ZFUITextEdit extends EditText {
     public static void native_textAlignSet(Object nativeTextEdit,
                                            int textAlign) {
         ZFUITextEdit nativeTextEditTmp = (ZFUITextEdit)nativeTextEdit;
-        if((textAlign & ZFEnum.e("ZFUIAlign", "LeftInner")) == ZFEnum.e("ZFUIAlign", "LeftInner")) {
+        if((textAlign & ZFUIAlign.e_LeftInner) == ZFUIAlign.e_LeftInner) {
             nativeTextEditTmp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
-        else if((textAlign & ZFEnum.e("ZFUIAlign", "RightInner")) == ZFEnum.e("ZFUIAlign", "RightInner")) {
+        else if((textAlign & ZFUIAlign.e_RightInner) == ZFUIAlign.e_RightInner) {
             nativeTextEditTmp.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         }
-        else if(textAlign == ZFEnum.e("ZFUIAlign", "Center")) {
+        else if(textAlign == ZFUIAlign.e_Center) {
             nativeTextEditTmp.setGravity(Gravity.CENTER);
         }
         else {
@@ -204,11 +202,11 @@ public final class ZFUITextEdit extends EditText {
         ZFUITextEdit nativeTextEditTmp = (ZFUITextEdit)nativeTextEdit;
         nativeTextEditTmp.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
     }
-    private static ZFAndroidSize _native_measureNativeTextEdit_sizeCache = new ZFAndroidSize();
-    public static Object native_measureNativeTextEdit(Object nativeTextEdit,
-                                                      int maxWidthOrNegative,
-                                                      int maxHeightOrNegative,
-                                                      int textSize) {
+    private static int[] _native_measureNativeTextEdit_sizeCache = new int[2]; // width, height
+    public static int[] native_measureNativeTextEdit(Object nativeTextEdit,
+                                                     int maxWidthOrNegative,
+                                                     int maxHeightOrNegative,
+                                                     int textSize) {
         ZFUITextEdit nativeTextEditTmp = (ZFUITextEdit)nativeTextEdit;
         float savedTextSize = nativeTextEditTmp.getTextSize();
         nativeTextEditTmp.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
@@ -225,9 +223,8 @@ public final class ZFUITextEdit extends EditText {
                 : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 
         int padding = (int)(2 * ZFAndroidUI.screenDensity(nativeTextEditTmp.getContext()));
-        _native_measureNativeTextEdit_sizeCache.set(
-            nativeTextEditTmp.getMeasuredWidth() + padding,
-            nativeTextEditTmp.getMeasuredHeight() + padding);
+        _native_measureNativeTextEdit_sizeCache[0] = nativeTextEditTmp.getMeasuredWidth() + padding;
+        _native_measureNativeTextEdit_sizeCache[1] = nativeTextEditTmp.getMeasuredHeight() + padding;
         nativeTextEditTmp.setTextSize(TypedValue.COMPLEX_UNIT_PX, savedTextSize);
 
         // measured size must be restored, otherwise text's draw step would cause strange error
