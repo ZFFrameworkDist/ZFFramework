@@ -7,22 +7,20 @@
  * Distributed under MIT license:
  *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
  * ====================================================================== */
-/**
- * @file ZFLua.h
- * @brief header file for ZFLua module
- */
+#include "ZFOutputForConsole.h"
 
-#ifndef _ZFI_ZFLua_h_
-#define _ZFI_ZFLua_h_
+ZF_NAMESPACE_GLOBAL_BEGIN
 
-#include "ZFLua/ZFInputForLua.h"
-#include "ZFLua/ZFLuaDef.h"
-#include "ZFLua/ZFLuaExecute.h"
-#include "ZFLua/ZFLuaGC.h"
-#include "ZFLua/ZFLuaState.h"
-#include "ZFLua/ZFObjectIO_lua.h"
-#include "ZFLua/ZFOutputForLua.h"
-#include "ZFLua/ZFPathType_lua.h"
+ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFOutputForConsole_ZFOutputDefaultExt, ZFLevelZFFrameworkEssential)
+{
+    ZFExportVarEnsureInit_ZFOutputForConsole();
+    ZFOutputDefaultAdd(ZFOutputForConsole());
+}
+ZF_GLOBAL_INITIALIZER_DESTROY(ZFOutputForConsole_ZFOutputDefaultExt)
+{
+    ZFOutputDefaultRemove(ZFOutputForConsole());
+}
+ZF_GLOBAL_INITIALIZER_END(ZFOutputForConsole_ZFOutputDefaultExt)
 
-#endif // #ifndef _ZFI_ZFLua_h_
+ZF_NAMESPACE_GLOBAL_END
 

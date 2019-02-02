@@ -76,6 +76,7 @@ elif test "x-$CONFIG_FILE_PATH" = "x--app" || test "x-$CONFIG_FILE_PATH" = "x--l
         echo "ZF_OUTPUT = $ZF_OUTPUT"
         echo "ZF_INPLACE = 1"
         echo "ZF_INPLACE_SRC = $ZF_INPLACE_SRC"
+        echo "# ZF_EXCLUDE +="
         echo ""
         echo "ZF_LIB += ZFCore"
         echo "# ZF_LIB += ZFAlgorithm"
@@ -292,7 +293,7 @@ _SYNC_EXCLUDE=
 if ! test "x-$_IS_MAC" = "x-1" ; then
     _SYNC_EXCLUDE="$_SYNC_EXCLUDE --exclude=\"project.pbxproj\""
 fi
-for i in "$ZF_EXCLUDE" ; do
+for i in $ZF_EXCLUDE ; do
     _SYNC_EXCLUDE="$_SYNC_EXCLUDE --exclude=\"$i\""
 done
 if ! test "x-$ZF_INPLACE" = "x-" ; then

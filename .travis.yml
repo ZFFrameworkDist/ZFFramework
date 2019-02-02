@@ -9,10 +9,7 @@ matrix:
         ZF_PROJ_NAME=ZFFramework_test;
     android:
       components:
-        - tools
         - build-tools-25.0.2
-        - platform-tools
-        - tools
         - android-25
     script:
       # Android licenses
@@ -24,6 +21,10 @@ matrix:
       # build
       - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh
       - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}
+      - if [ `basename $(git remote get-url origin) .git` = "ZFFramework" ]; then
+          chmod +x ../ZFFramework/master/ZF_CI/upload_app.sh;
+          ../ZFFramework/master/ZF_CI/upload_app.sh "${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}/zfapp/build/outputs/apk/release/zfapp-release.apk" "${ZF_PROJ_NAME}.src.apk";
+        fi
 
   - language: android
     env:
@@ -33,10 +34,7 @@ matrix:
         ZF_PROJ_NAME=ZFFramework_test;
     android:
       components:
-        - tools
         - build-tools-25.0.2
-        - platform-tools
-        - tools
         - android-25
     script:
       # Android licenses
@@ -48,6 +46,10 @@ matrix:
       # build
       - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh
       - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}
+      - if [ `basename $(git remote get-url origin) .git` = "ZFFramework" ]; then
+          chmod +x ../ZFFramework/master/ZF_CI/upload_app.sh;
+          ../ZFFramework/master/ZF_CI/upload_app.sh "${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}/zfapp/build/outputs/apk/release/zfapp-release.apk" "${ZF_PROJ_NAME}.apk";
+        fi
 
   - language: objective-c
     env:
@@ -111,14 +113,30 @@ matrix:
       - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_MacOS.sh
       - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Qt_MacOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Qt/${ZF_PROJ_NAME}
 
-  - language: objective-c
+  - language: android
     env:
-      - ZF_BUILD=iOS;
+      - ZF_BUILD=Android;
+        ANDROID_HOME=/usr/local/android-sdk;
         ZF_PROJ_PATH=demo_ZF2048/zfproj;
         ZF_PROJ_NAME=ZF2048;
+    android:
+      components:
+        - build-tools-25.0.2
+        - android-25
     script:
-      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh
-      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_iOS.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/iOS/${ZF_PROJ_NAME}
+      # Android licenses
+      - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "tools" > /dev/null 2>&1
+      - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platforms;android-25" > /dev/null 2>&1
+      - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;android;m2repository" > /dev/null 2>&1
+      - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "extras;google;m2repository" > /dev/null 2>&1
+      - yes | ${ANDROID_HOME}/tools/bin/sdkmanager "ndk-bundle" > /dev/null 2>&1
+      # build
+      - chmod +x ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh
+      - ../ZFFramework/master/ZF_CI/testbuild/testbuild_Android.sh ${ZF_PROJ_NAME} ${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}
+      - if [ `basename $(git remote get-url origin) .git` = "ZFFramework" ]; then
+          chmod +x ../ZFFramework/master/ZF_CI/upload_app.sh;
+          ../ZFFramework/master/ZF_CI/upload_app.sh "${ZF_PROJ_PATH}/Android/${ZF_PROJ_NAME}/zfapp/build/outputs/apk/release/zfapp-release.apk" "${ZF_PROJ_NAME}.apk";
+        fi
 
   - language: cpp
     env:
@@ -185,5 +203,8 @@ install:
         export HOMEBREW_QT5_VERSION=$(brew list --versions qt5 | rev | cut -d' ' -f1 | rev);
         sudo ln -s /usr/local/Cellar/qt5/$HOMEBREW_QT5_VERSION/mkspecs /usr/local/mkspecs;
       fi;
+    fi
+  - if [ "$ZF_BUILD" = "Android" ]; then
+      travis_retry sudo apt-get install ninja-build;
     fi
 

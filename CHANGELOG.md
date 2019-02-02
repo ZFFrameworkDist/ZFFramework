@@ -1,3 +1,9 @@
+# 0.7.1
+
+* optimize unsafe method names
+* optimize output chain
+* update CI
+
 # 0.7.0
 
 * optimize reflection performance

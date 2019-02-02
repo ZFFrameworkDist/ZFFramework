@@ -13,6 +13,20 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
+// ZFOutputDummy
+static zfindex _ZFP_ZFOutputDummy(ZF_IN const void *s, ZF_IN zfindex count)
+{
+    return count;
+}
+ZFOutput ZFOutputDummy(void)
+{
+    ZFOutput ret = ZFCallbackForFunc(_ZFP_ZFOutputDummy);
+    ret.callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomType_ZFOutputDummy);
+    ret.callbackSerializeCustomDataSet(ZFSerializableData());
+    return ret;
+}
+
+// ============================================================
 // ZFOutputForString
 zfclass _ZFP_I_ZFOutputForStringOwner : zfextends ZFObject
 {
@@ -68,10 +82,10 @@ ZFOutput ZFOutputForString(ZF_IN zfstring &s)
 }
 
 // ============================================================
-// ZFOutputForBuffer
-zfclass _ZFP_I_ZFOutputForBufferOwner : zfextends ZFObject
+// ZFOutputForBufferUnsafe
+zfclass _ZFP_I_ZFOutputForBufferUnsafeOwner : zfextends ZFObject
 {
-    ZFOBJECT_DECLARE(_ZFP_I_ZFOutputForBufferOwner, ZFObject)
+    ZFOBJECT_DECLARE(_ZFP_I_ZFOutputForBufferUnsafeOwner, ZFObject)
 
 public:
     zfbool autoAppendNullToken;
@@ -131,15 +145,15 @@ public:
         return pEnd - pStart;
     }
 };
-ZFOutput ZFOutputForBuffer(ZF_IN void *buf,
-                           ZF_IN_OPT zfindex maxCount /* = zfindexMax() */,
-                           ZF_IN_OPT zfbool autoAppendNullToken /* = zftrue */)
+ZFOutput ZFOutputForBufferUnsafe(ZF_IN void *buf,
+                                 ZF_IN_OPT zfindex maxCount /* = zfindexMax() */,
+                                 ZF_IN_OPT zfbool autoAppendNullToken /* = zftrue */)
 {
     if(buf == zfnull || maxCount == 0 || (maxCount == 1 && autoAppendNullToken))
     {
         return ZFCallbackNull();
     }
-    _ZFP_I_ZFOutputForBufferOwner *owner = zfAlloc(_ZFP_I_ZFOutputForBufferOwner);
+    _ZFP_I_ZFOutputForBufferUnsafeOwner *owner = zfAlloc(_ZFP_I_ZFOutputForBufferUnsafeOwner);
     owner->autoAppendNullToken = autoAppendNullToken;
     owner->pStart = (zfbyte *)buf;
     if(maxCount == zfindexMax())
@@ -157,7 +171,7 @@ ZFOutput ZFOutputForBuffer(ZF_IN void *buf,
     }
     owner->p = owner->pStart;
     ZFOutput ret = ZFCallbackForMemberMethod(
-        owner, ZFMethodAccess(_ZFP_I_ZFOutputForBufferOwner, onOutput));
+        owner, ZFMethodAccess(_ZFP_I_ZFOutputForBufferUnsafeOwner, onOutput));
     ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, owner);
     zfRelease(owner);
     return ret;
@@ -182,6 +196,7 @@ ZFMETHOD_USER_REGISTER_2({
         return output.execute(src, size) * sizeof(zfchar);
     }, v_ZFCallback, zfindex, output, ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, size, zfindexMax()))
 
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFOutput, ZFOutputDummy)
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFOutput, ZFOutputForString, ZFMP_IN_OUT(zfstring &, s))
 
 ZF_NAMESPACE_GLOBAL_END

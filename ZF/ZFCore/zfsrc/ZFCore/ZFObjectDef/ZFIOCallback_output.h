@@ -24,7 +24,10 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * @brief general output callback
  *
  * proto type:
- * -  zfindex output(const void *, zfindex);
+ * @code
+ *   zfindex output(ZF_IN const void *src,
+ *                  ZF_IN_OPT zfindex count = zfindexMax());
+ * @endcode
  *
  * params:
  * -  (const void *) output buffer
@@ -162,6 +165,22 @@ _ZFP_ZFCALLBACK_DECLARE_END_NO_ALIAS(ZFOutput, ZFIOCallback)
 // ============================================================
 // common output callbacks
 /**
+ * @brief see #ZFCALLBACK_SERIALIZE_CUSTOM_TYPE_DEFINE
+ *
+ * serializable data:
+ * @code
+ *   <node>
+ *       // dummy input has no contents
+ *   </node>
+ * @endcode
+ */
+#define ZFCallbackSerializeCustomType_ZFOutputDummy "ZFOutputDummy"
+/**
+ * @brief a dummy output that always output nothing with success state
+ */
+extern ZF_ENV_EXPORT ZFOutput ZFOutputDummy(void);
+
+/**
  * @brief create a output callback to output to a zfstring
  *
  * params:
@@ -179,9 +198,9 @@ extern ZF_ENV_EXPORT ZFOutput ZFOutputForString(ZF_IN_OUT zfstring &s);
  *   if autoAppendNullToken, maxCount should contain the extra '\0' size
  * -  (zfbool) whether auto append '\0' to tail each time write
  */
-extern ZF_ENV_EXPORT ZFOutput ZFOutputForBuffer(ZF_IN void *buf,
-                                                ZF_IN_OPT zfindex maxCount = zfindexMax(),
-                                                ZF_IN_OPT zfbool autoAppendNullToken = zftrue);
+extern ZF_ENV_EXPORT ZFOutput ZFOutputForBufferUnsafe(ZF_IN void *buf,
+                                                      ZF_IN_OPT zfindex maxCount = zfindexMax(),
+                                                      ZF_IN_OPT zfbool autoAppendNullToken = zftrue);
 
 // ============================================================
 // basic output

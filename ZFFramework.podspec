@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZFFramework'
-  s.version          = '0.7.0'
+  s.version          = '0.7.1'
   s.summary          = 'cross-platform C++ app framework'
   s.description      = <<-DESC
 see http://ZFFramework.com for more info
