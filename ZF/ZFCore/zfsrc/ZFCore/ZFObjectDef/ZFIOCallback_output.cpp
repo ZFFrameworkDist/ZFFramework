@@ -32,6 +32,9 @@ zfclass _ZFP_I_ZFOutputForStringOwner : zfextends ZFObject
 {
     ZFOBJECT_DECLARE(_ZFP_I_ZFOutputForStringOwner, ZFObject)
 
+    ZFALLOC_CACHE_RELEASE({
+    })
+
 public:
     zfstring *pString;
     zfindex savedLength;
@@ -70,7 +73,7 @@ public:
 };
 ZFOutput ZFOutputForString(ZF_IN zfstring &s)
 {
-    _ZFP_I_ZFOutputForStringOwner *owner = zfAlloc(_ZFP_I_ZFOutputForStringOwner);
+    _ZFP_I_ZFOutputForStringOwner *owner = zfAllocWithCache(_ZFP_I_ZFOutputForStringOwner);
     owner->pString = &s;
     owner->savedLength = s.length();
     owner->curPos = s.length();
@@ -86,6 +89,9 @@ ZFOutput ZFOutputForString(ZF_IN zfstring &s)
 zfclass _ZFP_I_ZFOutputForBufferUnsafeOwner : zfextends ZFObject
 {
     ZFOBJECT_DECLARE(_ZFP_I_ZFOutputForBufferUnsafeOwner, ZFObject)
+
+    ZFALLOC_CACHE_RELEASE({
+    })
 
 public:
     zfbool autoAppendNullToken;
@@ -153,7 +159,7 @@ ZFOutput ZFOutputForBufferUnsafe(ZF_IN void *buf,
     {
         return ZFCallbackNull();
     }
-    _ZFP_I_ZFOutputForBufferUnsafeOwner *owner = zfAlloc(_ZFP_I_ZFOutputForBufferUnsafeOwner);
+    _ZFP_I_ZFOutputForBufferUnsafeOwner *owner = zfAllocWithCache(_ZFP_I_ZFOutputForBufferUnsafeOwner);
     owner->autoAppendNullToken = autoAppendNullToken;
     owner->pStart = (zfbyte *)buf;
     if(maxCount == zfindexMax())
@@ -184,16 +190,8 @@ ZF_NAMESPACE_GLOBAL_END
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFMETHOD_USER_REGISTER_2({
-        if(size == zfindexMax())
-        {
-            size = zfslen(src);
-        }
-        else
-        {
-            size /= sizeof(zfchar);
-        }
         ZFOutput output = invokerObject->to<v_ZFCallback *>()->zfv;
-        return output.execute(src, size) * sizeof(zfchar);
+        return output.output(src, size);
     }, v_ZFCallback, zfindex, output, ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, size, zfindexMax()))
 
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFOutput, ZFOutputDummy)

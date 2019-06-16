@@ -340,14 +340,25 @@ public:
     zfindex savedPos;
     zfindex curPos; // ensured init with start
 
+    ZFALLOC_CACHE_RELEASE({
+        cache->_cleanup();
+        cache->src.callbackClear();
+    })
+private:
+    void _cleanup(void)
+    {
+        if(autoRestorePos)
+        {
+            autoRestorePos = zffalse;
+            src.ioSeek(savedPos);
+        }
+    }
+
 protected:
     zfoverride
     virtual void objectOnDeallocPrepare(void)
     {
-        if(autoRestorePos)
-        {
-            src.ioSeek(savedPos);
-        }
+        this->_cleanup();
         zfsuper::objectOnDeallocPrepare();
     }
 
@@ -419,7 +430,7 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
         return ZFCallbackNull();
     }
 
-    _ZFP_I_ZFInputForInputInRangeOwner *owner = zfAlloc(_ZFP_I_ZFInputForInputInRangeOwner);
+    _ZFP_I_ZFInputForInputInRangeOwner *owner = zfAllocWithCache(_ZFP_I_ZFInputForInputInRangeOwner);
     owner->src = inputCallback;
     owner->srcStart = start;
     owner->srcCount = countFixed;
@@ -549,6 +560,13 @@ public:
     const zfbyte *pStart;
     const zfbyte *pEnd; // ensured valid
     const zfbyte *p;
+
+    ZFALLOC_CACHE_RELEASE({
+        cache->pStart = zfnull;
+        cache->pEnd = zfnull;
+        cache->p = zfnull;
+    })
+
 public:
     ZFMETHOD_INLINE_2(zfindex, onInput,
                       ZFMP_IN(void *, buf),
@@ -607,7 +625,7 @@ static ZFInput _ZFP_ZFInputForBuffer(ZF_IN zfbool copy,
         return ZFCallbackNull();
     }
 
-    _ZFP_I_ZFInputForBufferUnsafeOwner *owner = zfAlloc(_ZFP_I_ZFInputForBufferUnsafeOwner);
+    _ZFP_I_ZFInputForBufferUnsafeOwner *owner = zfAllocWithCache(_ZFP_I_ZFInputForBufferUnsafeOwner);
     owner->pStart = (const zfbyte *)src;
     owner->pEnd = owner->pStart + len;
     owner->p = owner->pStart;
@@ -647,17 +665,9 @@ ZF_NAMESPACE_GLOBAL_END
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFMETHOD_USER_REGISTER_2({
-        if(size == zfindexMax())
-        {
-            return 0;
-        }
         ZFInput input = invokerObject->to<v_ZFCallback *>()->zfv;
-        void *bufTmp = zfmalloc(size);
-        zfindex read = input.execute(bufTmp, size);
-        buf.append((const zfchar *)bufTmp, read / sizeof(zfchar));
-        zffree(bufTmp);
-        return read;
-    }, v_ZFCallback, zfindex, input, ZFMP_OUT(zfstring &, buf), ZFMP_IN(zfindex, size))
+        return input.input(buf, count);
+    }, v_ZFCallback, zfindex, input, ZFMP_OUT(zfstring &, buf), ZFMP_IN(zfindex, count))
 
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFBuffer, ZFInputReadToBuffer, ZFMP_IN_OUT(const ZFInput &, input))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFInput, ZFInputDummy)

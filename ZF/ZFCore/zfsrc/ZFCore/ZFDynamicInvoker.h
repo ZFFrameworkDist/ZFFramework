@@ -22,9 +22,12 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 /**
  * @brief wrapper for unknown types for #ZFDI_invoke
  */
-zfclass ZF_ENV_EXPORT ZFDI_Wrapper : zfextends ZFObject
+zfabstract ZF_ENV_EXPORT ZFDI_WrapperBase : zfextends ZFObject
 {
-    ZFOBJECT_DECLARE(ZFDI_Wrapper, ZFObject)
+    ZFOBJECT_DECLARE_ABSTRACT(ZFDI_WrapperBase, ZFObject)
+    ZFALLOC_CACHE_RELEASE_ABSTRACT({
+        cache->zfvSet(zfnull);
+    })
 
 public:
     /**
@@ -34,13 +37,15 @@ public:
      * -  #ZFTypeIdWrapper::wrappedValueFromString
      * -  #ZFSerializeFromString
      */
-    zfstring zfv;
+    virtual void zfvSet(ZF_IN const zfchar *zfv) zfpurevirtual;
+    /** @brief see #zfvSet */
+    virtual const zfchar *zfv(void) zfpurevirtual;
 
 public:
     zfoverride
     virtual zfidentity objectHash(void)
     {
-        return zfidentityCalcString(this->zfv);
+        return zfidentityCalcString(this->zfv());
     }
     zfoverride
     virtual ZFCompareResult objectCompare(ZF_IN ZFObject *anotherObj)
@@ -48,19 +53,71 @@ public:
         zfself *ref = ZFCastZFObject(zfself *, anotherObj);
         if(ref != zfnull)
         {
-            return ZFComparerDefault(this->zfv, ref->zfv);
+            return ZFComparerDefault(this->zfv(), ref->zfv());
         }
         else
         {
             return ZFCompareUncomparable;
         }
     }
+    zfoverride
+    virtual inline zfbool objectIsPrivate(void) {return zftrue;}
+    zfoverride
+    virtual inline zfbool objectIsInternal(void) {return zftrue;}
 protected:
     zfoverride
     virtual void objectInfoT(ZF_IN_OUT zfstring &ret)
     {
-        ret += this->zfv;
+        ret += this->zfv();
     }
+};
+/** @brief see #ZFDI_WrapperBase */
+zfclass ZF_ENV_EXPORT ZFDI_Wrapper : zfextends ZFDI_WrapperBase
+{
+    ZFOBJECT_DECLARE(ZFDI_Wrapper, ZFDI_WrapperBase)
+    ZFALLOC_CACHE_RELEASE({zfsuper::zfAllocCacheRelease(cache);})
+public:
+    zfoverride
+    virtual void zfvSet(ZF_IN const zfchar *zfv)
+    {
+        if(zfv)
+        {
+            this->_ZFP_zfv = zfv;
+        }
+        else
+        {
+            this->_ZFP_zfv.removeAll();
+        }
+    }
+    zfoverride
+    virtual const zfchar *zfv(void) {return this->_ZFP_zfv;}
+private:
+    zfstring _ZFP_zfv;
+};
+/** @brief see #ZFDI_WrapperBase */
+zfclass ZF_ENV_EXPORT ZFDI_WrapperRaw : zfextends ZFDI_WrapperBase
+{
+    ZFOBJECT_DECLARE_WITH_CUSTOM_CTOR(ZFDI_WrapperRaw, ZFDI_WrapperBase)
+    ZFALLOC_CACHE_RELEASE({zfsuper::zfAllocCacheRelease(cache);})
+public:
+    zfoverride
+    virtual void zfvSet(ZF_IN const zfchar *zfv)
+    {
+        if(zfv)
+        {
+            this->_ZFP_zfv = zfv;
+        }
+        else
+        {
+            this->_ZFP_zfv = "";
+        }
+    }
+    zfoverride
+    virtual const zfchar *zfv(void) {return this->_ZFP_zfv;}
+private:
+    const zfchar *_ZFP_zfv;
+protected:
+    ZFDI_WrapperRaw(void) : _ZFP_zfv("") {}
 };
 
 // ============================================================
@@ -70,7 +127,7 @@ protected:
  * support these types:
  * -  #v_zfstring
  * -  #ZFString
- * -  #ZFDI_Wrapper
+ * -  #ZFDI_WrapperBase
  */
 extern ZF_ENV_EXPORT const zfchar *ZFDI_toString(ZF_IN ZFObject *obj);
 
@@ -124,7 +181,7 @@ extern ZF_ENV_EXPORT void ZFDI_paramInfo(ZF_IN_OUT zfstring &ret
  * -  #ZFObject type for retain type
  * -  #ZFTypeIdWrapper for assign type
  * -  #ZFMethodGenericInvokerDefaultParam for default param
- * -  #ZFDI_Wrapper, we will try to convert to desired type if possible
+ * -  #ZFDI_WrapperBase, we will try to convert to desired type if possible
  */
 extern ZF_ENV_EXPORT zfbool ZFDI_invoke(ZF_OUT zfautoObject &ret
                                         , ZF_OUT_OPT zfstring *errorHint
@@ -132,15 +189,8 @@ extern ZF_ENV_EXPORT zfbool ZFDI_invoke(ZF_OUT zfautoObject &ret
                                         , ZF_IN_OPT const zfchar *NS
                                         , ZF_IN ZFObject *type
                                         , ZF_IN zfindex paramCount
-                                        , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
-                                        , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
-                                        /* ZFMETHOD_MAX_PARAM */);
+                                        , ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]
+                                        );
 
 /**
  * @brief perform advanced dynamic invoke
@@ -164,28 +214,14 @@ extern ZF_ENV_EXPORT zfbool ZFDI_alloc(ZF_OUT zfautoObject &ret
                                        , ZF_IN_OPT const zfchar *NS
                                        , ZF_IN ZFObject *type
                                        , ZF_IN zfindex paramCount
-                                       , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
-                                       /* ZFMETHOD_MAX_PARAM */);
+                                       , ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]
+                                       );
 /** @brief see #ZFDI_alloc */
 extern ZF_ENV_EXPORT zfbool ZFDI_alloc(ZF_OUT zfautoObject &ret
                                        , ZF_OUT_OPT zfstring *errorHint
                                        , ZF_IN const ZFClass *cls
                                        , ZF_IN zfindex paramCount
-                                       , ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param1 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param2 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param3 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param4 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param5 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param6 = ZFMethodGenericInvokerDefaultParam()
-                                       , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
+                                       , ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]
                                        );
 
 // ============================================================
@@ -194,7 +230,7 @@ extern ZF_ENV_EXPORT zfbool ZFDI_alloc(ZF_OUT zfautoObject &ret
  */
 extern ZF_ENV_EXPORT zfbool ZFDI_paramConvert(ZF_OUT zfautoObject &ret,
                                               ZF_IN const zfchar *typeId,
-                                              ZF_IN ZFDI_Wrapper *wrapper,
+                                              ZF_IN ZFDI_WrapperBase *wrapper,
                                               ZF_OUT_OPT zfstring *errorHint = zfnull);
 
 ZF_NAMESPACE_GLOBAL_END

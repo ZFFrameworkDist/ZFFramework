@@ -88,6 +88,7 @@ public:
     ZFClass *pimplOwner;
     zfbool classIsDynamicRegister;
     zfautoObject classDynamicRegisterUserData;
+    _ZFP_zfAllocWithCacheCallback objectAllocWithCacheCallback;
     _ZFP_ZFObjectConstructor constructor;
     _ZFP_ZFObjectDestructor destructor;
     zfstring classNamespace;
@@ -337,13 +338,11 @@ ZF_GLOBAL_INITIALIZER_END(ZFClassTagClearLevelHigh)
 // static methods
 const ZFClass *ZFClass::classForName(ZF_IN const zfchar *className)
 {
-    zfCoreMutexLocker();
     return _ZFP_ZFClassMap.get<const ZFClass *>(ZFNamespaceSkipGlobal(className));
 }
 const ZFClass *ZFClass::classForName(ZF_IN const zfchar *className,
                                      ZF_IN const zfchar *classNamespace)
 {
-    zfCoreMutexLocker();
     classNamespace = ZFNamespaceSkipGlobal(classNamespace);
     if(classNamespace != zfnull)
     {
@@ -575,14 +574,23 @@ zfautoObject ZFClass::newInstance(void) const
 {
     zfCoreMutexLocker();
     ZFObject *obj = zfnull;
-    obj = d->objectConstruct();
-    if(obj != zfnull)
+    if(d->objectAllocWithCacheCallback)
     {
-        obj->objectOnInit();
-        obj->_ZFP_ZFObjectCheckOnInit();
+        obj = d->objectAllocWithCacheCallback();
     }
-    zflockfree_zfblockedRelease(obj);
-    return obj;
+    else
+    {
+        obj = d->objectConstruct();
+        if(obj != zfnull)
+        {
+            obj->objectOnInit();
+            obj->_ZFP_ZFObjectCheckOnInit();
+        }
+    }
+    zfautoObject ret;
+    ret.zflockfree_assign(obj);
+    zflockfree_zfRelease(obj);
+    return ret;
 }
 
 zfautoObject ZFClass::newInstanceGeneric(
@@ -619,16 +627,16 @@ zfautoObject ZFClass::newInstanceGeneric(
     ZFToken token = this->newInstanceGenericBegin();
     if(token != zfnull)
     {
-        zfautoObject paramList[ZFMETHOD_MAX_PARAM] = {
-            param0,
-            param1,
-            param2,
-            param3,
-            param4,
-            param5,
-            param6,
-            param7,
-        };
+        zfautoObject paramList[ZFMETHOD_MAX_PARAM];
+        paramList[0].zflockfree_assign(param0);
+        paramList[1].zflockfree_assign(param1);
+        paramList[2].zflockfree_assign(param2);
+        paramList[3].zflockfree_assign(param3);
+        paramList[4].zflockfree_assign(param4);
+        paramList[5].zflockfree_assign(param5);
+        paramList[6].zflockfree_assign(param6);
+        paramList[7].zflockfree_assign(param7);
+
         for(zfindex i = 0; i < objectOnInitMethodList.count(); ++i)
         {
             if(this->newInstanceGenericCheck(token, objectOnInitMethodList[i], paramList))
@@ -912,18 +920,16 @@ void ZFClass::classTagSet(ZF_IN const zfchar *key,
     }
     else
     {
+        ZFObject *obj = zflockfree_zfRetain(it->second);
         if(tag == zfnull)
         {
-            zfautoObject holder = it->second;
-            ZFUNUSED(holder);
             m.erase(it);
         }
         else
         {
-            zfautoObject holder = it->second;
-            ZFUNUSED(holder);
-            it->second = tag;
+            it->second.zflockfree_assign(tag);
         }
+        zflockfree_zfRelease(obj);
     }
 }
 ZFObject *ZFClass::classTagGet(ZF_IN const zfchar *key) const
@@ -955,11 +961,13 @@ zfautoObject ZFClass::classTagRemoveAndGet(ZF_IN const zfchar *key) const
 {
     if(key != zfnull)
     {
+        zfCoreMutexLocker();
         _ZFP_ZFClassTagMapType &m = d->classTagMap;
         _ZFP_ZFClassTagMapType::iterator it = m.find(key);
         if(it != m.end())
         {
-            zfautoObject ret = it->second;
+            zfautoObject ret;
+            ret.zflockfree_assign(it->second);
             m.erase(it);
             return ret;
         }
@@ -1000,6 +1008,7 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
                                        ZF_IN const zfchar *classNamespace,
                                        ZF_IN const zfchar *className,
                                        ZF_IN const ZFClass *parent,
+                                       ZF_IN _ZFP_zfAllocWithCacheCallback objectAllocWithCacheCallback,
                                        ZF_IN _ZFP_ZFObjectConstructor constructor,
                                        ZF_IN _ZFP_ZFObjectDestructor destructor,
                                        ZF_IN _ZFP_ZFObjectCheckInitImplementationListCallback checkInitImplListCallback,
@@ -1046,6 +1055,7 @@ ZFClass *ZFClass::_ZFP_ZFClassRegister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
 
         cls->d->classIsDynamicRegister = classIsDynamicRegister;
         cls->d->classDynamicRegisterUserData = classDynamicRegisterUserData;
+        cls->d->objectAllocWithCacheCallback = objectAllocWithCacheCallback;
         cls->d->constructor = constructor;
         cls->d->destructor = destructor;
 
@@ -1626,6 +1636,10 @@ zfbool ZFClass::_ZFP_ZFClass_propertyInitStepIsTheSame(ZF_IN const ZFProperty *p
     return zftrue;
 }
 
+_ZFP_zfAllocWithCacheCallback ZFClass::_ZFP_objectAllocWithCacheCallback(void) const
+{
+    return d->objectAllocWithCacheCallback;
+}
 _ZFP_ZFObjectConstructor ZFClass::_ZFP_objectConstructor(void) const
 {
     return d->constructor;
@@ -1639,6 +1653,7 @@ _ZFP_ZFObjectDestructor ZFClass::_ZFP_objectDestructor(void) const
 _ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *classNamespace,
                                                        ZF_IN const zfchar *className,
                                                        ZF_IN const ZFClass *parent,
+                                                       ZF_IN _ZFP_zfAllocWithCacheCallback objectAllocWithCacheCallback,
                                                        ZF_IN _ZFP_ZFObjectConstructor constructor,
                                                        ZF_IN _ZFP_ZFObjectDestructor destructor,
                                                        ZF_IN _ZFP_ZFObjectCheckInitImplementationListCallback checkInitImplListCallback,
@@ -1653,6 +1668,7 @@ _ZFP_ZFClassRegisterHolder::_ZFP_ZFClassRegisterHolder(ZF_IN const zfchar *class
         classNamespace,
         className,
         parent,
+        objectAllocWithCacheCallback,
         constructor,
         destructor,
         checkInitImplListCallback,
@@ -1724,10 +1740,10 @@ void _ZFP_ZFClassDataChangeNotify(ZF_IN ZFClassDataChangeType changeType,
         data.changedProperty = changedProperty;
         data.changedMethod = changedMethod;
 
-        ZFPointerHolder *holder = ZFPointerHolder::cacheGet();
+        ZFPointerHolder *holder = zflockfree_zfAllocWithCache(ZFPointerHolder);
         holder->holdedData = &data;
         ZFClassDataChangeObserver.observerNotify(ZFGlobalEvent::EventClassDataChange(), holder);
-        ZFPointerHolder::cacheAdd(holder);
+        zflockfree_zfRelease(holder);
     }
 }
 

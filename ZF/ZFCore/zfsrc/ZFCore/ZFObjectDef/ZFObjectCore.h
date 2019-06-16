@@ -68,6 +68,7 @@ public:
         return zfnull;
     }
     static void _ZFP_Obj_initImpl(ZFClass *cls) {}
+    static ZFObject *_ZFP_zfAllocWithCache(void) {return zfnull;}
 };
 template<typename T_ZFObject, int valid>
 zfclassNotPOD ZF_ENV_EXPORT _ZFP_Obj_AllocCk;
@@ -239,12 +240,14 @@ zfclass ZF_ENV_EXPORT ZFObject
 public:
     enum {_ZFP_ZFObjectCanAllocPublic = 1};
     static void _ZFP_Obj_initImpl(ZFClass *cls) {}
+    static ZFObject *_ZFP_zfAllocWithCache(void) {return zfnull;}
     virtual inline void _ZFP_ObjI_onInitIvk(void) {}
     virtual inline void _ZFP_ObjI_onDeallocIvk(void) {}
 protected:
     /** @cond ZFPrivateDoc */
     ZFObject(void)
     : _ZFP_ZFObject_classData(zfnull)
+    , _ZFP_ZFObject_zfAllocCacheRelease(zfnull)
     , d(zfnull)
     , _observerHolder()
     {
@@ -791,9 +794,12 @@ protected:
 
 public:
     const ZFClass *_ZFP_ZFObject_classData;
+public:
+    void (*_ZFP_ZFObject_zfAllocCacheRelease)(ZF_IN ZFObject *obj);
 private:
     _ZFP_ZFObjectPrivate *d;
     ZFObserverHolder _observerHolder;
+private:
     friend zfclassFwd ZFClass;
     friend zfclassFwd ZFObserverHolder;
     friend zfclassFwd _ZFP_ZFObserverHolderPrivate;

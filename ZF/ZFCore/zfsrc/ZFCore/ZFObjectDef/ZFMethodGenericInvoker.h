@@ -113,8 +113,6 @@ public:
 };
 #define _ZFP_ZFMETHOD_GENERIC_INVOKER_PARAM_ACCESS_EXPAND(N, DefaultExpandOrEmpty, ParamType, param) \
     _ZFP_MtdGIPA<_TR##N, _T##N>(param).a(DefaultExpandOrEmpty(pDef##N()))
-#define _ZFP_ZFMETHOD_GENERIC_INVOKER_PARAM_ACCESS_FINISH_EXPAND(N, DefaultExpandOrEmpty, ParamType, param) \
-    ZFTypeId<_TR##N>::Value<_T##N>::zfvAccessFinish(param);
 #define _ZFP_ZFMETHOD_GENERIC_PARAM_DEFAULT_ACCESS(N, DefaultExpandOrEmpty, ParamType, DefaultValueFix) \
     DefaultExpandOrEmpty( \
         static zfautoObject pDef##N(void) \
@@ -304,16 +302,11 @@ extern ZF_ENV_EXPORT void _ZFP_ZFMethodGenericInvokeError(ZF_IN const ZFMethod *
     template<typename T_ReturnType ZFM_REPEAT(N, ZFM_REPEAT_TEMPLATE, ZFM_COMMA, ZFM_COMMA)> \
     T_ReturnType _ZFP_MtdGII(ZF_IN const ZFMethod *method, ZF_IN ZFObject *obj ZFM_REPEAT(N, ZFM_REPEAT_PARAM, ZFM_COMMA, ZFM_COMMA)) \
     { \
-        zfautoObject _p[ZFMETHOD_MAX_PARAM] = { \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-            ZFMethodGenericInvokerDefaultParamHolder(), \
-        }; \
+        zfautoObject _p[ZFMETHOD_MAX_PARAM]; \
+        for(zfindex i = 0; i < ZFMETHOD_MAX_PARAM; ++i) \
+        { \
+            _p[i].zflockfree_assign(ZFMethodGenericInvokerDefaultParamHolder()); \
+        } \
         ZFM_REPEAT(N, _ZFP_ZFMethodGenericInvoke_REPEAT1, ZFM_EMPTY, ZFM_EMPTY) \
         zfautoObject _ret; \
         zfstring errorHint; \

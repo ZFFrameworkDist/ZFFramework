@@ -58,7 +58,7 @@ ZFENUM_END(ZFUIMouseButton)
  */
 zffinal zfclass ZF_ENV_EXPORT ZFUIMouseEvent : zfextends ZFUIEvent
 {
-    ZFOBJECT_DECLARE_WITH_CUSTOM_CTOR(ZFUIMouseEvent, ZFUIEvent)
+    ZFOBJECT_DECLARE(ZFUIMouseEvent, ZFUIEvent)
 
 public:
     /**
@@ -84,9 +84,6 @@ public:
      */
     ZFUIMouseButtonEnum mouseButton;
 
-public:
-    ZFCACHEHOLDER_DECLARE()
-
 protected:
     zfoverride
     virtual void objectInfoOnAppend(ZF_IN_OUT zfstring &ret);
@@ -96,17 +93,6 @@ public:
     virtual void eventOnApplyScale(ZF_IN zffloat scale);
     zfoverride
     virtual void eventOnApplyScaleReversely(ZF_IN zffloat scale);
-
-protected:
-    /** @cond ZFPrivateDoc */
-    ZFUIMouseEvent(void)
-    : mouseId(zfidentityInvalid())
-    , mouseAction(ZFUIMouseAction::e_MouseDown)
-    , mousePoint()
-    , mouseButton(ZFUIMouseButton::e_MouseButtonLeft)
-    {
-    }
-    /** @endcond */
 };
 
 ZF_NAMESPACE_GLOBAL_END

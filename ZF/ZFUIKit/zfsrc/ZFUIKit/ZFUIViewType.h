@@ -45,7 +45,6 @@ ZFENUM_END(ZFUIViewChildLayer)
 zfclass ZF_ENV_EXPORT ZFUIViewMeasureResult : zfextends ZFObject
 {
     ZFOBJECT_DECLARE(ZFUIViewMeasureResult, ZFObject)
-    ZFCACHEHOLDER_DECLARE()
 
 public:
     /** @brief see #ZFUIViewMeasureResult */
@@ -54,6 +53,12 @@ public:
     ZFUISizeParam sizeParam;
     /** @brief see #ZFUIViewMeasureResult */
     ZFUISize measuredSize;
+
+    ZFALLOC_CACHE_RELEASE({
+        cache->sizeHint = ZFUISizeZero();
+        cache->sizeParam = ZFUISizeParamZero();
+        cache->measuredSize = ZFUISizeZero();
+    })
 
 protected:
     zfoverride

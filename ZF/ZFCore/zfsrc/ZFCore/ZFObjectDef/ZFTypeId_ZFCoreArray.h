@@ -76,6 +76,7 @@ public:
 zfclass ZF_ENV_EXPORT v_ZFCoreArray : zfextends ZFTypeIdWrapper
 {
     ZFOBJECT_DECLARE(v_ZFCoreArray, ZFTypeIdWrapper)
+    ZFALLOC_CACHE_RELEASE({zfsuper::zfAllocCacheRelease(cache);})
 public:
     /** @brief the value, see #ZFTypeId::Value */
     ZFCoreArray<zfautoObject> zfv;
@@ -267,16 +268,20 @@ public:
     zfoverride
     virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const
     {
-        ZFObject *t = zfAlloc(v_ZFCoreArray);
+        zfCoreMutexLock();
+        ZFObject *t = zflockfree_zfAllocWithCache(v_ZFCoreArray);
         v = t;
-        zfRelease(t);
+        zflockfree_zfRelease(t);
+        zfCoreMutexUnlock();
         return zftrue;
     }
     static zfbool ValueStore(ZF_OUT zfautoObject &obj, ZF_IN ZFCoreArray<T_Type> const &v)
     {
-        v_ZFCoreArray *holder = zfAlloc(v_ZFCoreArray);
+        zfCoreMutexLock();
+        v_ZFCoreArray *holder = zflockfree_zfAllocWithCache(v_ZFCoreArray);
         obj = holder;
-        zfRelease(holder);
+        zflockfree_zfRelease(holder);
+        zfCoreMutexUnlock();
         return _ZFP_ZFCoreArrayConvert<ZFCoreArray<T_Type> >::template from<T_Type>(holder->zfv, v);
     }
     template<typename T_Access = ZFCoreArray<T_Type>
@@ -360,9 +365,11 @@ public:
     zfoverride
     virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const
     {
-        ZFObject *t = zfAlloc(v_ZFCoreArray);
+        zfCoreMutexLock();
+        ZFObject *t = zflockfree_zfAllocWithCache(v_ZFCoreArray);
         v = t;
-        zfRelease(t);
+        zflockfree_zfRelease(t);
+        zfCoreMutexUnlock();
         return zftrue;
     }
     static zfbool ValueStore(ZF_OUT zfautoObject &obj, ZF_IN ZFCoreArray<T_Type> const &v)

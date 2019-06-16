@@ -52,6 +52,10 @@ public:
      */
     const void *holdedData;
 
+    ZFALLOC_CACHE_RELEASE({
+        cache->holdedData = zfnull;
+    })
+
 public:
     /** @brief util method to cast #holdedData */
     template<typename T_RawType>
@@ -66,20 +70,6 @@ public:
         typedef typename zftTraits<T_RawType>::TrConstPtr T_RawTypeConstPointer;
         return *ZFCastStatic(T_RawTypeConstPointer, this->holdedData);
     }
-
-public:
-    /**
-     * @brief access cached object for performance
-     *
-     * should be paired with #cacheAdd
-     */
-    static ZFPointerHolder *cacheGet(void);
-    /**
-     * @brief release the cached object
-     *
-     * after calling this method, you must not access the obj any more by any chances
-     */
-    static void cacheAdd(ZF_IN ZFPointerHolder *obj);
 
 protected:
     zfoverride

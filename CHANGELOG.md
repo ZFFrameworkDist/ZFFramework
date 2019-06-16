@@ -1,3 +1,9 @@
+# 0.8.0
+
+* optimize cache performance
+* optimize generic invoker performance
+* remove lua custom dispatch support for performance
+
 # 0.7.2
 
 * ZFTime use local time zone by default

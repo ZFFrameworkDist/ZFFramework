@@ -116,11 +116,11 @@ void ZFImpl_ZFLua_luaStateAttach(ZF_IN lua_State *L)
     public:
         static zfautoObject get_zftrue(void)
         {
-            return zflineAlloc(v_zfbool, zftrue);
+            return v_zftrue;
         }
         static zfautoObject get_zffalse(void)
         {
-            return zflineAlloc(v_zfbool, zffalse);
+            return v_zffalse;
         }
     };
     ZFImpl_ZFLua_luaFunctionRegister(L, "_ZFP_ZFImpl_ZFLua_zftrue", _ZFP_ZFImpl_ZFLua_zfboolHolder::get_zftrue);
@@ -136,7 +136,8 @@ void ZFImpl_ZFLua_luaStateAttach(ZF_IN lua_State *L)
     public:
         static int f(ZF_IN lua_State *L)
         {
-            zfblockedAlloc(v_VoidPointer, ret, (void *)L);
+            zfblockedAllocWithCache(v_VoidPointer, ret);
+            ret->zfv = (void *)L;
             zfautoObject tmp = ret;
             ZFImpl_ZFLua_luaPush(L, tmp);
             return 1;
@@ -263,167 +264,6 @@ void ZFImpl_ZFLua_implSetupObject(ZF_IN_OUT lua_State *L, ZF_IN_OPT int objIndex
 }
 
 // ============================================================
-static zfautoObject _ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstance;
-const zfautoObject &_ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSet(void)
-{
-    return _ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstance;
-}
-zfclass _ZFP_I_ZFImpl_ZFLua_ImplDispatchReturnValueNotSet : zfextends ZFObject
-{
-    ZFOBJECT_DECLARE(_ZFP_I_ZFImpl_ZFLua_ImplDispatchReturnValueNotSet, ZFObject)
-};
-ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(_ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstanceInit, ZFLevelZFFrameworkLow)
-{
-    _ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstance
-        = zflineAlloc(_ZFP_I_ZFImpl_ZFLua_ImplDispatchReturnValueNotSet);
-}
-ZF_GLOBAL_INITIALIZER_DESTROY(_ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstanceInit)
-{
-    _ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstance = zfnull;
-}
-ZF_GLOBAL_INITIALIZER_END(_ZFP_ZFImpl_ZFLua_implDispatchReturnValueNotSetInstanceInit)
-
-static zfstlmap<zfstlstringZ, zfstlmap<zfstlstringZ, zfstlvector<_ZFP_ZFImpl_ZFLua_ImplDispatchCallback> > > _ZFP_ZFImpl_ZFLua_implDispatchData;
-void _ZFP_ZFImpl_ZFLua_implDispatchRegister(ZF_IN _ZFP_ZFImpl_ZFLua_ImplDispatchCallback invokerCallback,
-                                            ZF_IN_OPT const zfchar *classOrNamespace /* = zfnull */,
-                                            ZF_IN_OPT const zfchar *methodName /* = zfnull */)
-{
-    zfCoreAssert(invokerCallback != zfnull);
-    zfCoreMutexLocker();
-
-    if(classOrNamespace == zfnull
-        || zfscmpTheSame(classOrNamespace, ZF_NAMESPACE_GLOBAL_NAME)
-        || zfscmpTheSame(classOrNamespace, ZF_NAMESPACE_GLOBAL_ABBR_NAME))
-    {
-        classOrNamespace = "";
-    }
-    if(methodName == zfnull)
-    {
-        methodName = "";
-    }
-    _ZFP_ZFImpl_ZFLua_implDispatchData[classOrNamespace][methodName].push_back(invokerCallback);
-}
-void _ZFP_ZFImpl_ZFLua_implDispatchUnregister(ZF_IN _ZFP_ZFImpl_ZFLua_ImplDispatchCallback invokerCallback,
-                                              ZF_IN_OPT const zfchar *classOrNamespace /* = zfnull */,
-                                              ZF_IN_OPT const zfchar *methodName /* = zfnull */)
-{
-    zfCoreMutexLocker();
-
-    if(classOrNamespace == zfnull
-        || zfscmpTheSame(classOrNamespace, ZF_NAMESPACE_GLOBAL_NAME)
-        || zfscmpTheSame(classOrNamespace, ZF_NAMESPACE_GLOBAL_ABBR_NAME))
-    {
-        classOrNamespace = "";
-    }
-    if(methodName == zfnull)
-    {
-        methodName = "";
-    }
-
-    zfstlmap<zfstlstringZ, zfstlmap<zfstlstringZ, zfstlvector<_ZFP_ZFImpl_ZFLua_ImplDispatchCallback> > >::iterator methodIt = _ZFP_ZFImpl_ZFLua_implDispatchData.find(classOrNamespace);
-    if(methodIt != _ZFP_ZFImpl_ZFLua_implDispatchData.end())
-    {
-        zfstlmap<zfstlstringZ, zfstlvector<_ZFP_ZFImpl_ZFLua_ImplDispatchCallback> >::iterator methodNameIt = methodIt->second.find(methodName);
-        if(methodNameIt != methodIt->second.end())
-        {
-            for(zfstlsize i = 0; i < methodNameIt->second.size(); ++i)
-            {
-                if(methodNameIt->second[i] == invokerCallback)
-                {
-                    methodNameIt->second.erase(methodNameIt->second.begin() + i);
-                    break;
-                }
-            }
-            if(methodNameIt->second.empty())
-            {
-                methodIt->second.erase(methodNameIt);
-            }
-        }
-        if(methodIt->second.empty())
-        {
-            _ZFP_ZFImpl_ZFLua_implDispatchData.erase(methodIt);
-        }
-    }
-}
-void ZFImpl_ZFLua_implDispatch(ZF_IN_OUT ZFImpl_ZFLua_ImplDispatchInfo &dispatchInfo)
-{
-    if(dispatchInfo.classOrNamespace == zfnull
-        || zfscmpTheSame(dispatchInfo.classOrNamespace, ZF_NAMESPACE_GLOBAL_NAME)
-        || zfscmpTheSame(dispatchInfo.classOrNamespace, ZF_NAMESPACE_GLOBAL_ABBR_NAME))
-    {
-        dispatchInfo.classOrNamespace = "";
-    }
-    if(dispatchInfo.methodName == zfnull)
-    {
-        dispatchInfo.methodName = "";
-    }
-
-    zfstlmap<zfstlstringZ, zfstlmap<zfstlstringZ, zfstlvector<_ZFP_ZFImpl_ZFLua_ImplDispatchCallback> > >::iterator methodIt = _ZFP_ZFImpl_ZFLua_implDispatchData.find(dispatchInfo.classOrNamespace);
-    if(methodIt != _ZFP_ZFImpl_ZFLua_implDispatchData.end())
-    {
-        // Scope::methodName
-        zfstlmap<zfstlstringZ, zfstlvector<_ZFP_ZFImpl_ZFLua_ImplDispatchCallback> >::iterator methodNameIt = methodIt->second.find(dispatchInfo.methodName);
-        if(methodNameIt != methodIt->second.end())
-        {
-            for(zfstlsize i = 0; i < methodNameIt->second.size(); ++i)
-            {
-                methodNameIt->second[i](dispatchInfo);
-                if(dispatchInfo.dispatchResult != ZFImpl_ZFLua_ImplDispatchResultForward)
-                {
-                    return ;
-                }
-            }
-        }
-
-        // Scope::*
-        methodNameIt = methodIt->second.find("");
-        if(methodNameIt != methodIt->second.end())
-        {
-            for(zfstlsize i = 0; i < methodNameIt->second.size(); ++i)
-            {
-                methodNameIt->second[i](dispatchInfo);
-                if(dispatchInfo.dispatchResult != ZFImpl_ZFLua_ImplDispatchResultForward)
-                {
-                    return ;
-                }
-            }
-        }
-    }
-
-    methodIt = _ZFP_ZFImpl_ZFLua_implDispatchData.find(ZFImpl_ZFLua_implDispatchAll);
-    if(methodIt != _ZFP_ZFImpl_ZFLua_implDispatchData.end())
-    {
-        // *::methodName
-        zfstlmap<zfstlstringZ, zfstlvector<_ZFP_ZFImpl_ZFLua_ImplDispatchCallback> >::iterator methodNameIt = methodIt->second.find(dispatchInfo.methodName);
-        if(methodNameIt != methodIt->second.end())
-        {
-            for(zfstlsize i = 0; i < methodNameIt->second.size(); ++i)
-            {
-                methodNameIt->second[i](dispatchInfo);
-                if(dispatchInfo.dispatchResult != ZFImpl_ZFLua_ImplDispatchResultForward)
-                {
-                    return ;
-                }
-            }
-        }
-
-        // *::*
-        methodNameIt = methodIt->second.find("");
-        if(methodNameIt != methodIt->second.end())
-        {
-            for(zfstlsize i = 0; i < methodNameIt->second.size(); ++i)
-            {
-                methodNameIt->second[i](dispatchInfo);
-                if(dispatchInfo.dispatchResult != ZFImpl_ZFLua_ImplDispatchResultForward)
-                {
-                    return ;
-                }
-            }
-        }
-    }
-}
-
-// ============================================================
 zfbool ZFImpl_ZFLua_execute(ZF_IN lua_State *L,
                             ZF_IN const zfchar *buf,
                             ZF_IN_OPT zfindex bufLen /* = zfindexMax() */,
@@ -508,7 +348,7 @@ zfbool ZFImpl_ZFLua_execute(ZF_IN lua_State *L,
         }
         else
         {
-            zfstring t;
+            const zfchar *t = zfnull;
             if(ZFImpl_ZFLua_toString(t, L, -1, zftrue))
             {
                 zfblockedAlloc(v_zfstring, v);
@@ -624,10 +464,49 @@ zfbool ZFImpl_ZFLua_toGeneric(ZF_OUT zfautoObject &param,
     {
         return zftrue;
     }
-    zfblockedAlloc(ZFDI_Wrapper, t);
-    if(ZFImpl_ZFLua_toString(t->zfv, L, luaStackOffset, zftrue))
+
+    zfblockedAllocWithCache(ZFDI_WrapperRaw, wrapper);
+    if(lua_isstring(L, luaStackOffset))
     {
-        param = t;
+        wrapper->zfvSet(lua_tostring(L, luaStackOffset));
+        param = wrapper;
+        return zftrue;
+    }
+    if(lua_isboolean(L, luaStackOffset))
+    {
+        wrapper->zfvSet((zfbool)lua_toboolean(L, luaStackOffset) ? ZFTOKEN_zfbool_zftrue : ZFTOKEN_zfbool_zffalse);
+        param = wrapper;
+        return zftrue;
+    }
+    if(!lua_isuserdata(L, luaStackOffset))
+    {
+        return zffalse;
+    }
+
+    zfautoObject const &obj = ZFImpl_ZFLua_luaGet(L, luaStackOffset);
+    if(obj == zfnull)
+    {
+        wrapper->zfvSet("");
+        return zftrue;
+    }
+    const ZFClass *cls = obj->classData();
+    if(cls->classIsTypeOf(ZFString::ClassData()))
+    {
+        ZFString *t = obj->to<ZFString *>();
+        if(t != zfnull)
+        {
+            wrapper->zfvSet(t->stringValue());
+        }
+        return zftrue;
+    }
+    else if(cls->classIsTypeOf(v_zfstring::ClassData()))
+    {
+        wrapper->zfvSet(obj->to<v_zfstring *>()->zfv);
+        return zftrue;
+    }
+    else if(cls->classIsTypeOf(ZFDI_WrapperBase::ClassData()))
+    {
+        wrapper->zfvSet(obj->to<ZFDI_WrapperBase *>()->zfv());
         return zftrue;
     }
     else
@@ -670,7 +549,8 @@ public:
         lua_rawgeti(L, LUA_REGISTRYINDEX, luaFunc);
         if(lua_isfunction(L, -1))
         {
-            zfblockedAlloc(v_ZFListenerData, listenerDataTmp, listenerData);
+            zfblockedAllocWithCache(v_ZFListenerData, listenerDataTmp);
+            listenerDataTmp->zfv = listenerData;
             ZFImpl_ZFLua_luaPush(L, listenerDataTmp);
 
             ZFImpl_ZFLua_luaPush(L, userData);
@@ -785,15 +665,55 @@ zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
                              ZF_IN_OPT zfbool allowEmpty /* = zffalse */,
                              ZF_OUT_OPT const ZFClass **holderCls /* = zfnull */)
 {
+    const zfchar *t = zfnull;
+    if(ZFImpl_ZFLua_toString(t, L, luaStackOffset, allowEmpty,  holderCls))
+    {
+        s += t;
+        return zftrue;
+    }
+    else
+    {
+        return zffalse;
+    }
+}
+zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
+                             ZF_IN ZFObject *obj,
+                             ZF_IN_OPT zfbool allowEmpty /* = zffalse */,
+                             ZF_OUT_OPT const ZFClass **holderCls /* = zfnull */)
+{
+    const zfchar *t = zfnull;
+    if(ZFImpl_ZFLua_toString(t, obj, allowEmpty,  holderCls))
+    {
+        s += t;
+        return zftrue;
+    }
+    else
+    {
+        return zffalse;
+    }
+}
+zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT const zfchar *&s,
+                             ZF_IN lua_State *L,
+                             ZF_IN int luaStackOffset,
+                             ZF_IN_OPT zfbool allowEmpty /* = zffalse */,
+                             ZF_OUT_OPT const ZFClass **holderCls /* = zfnull */)
+{
     if(holderCls != zfnull) {*holderCls = zfnull;}
     if(lua_isstring(L, luaStackOffset))
     {
-        s += lua_tostring(L, luaStackOffset);
+        s = lua_tostring(L, luaStackOffset);
         return zftrue;
     }
     if(lua_isboolean(L, luaStackOffset))
     {
-        zfboolToString(s, (zfbool)lua_toboolean(L, luaStackOffset));
+        if((zfbool)lua_toboolean(L, luaStackOffset))
+        {
+            s = ZFTOKEN_zfbool_zftrue;
+        }
+        else
+        {
+            s = ZFTOKEN_zfbool_zffalse;
+        }
         return zftrue;
     }
     if(!lua_isuserdata(L, luaStackOffset))
@@ -804,7 +724,7 @@ zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
     zfautoObject const &param = ZFImpl_ZFLua_luaGet(L, luaStackOffset);
     return ZFImpl_ZFLua_toString(s, param.toObject(), allowEmpty, holderCls);
 }
-zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
+zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT const zfchar *&s,
                              ZF_IN ZFObject *obj,
                              ZF_IN_OPT zfbool allowEmpty /* = zffalse */,
                              ZF_OUT_OPT const ZFClass **holderCls /* = zfnull */)
@@ -812,6 +732,7 @@ zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
     if(holderCls != zfnull) {*holderCls = zfnull;}
     if(obj == zfnull)
     {
+        s = "";
         return allowEmpty;
     }
 
@@ -822,20 +743,24 @@ zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
         ZFString *t = obj->to<ZFString *>();
         if(t != zfnull)
         {
-            s += t->stringValue();
+            s = t->stringValue();
+        }
+        else
+        {
+            s = "";
         }
         return zftrue;
     }
     else if(cls->classIsTypeOf(v_zfstring::ClassData()))
     {
         if(holderCls != zfnull) {*holderCls = v_zfstring::ClassData();}
-        s += obj->to<v_zfstring *>()->zfv;
+        s = obj->to<v_zfstring *>()->zfv;
         return zftrue;
     }
-    else if(cls->classIsTypeOf(ZFDI_Wrapper::ClassData()))
+    else if(cls->classIsTypeOf(ZFDI_WrapperBase::ClassData()))
     {
-        if(holderCls != zfnull) {*holderCls = ZFDI_Wrapper::ClassData();}
-        s += obj->to<ZFDI_Wrapper *>()->zfv;
+        if(holderCls != zfnull) {*holderCls = ZFDI_WrapperBase::ClassData();}
+        s = obj->to<ZFDI_WrapperBase *>()->zfv();
         return zftrue;
     }
     else
@@ -1028,10 +953,10 @@ zfbool ZFImpl_ZFLua_toLuaValue(ZF_IN lua_State *L,
         }
     }
 
-    zfstring s;
+    const zfchar *s = zfnull;
     if(ZFImpl_ZFLua_toString(s, obj, allowEmpty))
     {
-        lua_pushstring(L, s.cString());
+        lua_pushstring(L, s);
         return 1;
     }
 
@@ -1051,7 +976,7 @@ zfbool ZFImpl_ZFLua_zfstringAppend(ZF_IN lua_State *L,
         return zftrue;
     }
 
-    zfstring fmt;
+    const zfchar *fmt = zfnull;
     if(!ZFImpl_ZFLua_toString(fmt, L, luaParamOffset))
     {
         return zffalse;
@@ -1076,7 +1001,7 @@ zfbool ZFImpl_ZFLua_zfstringAppend(ZF_IN lua_State *L,
     }
 
     /* ZFMETHOD_MAX_PARAM */
-    zfstringAppend(s, fmt.cString()
+    zfstringAppend(s, fmt
             , params[0].cString()
             , params[1].cString()
             , params[2].cString()
