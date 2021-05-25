@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFObject.h
  * @brief ZFObject related include
@@ -18,6 +9,7 @@
 #include "ZFObjectDef/ZFAny.h"
 #include "ZFObjectDef/ZFCallback.h"
 #include "ZFObjectDef/ZFCallbackSerializable.h"
+#include "ZFObjectDef/ZFCallback_lambda.h"
 #include "ZFObjectDef/ZFCallback_template.h"
 #include "ZFObjectDef/ZFClass.h"
 #include "ZFObjectDef/ZFClassDynamicRegister.h"
@@ -26,6 +18,7 @@
 #include "ZFObjectDef/ZFCopyable.h"
 #include "ZFObjectDef/ZFCoreType_IODef.h"
 #include "ZFObjectDef/ZFCoreType_methodRegister.h"
+#include "ZFObjectDef/ZFDynamicInvoker.h"
 #include "ZFObjectDef/ZFEnum.h"
 #include "ZFObjectDef/ZFEnumDeclare.h"
 #include "ZFObjectDef/ZFEnumDeclarePropType.h"
@@ -35,7 +28,6 @@
 #include "ZFObjectDef/ZFFilterForZFMethod.h"
 #include "ZFObjectDef/ZFFilterForZFObject.h"
 #include "ZFObjectDef/ZFFilterForZFProperty.h"
-#include "ZFObjectDef/ZFGlobalEventCenter.h"
 #include "ZFObjectDef/ZFIOCallback.h"
 #include "ZFObjectDef/ZFIdMap.h"
 #include "ZFObjectDef/ZFListenerDeclare.h"
@@ -43,6 +35,7 @@
 #include "ZFObjectDef/ZFMethod.h"
 #include "ZFObjectDef/ZFMethodDeclare.h"
 #include "ZFObjectDef/ZFMethodDynamicRegister.h"
+#include "ZFObjectDef/ZFMethodDynamicRegisterExtra.h"
 #include "ZFObjectDef/ZFMethodFuncDeclare.h"
 #include "ZFObjectDef/ZFMethodFuncUserRegister.h"
 #include "ZFObjectDef/ZFMethodGenericInvoker.h"
@@ -55,7 +48,6 @@
 #include "ZFObjectDef/ZFObjectGlobalInstance.h"
 #include "ZFObjectDef/ZFObjectHolder.h"
 #include "ZFObjectDef/ZFObjectIO.h"
-#include "ZFObjectDef/ZFObjectImpl.h"
 #include "ZFObjectDef/ZFObjectInterface.h"
 #include "ZFObjectDef/ZFObjectMutex.h"
 #include "ZFObjectDef/ZFObjectObserver.h"
@@ -64,10 +56,11 @@
 #include "ZFObjectDef/ZFObjectUtil.h"
 #include "ZFObjectDef/ZFOutputDefault.h"
 #include "ZFObjectDef/ZFPointerHolder.h"
+#include "ZFObjectDef/ZFProgressable.h"
 #include "ZFObjectDef/ZFProperty.h"
-#include "ZFObjectDef/ZFPropertyCallbackDefaultImpl.h"
 #include "ZFObjectDef/ZFPropertyDeclare.h"
 #include "ZFObjectDef/ZFPropertyDynamicRegister.h"
+#include "ZFObjectDef/ZFPropertyDynamicRegisterExtra.h"
 #include "ZFObjectDef/ZFPropertyFwd.h"
 #include "ZFObjectDef/ZFPropertySerializable.h"
 #include "ZFObjectDef/ZFPropertyUserRegister.h"

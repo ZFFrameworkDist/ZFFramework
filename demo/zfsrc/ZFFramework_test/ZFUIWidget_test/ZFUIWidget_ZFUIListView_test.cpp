@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -21,8 +12,8 @@ public:
     {
         return 2000;
     }
-    virtual zfint cellSizeAtIndex(ZF_IN zfindex index,
-                                  ZF_IN ZFUIListCell *cell)
+    virtual zffloat cellSizeAtIndex(ZF_IN zfindex index,
+                                    ZF_IN ZFUIListCell *cell)
     {
         #if 1
             return this->cellSizeHint() + zfmRand(100);
@@ -33,7 +24,7 @@ public:
     virtual zfautoObject cellAtIndex(ZF_IN zfindex index)
     {
         zfblockedAlloc(ZFUIListCell, ret);
-        ret->cellViewSet(zflineAlloc(ZFUIListCellViewBasic));
+        ret->cellView(zflineAlloc(ZFUIListCellViewBasic));
         return ret;
     }
     virtual inline void cellOnUpdate(ZF_IN zfindex atIndex,
@@ -42,16 +33,16 @@ public:
         zfsuperI(ZFUIListAdapter)::cellOnUpdate(atIndex, cell);
 
         ZFUIListCellViewBasic *tmp = cell->cellView()->toAny();
-        tmp->cellLabelMain()->textSet(zfstringWithFormat("main %zi", atIndex));
+        tmp->cellLabelMain()->text(zfstringWithFormat("main %zi", atIndex));
         if(zfmRand(3) == 0)
         {
-            tmp->cellLabelSub()->textSet(zfstringWithFormat("sub %zi", atIndex));
+            tmp->cellLabelSub()->text(zfstringWithFormat("sub %zi", atIndex));
         }
         if(zfmRand(3) == 0)
         {
-            tmp->cellIcon()->imageSet(ZFUIImageLoadFromColor(ZFUIColorRandom(), ZFUISizeMake(40)));
+            tmp->cellIcon()->image(ZFUIImageLoadFromColor(ZFUIColorRandom(), ZFUISizeMake(40)));
         }
-        tmp->viewBackgroundColorSet(ZFUIColorRandom());
+        tmp->viewBackgroundColor(ZFUIColorRandom());
     }
 
     #if 1 // whether use cache
@@ -84,15 +75,15 @@ protected:
 
         zfblockedAlloc(ZFUIListView, listView);
         container->childAdd(listView);
-        listView->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
-        listView->layoutParam()->layoutMarginSet(ZFUIMarginMake(40));
-        listView->viewBackgroundColorSet(ZFUIColorRed());
-        listView->listAdapterSet(this->listAdapter());
+        listView->layoutParam()->sizeParam(ZFUISizeParamFillFill());
+        listView->layoutParam()->layoutMargin(ZFUIMarginMake(40));
+        listView->viewBackgroundColor(ZFUIColorRed());
+        listView->listAdapter(this->listAdapter());
         {
             zfblockedAlloc(ZFUIListCellUpdaterBasic, cellUpdater);
             listView->cellUpdater()->add(cellUpdater);
-            cellUpdater->separatorSizeSet(5);
-            cellUpdater->separatorColorSet(ZFUIColorRed());
+            cellUpdater->separatorSize(5);
+            cellUpdater->separatorColor(ZFUIColorRed());
         }
 
         this->setupScrollListener(listView);
@@ -105,32 +96,32 @@ private:
     {
 #if 0 // output logs during scroll event may cause performance issue
         ZFLISTENER_LOCAL(onDragBegin, {
-            zfLogTrimT() << "onDragBegin  " << listenerData.sender->objectInfoOfInstance() << listenerData.sender->to<ZFUIListView *>()->scrollContentFrame();
+            zfLogTrimT() << "onDragBegin  " << listenerData.sender()->objectInfoOfInstance() << listenerData.sender<ZFUIListView *>()->scrollContentFrame();
         })
         listView->observerAdd(ZFUIListView::EventScrollOnDragBegin(), onDragBegin);
 
         ZFLISTENER_LOCAL(onDrag, {
-            zfLogTrimT() << "onDrag       " << listenerData.sender->objectInfoOfInstance() << listenerData.sender->to<ZFUIListView *>()->scrollContentFrame();
+            zfLogTrimT() << "onDrag       " << listenerData.sender()->objectInfoOfInstance() << listenerData.sender<ZFUIListView *>()->scrollContentFrame();
         })
         listView->observerAdd(ZFUIListView::EventScrollOnDrag(), onDrag);
 
         ZFLISTENER_LOCAL(onDragEnd, {
-            zfLogTrimT() << "onDragEnd    " << listenerData.sender->objectInfoOfInstance() << listenerData.sender->to<ZFUIListView *>()->scrollContentFrame();
+            zfLogTrimT() << "onDragEnd    " << listenerData.sender()->objectInfoOfInstance() << listenerData.sender<ZFUIListView *>()->scrollContentFrame();
         })
         listView->observerAdd(ZFUIListView::EventScrollOnDragEnd(), onDragEnd);
 
         ZFLISTENER_LOCAL(onScrollBegin, {
-            zfLogTrimT() << "onScrollBegin" << listenerData.sender->objectInfoOfInstance() << listenerData.sender->to<ZFUIListView *>()->scrollContentFrame();
+            zfLogTrimT() << "onScrollBegin" << listenerData.sender()->objectInfoOfInstance() << listenerData.sender<ZFUIListView *>()->scrollContentFrame();
         })
         listView->observerAdd(ZFUIListView::EventScrollOnScrollBegin(), onScrollBegin);
 
         ZFLISTENER_LOCAL(onScroll, {
-            zfLogTrimT() << "onScroll     " << listenerData.sender->objectInfoOfInstance() << listenerData.sender->to<ZFUIListView *>()->scrollContentFrame();
+            zfLogTrimT() << "onScroll     " << listenerData.sender()->objectInfoOfInstance() << listenerData.sender<ZFUIListView *>()->scrollContentFrame();
         })
         listView->observerAdd(ZFUIListView::EventScrollOnScroll(), onScroll);
 
         ZFLISTENER_LOCAL(onScrollEnd, {
-            zfLogTrimT() << "onScrollEnd  " << listenerData.sender->objectInfoOfInstance() << listenerData.sender->to<ZFUIListView *>()->scrollContentFrame();
+            zfLogTrimT() << "onScrollEnd  " << listenerData.sender()->objectInfoOfInstance() << listenerData.sender<ZFUIListView *>()->scrollContentFrame();
         })
         listView->observerAdd(ZFUIListView::EventScrollOnScrollEnd(), onScrollEnd);
 #endif
@@ -138,7 +129,7 @@ private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIListView *listView)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
         ZFUIKit_test_prepareSettingForBoolProperty(settings, listView, ZFPropertyAccess(ZFUIListView, scrollAlignToAxis));
         ZFUIKit_test_prepareSettingForBoolProperty(settings, listView, ZFPropertyAccess(ZFUIListView, scrollBounceHorizontal));
         ZFUIKit_test_prepareSettingForBoolProperty(settings, listView, ZFPropertyAccess(ZFUIListView, scrollBounceVertical));
@@ -151,22 +142,22 @@ private:
                 , ZFUIOrientation::e_Right
                 , ZFUIOrientation::e_Bottom
                 ));
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, listView->listAdapter()->toObject(), zfint, ZFPropertyAccess(ZFUIListAdapter, cellSizeHint), ZFCoreArrayPODCreate(zfint, 56, 100, 44));
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, listView->listAdapter()->toObject(), zffloat, ZFPropertyAccess(ZFUIListAdapter, cellSizeHint), ZFCoreArrayPODCreate(zffloat, 56, 100, 44));
 
 #define _ZFP_ZFUIWidget_ZFUIListView_test_autoScrollSpeed 100
         { // auto scroll x
             zfblockedAlloc(ZFUIKit_test_SettingData, setting);
             settings->add(setting);
-            setting->userDataSet(zflineAlloc(ZFObject));
-            setting->userData()->tagSet("listView", listView->objectHolder());
+            setting->userData(zflineAlloc(ZFObject));
+            setting->userData()->objectTag("listView", listView->objectHolder());
             ZFLISTENER_LOCAL(buttonTextGetter, {
-                ZFUIListView *listView = userData->tagGet("listView")->objectHolded();
-                ZFStringEditable *text = listenerData.param0->to<ZFStringEditable *>();
-                text->stringValueSet(zfstringWithFormat("autoScrollSpeedX: %d", listView->autoScrollSpeedX()));
+                ZFUIListView *listView = userData->objectTag("listView")->objectHolded();
+                v_zfstring *text = listenerData.param0<v_zfstring *>();
+                text->zfv = zfstringWithFormat("autoScrollSpeedX: %f", listView->autoScrollSpeedX());
             })
-            setting->buttonTextGetterSet(buttonTextGetter);
+            setting->buttonTextGetter(buttonTextGetter);
             ZFLISTENER_LOCAL(buttonClickListener, {
-                ZFUIListView *listView = userData->tagGet("listView")->objectHolded();
+                ZFUIListView *listView = userData->objectTag("listView")->objectHolded();
                 if(listView->autoScrollSpeedX() == 0)
                 {
                     listView->autoScrollStartX(_ZFP_ZFUIWidget_ZFUIListView_test_autoScrollSpeed * ((zfmRand(2) == 0) ? 1 : -1));
@@ -176,21 +167,21 @@ private:
                     listView->autoScrollStopX();
                 }
             })
-            setting->buttonClickListenerSet(buttonClickListener);
+            setting->buttonClickListener(buttonClickListener);
         }
         { // auto scroll y
             zfblockedAlloc(ZFUIKit_test_SettingData, setting);
             settings->add(setting);
-            setting->userDataSet(zflineAlloc(ZFObject));
-            setting->userData()->tagSet("listView", listView->objectHolder());
+            setting->userData(zflineAlloc(ZFObject));
+            setting->userData()->objectTag("listView", listView->objectHolder());
             ZFLISTENER_LOCAL(buttonTextGetter, {
-                ZFUIListView *listView = userData->tagGet("listView")->objectHolded();
-                ZFStringEditable *text = listenerData.param0->to<ZFStringEditable *>();
-                text->stringValueSet(zfstringWithFormat("autoScrollSpeedY: %d", listView->autoScrollSpeedY()));
+                ZFUIListView *listView = userData->objectTag("listView")->objectHolded();
+                v_zfstring *text = listenerData.param0<v_zfstring *>();
+                text->zfv = zfstringWithFormat("autoScrollSpeedY: %f", listView->autoScrollSpeedY());
             })
-            setting->buttonTextGetterSet(buttonTextGetter);
+            setting->buttonTextGetter(buttonTextGetter);
             ZFLISTENER_LOCAL(buttonClickListener, {
-                ZFUIListView *listView = userData->tagGet("listView")->objectHolded();
+                ZFUIListView *listView = userData->objectTag("listView")->objectHolded();
                 if(listView->autoScrollSpeedY() == 0)
                 {
                     listView->autoScrollStartY(_ZFP_ZFUIWidget_ZFUIListView_test_autoScrollSpeed * ((zfmRand(2) == 0) ? 1 : -1));
@@ -200,21 +191,21 @@ private:
                     listView->autoScrollStopY();
                 }
             })
-            setting->buttonClickListenerSet(buttonClickListener);
+            setting->buttonClickListener(buttonClickListener);
         }
 
         { // scroll random cell to random position
             zfblockedAlloc(ZFObject, userData);
-            userData->tagSet("listView", listView->objectHolder());
+            userData->objectTag("listView", listView->objectHolder());
             ZFLISTENER_LOCAL(buttonClickListener, {
-                ZFUIListView *listView = userData->tagGet("listView")->objectHolded();
+                ZFUIListView *listView = userData->objectTag("listView")->objectHolded();
                 zfbool toHead = (zfmRand(2) == 0);
                 zfindex toIndex = zfmRand(listView->listAdapter()->cellCount());
-                zfint toOffset = (ZFUIOrientationIsHorizontal(listView->listOrientation())
-                    ? zfmRand(listView->layoutedFrame().size.width)
-                    : zfmRand(listView->layoutedFrame().size.height));
+                zffloat toOffset = (ZFUIOrientationIsHorizontal(listView->listOrientation())
+                    ? zfmRand((zfint)listView->viewFrame().width)
+                    : zfmRand((zfint)listView->viewFrame().height));
                 zfbool animated = (zfmRand(5) != 0);
-                ZFUIHintShow(zfstringWithFormat("%s\nindex: %zi\noffset: %d\nanimated: %b",
+                ZFUIHintShow(zfstringWithFormat("%s\nindex: %zi\noffset: %f\nanimated: %b",
                     toHead ? "scrollListCellToHead" : "scrollListCellToTail",
                     toIndex, toOffset, animated));
                 if(toHead)
@@ -228,24 +219,24 @@ private:
             })
             zfblockedAlloc(ZFUIKit_test_Button, randomScrollButton);
             window->childAdd(randomScrollButton);
-            randomScrollButton->buttonLabelTextSet("random scroll");
+            randomScrollButton->buttonLabelText("random scroll");
             randomScrollButton->observerAdd(ZFUIButton::EventButtonOnClick(), buttonClickListener, userData);
         }
 
         { // scrollAreaMargin
             zfblockedAlloc(ZFUIKit_test_SettingData, setting);
             settings->add(setting);
-            setting->userDataSet(zflineAlloc(ZFObject));
-            setting->userData()->tagSet("listView", listView->objectHolder());
+            setting->userData(zflineAlloc(ZFObject));
+            setting->userData()->objectTag("listView", listView->objectHolder());
             ZFLISTENER_LOCAL(buttonTextGetter, {
-                ZFUIScrollView *listView = userData->tagGet("listView")->objectHolded();
-                ZFStringEditable *text = listenerData.param0->to<ZFStringEditable *>();
-                text->stringValueSet(zfstringWithFormat("scrollAreaMargin: %s",
-                    ZFUIMarginToString(listView->scrollAreaMargin()).cString()));
+                ZFUIScrollView *listView = userData->objectTag("listView")->objectHolded();
+                v_zfstring *text = listenerData.param0<v_zfstring *>();
+                text->zfv = zfstringWithFormat("scrollAreaMargin: %s",
+                    ZFUIMarginToString(listView->scrollAreaMargin()).cString());
             })
-            setting->buttonTextGetterSet(buttonTextGetter);
+            setting->buttonTextGetter(buttonTextGetter);
             ZFLISTENER_LOCAL(buttonClickListener, {
-                ZFUIScrollView *listView = userData->tagGet("listView")->objectHolded();
+                ZFUIScrollView *listView = userData->objectTag("listView")->objectHolded();
                 if(listView->scrollAreaMargin().left >= 40)
                 {
                     listView->scrollAreaMarginRemove(listView->scrollAreaMargin());
@@ -255,7 +246,7 @@ private:
                     listView->scrollAreaMarginAdd(ZFUIMarginMake(20));
                 }
             })
-            setting->buttonClickListenerSet(buttonClickListener);
+            setting->buttonClickListener(buttonClickListener);
         }
 
         ZFUIKit_test_prepareSettingButtonWithTestWindow(window, settings);

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import java.lang.ref.WeakReference;
@@ -168,12 +159,12 @@ public class ZFUIOnScreenKeyboardState {
             }
         }
         else if(windowData.keyboardStateDelaying) {
-            System.arraycopy(_keyboardFrame, 0, windowData.keyboardFrame, 0, 4);
+            System.arraycopy(windowData.keyboardFrame, 0, _keyboardFrame, 0, 4);
         }
         else {
             int old = windowData.keyboardFrame[3];
             keyboardFrameUpdate(window, windowData.keyboardFrame);
-            System.arraycopy(_keyboardFrame, 0, windowData.keyboardFrame, 0, 4);
+            System.arraycopy(windowData.keyboardFrame, 0, _keyboardFrame, 0, 4);
             if(_keyboardFrame[3] != old) {
                 ZFUIOnScreenKeyboardState.native_notifyKeyboardStateOnChange();
             }

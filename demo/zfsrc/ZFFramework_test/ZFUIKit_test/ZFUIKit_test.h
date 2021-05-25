@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #ifndef _ZFI_ZFUIKit_test_h_
 #define _ZFI_ZFUIKit_test_h_
 
@@ -20,7 +11,7 @@ zfclass ZFUIKit_test_Window : zfextends ZFUIWindow
 {
     ZFOBJECT_DECLARE(ZFUIKit_test_Window, ZFUIWindow)
 
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIColor, viewBackgroundColor)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUIColor, viewBackgroundColor)
     {
         propertyValue = ZFUIColorWhite();
     }
@@ -30,13 +21,13 @@ zfclass ZFUIKit_test_Button : zfextends ZFUIButtonBasic
 {
     ZFOBJECT_DECLARE(ZFUIKit_test_Button, ZFUIButtonBasic)
 
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIImageView *, buttonBackgroundStyleNormal)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUIImageView *, buttonBackgroundStyleNormal)
     {
-        propertyValue.to<ZFUIImageView *>()->viewBackgroundColorSet(ZFUIColorGreen());
+        propertyValue.to<ZFUIImageView *>()->viewBackgroundColor(ZFUIColorGreen());
     }
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIImageView *, buttonBackgroundStyleHighlighted)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUIImageView *, buttonBackgroundStyleHighlighted)
     {
-        propertyValue.to<ZFUIImageView *>()->viewBackgroundColorSet(ZFUIColorBlue());
+        propertyValue.to<ZFUIImageView *>()->viewBackgroundColor(ZFUIColorBlue());
     }
 };
 
@@ -49,25 +40,25 @@ protected:
     virtual void objectOnInit(void)
     {
         zfsuper::objectOnInit();
-        this->scrollBounceVerticalAlwaysSet(zftrue);
+        this->scrollBounceVerticalAlways(zftrue);
     }
 
     zfoverride
-    virtual void layoutParamOnUpdate(ZF_IN ZFUIViewLayoutParam *layoutParam)
+    virtual void layoutParamOnUpdate(ZF_IN ZFUILayoutParam *layoutParam)
     {
         zfsuper::layoutParamOnUpdate(layoutParam);
 
-        layoutParam->sizeParamSet(ZFUISizeParamFillWrap());
-        layoutParam->layoutAlignSet(ZFUIAlign::e_TopInner);
+        layoutParam->sizeParam(ZFUISizeParamFillWrap());
+        layoutParam->layoutAlign(ZFUIAlign::e_TopInner);
     }
     zfoverride
     virtual void layoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds)
     {
         zfsuper::layoutOnLayoutPrepare(bounds);
 
-        zfint contentHeight = 0;
-        zfint space = 4;
-        ZFUISize childMeasureSizeHint = ZFUISizeMake(this->scrollArea().size.width, -1);
+        zffloat contentHeight = 0;
+        zffloat space = 4;
+        ZFUISize childMeasureSizeHint = ZFUISizeMake(this->scrollArea().width, -1);
         ZFUISizeParam childMeasureSizeParam = ZFUISizeParamFillWrap();
 
         for(zfindex i = 0; i < this->childCount(); ++i)
@@ -76,15 +67,15 @@ protected:
 
             ZFUIView *child = this->childAtIndex(i);
             child->layoutMeasure(childMeasureSizeHint, childMeasureSizeParam);
-            child->layoutParam()->layoutMarginSet(ZFUIMarginMake(0, contentHeight, 0, 0));
+            child->layoutParam()->layoutMargin(ZFUIMarginMake(0, contentHeight, 0, 0));
 
             contentHeight += child->layoutMeasuredSize().height;
         }
         contentHeight += space;
 
-        this->scrollContentFrameSetWhileAnimating(ZFUIRectMake(
-            this->scrollContentFrame().point.x, this->scrollContentFrame().point.y,
-            this->scrollArea().size.width, contentHeight));
+        this->scrollContentFrameUpdate(ZFUIRectMake(
+            this->scrollContentFrame().x, this->scrollContentFrame().y,
+            this->scrollArea().width, contentHeight));
     }
 };
 
@@ -101,7 +92,7 @@ public:
 
 public:
     /**
-     * param0 is a #ZFStringEditable to get the button's text
+     * param0 is a #v_zfstring to get the button's text
      */
     ZFPROPERTY_ASSIGN(ZFListener, buttonTextGetter)
     ZFPROPERTY_ASSIGN(ZFListener, buttonClickListener)
@@ -119,9 +110,9 @@ protected:
                               ZF_IN_OPT ZFObject *userData = zfnull)
     {
         this->objectOnInit();
-        this->buttonTextGetterSet(buttonTextGetter);
-        this->buttonClickListenerSet(buttonClickListener);
-        this->userDataSet(userData);
+        this->buttonTextGetter(buttonTextGetter);
+        this->buttonClickListener(buttonClickListener);
+        this->userData(userData);
     }
     zfoverride
     virtual void objectOnInit(void)
@@ -132,14 +123,14 @@ protected:
 extern zfautoObject ZFUIKit_test_prepareSettingButton(ZF_IN ZFArray *settings);
 extern void ZFUIKit_test_prepareSettingButtonWithTestWindow(ZF_IN ZFUIWindow *window,
                                                             ZF_IN ZFArray *settings);
-extern void ZFUIKit_test_prepareSettingForProperty(ZF_IN_OUT ZFArrayEditable *settings,
+extern void ZFUIKit_test_prepareSettingForProperty(ZF_IN_OUT ZFArray *settings,
                                                    ZF_IN ZFObject *obj,
                                                    ZF_IN const ZFProperty *property,
                                                    ZF_IN const ZFListener &nextCallback,
                                                    ZF_IN ZFObject *userData);
 
 // ============================================================
-extern void ZFUIKit_test_prepareSettingForBoolProperty(ZF_IN_OUT ZFArrayEditable *settings,
+extern void ZFUIKit_test_prepareSettingForBoolProperty(ZF_IN_OUT ZFArray *settings,
                                                        ZF_IN ZFObject *obj,
                                                        ZF_IN const ZFProperty *property);
 
@@ -189,10 +180,10 @@ protected:
         ZFUIKit_test_prepareSettingForProperty(settings, userData->obj, userData->property, nextCallback, userData); \
     } while(zffalse)
 
-extern void ZFUIKit_test_prepareSettingForLayoutRequest(ZF_IN_OUT ZFArrayEditable *settings,
+extern void ZFUIKit_test_prepareSettingForLayoutRequest(ZF_IN_OUT ZFArray *settings,
                                                         ZF_IN ZFUIView *view);
 
-extern void ZFUIKit_test_prepareSettingForResetProperty(ZF_IN_OUT ZFArrayEditable *settings,
+extern void ZFUIKit_test_prepareSettingForResetProperty(ZF_IN_OUT ZFArray *settings,
                                                         ZF_IN ZFObject *obj,
                                                         ZF_IN const ZFCoreArrayPOD<const ZFProperty *> &propertyList);
 

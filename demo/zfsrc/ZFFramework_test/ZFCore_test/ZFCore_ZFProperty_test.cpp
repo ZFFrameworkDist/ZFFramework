@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -28,50 +19,41 @@ public:
     ZFPROPERTY_ASSIGN(ZFObject *, propertyWeak)
 
     // custom callback
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFObject *, propertyRetain)
+    ZFPROPERTY_ON_INIT_INLINE(ZFObject *, propertyRetain)
     {
         zfLogT();
     }
-    ZFPROPERTY_OVERRIDE_ON_DEALLOC_INLINE(ZFObject *, propertyRetain)
+    ZFPROPERTY_ON_VERIFY_INLINE(ZFObject *, propertyRetain)
     {
         zfLogT();
     }
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(ZFObject *, propertyRetain)
+    ZFPROPERTY_ON_ATTACH_INLINE(ZFObject *, propertyRetain)
     {
         zfLogT();
     }
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(ZFObject *, propertyRetain)
-    {
-        zfLogT();
-    }
-    ZFPROPERTY_OVERRIDE_ON_DETACH_INLINE(ZFObject *, propertyRetain)
+    ZFPROPERTY_ON_DETACH_INLINE(ZFObject *, propertyRetain)
     {
         zfLogT();
     }
 
-    ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE(zfstring, propertyAssign)
-    ZFPROPERTY_OVERRIDE_ON_DEALLOC_DECLARE(zfstring, propertyAssign)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfstring, propertyAssign)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfstring, propertyAssign)
-    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(zfstring, propertyAssign)
+    ZFPROPERTY_ON_INIT_DECLARE(zfstring, propertyAssign)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zfstring, propertyAssign)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfstring, propertyAssign)
+    ZFPROPERTY_ON_DETACH_DECLARE(zfstring, propertyAssign)
 };
-ZFPROPERTY_OVERRIDE_ON_INIT_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
+ZFPROPERTY_ON_INIT_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
 {
     zfLogT();
 }
-ZFPROPERTY_OVERRIDE_ON_DEALLOC_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
+ZFPROPERTY_ON_VERIFY_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
 {
     zfLogT();
 }
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
+ZFPROPERTY_ON_ATTACH_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
 {
     zfLogT();
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
-{
-    zfLogT();
-}
-ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
+ZFPROPERTY_ON_DETACH_DEFINE(_ZFP_ZFCore_ZFProperty_test_TestBase, zfstring, propertyAssign)
 {
     zfLogT();
 }
@@ -115,21 +97,21 @@ protected:
             zfLogTrimT();
 
             // reflect
-            p->propertyAssignSet("oldValue");
+            p->propertyAssign("oldValue");
             zfLogT() << "before:" << p->propertyAssign();
-            p->classData()->methodForName("propertyAssignSet")->execute<void, zfstring const &>(p, "newValue");
+            p->classData()->propertySetterForName("propertyAssign")->execute<void, zfstring const &>(p, "newValue");
             zfLogT() << "after:" << p->propertyAssign();
-            zfLogT() << "access by reflect:" << p->classData()->methodForName("propertyAssign")->execute<zfstring const &>(p);
+            zfLogT() << "access by reflect:" << p->classData()->propertyGetterForName("propertyAssign")->execute<zfstring const &>(p);
 
             // retain
             zfLogTrimT();
             zfLogTrimT() << "retain";
 
-            p->propertyRetainSet(zflineAlloc(ZFObject));
+            p->propertyRetain(zflineAlloc(ZFObject));
             zfLogT() << p->propertyRetain();
 
 #if 0 // this should not compile
-            p->propertyRetainReadonlySet(zflineAlloc(ZFObject));
+            p->propertyRetainReadonly(zflineAlloc(ZFObject));
 #endif
             zfLogT() << p->propertyRetainReadonly();
 
@@ -137,18 +119,18 @@ protected:
             zfLogTrimT();
             zfLogTrimT() << "assign";
 
-            p->propertyAssignSet(zfstring());
+            p->propertyAssign(zfstring());
             zfLogT() << p->propertyAssign();
 
 #if 0 // this should not compile
-            p->propertyAssignReadonlySet(zfstring());
+            p->propertyAssignReadonly(zfstring());
 #endif
             zfLogT() << p->propertyAssignReadonly();
 
             // weak
             {
                 zfblockedAlloc(ZFObject, value);
-                p->propertyWeakSet(value);
+                p->propertyWeak(value);
                 zfLogT() << p->propertyWeak();
             }
             zfLogT() << p->propertyWeak();
@@ -158,14 +140,14 @@ protected:
             this->testCaseOutput("copy propertis");
             zfblockedAlloc(_ZFP_ZFCore_ZFProperty_test_TestBase, pBase);
             zfblockedAlloc(_ZFP_ZFCore_ZFProperty_test_TestChild, pChild);
-            pBase->propertyAssignSet("string set in another");
+            pBase->propertyAssign("string set in another");
             ZFPropertyCopyAll(pChild, pBase);
             this->testCaseOutputSeparator();
             zfLogTrimT() << "after copy:" << pChild->propertyAssign();
 
             this->testCaseOutputSeparator();
             this->testCaseOutput("copy by ZFPropertyCopyAll");
-            pChild->propertyAssignSet("");
+            pChild->propertyAssign("");
             ZFPropertyCopyAll(pChild, pBase);
             zfLogTrimT() << "after copy:" << pChild->propertyAssign();
         }

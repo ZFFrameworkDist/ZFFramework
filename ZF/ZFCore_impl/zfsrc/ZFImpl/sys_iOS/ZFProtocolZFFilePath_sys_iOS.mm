@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFFilePath.h"
 
@@ -26,7 +17,7 @@ public:
             zfindex pos = zfstringFindReversely(this->_pathForModuleFile, ZFFileSeparator());
             if(pos != zfindexMax())
             {
-                this->_pathForModule.assign(this->_pathForModuleFile, 0, pos);
+                this->_pathForModule.assign(this->_pathForModuleFile, pos);
             }
         }
         return this->_pathForModule;
@@ -52,7 +43,7 @@ public:
         }
         return this->_pathForSetting;
     }
-    virtual void pathForSettingSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForSetting(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForSetting = path;
     }
@@ -67,7 +58,7 @@ public:
         }
         return this->_pathForStorage;
     }
-    virtual void pathForStorageSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForStorage(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForStorage = path;
     }
@@ -80,7 +71,7 @@ public:
         }
         return this->_pathForStorageShared;
     }
-    virtual void pathForStorageSharedSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForStorageShared(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForStorageShared = path;
     }
@@ -95,7 +86,7 @@ public:
         }
         return this->_pathForCache;
     }
-    virtual void pathForCacheSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForCache(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForCache = path;
     }

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFTextTemplateRun.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -182,8 +173,8 @@ static zfbool _ZFP_ZFTextTemplateRun_applyFile(ZF_IN_OUT zfstring &path,
     zfchar *buf = zfnull;
     zfchar *bufEnd = zfnull;
     {
-        ZFToken token = ZFFileFileOpen(path, ZFFileOpenOption::e_Read);
-        if(token == ZFTokenInvalid())
+        void *token = ZFFileFileOpen(path, ZFFileOpenOption::e_Read);
+        if(token == zfnull)
         {
             zfstringAppend(outErrorHint, "failed to open file %s", path.cString());
             return zffalse;

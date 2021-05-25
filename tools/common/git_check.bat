@@ -20,21 +20,22 @@ exit /b 1
 if not defined CLONE_OPTION set CLONE_OPTION=--depth=1
 
 set _OLD_DIR=%cd%
-set _TIMEOUT=86400
+rem 60*60*24*7, one week
+set _TIMEOUT=604800
 set _GIT_VALID=0
 
 if exist "%DST_PATH%\.git" (
     set _GIT_PATH_DESIRED=%DST_PATH%\.git
-    cd "%_GIT_PATH_DESIRED%" >nul 2>&1
+    cd /d "%_GIT_PATH_DESIRED%" >nul 2>&1
     set _GIT_PATH_DESIRED=%CD%
-    cd "%_OLD_DIR%"
+    cd /d "%_OLD_DIR%"
 
-    cd "%DST_PATH%" >nul 2>&1
+    cd /d "%DST_PATH%" >nul 2>&1
     for /f "tokens=*" %%i in ('git rev-parse --show-toplevel 2^>nul') do set _GIT_PATH_EXIST=%%i\.git
-    cd "%_OLD_DIR%"
-    cd "%_GIT_PATH_EXIST%" >nul 2>&1
+    cd /d "%_OLD_DIR%"
+    cd /d "%_GIT_PATH_EXIST%" >nul 2>&1
     set _GIT_PATH_EXIST=%CD%
-    cd "%_OLD_DIR%"
+    cd /d "%_OLD_DIR%"
 
     if "%_GIT_PATH_DESIRED%" == "%_GIT_PATH_EXIST%" (
         set _GIT_VALID=1
@@ -45,14 +46,15 @@ if "%_GIT_VALID%" == "1" (
     call "%WORK_DIR%\timestamp_check.bat" "%DST_PATH%\.git" %_TIMEOUT%
 
     if not "!errorlevel!" == "0" (
-        cd "%DST_PATH%"
+        cd /d "%DST_PATH%"
+        git stash
         git checkout .
         git reset --hard
-        git clean -xdf
         git fetch --all && git pull
         set _SUCCESS=!errorlevel!
         git checkout %GIT_BRANCH%
-        cd "%_OLD_DIR%"
+        git stash pop
+        cd /d "%_OLD_DIR%"
 
         if "!_SUCCESS!" == "0" (
             call "%WORK_DIR%\timestamp_save.bat" "%DST_PATH%\.git" %_TIMEOUT%

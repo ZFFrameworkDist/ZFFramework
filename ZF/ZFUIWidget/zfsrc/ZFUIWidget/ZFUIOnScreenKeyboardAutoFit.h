@@ -1,16 +1,7 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIOnScreenKeyboardAutoFit.h
  * @brief a scroll container that automatically fits content's position
- *   accorrding #ZFUIOnScreenKeyboardState
+ *   according #ZFUIOnScreenKeyboardState
  */
 
 #ifndef _ZFI_ZFUIOnScreenKeyboardAutoFit_h_
@@ -24,14 +15,11 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 zfclassFwd _ZFP_ZFUIOnScreenKeyboardAutoFitLayoutPrivate;
 /**
  * @brief a scroll container that automatically fits content's position
- *   accorrding #ZFUIOnScreenKeyboardState
- *
- * recommended set as #ZFUIView::viewDelegateClass,
- * you may use #ZFUIOnScreenKeyboardAutoFitStart for short
+ *   according #ZFUIOnScreenKeyboardState
  */
-zfclass ZF_ENV_EXPORT ZFUIOnScreenKeyboardAutoFitLayout : zfextends ZFUIView
+zfclass ZF_ENV_EXPORT ZFUIOnScreenKeyboardAutoFitLayout : zfextends ZFUIScrollView
 {
-    ZFOBJECT_DECLARE(ZFUIOnScreenKeyboardAutoFitLayout, ZFUIView)
+    ZFOBJECT_DECLARE(ZFUIOnScreenKeyboardAutoFitLayout, ZFUIScrollView)
     ZFSTYLE_DEFAULT_DECLARE(ZFUIOnScreenKeyboardAutoFitLayout)
 
 public:
@@ -40,20 +28,20 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, autoFitEnable,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, autoFitEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, autoFitEnable)
     /**
      * @brief whether auto move focused view to visible position, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, autoFitFocusedViewToVisible,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, autoFitFocusedViewToVisible)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, autoFitFocusedViewToVisible)
 
     /**
      * @brief whether allow manually scroll when auto fit enabled, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, autoFitScrollEnable,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, autoFitScrollEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, autoFitScrollEnable)
 
 public:
     /**
@@ -70,38 +58,31 @@ protected:
     virtual void objectOnInitFinish(void);
 
 protected:
-    zfoverride
-    virtual zfbool viewDelegateSupported(void)
-    {
-        return zffalse;
-    }
+    virtual ZFSerializablePropertyType serializableOnCheckPropertyType(ZF_IN const ZFProperty *property);
 
+protected:
     zfoverride
-    virtual void viewDelegateLayoutOnMeasure(ZF_OUT ZFUISize &ret,
-                                             ZF_IN const ZFUISize &sizeHint,
-                                             ZF_IN const ZFUISizeParam &sizeParam);
+    virtual void layoutOnMeasure(ZF_OUT ZFUISize &ret,
+                                 ZF_IN const ZFUISize &sizeHint,
+                                 ZF_IN const ZFUISizeParam &sizeParam);
     zfoverride
-    virtual void viewDelegateLayoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds);
+    virtual void layoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds);
+
+protected:
+    // disable scroll thumb
+    zfoverride
+    virtual void scrollThumbHorizontalOnInit(void)
+    {
+    }
+    zfoverride
+    virtual void scrollThumbVerticalOnInit(void)
+    {
+    }
 
 private:
     _ZFP_ZFUIOnScreenKeyboardAutoFitLayoutPrivate *d;
     friend zfclassFwd _ZFP_ZFUIOnScreenKeyboardAutoFitLayoutPrivate;
 };
-
-// ============================================================
-/**
- * @brief util method to apply #ZFUIOnScreenKeyboardAutoFitLayout to a window
- *
- * applied to #ZFUIView::viewDelegateClass,
- * you must not change the window's #ZFUIView::viewDelegate during using the auto fit layout\n
- * \n
- * #ZFUIOnScreenKeyboardAutoFitStop would be applied automatically when owner window destroyed
- */
-ZFMETHOD_FUNC_DECLARE_1(ZFUIOnScreenKeyboardAutoFitLayout *, ZFUIOnScreenKeyboardAutoFitStart,
-                        ZFMP_IN(ZFUIWindow *, window))
-/** @brief see #ZFUIOnScreenKeyboardAutoFitStart */
-ZFMETHOD_FUNC_DECLARE_1(void, ZFUIOnScreenKeyboardAutoFitStop,
-                        ZFMP_IN(ZFUIWindow *, window))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFUIOnScreenKeyboardAutoFit_h_

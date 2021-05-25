@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,9 +18,9 @@ protected:
 
         zfblockedAlloc(ZFUIButtonGroupBasic, layout);
         container->childAdd(layout);
-        layout->layoutParam()->layoutMarginSet(ZFUIMarginMake(40));
-        layout->buttonGroupTypeSet(ZFUIButtonGroupType::e_Tab);
-        layout->layoutOrientationSet(ZFUIOrientation::e_Top);
+        layout->layoutParam()->layoutMargin(ZFUIMarginMake(40));
+        layout->buttonGroupType(ZFUIButtonGroupType::e_Tab);
+        layout->layoutOrientation(ZFUIOrientation::e_Top);
 
         this->prepareChildren(layout);
 
@@ -37,9 +28,9 @@ protected:
 
         ZFLISTENER_LOCAL(buttonGroupAction, {
             zfLogTrimT()
-                << listenerData.sender
-                << ZFIdMapGetName(listenerData.eventId)
-                << ", checked:" << listenerData.param1;
+                << listenerData.sender()
+                << ZFIdMapNameForId(listenerData.eventId())
+                << ", checked:" << listenerData.param1();
         })
         layout->observerAdd(ZFUIButtonGroup::EventButtonTabOnClickChecked(), buttonGroupAction);
         layout->observerAdd(ZFUIButtonGroup::EventButtonTabOnChange(), buttonGroupAction);
@@ -52,13 +43,13 @@ private:
         {
             zfblockedAlloc(ZFUIButtonRatio, child);
             layout->buttonAdd(child);
-            child->buttonLabelTextSet(zfstringWithFormat("btn %zi", i));
+            child->buttonLabelText(zfstringWithFormat("btn %zi", i));
         }
     }
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIButtonGroup *layout)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingForBoolProperty(settings, layout->toObject(), ZFPropertyAccess(ZFUIButtonGroup, buttonTabAllowUnchecked));
 

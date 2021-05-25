@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFOutputForConsole.h"
 #include "ZFImplOutput.h"
 
@@ -37,8 +28,8 @@ static zfindex _ZFP_ZFOutputForConsoleFunction(ZF_IN const void *s, ZF_IN zfinde
 static ZFOutput _ZFP_ZFOutputForConsole_create(void)
 {
     ZFOutput ret = ZFCallbackForFunc(_ZFP_ZFOutputForConsoleFunction);
-    ret.callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomType_ZFOutputForConsole);
-    ret.callbackSerializeCustomDataSet(ZFSerializableData());
+    ret.callbackSerializeCustomType(ZFCallbackSerializeCustomType_ZFOutputForConsole);
+    ret.callbackSerializeCustomData(ZFSerializableData());
     return ret;
 }
 

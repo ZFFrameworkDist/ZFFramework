@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFUIImageIO.h
  * @brief protocol for ZFUIImage
@@ -31,17 +22,26 @@ public:
      * @brief see #ZFUIImageScale
      *
      * returned image would be released by nativeImageRelease of ZFUIImage protocol
-     * @note size is in pixel unit, you may revert it accorrding imageScale
+     * @note size is in pixel unit, you may revert it according imageScale
      */
     virtual void *imageApplyScale(ZF_IN zffloat imageScale,
                                   ZF_IN void *nativeImage,
                                   ZF_IN const ZFUISize &newSize,
                                   ZF_IN const ZFUIMargin &ninePatch) zfpurevirtual;
     /**
+     * @brief see #ZFUIImageLoadInFrame
+     *
+     * returned image would be released by nativeImageRelease of ZFUIImage protocol
+     * @note size is in pixel unit, you may revert it according imageScale
+     */
+    virtual void *imageLoadInFrame(ZF_IN zffloat imageScale,
+                                   ZF_IN void *nativeImage,
+                                   ZF_IN const ZFUIRect &frameInImage) zfpurevirtual;
+    /**
      * @brief see #ZFUIImageLoadFromColor, size ensured valid
      *
      * returned image would be released by nativeImageRelease of ZFUIImage protocol
-     * @note size is in pixel unit, you may revert it accorrding imageScale
+     * @note size is in pixel unit, you may revert it according imageScale
      */
     virtual void *imageLoadFromColor(ZF_IN zffloat imageScale,
                                      ZF_IN const ZFUIColor &color,

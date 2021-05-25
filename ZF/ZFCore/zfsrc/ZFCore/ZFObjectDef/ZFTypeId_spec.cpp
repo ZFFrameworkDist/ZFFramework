@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFTypeId_spec.h"
 #include "ZFObjectImpl.h"
 
@@ -33,7 +24,7 @@ ZFOUTPUT_TYPE_DEFINE(zfautoObject, {
 
 // ============================================================
 // ZFCallerInfo
-ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFCallerInfo, ZFCallerInfoHolder, {
+ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFCallerInfo, ZFCallerInfo, {
         ZFIndexRange pos[3];
         zfmemset(pos, 0, sizeof(pos));
         const zfchar *p = src;
@@ -42,7 +33,7 @@ ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFCallerInfo, ZFCallerInfoHolder, {
         zfcharSkipSpace(p, pEnd);
         if(p >= pEnd)
         {
-            v.callerInfoSet();
+            v.callerInfo();
             return zftrue;
         }
         if(*p != '[')
@@ -81,7 +72,7 @@ ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFCallerInfo, ZFCallerInfoHolder, {
             return zffalse;
         }
 
-        v.callerInfoSet(
+        v.callerInfo(
                 (pos[0].count > 0)
                     ? zfstring(src + pos[0].start, pos[0].count).cString()
                     : zfnull,
@@ -95,6 +86,8 @@ ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFCallerInfo, ZFCallerInfoHolder, {
         v.callerInfoT(s);
         return zftrue;
     })
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallerInfo, void, callerInfoT, ZFMP_IN_OUT(zfstring &, ret))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallerInfo, zfstring, callerInfo)
 
 ZF_NAMESPACE_GLOBAL_END
 

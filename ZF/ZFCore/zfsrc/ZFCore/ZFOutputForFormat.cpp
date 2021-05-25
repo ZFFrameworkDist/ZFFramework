@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFOutputForFormat.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -116,51 +107,55 @@ public:
             }
         }
     }
-    ZFMETHOD_INLINE_2(zfindex, onOutput,
+    ZFMETHOD_DECLARE_2(zfindex, onOutput,
                       ZFMP_IN(const void *, s),
                       ZFMP_IN(zfindex, count))
-    {
-        if(!this->output.callbackIsValid())
-        {
-            return 0;
-        }
-
-        if(count == zfindexMax())
-        {
-            count = zfslen((const zfchar *)s);
-        }
-        else
-        {
-            count /= sizeof(zfchar);
-        }
-
-        zfstring buf;
-        this->format->_ZFP_format(
-            buf,
-            ZFOutputFormatStep::e_OnOutput,
-            (const zfchar *)s,
-            count,
-            this->outputCount,
-            this->writtenLen,
-            this->state);
-        ++(this->outputCount);
-        if(buf.isEmpty())
-        {
-            return count * sizeof(zfchar);
-        }
-
-        zfindex written = this->output.execute(buf.cString(), buf.length() * sizeof(zfchar));
-        this->writtenLen += written;
-        if(written == buf.length() * sizeof(zfchar))
-        {
-            return count * sizeof(zfchar);
-        }
-        else
-        {
-            return 0;
-        }
-    }
 };
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFOutputForFormatOwner, zfindex, onOutput,
+                  ZFMP_IN(const void *, s),
+                  ZFMP_IN(zfindex, count))
+{
+    if(!this->output.callbackIsValid())
+    {
+        return 0;
+    }
+
+    if(count == zfindexMax())
+    {
+        count = zfslen((const zfchar *)s);
+    }
+    else
+    {
+        count /= sizeof(zfchar);
+    }
+
+    zfstring buf;
+    this->format->_ZFP_format(
+        buf,
+        ZFOutputFormatStep::e_OnOutput,
+        (const zfchar *)s,
+        count,
+        this->outputCount,
+        this->writtenLen,
+        this->state);
+    ++(this->outputCount);
+    if(buf.isEmpty())
+    {
+        return count * sizeof(zfchar);
+    }
+
+    zfindex written = this->output.execute(buf.cString(), buf.length() * sizeof(zfchar));
+    this->writtenLen += written;
+    if(written == buf.length() * sizeof(zfchar))
+    {
+        return count * sizeof(zfchar);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 
 ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFOutputForFormatT,
                        ZFMP_OUT(ZFCallback &, ret),
@@ -182,7 +177,7 @@ ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFOutputForFormatT,
     outputOwner->format = zfRetain(format);
     ret = ZFCallbackForMemberMethod(outputOwner, ZFMethodAccess(_ZFP_I_ZFOutputForFormatOwner, onOutput));
     ret.callbackOwnerObjectRetain();
-    ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, output.callbackTagGet(ZFCallbackTagKeyword_ioOwner));
+    ret.callbackTag(ZFCallbackTagKeyword_ioOwner, output.callbackTag(ZFCallbackTagKeyword_ioOwner));
     zfRelease(outputOwner);
 
     if(!ret.callbackSerializeCustomDisabled())
@@ -194,12 +189,12 @@ ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFOutputForFormatT,
             && ZFObjectToData(formatData, format->toObject()))
         {
             ZFSerializableData serializableData;
-            outputData.categorySet(ZFSerializableKeyword_ZFOutputForFormat_output);
+            outputData.category(ZFSerializableKeyword_ZFOutputForFormat_output);
             serializableData.elementAdd(outputData);
-            formatData.categorySet(ZFSerializableKeyword_ZFOutputForFormat_format);
+            formatData.category(ZFSerializableKeyword_ZFOutputForFormat_format);
             serializableData.elementAdd(formatData);
-            ret.callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomType_ZFOutputForFormat);
-            ret.callbackSerializeCustomDataSet(serializableData);
+            ret.callbackSerializeCustomType(ZFCallbackSerializeCustomType_ZFOutputForFormat);
+            ret.callbackSerializeCustomData(serializableData);
         }
     }
 

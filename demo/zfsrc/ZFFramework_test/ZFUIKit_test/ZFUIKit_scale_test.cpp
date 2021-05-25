@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIKit_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,8 +18,8 @@ protected:
 
         zfblockedAlloc(ZFUITextView, view);
         container->childAdd(view);
-        view->textSet("test text");
-        view->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
+        view->text("test text");
+        view->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
 
         this->prepareSettingButton(window);
     }
@@ -36,23 +27,30 @@ protected:
 private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
-        { // scaleForApp
+        { // UIScale
             zfblockedAlloc(ZFUIKit_test_SettingData, setting);
             settings->add(setting);
             ZFLISTENER_LOCAL(buttonTextGetter, {
-                ZFStringEditable *text = listenerData.param0->to<ZFStringEditable *>();
-                text->stringValueSet(zfstringWithFormat(
-                    "scale: %d",
-                    (zfint)ZFUISysWindow::mainWindow()->rootView()->scaleForApp()));
+                v_zfstring *text = listenerData.param0<v_zfstring *>();
+                text->zfv = zfstringWithFormat(
+                    "scale: %f",
+                    ZFUISysWindow::mainWindow()->rootView()->UIScale());
             })
-            setting->buttonTextGetterSet(buttonTextGetter);
+            setting->buttonTextGetter(buttonTextGetter);
             ZFLISTENER_LOCAL(buttonClickListener, {
                 ZFUIRootView *rootView = ZFUISysWindow::mainWindow()->rootView();
-                rootView->scaleForAppSet(((zfint)(rootView->scaleForApp()) % 2) + 1);
+                if(rootView->UIScale() == 1)
+                {
+                    rootView->UIScale(2);
+                }
+                else
+                {
+                    rootView->UIScale(1);
+                }
             })
-            setting->buttonClickListenerSet(buttonClickListener);
+            setting->buttonClickListener(buttonClickListener);
         }
 
         ZFUIKit_test_prepareSettingButtonWithTestWindow(window, settings);

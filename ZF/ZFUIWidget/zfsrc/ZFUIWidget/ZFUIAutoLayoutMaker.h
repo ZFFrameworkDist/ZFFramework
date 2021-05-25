@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIAutoLayoutMaker.h
  * @brief utilities for #ZFUIAutoLayout
@@ -32,13 +23,13 @@ zfclassFwd _ZFP_ZFUIAutoLayoutMakerPrivate;
  * all available functions of maker:
  * -  zfal_maker(view) :
  *   change the maker's target
- * -  width(int) / height(int) :
+ * -  width(zffloat) / height(zffloat) :
  *   explicitly specify the size rule,
  *   same as setting #ZFUIView::layoutParam with sizeHint and fill sizeParam,
  *   would be overrided by other rules if conflict,
  *   set to negative value would reset the rule
- * -  size(int) / size(int, int) / size(ZFUISize) :
- *   util to width(int) / height(int)
+ * -  size(zffloat) / size(zffloat, zffloat) / size(ZFUISize) :
+ *   util to width(zffloat) / height(zffloat)
  * -  left(), top/right/bottom/width/height, etc :
  *   specify the #ZFUIAutoLayoutRule::pos
  * -  toLeft(target), top/right/bottom/width/height, etc :
@@ -91,10 +82,10 @@ public:
     ZFUIAutoLayoutMaker &zfal_maker(ZF_IN ZFUIView *child); /**< @brief see #ZFUIAutoLayoutMaker */
     ZFUIAutoLayoutMaker &zfal_maker(ZF_IN ZFUIView *child, ZF_IN ZFUIAutoLayout *parent); /**< @brief see #ZFUIAutoLayoutMaker */
 
-    ZFUIAutoLayoutMaker &width(ZF_IN zfint size); /**< @brief see #ZFUIAutoLayoutMaker */
-    ZFUIAutoLayoutMaker &height(ZF_IN zfint size); /**< @brief see #ZFUIAutoLayoutMaker */
-    ZFUIAutoLayoutMaker &size(ZF_IN zfint size); /**< @brief see #ZFUIAutoLayoutMaker */
-    ZFUIAutoLayoutMaker &size(ZF_IN zfint width, ZF_IN zfint height); /**< @brief see #ZFUIAutoLayoutMaker */
+    ZFUIAutoLayoutMaker &width(ZF_IN zffloat size); /**< @brief see #ZFUIAutoLayoutMaker */
+    ZFUIAutoLayoutMaker &height(ZF_IN zffloat size); /**< @brief see #ZFUIAutoLayoutMaker */
+    ZFUIAutoLayoutMaker &size(ZF_IN zffloat size); /**< @brief see #ZFUIAutoLayoutMaker */
+    ZFUIAutoLayoutMaker &size(ZF_IN zffloat width, ZF_IN zffloat height); /**< @brief see #ZFUIAutoLayoutMaker */
     ZFUIAutoLayoutMaker &size(ZF_IN const ZFUISize &size); /**< @brief see #ZFUIAutoLayoutMaker */
 
     ZFUIAutoLayoutMaker &width(void); /**< @brief see #ZFUIAutoLayoutMaker */
@@ -122,7 +113,7 @@ public:
     ZFUIAutoLayoutMaker &toParent(void); /**< @brief see #ZFUIAutoLayoutMaker */
 
     ZFUIAutoLayoutMaker &scale(ZF_IN zffloat scale); /**< @brief see #ZFUIAutoLayoutMaker */
-    ZFUIAutoLayoutMaker &offset(ZF_IN zfint offset); /**< @brief see #ZFUIAutoLayoutMaker */
+    ZFUIAutoLayoutMaker &offset(ZF_IN zffloat offset); /**< @brief see #ZFUIAutoLayoutMaker */
 
     ZFUIAutoLayoutMaker &biasX(ZF_IN zffloat biasX); /**< @brief see #ZFUIAutoLayoutMaker */
     ZFUIAutoLayoutMaker &biasY(ZF_IN zffloat biasY); /**< @brief see #ZFUIAutoLayoutMaker */

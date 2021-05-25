@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIListAdapterArray.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -68,7 +59,7 @@ zfbool ZFUIListAdapterArray::serializableOnSerializeToData(ZF_IN_OUT ZFSerializa
             {
                 return zffalse;
             }
-            cellData.categorySet(ZFSerializableKeyword_ZFUIListAdapterArray_cell);
+            cellData.category(ZFSerializableKeyword_ZFUIListAdapterArray_cell);
             serializableData.elementAdd(cellData);
         }
     }

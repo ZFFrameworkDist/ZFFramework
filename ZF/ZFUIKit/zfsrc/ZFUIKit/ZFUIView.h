@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIView.h
  * @brief base class of all UI views
@@ -37,7 +28,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 // ============================================================
 zfclassFwd ZFUIView;
 /**
- * @brief see #ZFUIView::nativeImplViewSet
+ * @brief see #ZFUIView::nativeImplView
  */
 typedef void (*ZFUIViewNativeImplViewDeleteCallback)(ZF_IN ZFUIView *view, ZF_IN void *nativeImplView);
 
@@ -142,8 +133,10 @@ public:
     ZFOBSERVER_EVENT(ViewOnRemoveFromParent)
     /**
      * @brief see #ZFObject::observerNotify
+     *
+     * called when this view or parent view's #UIScale or #UIScaleFixed changed
      */
-    ZFOBSERVER_EVENT(ViewScaleOnChange)
+    ZFOBSERVER_EVENT(UIScaleOnChange)
     /**
      * @brief see #ZFObject::observerNotify
      *
@@ -159,8 +152,7 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0 is the view that caused this layout request\n
-     * called when this view or any of children called #layoutRequest manually
+     * called when #layoutRequest called
      */
     ZFOBSERVER_EVENT(ViewLayoutOnLayoutRequest)
     /**
@@ -173,9 +165,9 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * #layoutedFrame would be updated before this method,
-     * you may safely modify children's #layoutParam during this method\n
-     * note, you must not modify self's #layoutParam during the whole layout step
+     * #viewFrame would be updated before this method,
+     * use #viewFramePrev if necessary,
+     * you may safely modify children's #layoutParam during this method
      */
     ZFOBSERVER_EVENT(ViewLayoutOnLayoutPrepare)
     /**
@@ -197,12 +189,6 @@ public:
      * called when #nativeImplViewMarginUpdate and value differs from old
      */
     ZFOBSERVER_EVENT(NativeImplViewMarginOnUpdate)
-    /**
-     * @brief see #ZFObject::observerNotify
-     *
-     * see #viewPropertyUpdateRequest
-     */
-    ZFOBSERVER_EVENT(ViewPropertyOnUpdate)
 
     // ============================================================
     // serialize
@@ -216,9 +202,9 @@ public:
      * by default, all children would have it's parent's default layout param (#layoutParamCreate)
      * as the ref layout param, during adding to parent
      */
-    virtual void serializableRefLayoutParamSet(ZF_IN ZFUIViewLayoutParam *serializableRefLayoutParam);
-    /** @brief see #serializableRefLayoutParamSet */
-    virtual ZFUIViewLayoutParam *serializableRefLayoutParam(void);
+    virtual void serializableRefLayoutParam(ZF_IN ZFUILayoutParam *serializableRefLayoutParam);
+    /** @brief see #serializableRefLayoutParam */
+    virtual ZFUILayoutParam *serializableRefLayoutParam(void);
 protected:
     zfoverride
     virtual zfbool serializableOnSerializeFromData(ZF_IN const ZFSerializableData &serializableData,
@@ -244,37 +230,6 @@ public:
     // ============================================================
     // properties
     /**
-     * @brief class name of a ZFUIView class,
-     *   if set, all children would be managed by the delegate view
-     *
-     * if set, an instance of the class would be created and saved as
-     * this view's delegate,
-     * after that, all children would be managed by the delegate
-     * (a complete list of functions affected by delegate would be listed below)\n
-     * note: changing this property would cause all children been moved\n
-     * \n
-     * here's a list of functions that would be affected by delegate view:
-     * -  #ZFUIView::childFindById
-     * -  #ZFUIView::childAdd
-     * -  #ZFUIView::childRemove
-     * -  #ZFUIView::childRemoveAtIndex
-     * -  #ZFUIView::childRemoveAll
-     * -  #ZFUIView::childMove
-     * -  #ZFUIView::childReplaceAtIndex
-     * -  #ZFUIView::childCount
-     * -  #ZFUIView::childAtIndex
-     * -  #ZFUIView::childFind
-     * -  #ZFUIView::childArray
-     * -  #ZFUIView::childRawArray
-     * -  #ZFUIView::layoutOnMeasure
-     * -  #ZFUIView::layoutOnMeasureFinish
-     * -  #ZFUIView::layoutOnLayoutPrepare
-     * -  #ZFUIView::layoutOnLayout
-     * -  #ZFUIView::layoutOnLayoutFinish
-     */
-    ZFPROPERTY_ASSIGN(zfstring, viewDelegateClass)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfstring, viewDelegateClass)
-    /**
      * @brief used to identify a view, empty by default
      *
      * this is useful when you want to find a view from a complicated view tree,
@@ -289,14 +244,14 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, viewVisible,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, viewVisible)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, viewVisible)
 
     /**
      * @brief view's alpha, 1 by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, viewAlpha, 1)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zffloat, viewAlpha)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zffloat, viewAlpha)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zffloat, viewAlpha)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, viewAlpha)
 
     /**
      * @brief whether the view should receive user interaction
@@ -304,7 +259,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, viewUIEnable,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, viewUIEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, viewUIEnable)
 
     /**
      * @brief whether the view as well as all its children should receive user interaction,
@@ -312,24 +267,70 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, viewUIEnableTree,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, viewUIEnableTree)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, viewUIEnableTree)
 
     /**
      * @brief whether enable mouse hover event, see #ZFUIView::viewEventOnMouseEvent, false by default
      */
     ZFPROPERTY_ASSIGN(zfbool, viewMouseHoverEventEnable)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, viewMouseHoverEventEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, viewMouseHoverEventEnable)
 
     /**
      * @brief whether the view can be focused, false by default
      */
     ZFPROPERTY_ASSIGN(zfbool, viewFocusable)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, viewFocusable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, viewFocusable)
     /**
      * @brief whether try to obtain focus when clicked down, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, viewFocusObtainWhenClick,
                                 zftrue)
+
+    /**
+     * @brief the view's frame
+     *
+     * typicall, this property would be updated automatically by parent's #layoutOnLayout,
+     * but you may also change this property manually,
+     * for example, to achieve custom animation logic,
+     * if you do so, the frame would be kept
+     * and parent's layout logic would be ignored,
+     * until you call #viewFrameReset
+     */
+    ZFMETHOD_DECLARE_0(ZFUIRect const &, viewFrame)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewFrame,
+                       ZFMP_IN(ZFUIRect const &, viewFrame))
+
+    /** @brief previous #viewFrame */
+    ZFMETHOD_DECLARE_0(const ZFUIRect &, viewFramePrev)
+
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(void, viewFrameReset)
+
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(zffloat const &, viewX)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewX, ZFMP_IN(zffloat const &, propertyValue))
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(zffloat const &, viewY)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewY, ZFMP_IN(zffloat const &, propertyValue))
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(zffloat const &, viewWidth)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewWidth, ZFMP_IN(zffloat const &, propertyValue))
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(zffloat const &, viewHeight)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewHeight, ZFMP_IN(zffloat const &, propertyValue))
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(zffloat const &, viewCenterX)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewCenterX, ZFMP_IN(zffloat const &, propertyValue))
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_0(zffloat const &, viewCenterY)
+    /** @brief see #viewFrame */
+    ZFMETHOD_DECLARE_1(void, viewCenterY, ZFMP_IN(zffloat const &, propertyValue))
 
     /**
      * @brief prefered size, #ZFUISizeInvalid by default
@@ -338,26 +339,61 @@ public:
      * the prefered size would be used to measure the view,
      * if prefered size not set, size hint would be used
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(ZFUISize, viewSizePrefered, ZFUISizeInvalid())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUISize, viewSizePrefered)
+    ZFPROPERTY_ASSIGN_WITH_INIT(ZFUISize, viewSizePrefer, ZFUISizeInvalid())
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUISize, viewSizePrefer)
     /**
      * @brief min size, #ZFUISizeZero by default
      */
     ZFPROPERTY_ASSIGN(ZFUISize, viewSizeMin)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUISize, viewSizeMin)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUISize, viewSizeMin)
     /**
      * @brief max size, negative value means not set, #ZFUISizeInvalid by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUISize, viewSizeMax,
                                 ZFUISizeInvalid())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUISize, viewSizeMax)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUISize, viewSizeMax)
 
     /**
      * @brief background color, #ZFUIColorZero by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, viewBackgroundColor,
                                 ZFUIColorZero())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, viewBackgroundColor)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIColor, viewBackgroundColor)
+
+    // ============================================================
+    // transform
+    /**
+     * @brief translate for the view
+     *
+     * when impl not available, setting this value would have no effect
+     */
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, viewTranslateX, 0)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, viewTranslateX)
+    /** @brief see #viewTranslateX */
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, viewTranslateY, 0)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, viewTranslateY)
+
+    /**
+     * @brief scale for the view
+     *
+     * when impl not available, setting this value would have no effect
+     */
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, viewScaleX, 1)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zffloat, viewScaleX)
+    /** @brief see #viewScaleX */
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, viewScaleY, 1)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zffloat, viewScaleY)
+
+    /**
+     * @brief rotation for the view
+     *
+     * the rotation is in Z axis,
+     * range in [0, 360),
+     * any value out of range would be fixed to [0, 360)\n
+     * when impl not available, setting this value would have no effect
+     */
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, viewRotate, 0)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zffloat, viewRotate)
 
     // ============================================================
     // init and dealloc
@@ -367,8 +403,6 @@ protected:
     zfoverride
     virtual void objectOnDealloc(void);
     zfoverride
-    virtual void objectOnInitFinish(void);
-    zfoverride
     virtual void objectOnDeallocPrepare(void);
 
 public:
@@ -377,9 +411,6 @@ public:
     zfoverride
     virtual ZFCompareResult objectCompare(ZF_IN ZFObject *anotherObj);
 
-public:
-    zfoverride
-    virtual void objectInfoT(ZF_IN_OUT zfstring &ret);
 protected:
     zfoverride
     virtual void objectInfoOnAppend(ZF_IN_OUT zfstring &ret);
@@ -423,14 +454,14 @@ public:
      * @brief see #nativeImplViewMargin, #ZFUIMarginZero by default
      */
     ZFPROPERTY_ASSIGN(ZFUIMargin, nativeImplViewMarginCustom)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIMargin, nativeImplViewMarginCustom)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIMargin, nativeImplViewMarginCustom)
 
 protected:
     /**
      * @brief see #nativeImplView
      */
-    zffinal void nativeImplViewSet(ZF_IN void *nativeImplView,
-                                   ZF_IN ZFUIViewNativeImplViewDeleteCallback nativeImplViewDeleteCallback);
+    zffinal void nativeImplView(ZF_IN void *nativeImplView,
+                                ZF_IN ZFUIViewNativeImplViewDeleteCallback nativeImplViewDeleteCallback);
     /**
      * @brief see #nativeImplViewMargin,
      *   subclass must call super and "append" to existing margin
@@ -485,9 +516,7 @@ protected:
      * which is not necessary during parent dealloc
      * (which may cause performance issue),
      * so we use this method to remove all children directly during parent dealloc
-     * to improve performance\n
-     * this method would be used only if #viewDelegate is not set,
-     * otherwise, if it's set, normal #childRemoveAll would be used instead
+     * to improve performance
      */
     virtual void implChildOnRemoveAllForDealloc(void);
 
@@ -505,85 +534,6 @@ public:
     ZFMETHOD_DECLARE_0(void *, nativeView)
     static void _ZFP_ZFUIView_nativeViewNotifyAdd(ZF_IN ZFUIView *view, ZF_IN void *nativeParentView);
     static void _ZFP_ZFUIView_nativeViewNotifyRemove(ZF_IN ZFUIView *view);
-
-    // ============================================================
-    // view delegate logic
-protected:
-    /**
-     * @brief manually set the view delegate, see #ZFUIView::viewDelegateClass
-     *
-     * note, this method is not serializable,
-     * this method and #ZFUIView::viewDelegateClass is exclusive
-     * and would override with each other\n
-     * this method is not affected by #viewDelegateSupported
-     */
-    virtual void viewDelegateSet(ZF_IN ZFUIView *viewDelegate);
-    /**
-     * @brief whether this view support delegate view logic
-     */
-    virtual inline zfbool viewDelegateSupported(void)
-    {
-        return zftrue;
-    }
-public:
-    /**
-     * @brief true if this view is a delegate view for parent
-     */
-    ZFMETHOD_DECLARE_0(zfbool, viewDelegateForParent)
-    /**
-     * @brief delegate parent of this view, null if this view is added normally
-     * @see viewParent, viewParentVirtual
-     */
-    ZFMETHOD_DECLARE_0(ZFUIView *, viewDelegateParent)
-    /**
-     * @brief see #ZFUIView::viewDelegateClass
-     */
-    ZFMETHOD_DECLARE_0(ZFUIView *, viewDelegate)
-    /**
-     * @brief util method to #viewDelegate
-     */
-    template<typename T_ZFObject>
-    inline T_ZFObject viewDelegate(void)
-    {
-        return ZFCastZFObjectUnchecked(T_ZFObject, this->viewDelegate());
-    }
-protected:
-    /**
-     * @brief called to init delegate view
-     */
-    virtual inline void viewDelegateOnInit(ZF_IN ZFUIView *viewDelegate)
-    {
-    }
-    /**
-     * @brief called to destroy delegate view
-     */
-    virtual inline void viewDelegateOnDealloc(ZF_IN ZFUIView *viewDelegate)
-    {
-    }
-    /**
-     * @brief see ##ZFUIView::viewDelegateClass, #layoutOnMeasure
-     */
-    virtual void viewDelegateLayoutOnMeasure(ZF_OUT ZFUISize &ret,
-                                             ZF_IN const ZFUISize &sizeHint,
-                                             ZF_IN const ZFUISizeParam &sizeParam);
-    /**
-     * @brief see ##ZFUIView::viewDelegateClass, #layoutOnMeasureFinish
-     */
-    virtual void viewDelegateLayoutOnMeasureFinish(ZF_IN_OUT ZFUISize &measuredSize,
-                                                   ZF_IN const ZFUISize &sizeHint,
-                                                   ZF_IN const ZFUISizeParam &sizeParam);
-    /**
-     * @brief see ##ZFUIView::viewDelegateClass, #layoutOnLayoutPrepare
-     */
-    virtual void viewDelegateLayoutOnLayoutPrepare(ZF_IN const ZFUIRect &bounds);
-    /**
-     * @brief see ##ZFUIView::viewDelegateClass, #layoutOnLayout
-     */
-    virtual void viewDelegateLayoutOnLayout(ZF_IN const ZFUIRect &bounds);
-    /**
-     * @brief see ##ZFUIView::viewDelegateClass, #layoutOnLayoutFinish
-     */
-    virtual void viewDelegateLayoutOnLayoutFinish(ZF_IN const ZFUIRect &bounds);
 
     // ============================================================
     // view focus
@@ -619,17 +569,12 @@ protected:
     // parent
 public:
     zffinal void _ZFP_ZFUIView_parentChanged(ZF_IN ZFUIView *parentView,
-                                             ZF_IN ZFUIViewLayoutParam *layoutParam,
+                                             ZF_IN ZFUILayoutParam *layoutParam,
                                              ZF_IN ZFUIViewChildLayerEnum viewLayer);
     /**
      * @brief parent view or null if none
-     * @see viewParentVirtual, viewDelegateParent
      */
     ZFMETHOD_DECLARE_0(ZFUIView *, viewParent)
-    /**
-     * @brief return #viewDelegateParent if exist, or #viewParent otherwise
-     */
-    ZFMETHOD_DECLARE_0(ZFUIView *, viewParentVirtual)
 
     /**
      * @brief remove this view from parent or do nothing if no parent
@@ -642,28 +587,29 @@ public:
     // scale settings
 public:
     /**
-     * @brief scale for view
+     * @brief UI scale for view tree
      *
      * ZFUIView use a special scale logic to adapt various screen sizes,
      * which contain these scale values:
      * -  app scale:\n
-     *   accessed by #scaleForApp, 1 by default\n
-     *   automatically changed while adding a ZFUIView to another,
-     *   and can only be changed by app by using #ZFUIRootView::scaleForAppSet of #ZFUISysWindow
+     *   app's custom scale, accessed by #UIScale, 1 by default\n
+     *   you may change this view to apply scale for entire view tree,
+     *   every child view may have different scale setting,
+     *   the final scale can be accessed by #UIScaleInherited
      * -  impl scale:\n
-     *   accessed by #scaleForImpl, it's value depends on impl\n
+     *   accessed by #UIScaleForImpl, it's value depends on impl\n
      *   automatically changed while adding a ZFUIView to native view,
      *   can not be changed by app
      * -  fixed scale:\n
-     *   accessed by #scaleFixed, always equal to (#scaleForApp * #scaleForImpl)\n
+     *   accessed by #UIScaleFixed, always equal to
+     *   (#UIScaleInherited * #UIScale * #UIScaleForImpl)\n
      *   all size unit would be applied with this value
      *   before passing to implementations,
      *   can not be changed by app
      * -  impl physical scale:\n
-     *   accessedb y #scaleForImplPhysicalPixel, it's value depends on impl\n
-     *   corresponding to #scaleForImpl,
-     *   used only if you want to verify physical pixel
-     *   (since impl may have it's own scale logic)
+     *   accessed by #UIScaleForPixel, it's value depends on impl\n
+     *   to access final pixel size:
+     *   view's size * #UIScaleInherited * #UIScale * #UIScaleForPixel
      *
      * in general:
      * -  for app:\n
@@ -671,8 +617,7 @@ public:
      *   all elements can be assigned as fixed size,
      *   such as 48 for a button's height and 21 for a small textView's height,
      *   it will be scaled automatically while rendering to different size's or DPI's devices\n
-     *   if you really want to change scale setting,
-     *   you should use #ZFUIRootView::scaleForAppSet of #ZFUISysWindow
+     *   you may use #UIScale to control custom scale logic
      * -  for implementation:\n
      *   you have no need to worry about element's logical size,
      *   everything would be scaled to desired size unit
@@ -681,32 +626,33 @@ public:
      * \n
      * since scale may affect impl's pixel size,
      * size-related property should be flushed manually while scale changed,
-     * subclass should override #scaleOnChange to update them,
-     * which would be called if #scaleFixed really changed
+     * subclass should override #UIScaleOnChange to update them,
+     * which would be called if #UIScaleFixed really changed
+     * \n
+     * #UIScale usually used for scale for entire view tree,
+     * all layout and touch position would be scaled properly,
+     * however, changing #UIScale for a deep view tree may consume must time\n
+     * for temporarily scale, typically for animation,
+     * use #viewScaleX instead
      */
-    ZFMETHOD_DECLARE_0(zffloat, scaleForApp)
-    /**
-     * @brief see #scaleForApp
-     */
-    ZFMETHOD_DECLARE_0(zffloat, scaleForImpl)
-    /**
-     * @brief see #scaleForApp
-     */
-    ZFMETHOD_DECLARE_0(zffloat, scaleForImplPhysicalPixel)
-    /**
-     * @brief see #scaleForApp
-     */
-    ZFMETHOD_DECLARE_0(zffloat, scaleFixed)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, UIScale, 1)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zffloat, UIScale)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, UIScale)
+    /** @brief see #UIScale */
+    ZFMETHOD_DECLARE_0(zffloat, UIScaleInherited)
+    /** @brief see #UIScale */
+    ZFMETHOD_DECLARE_0(zffloat, UIScaleForImpl)
+    /** @brief see #UIScale */
+    ZFMETHOD_DECLARE_0(zffloat, UIScaleForPixel)
+    /** @brief see #UIScale */
+    ZFMETHOD_DECLARE_0(zffloat, UIScaleFixed)
 protected:
     /**
-     * @brief see #scaleForApp, ensured called only when scale value actually changed
+     * @brief see #UIScale, ensured called only when scale value actually changed
      *
-     * after this method, #EventViewScaleOnChange would be fired
+     * after this method, #EventUIScaleOnChange would be fired
      */
-    virtual void scaleOnChange(void);
-public:
-    void _ZFP_ZFUIView_scaleSetRecursively(ZF_IN zffloat scaleFixed,
-                                           ZF_IN zffloat scaleForImpl);
+    virtual void UIScaleOnChange(void);
 
     // ============================================================
     // layout logic
@@ -716,7 +662,7 @@ public:
      *   calling #layoutParamClass to create instance
      *   and #layoutParamOnUpdate to update
      */
-    ZFMETHOD_DECLARE_0(zfautoObject, layoutParamCreate)
+    ZFMETHOD_DECLARE_0(zfautoObjectT<ZFUILayoutParam *>, layoutParamCreate)
 protected:
     /**
      * @brief see #layoutParamCreate
@@ -727,7 +673,7 @@ protected:
     /**
      * @brief see #layoutParamCreate
      */
-    virtual inline void layoutParamOnUpdate(ZF_IN ZFUIViewLayoutParam *layoutParam)
+    virtual inline void layoutParamOnUpdate(ZF_IN ZFUILayoutParam *layoutParam)
     {
     }
 
@@ -740,15 +686,15 @@ public:
      * while adding to another container view with different layout param type,
      * a new layout param would be created and applied style from the existing one
      */
-    ZFMETHOD_DECLARE_1(void, layoutParamSet,
-                       ZFMP_IN(ZFUIViewLayoutParam *, layoutParam))
+    ZFMETHOD_DECLARE_1(void, layoutParam,
+                       ZFMP_IN(ZFUILayoutParam *, layoutParam))
     /**
      * @brief get self's layout param, valid only while the view has parent
      *
      * return null if the view has no parent,
      * automatically invoke the view's #layoutRequest if the layout param's property changed
      */
-    ZFMETHOD_DECLARE_0(ZFUIViewLayoutParam *, layoutParam)
+    ZFMETHOD_DECLARE_0(ZFUILayoutParam *, layoutParam)
     /**
      * @brief see #layoutParam
      */
@@ -759,19 +705,6 @@ public:
     }
 
 public:
-    zffinal void _ZFP_ZFUIView_notifyLayoutRootView(ZF_IN const ZFUIRect &bounds);
-    /**
-     * @brief override #layoutRequest to prevent this view being layouted for some condition
-     *
-     * this method is useful if you want to update some property without notifying the view,
-     * typically for performance only, use with caution
-     */
-    ZFMETHOD_DECLARE_1(void, layoutRequestOverrideSet,
-                       ZFMP_IN(zfbool, layoutRequestOverride))
-    /**
-     * @brief see #layoutRequestOverrideSet
-     */
-    ZFMETHOD_DECLARE_0(zfindex, layoutRequestOverride)
     /**
      * @brief set need layout
      */
@@ -799,54 +732,28 @@ public:
      */
     ZFMETHOD_DECLARE_0(const ZFUISize &, layoutMeasuredSize)
     /**
-     * @brief layout the view and it's children
-     *
-     * internal views have layout step but no measure step
-     */
-    ZFMETHOD_DECLARE_1(void, layout,
-                       ZFMP_IN(const ZFUIRect &, rect))
-    /**
      * @brief force to layout if need
      */
     ZFMETHOD_DECLARE_0(void, layoutIfNeed)
     /**
-     * @brief get the frame of this view, invalid if not layout
-     */
-    ZFMETHOD_DECLARE_0(const ZFUIRect &, layoutedFrame)
-    /**
-     * @brief get previous frame of this view, ensured zero for first time,
-     *   ensured reset to zero after remove from parent
-     *
-     * you may also reset it manually by #layoutedFramePrevReset
-     */
-    ZFMETHOD_DECLARE_0(const ZFUIRect &, layoutedFramePrev)
-    /**
-     * @brief manually reset #layoutedFramePrev to zero
-     */
-    ZFMETHOD_DECLARE_0(void, layoutedFramePrevReset)
-    /**
-     * @brief get fixed frame of this view, invalid if not layout
+     * @brief get child offset to this view
      *
      * for views that have offset logic (typically scroll views),
-     * use this method to access frame relative to its parent
-     * instead of frame applied with offset\n
-     * call this method would cause parent's #layoutedFrameFixedOnUpdateForChild being called
-     * to update the actual frame,
-     * result may be invalid if not layout or parent is not type of ZFUIView,
-     * in this case, #layoutedFrame would be returned
+     * use this method to access the offset to its parent,
+     * child's #viewFrame plus this offset should be the actual
+     * offset to parent's edge\n
+     * subclass should override #layoutChildOffsetOnUpdate
+     * to supply this value
      */
-    ZFMETHOD_DECLARE_1(void, layoutedFrameFixedT,
-                       ZFMP_OUT(ZFUIRect &, ret))
-    /**
-     * @brief see #layoutedFrameFixedT
-     */
-    ZFMETHOD_DECLARE_0(ZFUIRect, layoutedFrameFixed)
+    ZFMETHOD_DECLARE_0(ZFUIPoint, layoutChildOffset)
 
+public:
+    void _ZFP_ZFUIView_notifyLayoutView(ZF_IN const ZFUIRect &viewFrame);
 protected:
     /**
      * @brief called during #layoutRequest
      */
-    virtual void layoutOnLayoutRequest(ZF_IN ZFUIView *requestByView);
+    virtual void layoutOnLayoutRequest(void);
     /**
      * @brief called by #layoutMeasure to decide the view's size
      *
@@ -859,12 +766,12 @@ protected:
      * sizeHint means the max size child should reach, see #ZFUISizeType for more info\n
      * \n
      * return a negative value means the view doesn't care about size,
-     * let #ZFUIView::viewSizePrefered to decide final result size\n
+     * let #ZFUIView::viewSizePrefer to decide final result size\n
      * \n
      * @note there's some repeatly work that #layoutMeasure would have done for you,
      *   you should not repeat it again for performance:
      *   -  filter out the case that both sizeParam are fixed or fill parent
-     *   -  apply sizeHint by #ZFUIViewLayoutParam::sizeHintApply
+     *   -  apply sizeHint by #ZFUILayoutParam::sizeHintApply
      *   -  fix result size in range [viewSizeMin, viewSizeMax]
      * @note for impl views (such as text view),
      *   you should manually take care of #nativeImplViewMargin
@@ -886,7 +793,7 @@ protected:
     {
     }
     /**
-     * @brief called by #layout to layout the view and children
+     * @brief called by #viewFrame to layout the view and children
      *
      * it's valid for subclass to override without calling zfsuper::layoutOnLayout,
      * which means subclass would override all layout steps in parent\n
@@ -898,12 +805,9 @@ protected:
     virtual inline void layoutOnLayoutFinish(ZF_IN const ZFUIRect &bounds)
     {
     }
-    /**
-     * @brief for subclass to impl #layoutedFrameFixed
-     */
-    virtual inline void layoutedFrameFixedOnUpdateForChild(ZF_OUT ZFUIRect &ret, ZF_IN const ZFUIRect &childFrame)
+    /** @brief see #layoutChildOffset */
+    virtual inline void layoutChildOffsetOnUpdate(ZF_IN_OUT ZFUIPoint &ret)
     {
-        ret = childFrame;
     }
 
     // ============================================================
@@ -928,15 +832,17 @@ public:
      */
     ZFMETHOD_DECLARE_3(void, childAdd,
                        ZFMP_IN(ZFUIView *, view),
-                       ZFMP_IN_OPT(ZFUIViewLayoutParam *, layoutParam, zfnull),
+                       ZFMP_IN_OPT(ZFUILayoutParam *, layoutParam, zfnull),
                        ZFMP_IN_OPT(zfindex, atIndex, zfindexMax()))
     /**
      * @brief util method for #childAdd
      */
-    ZFMETHOD_DECLARE_3(void, childAdd,
+    ZFMETHOD_DECLARE_5(void, childAdd,
                        ZFMP_IN(ZFUIView *, view),
                        ZFMP_IN(const ZFUISizeParam &, sizeParam),
-                       ZFMP_IN_OPT(ZFUIAlignFlags const &, layoutAlign, ZFUIAlign::e_LeftInner | ZFUIAlign::e_TopInner))
+                       ZFMP_IN_OPT(ZFUIAlignFlags const &, layoutAlign, ZFUIAlign::e_LeftInner | ZFUIAlign::e_TopInner),
+                       ZFMP_IN_OPT(ZFUIMargin const &, layoutMargin, ZFUIMarginZero()),
+                       ZFMP_IN_OPT(const ZFUISize &, sizeHint, ZFUISizeInvalid()))
     /**
      * @brief remove view or do nothing if view isn't added to this view
      */
@@ -1014,34 +920,29 @@ protected:
     virtual void viewChildOnChange(void);
     /** @brief see #EventViewChildOnAdd */
     virtual void viewChildOnAdd(ZF_IN ZFUIView *child,
-                                ZF_IN ZFUIViewChildLayerEnum layer);
+                                ZF_IN ZFUIViewChildLayerEnum childLayer);
     /** @brief see #EventViewChildOnRemove */
     virtual void viewChildOnRemove(ZF_IN ZFUIView *child,
-                                   ZF_IN ZFUIViewChildLayerEnum layer);
+                                   ZF_IN ZFUIViewChildLayerEnum childLayer);
     /** @brief see #EventViewOnAddToParent */
     virtual void viewOnAddToParent(ZF_IN ZFUIView *parent);
     /** @brief see #EventViewOnRemoveFromParent */
     virtual void viewOnRemoveFromParent(ZF_IN ZFUIView *parent);
 
     // ============================================================
-    // internal impl views
+    // internal views
 public:
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_3(void, internalImplViewAdd,
                        ZFMP_IN(ZFUIView *, view),
-                       ZFMP_IN_OPT(ZFUIViewLayoutParam *, layoutParam, zfnull),
+                       ZFMP_IN_OPT(ZFUILayoutParam *, layoutParam, zfnull),
                        ZFMP_IN_OPT(zfbool, addAsTopMost, zftrue))
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_1(void, internalImplViewRemove,
                        ZFMP_IN(ZFUIView *, view))
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_0(ZFCoreArrayPOD<ZFUIView *>, internalImplViewArray)
-protected:
-    /** @brief see #internalBgViewAdd */
-    virtual void internalImplViewOnLayout(ZF_IN const ZFUIRect &bounds);
 
-    // ============================================================
-    // internal background views
 public:
     /**
      * @brief internal view which is independent from normal view
@@ -1058,15 +959,11 @@ public:
      * such as #internalBgViewAdd and #internalBgViewRemove
      * (considering the #childAdd and #childRemove)\n
      * \n
-     * internal views has no measure steps, its size always depends on parent's size\n
-     * \n
-     * for safety, internal views has no access methods related to index
-     * subclass should save internal views as member and access manually\n
-     * also, subclass must call super's method when override internalXXX
+     * internal views has no measure steps, its size always depends on parent's size
      */
     ZFMETHOD_DECLARE_3(void, internalBgViewAdd,
                        ZFMP_IN(ZFUIView *, view),
-                       ZFMP_IN_OPT(ZFUIViewLayoutParam *, layoutParam, zfnull),
+                       ZFMP_IN_OPT(ZFUILayoutParam *, layoutParam, zfnull),
                        ZFMP_IN_OPT(zfbool, addAsTopMost, zftrue))
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_1(void, internalBgViewRemove,
@@ -1075,25 +972,18 @@ public:
      * @brief usually for debug use only, try to avoid use this in your app for other purpose
      */
     ZFMETHOD_DECLARE_0(ZFCoreArrayPOD<ZFUIView *>, internalBgViewArray)
-protected:
-    /** @brief see #internalBgViewAdd */
-    virtual void internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds);
 
-    // ============================================================
-    // internal foreground views
 public:
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_3(void, internalFgViewAdd,
                        ZFMP_IN(ZFUIView *, view),
-                       ZFMP_IN_OPT(ZFUIViewLayoutParam *, layoutParam, zfnull),
+                       ZFMP_IN_OPT(ZFUILayoutParam *, layoutParam, zfnull),
                        ZFMP_IN_OPT(zfbool, addAsTopMost, zftrue))
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_1(void, internalFgViewRemove,
                        ZFMP_IN(ZFUIView *, view))
     /** @brief see #internalBgViewAdd */
     ZFMETHOD_DECLARE_0(ZFCoreArrayPOD<ZFUIView *>, internalFgViewArray)
-    /** @brief see #internalBgViewAdd */
-    virtual void internalFgViewOnLayout(ZF_IN const ZFUIRect &bounds);
 
     // ============================================================
     // other internal view logic
@@ -1118,7 +1008,7 @@ public:
     ZFMETHOD_DECLARE_0(void, internalViewAutoSerializeTagRemoveAll)
     /** @brief see #internalViewAutoSerializeTagAdd */
     ZFMETHOD_DECLARE_1(void, internalViewAutoSerializeTagGetAllT,
-                       ZFMP_OUT(ZFCoreArray<zfstring> &, ret))
+                       ZFMP_IN_OUT(ZFCoreArray<zfstring> &, ret))
     /** @brief see #internalViewAutoSerializeTagAdd */
     ZFMETHOD_DECLARE_0(ZFCoreArray<zfstring>, internalViewAutoSerializeTagGetAll)
 
@@ -1131,6 +1021,8 @@ protected:
     {
         return zftrue;
     }
+    /** @brief see #internalBgViewAdd */
+    virtual void internalViewOnLayout(ZF_IN const ZFUIRect &bounds);
 
     // ============================================================
     // UI events
@@ -1199,24 +1091,6 @@ protected:
      * util it's resolved
      */
     virtual void viewEventOnWheelEvent(ZF_IN ZFUIWheelEvent *wheelEvent);
-
-    // ============================================================
-    // view property async update
-public:
-    /**
-     * @brief schedule a update task that #viewPropertyOnUpdate would be called after a proper time,
-     *   used to update view's property
-     *
-     * #viewPropertyOnUpdate ensured called once after a view created
-     */
-    ZFMETHOD_DECLARE_0(void, viewPropertyUpdateRequest)
-    zffinal inline void _ZFP_ZFUIView_viewPropertyNotifyUpdate(void)
-    {
-        this->viewPropertyOnUpdate();
-    }
-protected:
-    /** @brief see #viewPropertyUpdateRequest */
-    virtual void viewPropertyOnUpdate(void);
 
     // ============================================================
     // override

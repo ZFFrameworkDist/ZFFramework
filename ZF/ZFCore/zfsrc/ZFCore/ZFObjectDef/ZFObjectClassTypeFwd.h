@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFObjectClassTypeFwd.h
  * @brief types for ZFFramework
@@ -106,7 +97,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         /** @endcond */ \
     public: \
         /** @brief see @ref paramName */ \
-        _ZFP_ZFCoreParam_self &paramName##Set(ZF_IN T_ParamType const &value) \
+        _ZFP_ZFCoreParam_self &paramName(ZF_IN T_ParamType const &value) \
         { \
             zfCoreMutexLock(); \
             zflockfree_zfRetain(value); \
@@ -136,7 +127,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         /** @endcond */ \
     public: \
         /** @brief see @ref paramName */ \
-        _ZFP_ZFCoreParam_self &paramName##Set(ZF_IN T_ParamType const &value);
+        _ZFP_ZFCoreParam_self &paramName(ZF_IN T_ParamType const &value);
 #define _ZFP_ZFCORE_PARAM_RETAIN_DEFINE(T_Owner, T_ParamType, paramName, initValue) \
     T_ParamType const &T_Owner::paramName(void) const \
     { \
@@ -167,7 +158,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         return *this; \
     } \
     /** @endcond */ \
-    T_Owner::_ZFP_ZFCoreParam_self &T_Owner::paramName##Set(ZF_IN T_ParamType const &value) \
+    T_Owner::_ZFP_ZFCoreParam_self &T_Owner::paramName(ZF_IN T_ParamType const &value) \
     { \
         zfCoreMutexLock(); \
         zflockfree_zfRetain(value); \
@@ -195,8 +186,8 @@ typedef zfautoObject (*ZFObjectCreator)(void);
 /**
  * @brief true if Type is #ZFObject type
  */
-#define zftIsZFObject(Type) (ZFM_CLASS_HAS_MEMBER(_ZFP_zftIsZFObjectCheck, ClassData, Type) ? 1 : 0)
-ZFM_CLASS_HAS_MEMBER_DECLARE(_ZFP_zftIsZFObjectCheck, ClassData, const ZFClass *(*F)(void))
+#define zftIsZFObject(Type) (ZFM_CLASS_HAS_MEMBER(_ZFP_zftIsZFObjectCheck, _ZFP_zftIsZFObject, Type) ? 1 : 0)
+ZFM_CLASS_HAS_MEMBER_DECLARE(_ZFP_zftIsZFObjectCheck, _ZFP_zftIsZFObject, void (*F)(void))
 
 // ============================================================
 /** @brief type for #ZFGlobalEvent::EventClassDataChange */

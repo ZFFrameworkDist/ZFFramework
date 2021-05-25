@@ -1,16 +1,16 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFFilterForZFClass.h"
 #include "ZFObjectImpl.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
+
+ZFEXPORT_ENUM_DEFINE(ZFFilterForZFClassType
+    , ZFFilterForZFClassTypeInclude
+    , ZFFilterForZFClassTypeExclude
+    , ZFFilterForZFClassTypeIncludeChildOf
+    , ZFFilterForZFClassTypeIncludeParentOf
+    , ZFFilterForZFClassTypeExcludeChildOf
+    , ZFFilterForZFClassTypeExcludeParentOf
+    )
 
 // ============================================================
 ZFFilterForZFClass::ZFFilterForZFClass(void)
@@ -79,11 +79,11 @@ zfindex ZFFilterForZFClass::filterCount(void) const
 {
     return this->_ZFP_ZFFilterForZFClass_filters.count();
 }
-const ZFClass *ZFFilterForZFClass::filterGet(ZF_IN zfindex index) const
+const ZFClass *ZFFilterForZFClass::filterElementAtIndex(ZF_IN zfindex index) const
 {
     return this->_ZFP_ZFFilterForZFClass_filters.get(index).filterClass;
 }
-ZFFilterForZFClassType ZFFilterForZFClass::filterGetFilterType(ZF_IN zfindex index) const
+ZFFilterForZFClassType ZFFilterForZFClass::filterTypeAtIndex(ZF_IN zfindex index) const
 {
     return this->_ZFP_ZFFilterForZFClass_filters.get(index).filterType;
 }
@@ -193,27 +193,10 @@ static void _ZFP_ZFFilterForZFClass_contentInfoGetter(ZF_IN_OUT zfstring &ret, Z
 void ZFFilterForZFClass::objectInfoT(ZF_IN_OUT zfstring &ret) const
 {
     this->_ZFP_ZFFilterForZFClass_filters.objectInfoOfContentT(ret,
-        _ZFP_ZFFilterForZFClass_contentInfoGetter,
         zfHint("max count")5,
-        ZFTokenForContainerDefault());
+        ZFTokenForContainerDefault(),
+        _ZFP_ZFFilterForZFClass_contentInfoGetter);
 }
 
 ZF_NAMESPACE_GLOBAL_END
-
-#if _ZFP_ZFOBJECT_METHOD_REG
-#include "../ZFObject.h"
-ZF_NAMESPACE_GLOBAL_BEGIN
-
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFFilterForZFClass, void, copyFrom, ZFMP_IN(ZFFilterForZFClass const &, ref))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFFilterForZFClass, void, filterAdd, ZFMP_IN(const ZFClass * const &, e), ZFMP_IN_OPT(ZFFilterForZFClassType, filterType, ZFFilterForZFClassTypeExclude))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFFilterForZFClass, void, filterRemove, ZFMP_IN(const ZFClass * const &, e), ZFMP_IN_OPT(ZFFilterForZFClassType, filterType, ZFFilterForZFClassTypeExclude))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFFilterForZFClass, void, filterRemoveAtIndex, ZFMP_IN(zfindex, index))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFFilterForZFClass, void, filterRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFFilterForZFClass, zfindex, filterCount)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFFilterForZFClass, const ZFClass *, filterGet, ZFMP_IN(zfindex, index))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFFilterForZFClass, ZFFilterForZFClassType, filterGetFilterType, ZFMP_IN(zfindex, index))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFFilterForZFClass, zfbool, filterCheckActive, ZFMP_IN(const ZFClass * const &, e))
-
-ZF_NAMESPACE_GLOBAL_END
-#endif
 

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_ZFLua.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -35,9 +26,9 @@ static void _ZFP_ZFImpl_ZFLua_ZFMethod_setupGlobalMethod(ZF_IN const ZFCoreArray
         ZFImpl_ZFLua_execute(luaStateList[i], code);
     }
 }
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange)
+static void _ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
-    const ZFClassDataChangeData *data = listenerData.param0->to<ZFPointerHolder *>()->holdedDataPointer<const ZFClassDataChangeData *>();
+    const ZFClassDataChangeData *data = listenerData.param0<ZFPointerHolder *>()->holdedDataPointer<const ZFClassDataChangeData *>();
     if(data->changedMethod != zfnull && data->changeType == ZFClassDataChangeTypeAttach)
     {
         if(data->changedMethod->methodIsFunctionType())
@@ -53,7 +44,7 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFImpl_ZFLua_ZFMethod_methodOnChange)
     }
 }
 ZFImpl_ZFLua_implSetupCallback_DEFINE(ZFMethod, ZFM_EXPAND({
-        ZFCoreArrayPOD<const ZFMethod *> allMethod = ZFMethodFuncGetAll();
+        ZFCoreArrayPOD<const ZFMethod *> allMethod = ZFMethodGetAllFunc();
         if(!allMethod.isEmpty())
         {
             zfstlmap<zfstlstringZ, zfbool> methodNamespaceList;

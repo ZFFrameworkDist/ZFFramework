@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIImage.h"
 
@@ -97,7 +88,7 @@ public:
     virtual ZFUISize nativeImageSize(ZF_IN void *nativeImage)
     {
         UIImage *uiImage = (__bridge UIImage *)nativeImage;
-        return ZFUISizeMake(zfmRound(uiImage.size.width * uiImage.scale), zfmRound(uiImage.size.height * uiImage.scale));
+        return ZFUISizeMake(uiImage.size.width * uiImage.scale, uiImage.size.height * uiImage.scale);
     }
 ZFPROTOCOL_IMPLEMENTATION_END(ZFUIImageImpl_sys_iOS)
 ZFPROTOCOL_IMPLEMENTATION_REGISTER(ZFUIImageImpl_sys_iOS)

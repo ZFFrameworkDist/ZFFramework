@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFSerializableUtil.h
  * @brief utilities for ZFSerializable's implementation
@@ -221,7 +212,7 @@ extern ZF_ENV_EXPORT zfbool printResolveStatus(ZF_IN const ZFSerializableData &s
                     "failed to convert %s to string", key); \
                 return zffalse; \
             } \
-            serializableData.attributeSet(key, valueString); \
+            serializableData.attributeForName(key, valueString); \
         } \
     } while(zffalse)
 
@@ -254,7 +245,7 @@ extern ZF_ENV_EXPORT zfbool printResolveStatus(ZF_IN const ZFSerializableData &s
             { \
                 return zffalse; \
             } \
-            categoryData.categorySet(key); \
+            categoryData.category(key); \
             serializableData.elementAdd(categoryData); \
         } \
     } while(zffalse)

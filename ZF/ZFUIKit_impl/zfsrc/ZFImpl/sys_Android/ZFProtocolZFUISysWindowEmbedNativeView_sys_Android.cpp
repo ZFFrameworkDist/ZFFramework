@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUISysWindowEmbedNativeView.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
@@ -57,7 +48,7 @@ public:
             ZFCastStatic(jobject, child)
             );
     }
-    virtual void nativeViewRemote(ZF_IN void *parent, ZF_IN void *child)
+    virtual void nativeViewRemove(ZF_IN void *parent, ZF_IN void *child)
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
         static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, "native_nativeViewRemove",

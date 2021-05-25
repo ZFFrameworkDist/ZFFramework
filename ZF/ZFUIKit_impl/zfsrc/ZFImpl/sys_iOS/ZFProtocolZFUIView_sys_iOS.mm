@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIViewFocus.h"
@@ -19,11 +10,8 @@
 @interface _ZFP_ZFUIViewImpl_sys_iOS_View : UIView
 @property (nonatomic, assign) ZFUIView *_ZFP_ownerZFUIView;
 @property (nonatomic, strong) UIView *_ZFP_nativeImplView;
-@property (nonatomic, assign) CGRect _ZFP_nativeImplViewFrame;
-@property (nonatomic, assign) CGRect _ZFP_frame;
 @property (nonatomic, strong) NSMutableArray *_ZFP_mouseRecords; // UITouch
 @property (nonatomic, assign) BOOL _ZFP_uiEnable;
-@property (nonatomic, assign) BOOL _ZFP_layoutRequested;
 @property (nonatomic, assign) BOOL _ZFP_ZFUIViewFocus_viewFocusable;
 @end
 @implementation _ZFP_ZFUIViewImpl_sys_iOS_View
@@ -42,7 +30,6 @@
 
     // status init
     self._ZFP_uiEnable = YES;
-    self._ZFP_layoutRequested = NO;
 
     self._ZFP_ZFUIViewFocus_viewFocusable = NO;
 
@@ -70,52 +57,17 @@
 
 // ============================================================
 // frame and layout
-- (void)set_ZFP_frame:(CGRect)newFrame ZFImpl_sys_iOS_overrideProperty
-{
-    self->__ZFP_frame = newFrame;
-    self.frame = newFrame;
-}
-- (void)setNeedsLayout
-{
-    if(!self._ZFP_layoutRequested)
-    {
-        self._ZFP_layoutRequested = YES;
-        if(self._ZFP_ownerZFUIView != zfnull && self._ZFP_ownerZFUIView->viewParent() == zfnull)
-        {
-            ZFPROTOCOL_ACCESS(ZFUIView)->notifyNeedLayout(self._ZFP_ownerZFUIView);
-        }
-    }
-    [super setNeedsLayout];
-}
 - (CGSize)sizeThatFits:(CGSize)size
 {
-    return self._ZFP_frame.size;
+    return self.frame.size;
 }
 - (void)layoutSubviews
 {
-    self._ZFP_layoutRequested = NO;
-    [super layoutSubviews];
-    if(self._ZFP_ownerZFUIView != zfnull && self._ZFP_ownerZFUIView->viewParent() == zfnull)
-    {
-        ZFPROTOCOL_ACCESS(ZFUIView)->notifyLayoutRootView(self._ZFP_ownerZFUIView, ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectFromCGRect(self.frame));
-    }
-
-    NSArray *children = self.subviews;
-    for(NSUInteger i = 0; i < [children count]; ++i)
-    {
-        UIView *child = [children objectAtIndex:i];
-        if(child == self._ZFP_nativeImplView)
-        {
-            child.frame = self._ZFP_nativeImplViewFrame;
-        }
-        else if([child isKindOfClass:[_ZFP_ZFUIViewImpl_sys_iOS_View class]])
-        {
-            child.frame = ((_ZFP_ZFUIViewImpl_sys_iOS_View *)child)._ZFP_frame;
-        }
-        else
-        {
-            child.frame = self.bounds;
-        }
+    if(self._ZFP_ownerZFUIView != zfnull
+        && self._ZFP_ownerZFUIView->layoutRequested()
+        && (self._ZFP_ownerZFUIView->viewParent() == zfnull || !self._ZFP_ownerZFUIView->viewParent()->layoutRequested())
+    ) {
+        ZFPROTOCOL_ACCESS(ZFUIView)->notifyLayoutView(self._ZFP_ownerZFUIView, ZFImpl_sys_iOS_ZFUIRectFromCGRect(self.frame));
     }
 }
 
@@ -136,10 +88,10 @@
         [self._ZFP_mouseRecords addObject:touch];
 
         zfblockedAllocWithCache(ZFUIMouseEvent, ev);
-        ev->eventResolvedSet(zffalse);
-        ev->mouseId = (zfidentity)[touch hash];
+        ev->eventResolved(zffalse);
+        ev->mouseId = (zft_zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseDown;
-        ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mousePoint = ZFImpl_sys_iOS_ZFUIPointFromCGPoint([touch locationInView:self]);
         ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
@@ -165,10 +117,10 @@
     for(UITouch *touch in self._ZFP_mouseRecords)
     {
         zfblockedAllocWithCache(ZFUIMouseEvent, ev);
-        ev->eventResolvedSet(zffalse);
-        ev->mouseId = (zfidentity)[touch hash];
+        ev->eventResolved(zffalse);
+        ev->mouseId = (zft_zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseMove;
-        ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mousePoint = ZFImpl_sys_iOS_ZFUIPointFromCGPoint([touch locationInView:self]);
         ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
@@ -188,10 +140,10 @@
         [self._ZFP_mouseRecords removeObject:touch];
 
         zfblockedAllocWithCache(ZFUIMouseEvent, ev);
-        ev->eventResolvedSet(zffalse);
-        ev->mouseId = (zfidentity)[touch hash];
+        ev->eventResolved(zffalse);
+        ev->mouseId = (zft_zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseUp;
-        ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mousePoint = ZFImpl_sys_iOS_ZFUIPointFromCGPoint([touch locationInView:self]);
         ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
@@ -211,10 +163,10 @@
         [self._ZFP_mouseRecords removeObject:touch];
 
         zfblockedAllocWithCache(ZFUIMouseEvent, ev);
-        ev->eventResolvedSet(zffalse);
-        ev->mouseId = (zfidentity)[touch hash];
+        ev->eventResolved(zffalse);
+        ev->mouseId = (zft_zfidentity)[touch hash];
         ev->mouseAction = ZFUIMouseAction::e_MouseCancel;
-        ev->mousePoint = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPoint([touch locationInView:self]);
+        ev->mousePoint = ZFImpl_sys_iOS_ZFUIPointFromCGPoint([touch locationInView:self]);
         ev->mouseButton = ZFUIMouseButton::e_MouseButtonLeft;
         ZFPROTOCOL_ACCESS(ZFUIView)->notifyUIEvent(self._ZFP_ownerZFUIView, ev);
     }
@@ -373,6 +325,7 @@ public:
         nativeViewTmp.userInteractionEnabled = YES;
         nativeViewTmp.backgroundColor = nil;
         nativeViewTmp._ZFP_ZFUIViewFocus_viewFocusable = NO;
+        nativeViewTmp.layer.transform = CATransform3DIdentity;
 
         [nativeViewTmp._ZFP_mouseRecords removeAllObjects];
         nativeViewTmp._ZFP_ownerZFUIView = zfnull;
@@ -397,10 +350,10 @@ public:
         nativeViewTmp = nil;
     }
 
-    virtual void nativeImplViewSet(ZF_IN ZFUIView *view,
-                                   ZF_IN void *nativeImplViewOld,
-                                   ZF_IN void *nativeImplView,
-                                   ZF_IN zfindex virtualIndex)
+    virtual void nativeImplView(ZF_IN ZFUIView *view,
+                                ZF_IN void *nativeImplViewOld,
+                                ZF_IN void *nativeImplView,
+                                ZF_IN zfindex virtualIndex)
     {
         _ZFP_ZFUIViewImpl_sys_iOS_View *nativeView = (__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView();
         if(nativeView._ZFP_nativeImplView != nil)
@@ -413,17 +366,17 @@ public:
             [nativeView insertSubview:nativeView._ZFP_nativeImplView atIndex:virtualIndex];
         }
     }
-    virtual void nativeImplViewFrameSet(ZF_IN ZFUIView *view,
-                                        ZF_IN const ZFUIRect &rect)
+    virtual void nativeImplViewFrame(ZF_IN ZFUIView *view,
+                                     ZF_IN const ZFUIRect &rect)
     {
         _ZFP_ZFUIViewImpl_sys_iOS_View *nativeView = (__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView();
-        nativeView._ZFP_nativeImplViewFrame = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(rect);
+        nativeView._ZFP_nativeImplView.frame = ZFImpl_sys_iOS_ZFUIRectToCGRect(rect);
     }
-    virtual zffloat nativeViewScaleForImpl(ZF_IN void *nativeView)
+    virtual zffloat UIScaleForImpl(ZF_IN void *nativeView)
     {
         return 1;
     }
-    virtual zffloat nativeViewScaleForPhysicalPixel(ZF_IN void *nativeView)
+    virtual zffloat UIScaleForPixel(ZF_IN void *nativeView)
     {
         UIScreen *ownerScreen = ((__bridge UIView *)nativeView).window.screen;
         return (zffloat)((ownerScreen == nil) ? [UIScreen mainScreen].scale : ownerScreen.scale);
@@ -432,30 +385,30 @@ public:
     // ============================================================
     // properties
 public:
-    virtual void viewVisibleSet(ZF_IN ZFUIView *view,
-                                ZF_IN zfbool viewVisible)
+    virtual void viewVisible(ZF_IN ZFUIView *view,
+                             ZF_IN zfbool viewVisible)
     {
         ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView()).hidden = !viewVisible;
     }
-    virtual void viewAlphaSet(ZF_IN ZFUIView *view,
-                              ZF_IN zffloat viewAlpha)
+    virtual void viewAlpha(ZF_IN ZFUIView *view,
+                           ZF_IN zffloat viewAlpha)
     {
         ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView()).alpha = viewAlpha;
     }
-    virtual void viewUIEnableSet(ZF_IN ZFUIView *view,
-                                 ZF_IN zfbool viewUIEnable)
+    virtual void viewUIEnable(ZF_IN ZFUIView *view,
+                              ZF_IN zfbool viewUIEnable)
     {
         ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView())._ZFP_uiEnable = viewUIEnable;
     }
-    virtual void viewUIEnableTreeSet(ZF_IN ZFUIView *view,
-                                     ZF_IN zfbool viewUIEnableTree)
+    virtual void viewUIEnableTree(ZF_IN ZFUIView *view,
+                                  ZF_IN zfbool viewUIEnableTree)
     {
         ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView()).userInteractionEnabled = viewUIEnableTree;
     }
-    virtual void viewBackgroundColorSet(ZF_IN ZFUIView *view,
-                                        ZF_IN const ZFUIColor &viewBackgroundColor)
+    virtual void viewBackgroundColor(ZF_IN ZFUIView *view,
+                                     ZF_IN const ZFUIColor &viewBackgroundColor)
     {
-        ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView()).backgroundColor = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorToUIColor(viewBackgroundColor);
+        ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView()).backgroundColor = ZFImpl_sys_iOS_ZFUIColorToUIColor(viewBackgroundColor);
     }
 
 public:
@@ -496,31 +449,26 @@ public:
     }
 
 public:
-    virtual void viewFrameSet(ZF_IN ZFUIView *view,
-                              ZF_IN const ZFUIRect &rect)
+    virtual void viewFrame(ZF_IN ZFUIView *view,
+                           ZF_IN const ZFUIRect &rect)
     {
-        ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView())._ZFP_frame =
-            ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(rect);
+        ((__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView()).frame =
+            ZFImpl_sys_iOS_ZFUIRectToCGRect(rect);
     }
 
     virtual void layoutRequest(ZF_IN ZFUIView *view)
     {
-        // iOS needs to setNeedsLayout recursively
-        UIView *nativeView = (__bridge UIView *)view->nativeView();
-        do
-        {
-            [nativeView setNeedsLayout];
-            nativeView = nativeView.superview;
-        } while(nativeView != nil);
+        _ZFP_ZFUIViewImpl_sys_iOS_View *nativeView = (__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView();
+        [nativeView setNeedsLayout];
     }
 
     virtual void measureNativeView(ZF_OUT ZFUISize &ret,
                                    ZF_IN void *nativeView,
                                    ZF_IN const ZFUISize &sizeHint)
     {
-        ret = ZFUISizeMake(zfmMax(sizeHint.width, 0), zfmMax(sizeHint.height, 0));
-        ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeFromCGSizeT(ret,
-            [(__bridge UIView *)nativeView sizeThatFits:ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeToCGSize(ret)]);
+        ret = ZFUISizeMake(zfmMax(sizeHint.width, (zffloat)0), zfmMax(sizeHint.height, (zffloat)0));
+        ZFImpl_sys_iOS_ZFUISizeFromCGSizeT(ret,
+            [(__bridge UIView *)nativeView sizeThatFits:ZFImpl_sys_iOS_ZFUISizeToCGSize(ret)]);
     }
 ZFPROTOCOL_IMPLEMENTATION_END(ZFUIViewImpl_sys_iOS)
 ZFPROTOCOL_IMPLEMENTATION_REGISTER(ZFUIViewImpl_sys_iOS)
@@ -533,8 +481,8 @@ ZFPROTOCOL_IMPLEMENTATION_BEGIN(ZFUIViewFocusImpl_sys_iOS, ZFUIViewFocus, ZFProt
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_ITEM(ZFUIView, "iOS:UIView")
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_END()
 public:
-    virtual void viewFocusableSet(ZF_IN ZFUIView *view,
-                                  ZF_IN zfbool viewFocusable)
+    virtual void viewFocusable(ZF_IN ZFUIView *view,
+                               ZF_IN zfbool viewFocusable)
     {
         _ZFP_ZFUIViewImpl_sys_iOS_View *nativeView = (__bridge _ZFP_ZFUIViewImpl_sys_iOS_View *)view->nativeView();
         nativeView._ZFP_ZFUIViewFocus_viewFocusable = viewFocusable;

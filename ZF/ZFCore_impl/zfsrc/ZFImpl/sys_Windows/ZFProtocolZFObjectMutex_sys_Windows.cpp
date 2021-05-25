@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Windows_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFObjectMutex.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -33,7 +24,7 @@ public:
     static void *implInit(void)
     {
         _Mutex *mutex = zfnew(_Mutex);
-        mutex->INVALID_THREAD_ID = (DWORD)INVALID_HANDLE_VALUE;
+        mutex->INVALID_THREAD_ID = (DWORD)-1;
         InitializeCriticalSection(&(mutex->mutex));
         InitializeCriticalSection(&(mutex->mutexParamLocker));
         mutex->runningThreadId = mutex->INVALID_THREAD_ID;

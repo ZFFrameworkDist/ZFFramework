@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFThreadTaskRequest.h"
 
@@ -46,7 +37,7 @@ public:
                              ZF_IN ZFObject *param1)
     {
         ZFListenerHolder *listenerData = zfAlloc(ZFListenerHolder, task,
-            ZFListenerData().param0Set(param0).param1Set(param1));
+            ZFListenerData().param0(param0).param1(param1));
         JNIEnv *jniEnv = JNIGetJNIEnv();
         static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, "native_taskRequest",
             JNIGetMethodSig(JNIType::S_void, JNIParamTypeContainer()

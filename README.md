@@ -1,6 +1,25 @@
+
+<!-- vim-markdown-toc GFM -->
+
+* [Introduction](#introduction)
+* [Quick overview](#quick-overview)
+    * [cpp hello world](#cpp-hello-world)
+    * [lua hello world](#lua-hello-world)
+    * [powerful dynamic register](#powerful-dynamic-register)
+* [Getting started](#getting-started)
+* [Detailed](#detailed)
+    * [Requirement](#requirement)
+    * [Main features](#main-features)
+    * [Current status](#current-status)
+    * [What we do](#what-we-do)
+    * [License](#license)
+
+<!-- vim-markdown-toc -->
+
+
 # Introduction
 
-welcome to ZFFramework, a cross-platform, lightweight, mid-level application framework in C++
+welcome to ZFFramework, a cross-platform and powerful application framework in C++
 
 everything here starts with "ZF", which stands for "Zero Framework"
 
@@ -11,21 +30,145 @@ everything here starts with "ZF", which stands for "Zero Framework"
 Homepage:
 
 * Online docs: http://ZFFramework.com
-* Github repo: https://github.com/ZFFramework/ZFFramework [![Build Status](https://travis-ci.org/ZFFramework/ZFFramework.svg?branch=master)](https://travis-ci.org/ZFFramework/ZFFramework)
+* Github repo: https://github.com/ZFFramework/ZFFramework [![Build Status](https://travis-ci.com/ZFFramework/ZFFramework.svg?branch=master)](https://travis-ci.com/ZFFramework/ZFFramework)
 
     NOTE: this repo would keep clean (remove unnecessary history) and update frequently,
     if you want stable or history version, please refer to [ZFFrameworkDist](https://github.com/ZFFrameworkDist/ZFFramework)
 
-# Main features
+
+# Quick overview
+
+## cpp hello world
+
+this piece of code shows how to show a hello world on UI and log output
+
+```cpp
+#include "ZFUIWidget.h" // for common UI module
+ZFMAIN_ENTRY() // app starts from here
+{
+    // show a hello world to log output
+    zfLogT() << "hello wolrd";
+
+    // show a window (full screen by default)
+    zfblockedAlloc(ZFUIWindow, window);
+    window->windowShow();
+
+    // show a hello world as a text view
+    zfblockedAlloc(ZFUITextView, textView);
+    window->childAdd(textView);
+    textView->layoutParam()->layoutAlign(ZFUIAlign::e_LeftInner);
+    textView->text("hello world");
+
+    // button and click (as observer)
+    zfblockedAlloc(ZFUIButtonBasic, button);
+    window->childAdd(button);
+    button->layoutParam()->layoutAlign(ZFUIAlign::e_RightInner);
+    button->buttonLabelText("click me");
+    ZFLISTENER_LOCAL(onClick, {
+        ZFUIButtonBasic *button = userData->objectHolded();
+        zfLogTrimT() << "button clicked:" << button;
+        zfLogTrimT() << "sender:" << listenerData.sender();
+    })
+    button->onClick(onClick, button->objectHolder());
+}
+```
+
+
+## lua hello world
+
+this piece of code shows equivalent lua code to use ZFFramework,
+<b>all the lua bindings are automatically done by reflection!</b>
+
+```lua
+zfLog('hello world')
+
+local window = ZFUIWindow()
+window:windowShow()
+
+local textView = zfAlloc('ZFUITextView')
+window:childAdd(textView)
+textView:layoutParam():layoutAlign(ZFUIAlign.e_LeftInner())
+textView:text('hello wolrd')
+
+local button = ZFUIButtonBasic.ClassData():newInstance()
+window:childAdd(button)
+button:layoutParam():layoutAlign(ZFUIAlign.e_RightInner())
+button:buttonLabelText('click me')
+button:onClick(
+    function (listenerData, userData)
+        zfLog('button clicked: %s', userData:objectHolded())
+        zfLog('sender: %s', listenerData:sender())
+    end,
+    button:objectHolder())
+```
+
+
+## powerful dynamic register
+
+this piece of code shows the powerful dynamic register logic
+
+```cpp
+#include "ZFLua.h"
+ZFMAIN_ENTRY()
+{
+    ZFDynamic()
+        .classBegin("MyBaseView", "ZFUIView")
+            .method(ZFListenerForLambda({
+                zfLogTrimT() << "MyBaseView::testFunc() called";
+            }), zfnull, "void", "testFunc")
+        .classEnd();
+
+    ZFLuaExecute(
+        "ZFDynamic()\n"
+        "    :classBegin('MyChildView', 'MyBaseView')\n"
+        "        :methodBegin('void', 'testFunc')\n"
+        "        :methodEnd(function(listenerData, userData)\n"
+        "            listenerData:param0():callSuper()\n"
+        "            zfLog('MyChildView::testFunc() called')\n"
+        "        end)\n"
+        "    :classEnd()\n"
+        "\n"
+        "local myView = MyChildView()\n"
+        "myView:testFunc()\n"
+    );
+
+    zfautoObject obj = ZFClass::classForName("MyChildView")->newInstance();
+    obj->invoke("testFunc");
+}
+```
+
+
+# Getting started
+
+* [Download](https://zfframework.github.io/doc/_doc_tag__download.html) necessary files
+* [Setup](https://zfframework.github.io/doc/_doc_tag__setup.html) set up necessary environment for ZFFramework
+* [Tutorial](https://zfframework.github.io/doc/_doc_tag__tutorial.html) quick tutorial to code with ZFFramework
+* [FAQ](https://zfframework.github.io/doc/_doc_tag__f_a_q.html)
+
+
+# Detailed
+
+## Requirement
+
+* for the core modlue:
+
+    * C++03 compatible compiler (require templates, no boost/RTTI/exceptions required)
+    * STL containers (require: map/unordered_map/vector/deque/list), or supply custom wrapper
+
+* for the implementation module:
+
+    * depends on the actual platform implementation
+
+
+## Main features
 
 * minimum requirement
 * powerful reflection, serialzation, styleable logic
 
     * for how powerful ZFFramework is, you may refer to [Feature page](https://zfframework.github.io/doc/_doc_tag__feature.html)
     * automatic lua binding, no extra bind code or config are necessary
-    * automatic UI serialization
-    * stateful property animation
-    * enhanced global event observer
+    * automatic serialization
+    * enhanced global event observer and event filter
 
 * fully modularization, "core + protocol + dynamic implementation" design
 
@@ -42,92 +185,7 @@ Homepage:
     you have no need to write size-dependent code in both app and implementation
 
 
-# Quick overview
-
-* this piece of code shows how to show a hello world on UI and log output
-
-```cpp
-    #include "ZFUIWidget.h" // for common UI module
-    ZFMAIN_ENTRY(params) // app starts from here
-    {
-        // show a hello world to log output
-        zfLogT() << "hello wolrd";
-
-        // show a window (full screen by default)
-        zfblockedAlloc(ZFUIWindow, window);
-        window->windowShow();
-
-        // show a hello world as a text view
-        zfblockedAlloc(ZFUITextView, textView);
-        window->childAdd(textView);
-        textView->layoutParam()->layoutAlignSet(ZFUIAlign::e_LeftInner);
-        textView->textSet("hello world");
-
-        // button and click (as observer)
-        zfblockedAlloc(ZFUIButtonBasic, button);
-        window->childAdd(button);
-        button->layoutParam()->layoutAlignSet(ZFUIAlign::e_RightInner);
-        button->buttonLabelTextSet("click me");
-        ZFLISTENER_LOCAL(onClick, {
-            ZFUIButtonBasic *button = userData->objectHolded();
-            zfLogTrimT() << "button clicked:" << button;
-        })
-        button->observerAdd(ZFUIButton::EventButtonOnClick(), onClick, button->objectHolder());
-
-        return 0;
-    }
-```
-
-* this piece of code shows equivalent lua code to use ZFFramework,
-    <b>all the lua bindings are automatically done by reflection!</b>
-
-```lua
-    zfLog('hello world')
-
-    local window = ZFUIWindow()
-    window:windowShow()
-
-    local textView = zfAlloc('ZFUITextView')
-    window:childAdd(textView)
-    textView:layoutParam():layoutAlignSet(ZFUIAlign.e_LeftInner())
-    textView:textSet('hello wolrd')
-
-    local button = ZFUIButtonBasic.ClassData():newInstance()
-    window:childAdd(button)
-    button:layoutParam():layoutAlignSet(ZFUIAlign.e_RightInner())
-    button:buttonLabelTextSet('click me')
-    button:observerAdd(
-        ZFUIButton.EventButtonOnClick(),
-        function (listenerData, userData)
-            zfLog('button clicked: %s', userData:objectHolded())
-        end,
-        button:objectHolder())
-```
-
-* and here are screenshot of demo 2048 game built by ZFFramework:
-
-    <table border="0"><tr>
-    <td><img src="https://raw.githubusercontent.com/ZFFramework/zfframework.github.com/master/res/ZFFramework/ZF2048_iOS.png"></td>
-    <td><img src="https://raw.githubusercontent.com/ZFFramework/zfframework.github.com/master/res/ZFFramework/ZF2048_Android.png"></td>
-    <td><img src="https://raw.githubusercontent.com/ZFFramework/zfframework.github.com/master/res/ZFFramework/ZF2048_Qt_Windows.png"></td>
-    <td><img src="https://raw.githubusercontent.com/ZFFramework/zfframework.github.com/master/res/ZFFramework/ZF2048_Qt_MacOS.png"></td>
-    <td><img src="https://raw.githubusercontent.com/ZFFramework/zfframework.github.com/master/res/ZFFramework/ZF2048_Qt_Ubuntu.png"></td>
-    </tr></table>
-
-
-# Requirement
-
-* for the core modlue:
-
-    * C++03 compatible compiler (require templates, no boost/RTTI/exceptions required)
-    * STL containers (require: map/unordered_map/vector/deque/list), or supply custom wrapper
-
-* for the implementation module:
-
-    * depends on the actual platform implementation
-
-
-# Current status
+## Current status
 
 * finished
     * core module (memory management, reflection, serialization)
@@ -145,23 +203,15 @@ Homepage:
     * more platform implementations
 
 
-# What we do
+## What we do
 
 * aiming to be portable and can be ported easily,
     aiming to be lightweighted and able to be embeded easily,
-    aiming to use 20% code to do 80% work
-* supply Java-like / ObjectC-like app level APIs to build up small/medium sized app easily
+    you may simply drag and drop all src files to your build system
+* fully dynamic, extensible
 
 
-# Getting started
-
-* [Download](https://zfframework.github.io/doc/_doc_tag__download.html) necessary files
-* [Setup](https://zfframework.github.io/doc/_doc_tag__setup.html) set up necessary environment for ZFFramework
-* [Tutorial](https://zfframework.github.io/doc/_doc_tag__tutorial.html) quick tutorial to code with ZFFramework
-* [FAQ](https://zfframework.github.io/doc/_doc_tag__f_a_q.html)
-
-
-# License
+## License
 
 ZFFramework is under MIT license ([see here](https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE)),
 feel free to copy or modify or use it
@@ -173,10 +223,5 @@ feel free to copy or modify or use it
     [Issues](https://github.com/ZFFramework/ZFFramework/issues) or [Pull Request](https://github.com/ZFFramework/ZFFramework/pulls) are welcome
 
 
-if you like my work, please consider donate:
-
-* [paypal](http://paypal.com/): zerofighter@163.com
-* [alipay](http://alipay.com/): zerofighter@163.com
-
-contact master@zsaber.com (Chinese or English only) before donate, we would really appreciate for your help
+if you like my work, [buy me a coffee](https://github.com/ZSaberLv0/ZSaberLv0)?
 

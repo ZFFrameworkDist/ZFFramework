@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_ZFLua_PathInfo.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -80,10 +71,9 @@ static int _ZFP_ZFLuaLocalInput(ZF_IN lua_State *L, ZF_IN zfbool requireValid, Z
     {
         if(requireValid)
         {
-            ZFLuaErrorOccurredTrim(
+            return ZFImpl_ZFLua_luaError(L,
                 "unable to access ZFLuaPathInfo(), got: %s",
                 ZFImpl_ZFLua_luaObjectInfo(L, 1, zftrue).cString());
-            return ZFImpl_ZFLua_luaError(L);
         }
         else
         {
@@ -97,10 +87,9 @@ static int _ZFP_ZFLuaLocalInput(ZF_IN lua_State *L, ZF_IN zfbool requireValid, Z
     {
         if(requireValid)
         {
-            ZFLuaErrorOccurredTrim(
+            return ZFImpl_ZFLua_luaError(L,
                 "unable to access localFilePath, got: %s",
                 ZFImpl_ZFLua_luaObjectInfo(L, 2, zftrue).cString());
-            return ZFImpl_ZFLua_luaError(L);
         }
         else
         {
@@ -130,11 +119,10 @@ static int _ZFP_ZFLuaLocalInput(ZF_IN lua_State *L, ZF_IN zfbool requireValid, Z
     {
         if(requireValid)
         {
-            ZFLuaErrorOccurredTrim(
+            return ZFImpl_ZFLua_luaError(L,
                 "unable to load local file \"%s\" relative to \"%s\"",
                 localFilePath,
                 ZFPathInfoToString(pathInfo->zfv).cString());
-            return ZFImpl_ZFLua_luaError(L);
         }
         else
         {
@@ -150,12 +138,13 @@ static int _ZFP_ZFLuaLocalInput(ZF_IN lua_State *L, ZF_IN zfbool requireValid, Z
 
 // ============================================================
 static void _ZFP_ZFLuaImportAllLoop(ZF_IN lua_State *L,
-                                    ZF_IN const ZFFilePathInfoData &impl,
+                                    ZF_IN const ZFFilePathInfoImpl &impl,
                                     ZF_IN const ZFPathInfo &pathInfo,
                                     ZF_IN const ZFListener &importCallback,
                                     ZF_IN ZFObject *importCallbackUserData,
                                     ZF_IN zfbool recursive);
 static int _ZFP_ZFLuaImportAllExecute(ZF_IN lua_State *L,
+                                      ZF_IN const ZFFilePathInfoImpl &impl,
                                       ZF_IN v_ZFPathInfo *pathInfo,
                                       ZF_IN const ZFListener &importCallback,
                                       ZF_IN ZFObject *importCallbackUserData);
@@ -188,12 +177,12 @@ static int _ZFP_ZFLuaImportAll(ZF_IN lua_State *L)
     if(count >= 5)
     {
         zfautoObject recursiveHolder;
-        if(ZFImpl_ZFLua_toNumberT(recursiveHolder, L, 5))
+        if(ZFImpl_ZFLua_toObject(recursiveHolder, L, 5))
         {
-            ZFValue *t = recursiveHolder;
-            if(t != zfnull && t->valueConvertableTo(ZFValueType::e_bool))
+            v_zfbool *t = recursiveHolder;
+            if(t != zfnull)
             {
-                recursive = t->boolValue();
+                recursive = t->zfv;
             }
         }
     }
@@ -215,19 +204,17 @@ static int _ZFP_ZFLuaImportAll(ZF_IN lua_State *L)
         v_ZFPathInfo *pathInfo = paramHolder;
         if(pathInfo == zfnull)
         {
-            ZFLuaErrorOccurredTrim(
+            return ZFImpl_ZFLua_luaError(L,
                 "unable to access pathInfo, got: %s",
                 ZFImpl_ZFLua_luaObjectInfo(L, 1, zftrue).cString());
-            return ZFImpl_ZFLua_luaError(L);
         }
 
         const zfchar *localFilePath = zfnull;
         if(!ZFImpl_ZFLua_toString(localFilePath, L, 2))
         {
-            ZFLuaErrorOccurredTrim(
+            return ZFImpl_ZFLua_luaError(L,
                 "unable to access localFilePath, got: %s",
                 ZFImpl_ZFLua_luaObjectInfo(L, 2, zftrue).cString());
-            return ZFImpl_ZFLua_luaError(L);
         }
 
         ZFPathInfo localPathInfo;
@@ -258,13 +245,12 @@ static int _ZFP_ZFLuaImportAllWrap(ZF_IN lua_State *L,
                                    ZF_IN ZFObject *importCallbackUserData,
                                    ZF_IN zfbool recursive)
 {
-    const ZFFilePathInfoData *impl = ZFFilePathInfoDataGet(pathInfo.pathType);
+    const ZFFilePathInfoImpl *impl = ZFFilePathInfoImplForPathType(pathInfo.pathType);
     if(impl == zfnull)
     {
-        ZFLuaErrorOccurredTrim(
+        return ZFImpl_ZFLua_luaError(L,
             "no such path type: %s",
             ZFPathInfoToString(pathInfo).cString());
-        return ZFImpl_ZFLua_luaError(L);
     }
     if(impl->callbackIsDir(pathInfo.pathData))
     {
@@ -274,23 +260,30 @@ static int _ZFP_ZFLuaImportAllWrap(ZF_IN lua_State *L,
     else
     {
         zfblockedAlloc(v_ZFPathInfo, pathInfoHolder, pathInfo);
-        return _ZFP_ZFLuaImportAllExecute(L, pathInfoHolder, importCallback, importCallbackUserData);
+        return _ZFP_ZFLuaImportAllExecute(L, *impl, pathInfoHolder, importCallback, importCallbackUserData);
     }
 }
 static int _ZFP_ZFLuaImportAllExecute(ZF_IN lua_State *L,
+                                      ZF_IN const ZFFilePathInfoImpl &impl,
                                       ZF_IN v_ZFPathInfo *pathInfo,
                                       ZF_IN const ZFListener &importCallback,
                                       ZF_IN ZFObject *importCallbackUserData)
 {
+    zfstring nameTmp;
+    if(!impl.callbackToFileName(pathInfo->zfv.pathData, nameTmp)
+        || ZFFileExtOf(nameTmp).compare("lua") != 0)
+    {
+        return 0;
+    }
+
     ZFInput input;
     input.callbackSerializeCustomDisable(zftrue);
     ZFInputForPathInfoT(input, pathInfo->zfv.pathType, pathInfo->zfv.pathData);
     if(!input.callbackIsValid())
     {
-        ZFLuaErrorOccurredTrim(
+        return ZFImpl_ZFLua_luaError(L,
             "unable to load: %s",
             ZFPathInfoToString(pathInfo->zfv).cString());
-        return ZFImpl_ZFLua_luaError(L);
     }
 
     zfstlmap<zfstlstringZ, zfbool> &m = _ZFP_ZFLuaImportOnceData();
@@ -302,13 +295,13 @@ static int _ZFP_ZFLuaImportAllExecute(ZF_IN lua_State *L,
 
     if(importCallback.callbackIsValid())
     {
-        importCallback.execute(ZFListenerData().param0Set(pathInfo), importCallbackUserData);
+        importCallback.execute(ZFListenerData().param0(pathInfo), importCallbackUserData);
     }
     ZFLuaExecute(input, zfnull, L);
     return 0;
 }
 static void _ZFP_ZFLuaImportAllLoop(ZF_IN lua_State *L,
-                                    ZF_IN const ZFFilePathInfoData &impl,
+                                    ZF_IN const ZFFilePathInfoImpl &impl,
                                     ZF_IN const ZFPathInfo &pathInfo,
                                     ZF_IN const ZFListener &importCallback,
                                     ZF_IN ZFObject *importCallbackUserData,
@@ -337,7 +330,7 @@ static void _ZFP_ZFLuaImportAllLoop(ZF_IN lua_State *L,
             }
             else
             {
-                _ZFP_ZFLuaImportAllExecute(L, childPathInfo, importCallback, importCallbackUserData);
+                _ZFP_ZFLuaImportAllExecute(L, impl, childPathInfo, importCallback, importCallbackUserData);
             }
         } while(impl.callbackFindNext(fd));
         impl.callbackFindClose(fd);

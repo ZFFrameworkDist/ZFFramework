@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLuaState.h"
 #include "protocol/ZFProtocolZFLua.h"
 
@@ -25,7 +16,7 @@ ZFMETHOD_FUNC_DEFINE_1(void, ZFLuaStateChange,
 }
 
 ZFMETHOD_FUNC_DEFINE_1(void, ZFLuaStateListT,
-                       ZFMP_OUT(ZFCoreArray<void *> &, ret))
+                       ZFMP_IN_OUT(ZFCoreArray<void *> &, ret))
 {
     ZFPROTOCOL_ACCESS(ZFLua)->luaStateList(ret);
 }
@@ -50,21 +41,21 @@ ZFMETHOD_FUNC_DEFINE_1(void, ZFLuaStateAttach,
                        ZFMP_IN(void *, L))
 {
     ZFPROTOCOL_ACCESS(ZFLua)->luaStateAttach(L);
-    if(ZFGlobalEventCenter::instance()->observerHasAdd(ZFGlobalEvent::EventLuaStateOnAttach()))
+    if(ZFGlobalObserver().observerHasAdd(ZFGlobalEvent::EventLuaStateOnAttach()))
     {
-        ZFGlobalEventCenter::instance()->observerNotify(
+        ZFGlobalObserver().observerNotify(
             ZFGlobalEvent::EventLuaStateOnAttach(),
-            zflineAlloc(v_VoidPointer, L));
+            zflineAlloc(v_ZFPtr, L));
     }
 }
 ZFMETHOD_FUNC_DEFINE_1(void, ZFLuaStateDetach,
                        ZFMP_IN(void *, L))
 {
-    if(ZFGlobalEventCenter::instance()->observerHasAdd(ZFGlobalEvent::EventLuaStateOnDetach()))
+    if(ZFGlobalObserver().observerHasAdd(ZFGlobalEvent::EventLuaStateOnDetach()))
     {
-        ZFGlobalEventCenter::instance()->observerNotify(
+        ZFGlobalObserver().observerNotify(
             ZFGlobalEvent::EventLuaStateOnDetach(),
-            zflineAlloc(v_VoidPointer, L));
+            zflineAlloc(v_ZFPtr, L));
     }
     ZFPROTOCOL_ACCESS(ZFLua)->luaStateDetach(L);
 }

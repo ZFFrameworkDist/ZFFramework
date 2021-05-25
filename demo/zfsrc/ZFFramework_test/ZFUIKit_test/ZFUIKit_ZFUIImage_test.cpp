@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIKit_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,14 +18,14 @@ protected:
 
         zfblockedAlloc(ZFUIImageView, view);
         container->childAdd(view);
-        view->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
+        view->layoutParam()->sizeParam(ZFUISizeParamFillFill());
 
         // encode image to binary and load it again to test
         zfautoObject imageHolder = zfRes("test_normal.png");
-        ZFIOBufferedCallbackUsingBuffer io;
-        ZFUIImageEncodeToFile(io, imageHolder);
-        zfautoObject imageNew = ZFUIImageEncodeFromFile(io);
-        view->imageSet(imageNew);
+        zfblockedAlloc(ZFIOBufferByMemory, io);
+        ZFUIImageSaveToFile(io->output(), imageHolder);
+        zfautoObject imageNew = ZFUIImageLoadFromFile(io->input());
+        view->image(imageNew);
 
         this->prepareSettingButton(window, view);
     }
@@ -43,7 +34,7 @@ private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIImageView *view)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingButtonWithTestWindow(window, settings);
     }

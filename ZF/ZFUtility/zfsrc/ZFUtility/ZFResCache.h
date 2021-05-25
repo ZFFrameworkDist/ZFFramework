@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFResCache.h
  * @brief utility to load serializable from resource with cache logic
@@ -30,29 +21,18 @@ zfclass ZF_ENV_EXPORT ZFResCache : zfextends ZFCache
     ZFOBJECT_DECLARE(ZFResCache, ZFCache)
     ZFOBJECT_SINGLETON_DECLARE(ZFResCache, instance)
 
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(zfindex, cacheMaxSize)
-    {
-        propertyValue = 100;
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(zfindex, cacheMaxSize)
 };
 
 /**
- * @brief load resource by #ZFObjectIOLoad and cache if enabled
+ * @brief load resource by #ZFObjectIOLoad
  *
- * cache would be stored in #ZFResCache,
- * you should not modified the returned object if cache enabled
+ * automatically cache the resource in #ZFResCache,
+ * you should not modified the returned object if cache enabled\n
+ * to remove cache, use #ZFCache::cacheRemove
  */
-ZFMETHOD_FUNC_DECLARE_2(zfautoObject, zfRes,
-                        ZFMP_IN(const zfchar *, resFilePath),
-                        ZFMP_IN_OPT(zfbool, enableCache, zftrue))
-/**
- * @brief see #zfRes
- */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfautoObject, zfResNoCache,
-                               ZFMP_IN(const zfchar *, resFilePath))
-{
-    return zfRes(resFilePath, zffalse);
-}
+ZFMETHOD_FUNC_DECLARE_1(zfautoObject, zfRes,
+                        ZFMP_IN(const zfchar *, resFilePath))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFResCache_h_

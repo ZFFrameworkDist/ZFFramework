@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCallbackSerializable.h"
 #include "ZFObjectImpl.h"
 
@@ -30,7 +21,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFCallback, ZFCallback, {
                     return zffalse;
                 }
 
-                _ZFP_ZFCallbackSerializeCustomCallback serializeCallback = _ZFP_ZFCallbackSerializeCustomTypeGet(customType);
+                _ZFP_ZFCallbackSerializeCustomCallback serializeCallback = _ZFP_ZFCallbackSerializeCustomTypeForName(customType);
                 if(serializeCallback == zfnull)
                 {
                     ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, serializableData,
@@ -41,8 +32,8 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFCallback, ZFCallback, {
                 {
                     return zffalse;
                 }
-                v.callbackSerializeCustomTypeSet(customType);
-                v.callbackSerializeCustomDataSet(customData);
+                v.callbackSerializeCustomType(customType);
+                v.callbackSerializeCustomData(customData);
 
                 serializableData.resolveMark();
                 return zftrue;
@@ -102,12 +93,12 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFCallback, ZFCallback, {
                 ZFSerializableUtil::errorOccurred(outErrorHint, "missing callback serialize custom data");
                 return zffalse;
             }
-            serializableData.itemClassSet(ZFTypeId_ZFCallback());
+            serializableData.itemClass(ZFTypeId_ZFCallback());
 
-            serializableData.attributeSet(ZFSerializableKeyword_ZFCallback_callbackType, v.callbackSerializeCustomType());
+            serializableData.attributeForName(ZFSerializableKeyword_ZFCallback_callbackType, v.callbackSerializeCustomType());
 
             ZFSerializableData customData = v.callbackSerializeCustomData()->copy();
-            customData.categorySet(ZFSerializableKeyword_ZFCallback_callbackData);
+            customData.category(ZFSerializableKeyword_ZFCallback_callbackData);
             serializableData.elementAdd(customData);
 
             return zftrue;
@@ -116,17 +107,17 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFCallback, ZFCallback, {
         switch(v.callbackType())
         {
             case ZFCallbackTypeDummy:
-                serializableData.itemClassSet(ZFSerializableKeyword_null);
+                serializableData.itemClass(ZFSerializableKeyword_null);
                 break;
             case ZFCallbackTypeMethod:
             {
-                serializableData.itemClassSet(ZFTypeId_ZFCallback());
+                serializableData.itemClass(ZFTypeId_ZFCallback());
                 ZFSerializableData methodData;
                 if(!ZFMethodToData(methodData, v.callbackMethod(), outErrorHint))
                 {
                     return zffalse;
                 }
-                methodData.categorySet(ZFSerializableKeyword_ZFCallback_method);
+                methodData.category(ZFSerializableKeyword_ZFCallback_method);
                 serializableData.elementAdd(methodData);
             }
                 break;
@@ -138,7 +129,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFCallback, ZFCallback, {
             }
                 break;
             case ZFCallbackTypeRawFunction:
-                serializableData.itemClassSet(ZFTypeId_ZFCallback());
+                serializableData.itemClass(ZFTypeId_ZFCallback());
                 ZFSerializableUtil::errorOccurred(outErrorHint,
                     "raw function is not supported");
                 return zffalse;
@@ -149,6 +140,43 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFCallback, ZFCallback, {
 
         return zftrue;
     })
+ZFMETHOD_USER_REGISTER_0({
+        ZFListenerData listenerData;
+        return ZFListener(invokerObject->to<v_ZFCallback *>()->zfv).execute(listenerData, zfnull);
+    }, v_ZFCallback,
+    void, execute)
+ZFMETHOD_USER_REGISTER_2({
+        return ZFListener(invokerObject->to<v_ZFCallback *>()->zfv).execute(listenerData, userData);
+    }, v_ZFCallback,
+    void, execute
+    , ZFMP_IN(const ZFListenerData &, listenerData)
+    , ZFMP_IN_OPT(ZFObject *, userData, zfnull)
+    )
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackId, ZFMP_IN(const zfchar *, callbackId))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const zfchar *, callbackId)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, callbackTag, ZFMP_IN(const zfchar *, key), ZFMP_IN(ZFObject *, tag))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, ZFObject *, callbackTag, ZFMP_IN(const zfchar *, key))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, callbackTagGetAllKeyValue, ZFMP_IN_OUT(ZFCoreArray<const zfchar *> &, allKey), ZFMP_IN_OUT(ZFCoreArray<ZFObject *> &, allValue))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackTagRemove, ZFMP_IN(const zfchar *, key))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, zfautoObject, callbackTagRemoveAndGet, ZFMP_IN(const zfchar *, key))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackTagRemoveAll)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, zfbool, callbackIsValid)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, ZFCallbackType, callbackType)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, ZFObject *, callbackOwnerObject)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFMethod *, callbackMethod)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, ZFFuncAddrType, callbackRawFunction)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackClear)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackOwnerObjectRetain)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackOwnerObjectRelease)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomType, ZFMP_IN(const zfchar *, customType))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const zfchar *, callbackSerializeCustomType)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomData, ZFMP_IN(const ZFSerializableData &, customData))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFSerializableData *, callbackSerializeCustomData)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomDisable, ZFMP_IN(zfbool, disable))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, zfbool, callbackSerializeCustomDisabled)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFPathInfo *, pathInfo)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, pathInfo, ZFMP_IN(const ZFPathInfo *, pathInfo))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, pathInfo, ZFMP_IN(const zfchar *, pathType), ZFMP_IN(const zfchar *, pathData))
 
 // ============================================================
 ZFTYPEID_ALIAS_DEFINE(ZFCallback, ZFCallback, ZFListener, ZFListener)
@@ -176,7 +204,7 @@ void _ZFP_ZFCallbackSerializeCustomTypeUnregister(ZF_IN const zfchar *customType
 {
     _ZFP_ZFCallbackSerializeCustomCallbackMap().erase(customType);
 }
-_ZFP_ZFCallbackSerializeCustomCallback _ZFP_ZFCallbackSerializeCustomTypeGet(ZF_IN const zfchar *customType)
+_ZFP_ZFCallbackSerializeCustomCallback _ZFP_ZFCallbackSerializeCustomTypeForName(ZF_IN const zfchar *customType)
 {
     zfstlmap<zfstlstringZ, _ZFP_ZFCallbackSerializeCustomCallback> &m = _ZFP_ZFCallbackSerializeCustomCallbackMap();
     zfstlmap<zfstlstringZ, _ZFP_ZFCallbackSerializeCustomCallback>::iterator it = m.find(customType);

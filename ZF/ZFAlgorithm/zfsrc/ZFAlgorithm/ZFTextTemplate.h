@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFTextTemplate.h
  * @brief text template util
@@ -22,7 +13,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 /**
  * @brief util method to apply template to plain text
  *
- * data would be applied accorrding to #ZFTextTemplateParam,
+ * data would be applied according to #ZFTextTemplateParam,
  * and result would be written to output,
  * return newly size written if success,
  * or zfindexMax() if failed,

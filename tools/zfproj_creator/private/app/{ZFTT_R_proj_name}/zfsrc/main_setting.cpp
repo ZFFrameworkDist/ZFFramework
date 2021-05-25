@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore.h"
 #include "ZFUIKit.h"
 
@@ -15,7 +6,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #if ZF_ENV_DEBUG // global debug level
     ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(main_setting_debugLevel, ZFLevelAppEssential)
     {
-        ZFLogLevelSet(ZFLogLevel::e_Verbose);
+        ZFLogLevelDefault(ZFLogLevel::e_Verbose);
     }
     ZF_GLOBAL_INITIALIZER_END(main_setting_debugLevel)
 #endif
@@ -28,16 +19,16 @@ ZF_NAMESPACE_GLOBAL_BEGIN
             return ;
         }
         ZFLISTENER_LOCAL(windowOnPause, {
-            ZFUISysWindow *sysWindow = listenerData.sender->to<ZFUISysWindow *>();
+            ZFUISysWindow *sysWindow = listenerData.sender<ZFUISysWindow *>();
             ZFUIViewTreePrint(sysWindow->rootView());
         })
         this->windowOnPauseListener = windowOnPause;
-        ZFObjectGlobalEventObserver().observerAdd(
+        ZFGlobalObserver().observerAdd(
             ZFUISysWindow::EventSysWindowOnPause(), this->windowOnPauseListener);
     }
     ZF_GLOBAL_INITIALIZER_DESTROY(main_setting_autoPrintViewTree)
     {
-        ZFObjectGlobalEventObserver().observerRemove(
+        ZFGlobalObserver().observerRemove(
             ZFUISysWindow::EventSysWindowOnPause(), this->windowOnPauseListener);
     }
     private:

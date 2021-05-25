@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFObjectCore.h
  * @brief base class of all objects
@@ -200,7 +191,7 @@ zfclassFwd ZFObjectHolder;
  * -  (ZFTAG_LIMITATION) due to some limitation, you should always use ZFObject as a pointer
  *   but without const qualifier,
  *   for const operations, use the const version objects,
- *   such as ZFArray instead of ZFArrayEditable
+ *   such as ZFArray instead of ZFArray
  *   for const arrays
  * -  you can access class info by:
  *   @code
@@ -241,6 +232,7 @@ public:
     enum {_ZFP_ZFObjectCanAllocPublic = 1};
     static void _ZFP_Obj_initImpl(ZFClass *cls) {}
     static ZFObject *_ZFP_zfAllocWithCache(void) {return zfnull;}
+    static inline void zfAllocCacheRelease(ZF_IN ZFObject *_obj) {}
     virtual inline void _ZFP_ObjI_onInitIvk(void) {}
     virtual inline void _ZFP_ObjI_onDeallocIvk(void) {}
 protected:
@@ -283,7 +275,7 @@ public:
      * @brief see #ZFObject::observerNotify
      *
      * param0 is #v_ZFProperty that value changes\n
-     * param1 is #v_VoidPointerConst holds the old property value
+     * param1 is #v_ZFPtrConst holds the old property value
      * (holds null when first time accessed)\n
      * the param1 holds these types:
      * -  for retain property, it points to (const zfautoObject *)
@@ -392,11 +384,16 @@ public:
      *   and follow the rules described in #objectHash
      */
     virtual ZFCompareResult objectCompare(ZF_IN ZFObject *anotherObj);
+    /** @brief util to #objectCompare */
+    virtual zfbool equalTo(ZF_IN ZFObject *anotherObj)
+    {
+        return this->objectCompare(anotherObj) == ZFCompareTheSame;
+    }
 
 public:
     /* ZFMETHOD_MAX_PARAM */
     /**
-     * @brief util method to perform #ZFMethodGenericInvoker,
+     * @brief util method to perform #ZFDI_invoke,
      *   do nothing if fail
      */
     virtual zfautoObject invoke(ZF_IN const zfchar *methodName
@@ -411,48 +408,64 @@ public:
                                 , ZF_OUT_OPT zfbool *success = zfnull
                                 , ZF_OUT_OPT zfstring *errorHint = zfnull
                                 );
+    /**
+     * @brief util method to perform #ZFDI_invoke,
+     *   do nothing if fail
+     */
+    virtual zfautoObject invoke(ZF_IN const zfchar *methodName
+                                , ZF_IN const zfchar *param0
+                                , ZF_IN_OPT const zfchar *param1 = zfnull
+                                , ZF_IN_OPT const zfchar *param2 = zfnull
+                                , ZF_IN_OPT const zfchar *param3 = zfnull
+                                , ZF_IN_OPT const zfchar *param4 = zfnull
+                                , ZF_IN_OPT const zfchar *param5 = zfnull
+                                , ZF_IN_OPT const zfchar *param6 = zfnull
+                                , ZF_IN_OPT const zfchar *param7 = zfnull
+                                , ZF_OUT_OPT zfbool *success = zfnull
+                                , ZF_OUT_OPT zfstring *errorHint = zfnull
+                                );
 
 public:
     /**
-     * @brief see #tagSet, true if this object has tag,
-     *   and tag can be checked by #tagGetAllKeyValue
+     * @brief see #objectTag, true if this object has tag,
+     *   and tag can be checked by #objectTagGetAllKeyValue
      */
-    zffinal zfbool tagHasSet(void);
+    zffinal zfbool objectTagExist(void);
     /**
      * @brief used to hold a object for app's use, auto retained
      *
      * replace if existing, remove if tag is null
      */
-    zffinal void tagSet(ZF_IN const zfchar *key,
-                        ZF_IN ZFObject *tag);
+    zffinal void objectTag(ZF_IN const zfchar *key,
+                           ZF_IN ZFObject *tag);
     /**
-     * @brief see #tagSet
+     * @brief see #objectTag
      */
-    zffinal ZFObject *tagGet(ZF_IN const zfchar *key);
+    zffinal ZFObject *objectTag(ZF_IN const zfchar *key);
     /**
-     * @brief see #tagSet
+     * @brief see #objectTag
      */
     template<typename T_ZFObject>
-    T_ZFObject tagGet(ZF_IN const zfchar *key)
+    T_ZFObject objectTag(ZF_IN const zfchar *key)
     {
-        return ZFCastZFObjectUnchecked(T_ZFObject, this->tagGet(key));
+        return ZFCastZFObjectUnchecked(T_ZFObject, this->objectTag(key));
     }
     /**
      * @brief get all key value
      */
-    zffinal void tagGetAllKeyValue(ZF_IN_OUT ZFCoreArray<const zfchar *> &allKey,
-                                   ZF_IN_OUT ZFCoreArray<ZFObject *> &allValue);
+    zffinal void objectTagGetAllKeyValue(ZF_IN_OUT ZFCoreArray<const zfchar *> &allKey,
+                                         ZF_IN_OUT ZFCoreArray<ZFObject *> &allValue);
     /**
      * @brief remove tag, same as set tag to null
      */
-    zffinal inline void tagRemove(ZF_IN const zfchar *key)
+    zffinal inline void objectTagRemove(ZF_IN const zfchar *key)
     {
-        this->tagSet(key, zfnull);
+        this->objectTag(key, zfnull);
     }
     /**
-     * @brief remove tag, return removed tag or #zfautoObjectNull if not exist
+     * @brief remove tag, return removed tag or null if not exist
      */
-    zffinal zfautoObject tagRemoveAndGet(ZF_IN const zfchar *key);
+    zffinal zfautoObject objectTagRemoveAndGet(ZF_IN const zfchar *key);
     /**
      * @brief remove all tag
      *
@@ -462,7 +475,7 @@ public:
      *   typically, you should remove exactly the one you have added
      * @note this method would be called during #EventObjectBeforeDealloc and #objectOnDeallocPrepare
      */
-    zffinal void tagRemoveAll(void);
+    zffinal void objectTagRemoveAll(void);
 
 public:
     /**
@@ -497,6 +510,22 @@ public:
     zffinal inline zfidentity observerAdd(ZF_IN const ZFObserverAddParam &param)
     {
         return this->observerHolder().observerAdd(param);
+    }
+    /**
+     * @brief see #observerNotify
+     */
+    zffinal inline zfidentity observerAddForOnce(ZF_IN zfidentity eventId,
+                                                 ZF_IN const ZFListener &observer,
+                                                 ZF_IN_OPT ZFObject *userData = zfnull,
+                                                 ZF_IN_OPT ZFObject *owner = zfnull,
+                                                 ZF_IN_OPT ZFLevel observerLevel = ZFLevelAppNormal)
+    {
+        return this->observerHolder().observerAddForOnce(
+            eventId,
+            observer,
+            userData,
+            owner,
+            observerLevel);
     }
     /**
      * @brief move observer to head of same #ZFLevel
@@ -577,7 +606,7 @@ public:
      * the #ZFListener would be executed\n
      * it's ensured the first added observer would be executed first
      * unless #observerMoveToFirst is called\n
-     * use #ZFGlobalEventCenter or #ZFObjectGlobalEventObserver for global observer\n
+     * use #ZFGlobalObserver for global observer\n
      * for instance observer:
      * @code
      *   zfclass YourClass
@@ -602,10 +631,10 @@ public:
      *   ZFObject *userData = ...;
      *   // store param as tag
      *   // make sure the tag name is unique and would be removed properly
-     *   userData->tagSet(paramToPass, uniqueTagName);
+     *   userData->objectTag(paramToPass, uniqueTagName);
      *   ZFListener yourStandaloneListener = SOME_CREATE_LOGIC {
      *       // here you can used the passed param
-     *       ZFObject *paramPassed = userData->tagGet(uniqueTagName);
+     *       ZFObject *paramPassed = userData->objectTag(uniqueTagName);
      *   };
      *   someEventSender->observerAdd(someEvent, yourStandaloneListener, userData);
      * @endcode
@@ -646,7 +675,7 @@ protected:
      *
      * ensured called before any other registered observer
      */
-    virtual inline void observerOnEvent(ZF_IN_OUT ZFListenerData &listenerData)
+    virtual inline void observerOnEvent(ZF_IN const ZFListenerData &listenerData)
     {
     }
 
@@ -655,10 +684,14 @@ public:
     void _ZFP_ZFObjectUnlock(void);
     zfbool _ZFP_ZFObjectTryLock(void);
 
+    inline void _ZFP_ZFObject_objectOnInit(void)
+    {
+        this->objectOnInit();
+    }
     ZFObject *_ZFP_ZFObjectCheckOnInit(void);
     void _ZFP_ZFObjectCheckRelease(void);
 
-public:
+protected:
     /**
      * @brief override this to init your object
      *
@@ -684,8 +717,9 @@ public:
      *       // custom init entry
      *       virtual void objectOnInit(Params...)
      *       {
-     *           this->objectOnInit(); // call objectOnInit with no params first
-     *           // your init steps
+     *           this->objectOnInit();
+     *           // your extra init steps
+     *           ...
      *       }
      *   };
      * @endcode
@@ -723,7 +757,6 @@ public:
      *   @endcode
      */
     virtual void objectOnInit(void);
-protected:
     /**
      * @brief called after #objectOnInit, safe to call virtual functions here
      *

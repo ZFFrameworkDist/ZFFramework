@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCopyable.h
  * @brief interface shows a ZFObject is copyable
@@ -29,7 +20,7 @@ public:
     /**
      * @brief return a copy of this object
      */
-    zffinal zfautoObject copy(void);
+    zffinal zfautoObjectT<ZFCopyable *> copy(void);
     /**
      * @brief see #copy, anotherObj must be same type as this object (by classData),
      *   otherwise, do nothing

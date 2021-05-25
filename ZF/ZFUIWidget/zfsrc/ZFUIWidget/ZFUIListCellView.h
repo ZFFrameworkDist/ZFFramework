@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListCellView.h
  * @brief abstract list content view
@@ -51,7 +42,7 @@ protected:
                                  ZF_IN const ZFUISize &sizeHint,
                                  ZF_IN const ZFUISizeParam &sizeParam);
     zfoverride
-    virtual void internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds);
+    virtual void internalViewOnLayout(ZF_IN const ZFUIRect &bounds);
     zfoverride
     virtual zfbool internalViewShouldLayout(ZF_IN ZFUIView *internalView);
 };

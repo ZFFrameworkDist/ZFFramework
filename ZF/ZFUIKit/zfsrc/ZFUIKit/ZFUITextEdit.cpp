@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUITextEdit.h"
 #include "protocol/ZFProtocolZFUITextEdit.h"
 
@@ -35,8 +26,8 @@ public:
 public:
     void updateSizeRelatedProperty(void)
     {
-        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textShadowOffsetSet(this->pimplOwner, ZFUISizeApplyScale(this->pimplOwner->textShadowOffset(), this->pimplOwner->scaleFixed()));
-        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSizeSet(this->pimplOwner, ZFUISizeApplyScale(this->pimplOwner->textSize(), this->pimplOwner->scaleFixed()));
+        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textShadowOffset(this->pimplOwner, ZFUISizeApplyScale(this->pimplOwner->textShadowOffset(), this->pimplOwner->UIScaleFixed()));
+        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSize(this->pimplOwner, ZFUISizeApplyScale(this->pimplOwner->textSize(), this->pimplOwner->UIScaleFixed()));
     }
 
 public:
@@ -60,30 +51,46 @@ ZFOBSERVER_EVENT_REGISTER(ZFUITextEdit, TextOnChange)
 ZFOBSERVER_EVENT_REGISTER(ZFUITextEdit, TextOnReturnClick)
 ZFOBSERVER_EVENT_REGISTER(ZFUITextEdit, TextOnEditConfirm)
 
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, zfbool, textEditEnable)
+ZFPROPERTY_ON_INIT_DEFINE(ZFUITextEdit, zfbool, viewFocusable)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditEnableSet(this, this->textEditEnable());
+    propertyValue = zftrue;
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, zfbool, textEditSecured)
+ZFPROPERTY_ON_INIT_DEFINE(ZFUITextEdit, ZFUISize, viewSizeMin)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditSecuredSet(this, this->textEditSecured());
+    propertyValue = ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeControl());
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUITextEditKeyboardTypeEnum, textEditKeyboardType)
+
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, zfbool, textEditEnable)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditKeyboardTypeSet(this, this->textEditKeyboardType());
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditEnable(this, this->textEditEnable());
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUITextEditKeyboardReturnTypeEnum, textEditKeyboardReturnType)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, zfbool, textEditSecured)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditKeyboardReturnTypeSet(this, this->textEditKeyboardReturnType());
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditSecure(this, this->textEditSecured());
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFRegExp *, textEditFilter)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUITextEditKeyboardTypeEnum, textEditKeyboardType)
+{
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditKeyboardType(this, this->textEditKeyboardType());
+}
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUITextEditKeyboardReturnTypeEnum, textEditKeyboardReturnType)
+{
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textEditKeyboardReturnType(this, this->textEditKeyboardReturnType());
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUITextEdit, ZFUITextView *, textPlaceHolder)
+{
+    zfblockedAlloc(ZFUITextView, textPlaceHolder);
+    propertyValue = textPlaceHolder;
+    textPlaceHolder->textColor(ZFUIGlobalStyle::DefaultStyle()->textColorHint());
+    textPlaceHolder->textSize(ZFUIGlobalStyle::DefaultStyle()->textSizeSmall());
+}
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFRegExp *, textEditFilter)
 {
     if(!this->text().isEmpty() && !this->textShouldChange(this->text()))
     {
-        this->textSet("");
+        this->text("");
     }
 }
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUITextEdit, ZFIndexRange, textSelectRange)
+ZFPROPERTY_ON_VERIFY_DEFINE(ZFUITextEdit, ZFIndexRange, textSelectRange)
 {
     zfindex textLength = this->text().length();
     if(propertyValue.start >= textLength)
@@ -95,7 +102,7 @@ ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUITextEdit, ZFIndexRange, textSelectRange
         propertyValue.count = textLength - propertyValue.start;
     }
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFIndexRange, textSelectRange)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFIndexRange, textSelectRange)
 {
     if(d->textSelectRangeChangedByImplFlag)
     {
@@ -103,18 +110,18 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFIndexRange, textSelectRange
     }
     else
     {
-        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSelectRangeSet(this, this->textSelectRange());
+        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSelectRange(this, this->textSelectRange());
     }
 }
 
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUITextEdit, zfstring, text)
+ZFPROPERTY_ON_VERIFY_DEFINE(ZFUITextEdit, zfstring, text)
 {
     if(!propertyValue.isEmpty() && !this->textShouldChange(propertyValue))
     {
         propertyValue.removeAll();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, zfstring, text)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, zfstring, text)
 {
     if(d->textChangedByImplFlag)
     {
@@ -122,47 +129,80 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, zfstring, text)
     }
     else
     {
-        ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSet(this, this->text());
+        ZFPROTOCOL_ACCESS(ZFUITextEdit)->text(this, this->text());
     }
     if(propertyValueOld.compare(this->text()) != 0)
     {
-        ZFCastZFObjectUnchecked(ZFUIView *, this->textPlaceHolder())->viewVisibleSet(this->text().isEmpty());
+        ZFCastZFObjectUnchecked(ZFUIView *, this->textPlaceHolder())->viewVisible(this->text().isEmpty());
         this->layoutRequest();
     }
 }
 
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUITextAppearanceEnum, textAppearance)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUITextAppearanceEnum, textAppearance)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textAppearanceSet(this, this->textAppearance());
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textAppearance(this, this->textAppearance());
     if(this->textAppearance() != propertyValueOld)
     {
         this->layoutRequest();
     }
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUIAlignFlags, textAlign)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUIAlignFlags, textAlign)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textAlignSet(this, this->textAlign());
-    this->textPlaceHolder()->textAlignSet(this->textAlign());
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textAlign(this, this->textAlign());
+    this->textPlaceHolder()->textAlign(this->textAlign());
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUIColor, textColor)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUIColor, textColor)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textColorSet(this, this->textColor());
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textColor(this, this->textColor());
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUIColor, textShadowColor)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUIColor, textShadowColor)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textShadowColorSet(this, this->textShadowColor());
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textShadowColor(this, this->textShadowColor());
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUISize, textShadowOffset)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, ZFUISize, textShadowOffset)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textShadowOffsetSet(this, ZFUISizeApplyScale(this->textShadowOffset(), this->scaleFixed()));
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textShadowOffset(this, ZFUISizeApplyScale(this->textShadowOffset(), this->UIScaleFixed()));
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUITextEdit, zfint, textSize)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUITextEdit, zffloat, textSize)
 {
-    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSizeSet(this, ZFUISizeApplyScale(this->textSize(), this->scaleFixed()));
+    ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSize(this, ZFUISizeApplyScale(this->textSize(), this->UIScaleFixed()));
     if(this->textSize() != propertyValueOld)
     {
         this->layoutRequest();
     }
+}
+
+ZFMETHOD_DEFINE_1(ZFUITextEdit, void, textStyleCopyFrom,
+                  ZFMP_IN(ZFUITextView *, src))
+{
+    if(src == zfnull)
+    {
+        return ;
+    }
+
+    this->text(src->text());
+    this->textAppearance(src->textAppearance());
+    this->textAlign(src->textAlign());
+    this->textColor(src->textColor());
+    this->textShadowColor(src->textShadowColor());
+    this->textShadowOffset(src->textShadowOffset());
+    this->textSize(src->textSize());
+}
+ZFMETHOD_DEFINE_1(ZFUITextEdit, void, textStyleCopyTo,
+                  ZFMP_IN(ZFUITextView *, dst))
+{
+    if(dst == zfnull)
+    {
+        return ;
+    }
+
+    dst->text(this->text());
+    dst->textAppearance(this->textAppearance());
+    dst->textAlign(this->textAlign());
+    dst->textColor(this->textColor());
+    dst->textShadowColor(this->textShadowColor());
+    dst->textShadowOffset(this->textShadowOffset());
+    dst->textSize(this->textSize());
 }
 
 void ZFUITextEdit::objectOnInit(void)
@@ -181,7 +221,7 @@ void ZFUITextEdit::objectOnInit(void)
             ZFPROTOCOL_ACCESS(ZFUITextEdit)->nativeTextEditDestroy(view->to<ZFUITextEdit *>(), nativeImplView);
         }
     };
-    this->nativeImplViewSet(ZFPROTOCOL_ACCESS(ZFUITextEdit)->nativeTextEditCreate(this),
+    this->nativeImplView(ZFPROTOCOL_ACCESS(ZFUITextEdit)->nativeTextEditCreate(this),
         _ZFP_ZFUITextEdit_nativeImplViewDestroy::action);
 
     ZFUIView *textPlaceHolderTmp = ZFCastZFObject(ZFUIView *, this->textPlaceHolder());
@@ -198,8 +238,8 @@ void ZFUITextEdit::objectOnInit(void)
         return ;
     }
     this->internalImplViewAdd(textPlaceHolderTmp);
-    textPlaceHolderTmp->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
-    textPlaceHolderTmp->serializableRefLayoutParam()->sizeParamSet(ZFUISizeParamFillFill());
+    textPlaceHolderTmp->layoutParam()->sizeParam(ZFUISizeParamFillFill());
+    textPlaceHolderTmp->serializableRefLayoutParam()->sizeParam(ZFUISizeParamFillFill());
 }
 void ZFUITextEdit::objectOnDealloc(void)
 {
@@ -243,13 +283,13 @@ ZFMETHOD_DEFINE_2(ZFUITextEdit, void, measureTextEdit,
 {
     const ZFUIMargin &nativeImplViewMargin = this->nativeImplViewMargin();
     ZFUISizeApplyScaleReversely(ret, ZFPROTOCOL_ACCESS(ZFUITextEdit)->measureNativeTextEdit(this,
-        ZFUISizeApplyScale(ZFUIViewLayoutParam::sizeHintOffset(sizeHint, ZFUISizeMake(
+        ZFUISizeApplyScale(ZFUILayoutParam::sizeHintOffset(sizeHint, ZFUISizeMake(
                     0 - ZFUIMarginGetWidth(nativeImplViewMargin),
                     0 - ZFUIMarginGetHeight(nativeImplViewMargin)
                 )),
-            this->scaleFixed()),
-        ZFUISizeApplyScale(this->textSize(), this->scaleFixed())),
-        this->scaleFixed());
+            this->UIScaleFixed()),
+        ZFUISizeApplyScale(this->textSize(), this->UIScaleFixed())),
+        this->UIScaleFixed());
     if(ZFPropertyIsValueAccessed(ZFPropertyAccess(ZFUITextEdit, textPlaceHolder), this)
         && !this->textPlaceHolder()->text().isEmpty())
     {
@@ -282,7 +322,7 @@ void ZFUITextEdit::_ZFP_ZFUITextEdit_textNotifyChange(ZF_IN const zfchar *newTex
     zfstring oldText = this->text();
 
     d->textChangedByImplFlag = zftrue;
-    this->textSet(newText);
+    this->text(newText);
 
     this->textOnChange(oldText);
 }
@@ -297,7 +337,7 @@ void ZFUITextEdit::_ZFP_ZFUITextEdit_textSelectRangeNotifyChange(void)
     ZFPROTOCOL_ACCESS(ZFUITextEdit)->textSelectRange(this, tmp);
 
     d->textSelectRangeChangedByImplFlag = zftrue;
-    this->textSelectRangeSet(tmp);
+    this->textSelectRange(tmp);
 }
 void ZFUITextEdit::_ZFP_ZFUITextEdit_textNotifyReturnClicked(void)
 {
@@ -402,16 +442,16 @@ void ZFUITextEdit::textOnChangeCheck(ZF_IN const zfchar *newText, ZF_IN_OUT zfbo
 
     if(this->observerHasAdd(ZFUITextEdit::EventTextOnChangeCheck()))
     {
-        zfautoObject t = ZFValueEditable::boolValueCreate(shouldChange);
-        this->observerNotify(ZFUITextEdit::EventTextOnChangeCheck(), zflineAlloc(ZFString, newText), t.toObject());
-        shouldChange = t.to<ZFValue *>()->boolValue();
+        zfblockedAlloc(v_zfbool, t, shouldChange);
+        this->observerNotify(ZFUITextEdit::EventTextOnChangeCheck(), zflineAlloc(v_zfstring, newText), t);
+        shouldChange = t->zfv;
     }
 }
 void ZFUITextEdit::textOnChange(ZF_IN const zfchar *oldText)
 {
     if(this->observerHasAdd(ZFUITextEdit::EventTextOnChange()))
     {
-        zfblockedAlloc(ZFString, oldTextTmp, oldText);
+        zfblockedAlloc(v_zfstring, oldTextTmp, oldText);
         this->observerNotify(ZFUITextEdit::EventTextOnChange(), oldTextTmp);
     }
 }
@@ -423,17 +463,21 @@ void ZFUITextEdit::textOnEditConfirm(void)
 {
     this->observerNotify(ZFUITextEdit::EventTextOnEditConfirm());
 }
-
-void ZFUITextEdit::scaleOnChange(void)
+ZFMETHOD_DEFINE_0(ZFUITextEdit, void, textEditNotifyConfirm)
 {
-    zfsuper::scaleOnChange();
+    this->textOnEditConfirm();
+}
+
+void ZFUITextEdit::UIScaleOnChange(void)
+{
+    zfsuper::UIScaleOnChange();
     d->updateSizeRelatedProperty();
 }
 void ZFUITextEdit::layoutOnMeasure(ZF_OUT ZFUISize &ret,
                                    ZF_IN const ZFUISize &sizeHint,
                                    ZF_IN const ZFUISizeParam &sizeParam)
 {
-    ret = this->viewSizePrefered();
+    ret = this->viewSizePrefer();
     ZFUISize tmp = ZFUISizeZero();
     this->measureTextEdit(tmp, sizeHint);
     if(ret.width < tmp.width)
@@ -454,7 +498,7 @@ void ZFUITextEdit::viewEventOnKeyEvent(ZF_IN ZFUIKeyEvent *keyEvent)
             zfsuper::viewEventOnKeyEvent(keyEvent);
             break;
         default:
-            keyEvent->eventResolvedSet(zftrue);
+            keyEvent->eventResolved(zftrue);
             break;
     }
 }
@@ -469,18 +513,21 @@ void ZFUITextEdit::viewFocusOnChange(void)
 
 zfbool ZFUITextEdit::internalViewShouldLayout(ZF_IN ZFUIView *internalView)
 {
-    if(internalView == this->textPlaceHolder()->toObject())
+    if(internalView == this->textPlaceHolder())
     {
         return zffalse;
     }
-    return zfsuper::internalViewShouldLayout(internalView);
+    else
+    {
+        return zfsuper::internalViewShouldLayout(internalView);
+    }
 }
-void ZFUITextEdit::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
+void ZFUITextEdit::internalViewOnLayout(ZF_IN const ZFUIRect &bounds)
 {
-    zfsuper::internalBgViewOnLayout(bounds);
+    zfsuper::internalViewOnLayout(bounds);
 
     ZFUITextView *textPlaceHolder = this->textPlaceHolder()->to<ZFUITextView *>();
-    textPlaceHolder->layout(ZFUIRectApplyMargin(
+    textPlaceHolder->viewFrame(ZFUIRectApplyMargin(
             bounds,
             ZFUIMarginInc(this->nativeImplViewMargin(), textPlaceHolder->layoutParam()->layoutMargin())
         ));

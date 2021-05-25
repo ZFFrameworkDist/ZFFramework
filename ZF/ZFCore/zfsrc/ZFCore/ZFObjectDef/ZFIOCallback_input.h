@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFIOCallback_input.h
  * @brief common callback defines
@@ -121,15 +112,15 @@ extern ZF_ENV_EXPORT zfbool ZFInputSkipChars(ZF_OUT zfchar *buf,
  *   return count read so far
  *
  * the first char matched charSet would be read and discarded,
- * and you may check it by firstCharMatchedCharSet,
+ * and you may check it by firstMatchedChar,
  * if reached end or maxCount before matched charSet,
- * 0 would be returned to firstCharMatchedCharSet
+ * 0 would be returned to firstMatchedChar
  */
 extern ZF_ENV_EXPORT zfindex ZFInputReadUntil(ZF_IN_OUT zfstring &ret,
                                               ZF_IN_OUT const ZFInput &input,
                                               ZF_IN_OPT const zfchar *charSet = " \t\r\n",
                                               ZF_IN_OPT zfindex maxCount = zfindexMax(),
-                                              ZF_OUT_OPT zfchar *firstCharMatchedCharSet = zfnull);
+                                              ZF_OUT_OPT zfchar *firstMatchedChar = zfnull);
 
 /**
  * @brief util method to check whether the input match the tokens

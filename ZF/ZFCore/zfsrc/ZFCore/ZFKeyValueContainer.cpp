@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFKeyValueContainer.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -17,14 +8,63 @@ ZFOBSERVER_EVENT_REGISTER(ZFKeyValueContainer, ContentOnChange)
 ZFOBSERVER_EVENT_REGISTER(ZFKeyValueContainer, ContentOnAdd)
 ZFOBSERVER_EVENT_REGISTER(ZFKeyValueContainer, ContentOnRemove)
 
+ZFMETHOD_DEFINE_3(ZFKeyValueContainer, void, objectInfoOfContentT,
+                  ZFMP_IN_OUT(zfstring &, ret),
+                  ZFMP_IN_OPT(zfindex, maxCount, zfindexMax()),
+                  ZFMP_IN_OPT(const ZFTokenForKeyValueContainer &, token, ZFTokenForKeyValueContainerDefault()))
+{
+    zfindex count = 0;
+    ret += token.tokenLeft;
+    for(zfiterator it = this->iterator(); this->iteratorValid(it) && count < maxCount; ++count, this->iteratorNext(it))
+    {
+        ZFKeyValuePair pair = this->iteratorPair(it);
+
+        if(count > 0)
+        {
+            ret += token.tokenSeparator;
+        }
+
+        ret += token.tokenPairLeft;
+        {
+            ret += token.tokenKeyLeft;
+            pair.key->objectInfoT(ret);
+            ret += token.tokenKeyRight;
+        }
+        ret += token.tokenPairSeparator;
+        {
+            ret += token.tokenValueLeft;
+            pair.value->objectInfoT(ret);
+            ret += token.tokenValueRight;
+        }
+        ret += token.tokenPairRight;
+    }
+    if(count < this->count())
+    {
+        if(count > 0)
+        {
+            ret += token.tokenSeparator;
+        }
+        ret += token.tokenEtc;
+    }
+    ret += token.tokenRight;
+}
+ZFMETHOD_DEFINE_2(ZFKeyValueContainer, zfstring, objectInfoOfContent,
+                  ZFMP_IN_OPT(zfindex, maxCount, zfindexMax()),
+                  ZFMP_IN_OPT(const ZFTokenForKeyValueContainer &, token, ZFTokenForKeyValueContainerDefault()))
+{
+    zfstring ret;
+    this->objectInfoOfContentT(ret, maxCount, token);
+    return ret;
+}
+
 zfbool ZFKeyValueContainer::serializableOnCheck(void)
 {
     if(!zfsuperI(ZFSerializable)::serializableOnCheck()) {return zffalse;}
 
-    for(zfiterator it = this->iterator(); this->iteratorIsValid(it); this->iteratorNext(it))
+    for(zfiterator it = this->iterator(); this->iteratorValid(it); this->iteratorNext(it))
     {
-        if(!ZFObjectIsSerializable(this->iteratorGetKey(it))
-            || !ZFObjectIsSerializable(this->iteratorGetValue(it)))
+        if(!ZFObjectIsSerializable(this->iteratorPair(it).key)
+            || !ZFObjectIsSerializable(this->iteratorValue(it)))
         {
             return zffalse;
         }
@@ -86,7 +126,7 @@ zfbool ZFKeyValueContainer::serializableOnSerializeFromData(ZF_IN const ZFSerial
                 ZFSerializableUtil::errorOccurred(outErrorHint, outErrorPos, serializableData, "null value");
                 return zffalse;
             }
-            this->iteratorAddKeyValue(key.toObject(), value.toObject());
+            this->iteratorAdd(key.toObject(), value.toObject());
             key = zfnull;
             value = zfnull;
         }
@@ -111,9 +151,9 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToData(ZF_IN_OUT ZFSerializab
 
     if(ref == zfnull)
     {
-        for(zfiterator it = this->iterator(); this->iteratorIsValid(it); )
+        for(zfiterator it = this->iterator(); this->iteratorValid(it); this->iteratorNext(it))
         {
-            ZFKeyValuePair pair = this->iteratorNextPair(it);
+            ZFKeyValuePair pair = this->iteratorPair(it);
 
             ZFSerializableData keyData;
             if(!ZFObjectToData(keyData, pair.key, outErrorHint))
@@ -127,9 +167,9 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToData(ZF_IN_OUT ZFSerializab
                 return zffalse;
             }
 
-            keyData.categorySet(ZFSerializableKeyword_ZFKeyValueContainer_key);
+            keyData.category(ZFSerializableKeyword_ZFKeyValueContainer_key);
             serializableData.elementAdd(keyData);
-            valueData.categorySet(ZFSerializableKeyword_ZFKeyValueContainer_value);
+            valueData.category(ZFSerializableKeyword_ZFKeyValueContainer_value);
             serializableData.elementAdd(valueData);
         }
     }
@@ -155,9 +195,9 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToDataWithRef(ZF_IN_OUT ZFSer
 
     if(ref->count() == 0)
     {
-        for(zfiterator it = this->iterator(); this->iteratorIsValid(it); )
+        for(zfiterator it = this->iterator(); this->iteratorValid(it); this->iteratorNext(it))
         {
-            ZFKeyValuePair pair = this->iteratorNextPair(it);
+            ZFKeyValuePair pair = this->iteratorPair(it);
             ZFSerializableData keyData;
             if(!ZFObjectToData(keyData, pair.key, outErrorHint))
             {
@@ -169,9 +209,9 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToDataWithRef(ZF_IN_OUT ZFSer
                 return zffalse;
             }
 
-            keyData.categorySet(ZFSerializableKeyword_ZFKeyValueContainer_key);
+            keyData.category(ZFSerializableKeyword_ZFKeyValueContainer_key);
             serializableData.elementAdd(keyData);
-            valueData.categorySet(ZFSerializableKeyword_ZFKeyValueContainer_value);
+            valueData.category(ZFSerializableKeyword_ZFKeyValueContainer_value);
             serializableData.elementAdd(valueData);
         }
         return zftrue;
@@ -180,13 +220,13 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToDataWithRef(ZF_IN_OUT ZFSer
     ZFKeyValueContainer *tmp = this->classData()->newInstance();
     zfblockedRelease(tmp);
     tmp->addFrom(ref);
-    for(zfiterator it = this->iterator(); this->iteratorIsValid(it); )
+    for(zfiterator it = this->iterator(); this->iteratorValid(it); this->iteratorNext(it))
     {
-        ZFKeyValuePair pair = this->iteratorNextPair(it);
+        ZFKeyValuePair pair = this->iteratorPair(it);
         zfiterator itTmp = tmp->iteratorFind(pair.key);
-        if(ref->iteratorIsValid(itTmp))
+        if(ref->iteratorValid(itTmp))
         {
-            if(ZFObjectCompare(pair.value, tmp->iteratorGetValue(itTmp)) == ZFCompareTheSame)
+            if(ZFObjectCompare(pair.value, tmp->iteratorValue(itTmp)) == ZFCompareTheSame)
             {
                 tmp->iteratorRemove(itTmp);
                 continue;
@@ -208,9 +248,9 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToDataWithRef(ZF_IN_OUT ZFSer
             return zffalse;
         }
 
-        keyData.categorySet(ZFSerializableKeyword_ZFKeyValueContainer_key);
+        keyData.category(ZFSerializableKeyword_ZFKeyValueContainer_key);
         serializableData.elementAdd(keyData);
-        valueData.categorySet(ZFSerializableKeyword_ZFKeyValueContainer_value);
+        valueData.category(ZFSerializableKeyword_ZFKeyValueContainer_value);
         serializableData.elementAdd(valueData);
     }
 
@@ -224,61 +264,31 @@ zfbool ZFKeyValueContainer::serializableOnSerializeToDataWithRef(ZF_IN_OUT ZFSer
     return zftrue;
 }
 
+void ZFKeyValueContainer::copyableOnCopyFrom(ZF_IN ZFObject *anotherObj)
+{
+    zfsuperI(ZFCopyable)::copyableOnCopyFrom(anotherObj);
+    zfself *another = ZFCastZFObject(zfself *, anotherObj);
+    if(another != zfnull && this != another)
+    {
+        this->removeAll();
+        this->addFrom(another);
+    }
+}
+
 void ZFKeyValueContainer::objectOnDeallocPrepare(void)
 {
     this->removeAll();
     zfsuper::objectOnDeallocPrepare();
 }
 
-ZFMETHOD_DEFINE_3(ZFKeyValueContainer, void, objectInfoOfContentT,
-                  ZFMP_IN_OUT(zfstring &, ret),
-                  ZFMP_IN_OPT(zfindex, maxCount, zfindexMax()),
-                  ZFMP_IN_OPT(const ZFTokenForKeyValueContainer &, token, ZFTokenForKeyValueContainerDefault()))
-{
-    zfindex count = 0;
-    ret += token.tokenLeft;
-    for(zfiterator it = this->iterator(); this->iteratorIsValid(it) && count < maxCount; ++count)
-    {
-        ZFKeyValuePair pair = this->iteratorNextPair(it);
-
-        if(count > 0)
-        {
-            ret += token.tokenSeparator;
-        }
-
-        ret += token.tokenPairLeft;
-        {
-            ret += token.tokenKeyLeft;
-            pair.key->objectInfoT(ret);
-            ret += token.tokenKeyRight;
-        }
-        ret += token.tokenPairSeparator;
-        {
-            ret += token.tokenValueLeft;
-            pair.value->objectInfoT(ret);
-            ret += token.tokenValueRight;
-        }
-        ret += token.tokenPairRight;
-    }
-    if(count < this->count())
-    {
-        if(count > 0)
-        {
-            ret += token.tokenSeparator;
-        }
-        ret += token.tokenEtc;
-    }
-    ret += token.tokenRight;
-}
-
 zfidentity ZFKeyValueContainer::objectHash(void)
 {
     zfiterator it = this->iterator();
-    if(this->iteratorIsValid(it))
+    if(this->iteratorValid(it))
     {
-        return (zfidentity)(~((zfidentity)this->count()
-            | ((ZFObjectHash(this->iteratorGetKey(it)) << 16) & 0x00FF0000)
-            | ((ZFObjectHash(this->iteratorGetValue(it)) << 24) & 0xFF000000)));
+        return (zfidentity)(~((zft_zfidentity)this->count()
+            | ((ZFObjectHash(this->iteratorPair(it).key) << 16) & 0x00FF0000)
+            | ((ZFObjectHash(this->iteratorValue(it)) << 24) & 0xFF000000)));
     }
     else
     {
@@ -297,18 +307,19 @@ ZFCompareResult ZFKeyValueContainer::objectCompare(ZF_IN ZFObject *anotherObj)
         return ZFCompareUncomparable;
     }
 
-    for(zfiterator it0 = this->iterator(); this->iteratorIsValid(it0);)
+    for(zfiterator it0 = this->iterator(); this->iteratorValid(it0); this->iteratorNext(it0))
     {
-        ZFKeyValuePair pair0 = this->iteratorNextPair(it0);
-        zfiterator it1 = another->iteratorForKey(pair0.key);
-        if(!another->iteratorIsValid(it1))
+        ZFKeyValuePair pair0 = this->iteratorPair(it0);
+        zfiterator it1 = another->iteratorFind(pair0.key);
+        if(!another->iteratorValid(it1))
         {
             return ZFCompareUncomparable;
         }
-        if(ZFObjectCompare(pair0.value, another->iteratorNextValue(it1)) != ZFCompareTheSame)
+        if(ZFObjectCompare(pair0.value, another->iteratorValue(it1)) != ZFCompareTheSame)
         {
             return ZFCompareUncomparable;
         }
+        another->iteratorNext(it1);
     }
     return ZFCompareTheSame;
 }

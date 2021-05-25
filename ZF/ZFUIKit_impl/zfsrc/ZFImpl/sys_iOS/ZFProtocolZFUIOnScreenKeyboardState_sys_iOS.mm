@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIOnScreenKeyboardState.h"
 
@@ -38,9 +29,10 @@ static _ZFP_ZFUIOnScreenKeyboardStateImpl_sys_iOS *_ZFP_ZFUIOnScreenKeyboardStat
 - (void)_keyboardOnChange:(NSNotification *)aNotification
 {
     CGRect rect = [[aNotification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    ZFUIRect keyboardFrameNew = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectFromCGRect(rect);
+    ZFUIRect keyboardFrameNew = ZFImpl_sys_iOS_ZFUIRectFromCGRect(rect);
 
-    self.keyboardShowing = (keyboardFrameNew.size.height > 0);
+    self.keyboardShowing = (keyboardFrameNew.height > 0
+        && keyboardFrameNew.y < [UIApplication sharedApplication].keyWindow.frame.size.height);
     if(keyboardFrameNew != self.keyboardFrame)
     {
         self.keyboardFrame = keyboardFrameNew;

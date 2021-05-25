@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file zfautoObjectFwd.h
  * @brief smart pointer for ZFObject
@@ -144,12 +135,6 @@ private:
     _ZFP_zfautoObjectPrivate *d;
 };
 
-extern ZF_ENV_EXPORT const zfautoObject _ZFP_zfautoObjectNull;
-/**
- * @brief global null zfautoObject
- */
-#define zfautoObjectNull() _ZFP_zfautoObjectNull
-
 // ============================================================
 // zfautoObjectT
 /**
@@ -168,56 +153,12 @@ public:
     zfautoObjectT(ZF_IN T_ZFObject const &obj);
 
 public:
-    zfautoObjectT<T_ZFObjectBase> &operator = (ZF_IN zfautoObject const &ref);
-    template<typename T_ZFObject>
-    zfautoObjectT<T_ZFObjectBase> &operator = (ZF_IN T_ZFObject *obj);
-    template<typename T_ZFObject>
-    zfautoObjectT<T_ZFObjectBase> &operator = (ZF_IN T_ZFObject const &obj);
-
-public:
-    template<typename T_ZFObject>
-    zfbool operator == (ZF_IN T_ZFObject *obj) const
-    {
-        return (this->toObject() == (obj ? obj->toObject() : zfnull));
-    }
-    template<typename T_ZFObject>
-    zfbool operator != (ZF_IN T_ZFObject *obj) const
-    {
-        return (this->toObject() != (obj ? obj->toObject() : zfnull));
-    }
-    template<typename T_ZFObject>
-    zfbool operator == (ZF_IN T_ZFObject const &obj) const
-    {
-        return (this->toObject() == _ZFP_ZFAnyCast(T_ZFObject, obj));
-    }
-    template<typename T_ZFObject>
-    zfbool operator != (ZF_IN T_ZFObject const &obj) const
-    {
-        return (this->toObject() != _ZFP_ZFAnyCast(T_ZFObject, obj));
-    }
-
-public:
     T_ZFObjectBase operator -> (void) const;
-    operator bool (void) const
-    {
-        return (this->toObject() != zfnull);
-    }
-    template<typename T_ZFObject>
-    operator T_ZFObject * (void) const
-    {
-        return ZFCastZFObject(T_ZFObject *, this->toObject());
+    inline ZFObject *toObject(void) const
+    { // required for _ZFP_ZFAnyCast to work
+        return zfautoObject::toObject();
     }
     /** @endcond */
-
-public:
-    /**
-     * @brief cast by #ZFCastZFObjectUnchecked
-     */
-    template<typename T_ZFObject>
-    inline T_ZFObject to(void) const
-    {
-        return ZFCastZFObjectUnchecked(T_ZFObject, this->toObject());
-    }
 };
 
 ZF_NAMESPACE_GLOBAL_END

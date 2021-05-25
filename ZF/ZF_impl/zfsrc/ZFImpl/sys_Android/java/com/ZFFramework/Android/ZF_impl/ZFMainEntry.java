@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZF_impl;
 
 import android.Manifest;
@@ -76,19 +67,19 @@ public final class ZFMainEntry extends Activity {
     // ============================================================
     // debug mode
     private static boolean _debugMode = false;
-    public static void debugModeSet(boolean value) {
+    public static void debugMode(boolean value) {
         _debugMode = value;
-        ZFMainEntry.native_debugModeSet(value);
+        ZFMainEntry.native_debugMode(value);
     }
     public static boolean debugMode() {
         return _debugMode;
     }
-    private native static void native_debugModeSet(boolean value);
+    private native static void native_debugMode(boolean value);
 
     // ============================================================
     // whether we need sdcard permission
     private static boolean _sdcardRW = true;
-    public static void sdcardRWSet(boolean value) {
+    public static void sdcardRW(boolean value) {
         _sdcardRW = value;
     }
     public static boolean sdcardRW() {

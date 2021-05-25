@@ -1,82 +1,73 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 
 #if ZF_ENV_sys_iOS
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // convert utility
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointToCGPointT(ZF_OUT CGPoint &ret, ZF_IN const ZFUIPoint &point)
+void ZFImpl_sys_iOS_ZFUIPointToCGPointT(ZF_OUT CGPoint &ret, ZF_IN const ZFUIPoint &point)
 {
     ret.x = point.x;
     ret.y = point.y;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIPointFromCGPointT(ZF_OUT ZFUIPoint &ret, ZF_IN const CGPoint &cgPoint)
+void ZFImpl_sys_iOS_ZFUIPointFromCGPointT(ZF_OUT ZFUIPoint &ret, ZF_IN const CGPoint &cgPoint)
 {
-    ret.x = zfmRound(cgPoint.x);
-    ret.y = zfmRound(cgPoint.y);
+    ret.x = cgPoint.x;
+    ret.y = cgPoint.y;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeToCGSizeT(ZF_OUT CGSize &ret, ZF_IN const ZFUISize &size)
+void ZFImpl_sys_iOS_ZFUISizeToCGSizeT(ZF_OUT CGSize &ret, ZF_IN const ZFUISize &size)
 {
     ret.width = size.width;
     ret.height = size.height;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeFromCGSizeT(ZF_OUT ZFUISize &ret, ZF_IN const CGSize &cgSize)
+void ZFImpl_sys_iOS_ZFUISizeFromCGSizeT(ZF_OUT ZFUISize &ret, ZF_IN const CGSize &cgSize)
 {
-    ret.width = zfmRound(cgSize.width);
-    ret.height = zfmRound(cgSize.height);
+    ret.width = cgSize.width;
+    ret.height = cgSize.height;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRectT(ZF_OUT CGRect &ret, ZF_IN const ZFUIRect &rect)
+void ZFImpl_sys_iOS_ZFUIRectToCGRectT(ZF_OUT CGRect &ret, ZF_IN const ZFUIRect &rect)
 {
-    ret.origin.x = rect.point.x;
-    ret.origin.y = rect.point.y;
-    ret.size.width = rect.size.width;
-    ret.size.height = rect.size.height;
+    ret.origin.x = rect.x;
+    ret.origin.y = rect.y;
+    ret.size.width = rect.width;
+    ret.size.height = rect.height;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectFromCGRectT(ZF_OUT ZFUIRect &ret, ZF_IN const CGRect &cgRect)
+void ZFImpl_sys_iOS_ZFUIRectFromCGRectT(ZF_OUT ZFUIRect &ret, ZF_IN const CGRect &cgRect)
 {
-    ret.point.x = zfmRound(cgRect.origin.x);
-    ret.point.y = zfmRound(cgRect.origin.y);
-    ret.size.width = zfmRound(cgRect.size.width);
-    ret.size.height = zfmRound(cgRect.size.height);
+    ret.x = cgRect.origin.x;
+    ret.y = cgRect.origin.y;
+    ret.width = cgRect.size.width;
+    ret.height = cgRect.size.height;
 }
 
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIMarginToUIEdgeInsetsT(ZF_OUT UIEdgeInsets &ret, ZF_IN const ZFUIMargin &margin)
+void ZFImpl_sys_iOS_ZFUIMarginToUIEdgeInsetsT(ZF_OUT UIEdgeInsets &ret, ZF_IN const ZFUIMargin &margin)
 {
     ret.left = margin.left;
     ret.top = margin.top;
     ret.right = margin.right;
     ret.bottom = margin.bottom;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIMarginFromUIEdgeInsetsT(ZF_OUT ZFUIMargin &ret, ZF_IN const UIEdgeInsets &edgeInsets)
+void ZFImpl_sys_iOS_ZFUIMarginFromUIEdgeInsetsT(ZF_OUT ZFUIMargin &ret, ZF_IN const UIEdgeInsets &edgeInsets)
 {
-    ret.left = zfmRound(edgeInsets.left);
-    ret.top = zfmRound(edgeInsets.top);
-    ret.right = zfmRound(edgeInsets.right);
-    ret.bottom = zfmRound(edgeInsets.bottom);
+    ret.left = edgeInsets.left;
+    ret.top = edgeInsets.top;
+    ret.right = edgeInsets.right;
+    ret.bottom = edgeInsets.bottom;
 }
 
-UIColor *ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorToUIColor(ZF_IN const ZFUIColor &color)
+UIColor *ZFImpl_sys_iOS_ZFUIColorToUIColor(ZF_IN const ZFUIColor &color)
 {
     return [UIColor colorWithRed:ZFUIColorGetR(color) green:ZFUIColorGetG(color) blue:ZFUIColorGetB(color) alpha:ZFUIColorGetA(color)];
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorFromUIColorT(ZF_OUT ZFUIColor &ret, ZF_IN UIColor *uiColor)
+void ZFImpl_sys_iOS_ZFUIColorFromUIColorT(ZF_OUT ZFUIColor &ret, ZF_IN UIColor *uiColor)
 {
     zffloat argb[4] = {0};
-    ZFImpl_sys_iOS_ZFUIKit_impl_UIColorToARGB(argb, uiColor);
+    ZFImpl_sys_iOS_UIColorToARGB(argb, uiColor);
     ret = ZFUIColorMake(argb[1], argb[2], argb[3], argb[0]);
 }
 
 // ============================================================
 // util method
-zfbool ZFImpl_sys_iOS_ZFUIKit_impl_UIColorToARGB(ZF_IN_OUT zffloat *pARGB, ZF_IN UIColor *color)
+zfbool ZFImpl_sys_iOS_UIColorToARGB(ZF_IN_OUT zffloat *pARGB, ZF_IN UIColor *color)
 {
     for(zfindex i = 0; i < 4; ++i)
     {
@@ -120,16 +111,16 @@ zfbool ZFImpl_sys_iOS_ZFUIKit_impl_UIColorToARGB(ZF_IN_OUT zffloat *pARGB, ZF_IN
 
     return zftrue;
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_UIColorGetInfoT(ZF_OUT zfstring &ret, ZF_IN UIColor *color)
+void ZFImpl_sys_iOS_UIColorInfoT(ZF_OUT zfstring &ret, ZF_IN UIColor *color)
 {
     if(color != nil)
     {
-        ZFUIColor t = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorFromUIColor(color);
+        ZFUIColor t = ZFImpl_sys_iOS_ZFUIColorFromUIColor(color);
         ZFUIColorToString(ret, t);
     }
 }
 
-static void _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(ZF_IN_OUT zfstring &s, UIView *view, zfindex depth, zfindex siblingIndex)
+static void _ZFP_ZFImpl_sys_iOS_viewTreePrint_recursive(ZF_IN_OUT zfstring &s, UIView *view, zfindex depth, zfindex siblingIndex)
 {
     zfstringAppend(s, "|%2d ", siblingIndex);
     for(zfindex i = 0; i < depth; ++i)
@@ -138,8 +129,12 @@ static void _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(ZF_IN_O
     }
 
     NSString *viewInfo = [NSString stringWithFormat:@"<%@ %08X>", [view class], (zfuint)[view hash]];
-    viewInfo = [viewInfo stringByAppendingFormat:@" (%d, %d, %d, %d)",
-        (int)view.frame.origin.x, (int)view.frame.origin.y, (int)view.frame.size.width, (int)view.frame.size.height];
+    viewInfo = [viewInfo stringByAppendingFormat:@" (%d, %d, %d, %d)"
+        , (int)zfmRound(view.frame.origin.x)
+        , (int)zfmRound(view.frame.origin.y)
+        , (int)zfmRound(view.frame.size.width)
+        , (int)zfmRound(view.frame.size.height)
+    ];
 
 #if 0 // test
 #define _TEST_PROPERTY
@@ -157,8 +152,12 @@ static void _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(ZF_IN_O
     if([view isKindOfClass:[UIScrollView class]])
     {
         UIScrollView *scrollView = (UIScrollView *)view;
-        zfstring info = zfstringWithFormat("(%d, %d, %d, %d)",
-            (zfint)scrollView.contentOffset.x, (zfint)scrollView.contentOffset.y, (zfint)scrollView.contentSize.width, (zfint)scrollView.contentSize.height);
+        zfstring info = zfstringWithFormat("(%d, %d, %d, %d)"
+            , (zfint)zfmRound(scrollView.contentOffset.x)
+            , (zfint)zfmRound(scrollView.contentOffset.y)
+            , (zfint)zfmRound(scrollView.contentSize.width)
+            , (zfint)zfmRound(scrollView.contentSize.height)
+            );
         viewInfo = [viewInfo stringByAppendingFormat:@" scroll:%@", [NSString stringWithUTF8String:info]];
     }
 #endif // scroll content
@@ -166,7 +165,7 @@ static void _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(ZF_IN_O
 #if 1 // bg
     if(view.backgroundColor != nil)
     {
-        zfstring colorInfo = ZFImpl_sys_iOS_ZFUIKit_impl_UIColorGetInfo(view.backgroundColor);
+        zfstring colorInfo = ZFImpl_sys_iOS_UIColorInfo(view.backgroundColor);
         viewInfo = [viewInfo stringByAppendingFormat:@" bg:%@", [NSString stringWithUTF8String:colorInfo]];
     }
 #endif // bg
@@ -221,22 +220,25 @@ static void _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(ZF_IN_O
     NSArray *subviews = view.subviews;
     for(NSUInteger i = 0; i < [subviews count]; ++i)
     {
-        _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(s, [subviews objectAtIndex:i], depth + 1, i);
+        _ZFP_ZFImpl_sys_iOS_viewTreePrint_recursive(s, [subviews objectAtIndex:i], depth + 1, i);
     }
 }
-void ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTreeT(ZF_OUT zfstring &ret, ZF_IN UIView *view)
+void ZFImpl_sys_iOS_viewTreePrintT(ZF_OUT zfstring &ret, ZF_IN UIView *view)
 {
     ret += "==================== UIView tree begin ====================\n";
     if(view != nil)
     {
         @autoreleasepool {
-            _ZFP_ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTree_recursive(ret, view, 0, 0);
+            _ZFP_ZFImpl_sys_iOS_viewTreePrint_recursive(ret, view, 0, 0);
         }
     }
     ret += "==================== UIView tree  end  ====================\n";
 }
 
-#if ZF_ENV_DEBUG && 0
+ZF_NAMESPACE_GLOBAL_END
+
+#if 0
+    #include "ZFUIKit/ZFUISysWindow.h"
     ZF_GLOBAL_INITIALIZER_INIT(ZFImpl_sys_iOS_autoPrintViewTree)
     {
         if(!ZFProtocolIsAvailable("ZFUIView"))
@@ -244,26 +246,24 @@ void ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTreeT(ZF_OUT zfstring &ret, ZF_IN 
             return ;
         }
         ZFLISTENER_LOCAL(windowOnPause, {
-            ZFUISysWindow *sysWindow = listenerData.sender->to<ZFUISysWindow *>();
+            ZFUISysWindow *sysWindow = listenerData.sender<ZFUISysWindow *>();
             zfstring s;
-            ZFImpl_sys_iOS_ZFUIKit_impl_UIViewGetViewTreeT(s, (__bridge UIView *)sysWindow->rootView()->nativeView());
+            ZFImpl_sys_iOS_viewTreePrintT(s, (__bridge UIView *)sysWindow->rootView()->nativeView());
             zfLogTrimT() << s;
         })
         this->windowOnPauseListener = windowOnPause;
-        ZFObjectGlobalEventObserver().observerAdd(
+        ZFGlobalObserver().observerAdd(
             ZFUISysWindow::EventSysWindowOnPause(), this->windowOnPauseListener);
     }
     ZF_GLOBAL_INITIALIZER_DESTROY(ZFImpl_sys_iOS_autoPrintViewTree)
     {
-        ZFObjectGlobalEventObserver().observerRemove(
+        ZFGlobalObserver().observerRemove(
             ZFUISysWindow::EventSysWindowOnPause(), this->windowOnPauseListener);
     }
     private:
         ZFListener windowOnPauseListener;
     ZF_GLOBAL_INITIALIZER_END(ZFImpl_sys_iOS_autoPrintViewTree)
 #endif
-
-ZF_NAMESPACE_GLOBAL_END
 
 #endif // #if ZF_ENV_sys_iOS
 

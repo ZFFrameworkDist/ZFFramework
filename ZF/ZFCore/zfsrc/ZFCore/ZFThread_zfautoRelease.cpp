@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFThread_zfautoRelease.h"
 #include "ZFAutoReleasePool.h"
 #include "protocol/ZFProtocolZFThread.h"
@@ -16,7 +7,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
 // zfautoRelease
-static ZFObject *_ZFP_zfautoRelease_poolDrain(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData);
+static ZFObject *_ZFP_zfautoRelease_poolDrain(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData);
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(zfautoRelease_poolDrainDataHolder, ZFLevelZFFrameworkEssential)
 {
     this->drainTask = ZFCallbackForFunc(_ZFP_zfautoRelease_poolDrain);
@@ -26,7 +17,7 @@ public:
     ZFListener drainTask;
     zfbool drainTaskRequested;
 ZF_GLOBAL_INITIALIZER_END(zfautoRelease_poolDrainDataHolder)
-static ZFObject *_ZFP_zfautoRelease_poolDrain(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData)
+static ZFObject *_ZFP_zfautoRelease_poolDrain(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
     ZF_GLOBAL_INITIALIZER_INSTANCE(zfautoRelease_poolDrainDataHolder)->drainTaskRequested = zffalse;
     ZFAutoReleasePool::instance()->poolDrain();

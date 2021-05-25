@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "../ZFCoreDef.h"
 
 #include "../ZFSTLWrapper/zfstl_map.h"
@@ -84,7 +75,7 @@ const zfchar *ZFNamespaceSkipGlobal(ZF_IN const zfchar *ns)
     }
 }
 
-zfbool ZFNamespaceSplit(ZF_OUT ZFCoreArray<ZFIndexRange> &ret,
+zfbool ZFNamespaceSplit(ZF_IN_OUT ZFCoreArray<ZFIndexRange> &ret,
                         ZF_IN const zfchar *src,
                         ZF_IN_OPT zfindex srcLen /* = zfindexMax() */)
 {
@@ -164,7 +155,7 @@ zfstring _ZFP_ZFNamespaceRegister(ZF_IN const char *parent,
             _ZFP_ZFNamespaceMapType *tNew = zfnew(_ZFP_ZFNamespaceMapType);
             t->d[key] = ZFCorePointerForObject<_ZFP_ZFNamespaceMapType *>(tNew);
             t = tNew;
-            t->ns.append(ns, pos[i].count + pos[i].count);
+            t->ns.append(ns, pos[i].start + pos[i].count);
         }
         else
         {
@@ -204,7 +195,7 @@ void _ZFP_ZFNamespaceUnregister(ZF_IN const char *ns)
     }
 }
 
-void ZFNamespaceGetAllT(ZF_OUT ZFCoreArray<const zfchar *> &ret)
+void ZFNamespaceGetAllT(ZF_IN_OUT ZFCoreArray<const zfchar *> &ret)
 {
     zfCoreMutexLocker();
     ZFCoreQueuePOD<_ZFP_ZFNamespaceMapType *> toCheck;
@@ -223,7 +214,7 @@ void ZFNamespaceGetAllT(ZF_OUT ZFCoreArray<const zfchar *> &ret)
     } while(!toCheck.isEmpty());
 }
 
-void ZFNamespaceGetAllT(ZF_OUT ZFCoreArray<const zfchar *> &ret,
+void ZFNamespaceGetAllT(ZF_IN_OUT ZFCoreArray<const zfchar *> &ret,
                         ZF_IN const zfchar *parent,
                         ZF_IN_OPT zfbool recursive /* = zffalse */)
 {

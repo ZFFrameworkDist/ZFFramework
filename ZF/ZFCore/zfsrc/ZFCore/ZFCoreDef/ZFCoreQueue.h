@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreQueue.h
  * @brief core queue type for private use only
@@ -57,7 +48,7 @@ public:
     /** @brief see #objectInfo */
     zffinal void objectInfoT(ZF_IN_OUT zfstring &ret) const
     {
-        this->objectInfoOfContentT(ret, zfnull, 10);
+        this->objectInfoOfContentT(ret, 10);
     }
     /** @brief return object info */
     zffinal inline zfstring objectInfo(void) const
@@ -70,10 +61,15 @@ public:
 public:
     /** @brief see #objectInfoOfContent */
     zffinal void objectInfoOfContentT(ZF_IN_OUT zfstring &ret,
-                                      ZF_IN typename ZFCoreInfoGetter<T_POD>::InfoGetter elementInfoGetter,
                                       ZF_IN_OPT zfindex maxCount = zfindexMax(),
-                                      ZF_IN_OPT const ZFTokenForContainer &token = ZFTokenForContainerDefault()) const
+                                      ZF_IN_OPT const ZFTokenForContainer &token = ZFTokenForContainerDefault(),
+                                      ZF_IN_OPT typename ZFCoreInfoGetterType<T_POD>::InfoGetter infoGetter = zfnull) const
     {
+        if(infoGetter == zfnull)
+        {
+            infoGetter = ZFCoreInfoGetter<T_POD>::InfoGetter;
+        }
+
         zfindex count = 0;
         ret += token.tokenLeft;
         for(T_POD *p = _pHead; p != _pTail && count < maxCount; ++count, _loopNext(p))
@@ -83,14 +79,7 @@ public:
                 ret += token.tokenSeparator;
             }
             ret += token.tokenValueLeft;
-            if(elementInfoGetter != zfnull)
-            {
-                elementInfoGetter(ret, *p);
-            }
-            else
-            {
-                ret += ZFTOKEN_ZFCoreInfoGetterNotAvailable;
-            }
+            infoGetter(ret, *p);
             ret += token.tokenValueRight;
         }
         if(count < this->count())
@@ -106,12 +95,12 @@ public:
     /**
      * @brief return contents info
      */
-    zffinal zfstring objectInfoOfContent(ZF_IN typename ZFCoreInfoGetter<T_POD>::InfoGetter elementInfoGetter,
-                                         ZF_IN_OPT zfindex maxCount = zfindexMax(),
-                                         ZF_IN_OPT const ZFTokenForContainer &token = ZFTokenForContainerDefault()) const
+    zffinal zfstring objectInfoOfContent(ZF_IN_OPT zfindex maxCount = zfindexMax(),
+                                         ZF_IN_OPT const ZFTokenForContainer &token = ZFTokenForContainerDefault(),
+                                         ZF_IN_OPT typename ZFCoreInfoGetterType<T_POD>::InfoGetter infoGetter = zfnull) const
     {
         zfstring ret;
-        this->objectInfoOfContentT(ret, elementInfoGetter, maxCount, token);
+        this->objectInfoOfContentT(ret, maxCount, token, infoGetter);
         return ret;
     }
 
@@ -204,7 +193,7 @@ public:
      */
     void toArrayT(ZF_IN_OUT ZFCoreArray<T_POD> &array) const
     {
-        array.capacitySet(array.capacity() + this->count());
+        array.capacity(array.capacity() + this->count());
         T_POD *p = _pHead;
         while(p != _pTail)
         {

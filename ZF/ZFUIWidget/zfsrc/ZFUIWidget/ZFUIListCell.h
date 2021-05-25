@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListCell.h
  * @brief abstract list cell to hold list content views
@@ -36,8 +27,8 @@ zfclass ZF_ENV_EXPORT ZFUIListCell : zfextends ZFUIView
      * @brief the content view
      */
     ZFPROPERTY_RETAIN(ZFUIView *, cellView)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIView *, cellView)
-    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIView *, cellView)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIView *, cellView)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUIView *, cellView)
 
     /**
      * @brief content view's layout param,
@@ -45,15 +36,9 @@ zfclass ZF_ENV_EXPORT ZFUIListCell : zfextends ZFUIView
      *   to achieve additional features,
      *   fill parent and align center by default
      */
-    ZFPROPERTY_RETAIN_READONLY(ZFUIViewLayoutParam *, cellViewLayoutParam,
+    ZFPROPERTY_RETAIN_READONLY(ZFUILayoutParam *, cellViewLayoutParam,
                                ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIViewLayoutParam *, cellViewLayoutParam)
-    {
-        propertyValue = this->layoutParamCreate();
-        ZFUIViewLayoutParam *value = propertyValue.to<ZFUIViewLayoutParam *>();
-        value->sizeParamSet(ZFUISizeParamFillFill());
-        value->layoutAlignSet(ZFUIAlign::e_Center);
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUILayoutParam *, cellViewLayoutParam)
 
 protected:
     zfoverride

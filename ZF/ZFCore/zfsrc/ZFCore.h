@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCore.h
  * @brief header file for ZFCore module
@@ -21,15 +12,17 @@
 #include "ZFCore/ZFContainer.h"
 #include "ZFCore/ZFCoreDef.h"
 #include "ZFCore/ZFCoreStatistic_ZFTime.h"
-#include "ZFCore/ZFDynamicInvoker.h"
 #include "ZFCore/ZFDynamicRegisterUtil.h"
 #include "ZFCore/ZFEnvInfo.h"
 #include "ZFCore/ZFFile.h"
-#include "ZFCore/ZFGlobalEventCenter_common.h"
+#include "ZFCore/ZFGlobalEvent_common.h"
+#include "ZFCore/ZFGlobalTimer.h"
 #include "ZFCore/ZFHashMap.h"
 #include "ZFCore/ZFHashSet.h"
+#include "ZFCore/ZFIOBuffer.h"
+#include "ZFCore/ZFIOBufferByCacheFile.h"
+#include "ZFCore/ZFIOBufferByMemory.h"
 #include "ZFCore/ZFIterable.h"
-#include "ZFCore/ZFIterableUtil.h"
 #include "ZFCore/ZFKeyValueContainer.h"
 #include "ZFCore/ZFKeyValuePair.h"
 #include "ZFCore/ZFLog.h"
@@ -58,7 +51,6 @@
 #include "ZFCore/ZFThread_zfautoRelease.h"
 #include "ZFCore/ZFTime.h"
 #include "ZFCore/ZFTimer.h"
-#include "ZFCore/ZFValue.h"
 
 #endif // #ifndef _ZFI_ZFCore_h_
 

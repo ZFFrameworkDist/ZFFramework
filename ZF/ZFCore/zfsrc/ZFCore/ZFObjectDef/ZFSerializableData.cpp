@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFSerializableData.h"
 #include "ZFObjectImpl.h"
 #include "ZFSerializableUtil.h"
@@ -188,7 +179,7 @@ const ZFPathInfo *ZFSerializableData::pathInfo(void) const
 {
     return d->pathInfo;
 }
-void ZFSerializableData::pathInfoSet(ZF_IN const ZFPathInfo *pathInfo)
+void ZFSerializableData::pathInfo(ZF_IN const ZFPathInfo *pathInfo)
 {
     if(pathInfo != zfnull && !(pathInfo->pathType.isEmpty() && pathInfo->pathData.isEmpty()))
     {
@@ -210,7 +201,7 @@ void ZFSerializableData::pathInfoSet(ZF_IN const ZFPathInfo *pathInfo)
         }
     }
 }
-void ZFSerializableData::pathInfoSet(ZF_IN const zfchar *pathType, ZF_IN const zfchar *pathData)
+void ZFSerializableData::pathInfo(ZF_IN const zfchar *pathType, ZF_IN const zfchar *pathData)
 {
     if(!zfsIsEmpty(pathType) || !zfsIsEmpty(pathData))
     {
@@ -264,7 +255,7 @@ zfbool ZFSerializableData::serializableDataParent(ZF_OUT ZFSerializableData &ret
 
 // ============================================================
 // class
-void ZFSerializableData::itemClassSet(ZF_IN const zfchar *classNameFull)
+void ZFSerializableData::itemClass(ZF_IN const zfchar *classNameFull)
 {
     if(classNameFull == zfnull)
     {
@@ -288,8 +279,8 @@ void ZFSerializableData::removeAll(void)
 }
 
 // ============================================================
-void ZFSerializableData::serializableDataTagSet(ZF_IN const zfchar *key,
-                                                ZF_IN ZFObject *tag)
+void ZFSerializableData::serializableDataTag(ZF_IN const zfchar *key,
+                                             ZF_IN ZFObject *tag)
 {
     if(key == zfnull)
     {
@@ -321,7 +312,7 @@ void ZFSerializableData::serializableDataTagSet(ZF_IN const zfchar *key,
         }
     }
 }
-ZFObject *ZFSerializableData::serializableDataTagGet(ZF_IN const zfchar *key) const
+ZFObject *ZFSerializableData::serializableDataTag(ZF_IN const zfchar *key) const
 {
     if(key != zfnull)
     {
@@ -338,8 +329,8 @@ void ZFSerializableData::serializableDataTagGetAllKeyValue(ZF_IN_OUT ZFCoreArray
                                                            ZF_IN_OUT ZFCoreArray<ZFObject *> &allValue) const
 {
     _ZFP_ZFSerializableDataTagMapType &m = d->serializableDataTagMap;
-    allKey.capacitySet(allKey.count() + m.size());
-    allValue.capacitySet(allValue.count() + m.size());
+    allKey.capacity(allKey.count() + m.size());
+    allValue.capacity(allValue.count() + m.size());
     for(_ZFP_ZFSerializableDataTagMapType::iterator it = m.begin(); it != m.end(); ++it)
     {
         allKey.add(it->first.c_str());
@@ -384,8 +375,8 @@ void ZFSerializableData::serializableDataTagRemoveAll(void)
 
 // ============================================================
 // attribute
-void ZFSerializableData::attributeSet(ZF_IN const zfchar *name,
-                                      ZF_IN const zfchar *value)
+void ZFSerializableData::attributeForName(ZF_IN const zfchar *name,
+                                          ZF_IN const zfchar *value)
 {
     if(name != zfnull)
     {
@@ -467,10 +458,10 @@ zfbool ZFSerializableData::attributeIteratorIsValid(ZF_IN const zfiterator &it) 
 zfbool ZFSerializableData::attributeIteratorIsEqual(ZF_IN const zfiterator &it0,
                                                     ZF_IN const zfiterator &it1) const
 {
-    return zfiterator::iteratorIsEqual<_ZFP_ZFSerializableDataAttributeMapType::iterator *>(it0, it1);
+    return zfiterator::iteratorEqual<_ZFP_ZFSerializableDataAttributeMapType::iterator *>(it0, it1);
 }
-void ZFSerializableData::attributeIteratorSet(ZF_IN_OUT zfiterator &it,
-                                              ZF_IN const zfchar *value)
+void ZFSerializableData::attributeIteratorValue(ZF_IN_OUT zfiterator &it,
+                                                ZF_IN const zfchar *value)
 {
     if(value == zfnull)
     {
@@ -491,7 +482,7 @@ void ZFSerializableData::attributeIteratorRemove(ZF_IN_OUT zfiterator &it)
         d->attributes.erase((*data)++);
     }
 }
-const zfchar *ZFSerializableData::attributeIteratorGetKey(ZF_IN const zfiterator &it) const
+const zfchar *ZFSerializableData::attributeIteratorKey(ZF_IN const zfiterator &it) const
 {
     _ZFP_ZFSerializableDataAttributeMapType::iterator *data = it.data<_ZFP_ZFSerializableDataAttributeMapType::iterator *>();
     if(data != zfnull)
@@ -500,7 +491,7 @@ const zfchar *ZFSerializableData::attributeIteratorGetKey(ZF_IN const zfiterator
     }
     return zfnull;
 }
-const zfchar *ZFSerializableData::attributeIteratorGet(ZF_IN const zfiterator &it) const
+const zfchar *ZFSerializableData::attributeIteratorValue(ZF_IN const zfiterator &it) const
 {
     _ZFP_ZFSerializableDataAttributeMapType::iterator *data = it.data<_ZFP_ZFSerializableDataAttributeMapType::iterator *>();
     if(data != zfnull)
@@ -520,7 +511,7 @@ const zfchar *ZFSerializableData::attributeIteratorNextKey(ZF_IN_OUT zfiterator 
     }
     return zfnull;
 }
-const zfchar *ZFSerializableData::attributeIteratorNext(ZF_IN_OUT zfiterator &it) const
+const zfchar *ZFSerializableData::attributeIteratorNextValue(ZF_IN_OUT zfiterator &it) const
 {
     _ZFP_ZFSerializableDataAttributeMapType::iterator *data = it.data<_ZFP_ZFSerializableDataAttributeMapType::iterator *>();
     if(data != zfnull)
@@ -823,10 +814,10 @@ ZFCompareResult ZFSerializableData::objectCompare(ZF_IN const ZFSerializableData
         return ZFCompareUncomparable;
     }
 
-    for(zfiterator it = another.attributeIterator(); another.attributeIteratorIsValid(it); another.attributeIteratorNext(it))
+    for(zfiterator it = another.attributeIterator(); another.attributeIteratorIsValid(it); another.attributeIteratorNextValue(it))
     {
-        const zfchar *value = this->attributeForName(another.attributeIteratorGetKey(it));
-        if(value == zfnull || !zfscmpTheSame(another.attributeIteratorGet(it), value))
+        const zfchar *value = this->attributeForName(another.attributeIteratorKey(it));
+        if(value == zfnull || !zfscmpTheSame(another.attributeIteratorValue(it), value))
         {
             return ZFCompareUncomparable;
         }
@@ -851,83 +842,4 @@ zfbool ZFSerializableData::isEmpty(void) const
 }
 
 ZF_NAMESPACE_GLOBAL_END
-
-#if _ZFP_ZFOBJECT_METHOD_REG
-#include "../ZFObject.h"
-ZF_NAMESPACE_GLOBAL_BEGIN
-
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, copyFrom, ZFMP_IN(const ZFSerializableData &, ref))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, ZFSerializableData, copy)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, const ZFPathInfo *, pathInfo)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, pathInfoSet, ZFMP_IN(const ZFPathInfo *, pathInfo))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, pathInfoSet, ZFMP_IN(const zfchar *, pathType), ZFMP_IN(const zfchar *, pathData))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, const ZFPathInfo *, pathInfoCheck)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfbool, serializableDataParent, ZFMP_OUT(ZFSerializableData &, ret))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, itemClassSet, ZFMP_IN(const zfchar *, classNameFull))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, const zfchar *, itemClass)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, propertyNameSet, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, const zfchar *, propertyName)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, propertyValueSet, ZFMP_IN(const zfchar *, value))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, const zfchar *, propertyValue)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, categorySet, ZFMP_IN(const zfchar *, category))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, const zfchar *, category)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, editModeSet, ZFMP_IN(zfbool, editMode))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfbool, editMode)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, removeAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, serializableDataTagSet, ZFMP_IN(const zfchar *, key), ZFMP_IN(ZFObject *, tag))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, ZFObject *, serializableDataTagGet, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, serializableDataTagGetAllKeyValue, ZFMP_IN_OUT(ZFCoreArray<const zfchar *> &, allKey), ZFMP_IN_OUT(ZFCoreArray<ZFObject *> &, allValue))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, serializableDataTagRemove, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfautoObject, serializableDataTagRemoveAndGet, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, serializableDataTagRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, attributeSet, ZFMP_IN(const zfchar *, name), ZFMP_IN(const zfchar *, value))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, const zfchar *, attributeForName, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfindex, attributeCount)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, attributeRemove, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, attributeRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfiterator, attributeIteratorForName, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfiterator, attributeIterator)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfbool, attributeIteratorIsValid, ZFMP_IN(const zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, zfbool, attributeIteratorIsEqual, ZFMP_IN(const zfiterator &, it0), ZFMP_IN(const zfiterator &, it1))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, attributeIteratorSet, ZFMP_IN_OUT(zfiterator &, it), ZFMP_IN(const zfchar *, value))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, attributeIteratorRemove, ZFMP_IN_OUT(zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, const zfchar *, attributeIteratorGetKey, ZFMP_IN(const zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, const zfchar *, attributeIteratorGet, ZFMP_IN(const zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, const zfchar *, attributeIteratorNextKey, ZFMP_IN_OUT(zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, const zfchar *, attributeIteratorNext, ZFMP_IN_OUT(zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfbool, attributeIteratorResolved, ZFMP_IN(const zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, attributeIteratorResolveMark, ZFMP_IN(const zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, attributeIteratorResolveUnmark, ZFMP_IN(const zfiterator &, it))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, elementAdd, ZFMP_IN(const ZFSerializableData &, element))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, elementAdd, ZFMP_IN(const ZFSerializableData &, element), ZFMP_IN(zfindex, atIndex))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFSerializableData, void, elementSetAtIndex, ZFMP_IN(zfindex, index), ZFMP_IN(const ZFSerializableData &, element))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfindex, elementFindByName, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfindex, elementFindByCategory, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfindex, elementCount)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, const ZFSerializableData &, elementAtIndex, ZFMP_IN(zfindex, index))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, elementRemoveAtIndex, ZFMP_IN(zfindex, index))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, elementRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfbool, resolved)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveMark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveUnmark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, zfbool, resolvedAttribute, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, resolveAttributeMark, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFSerializableData, void, resolveAttributeUnmark, ZFMP_IN(const zfchar *, name))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfbool, resolvedPropertyName)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolvePropertyNameMark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolvePropertyNameUnmark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfbool, resolvedPropertyValue)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolvePropertyValueMark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolvePropertyValueUnmark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfbool, resolvedCategory)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveCategoryMark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveCategoryUnmark)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveMarkAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveUnmarkAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveAttributeMarkAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, void, resolveAttributeUnmarkAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFSerializableData, zfbool, isEmpty)
-
-ZF_NAMESPACE_GLOBAL_END
-#endif
 

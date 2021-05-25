@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFAnimationGroup.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -45,14 +36,14 @@ zfclass _ZFP_ZFAnimationGroupPrivate : zfextends ZFObject
 
 public:
     ZFAnimationGroup *pimplOwner;
-    ZFArrayEditable *childAnis; // ZFAnimationGroupChildData *
+    ZFArray *childAnis; // ZFAnimationGroupChildData *
 private:
     /*
      * ZFAnimationGroupChildData *
      * for parallel group, stores all running child
      * for serial group, stores running child and all child to run
      */
-    ZFArrayEditable *childBuf;
+    ZFArray *childBuf;
     zfbool cachedParallel;
     ZFListener cachedOnStartListener;
     ZFListener cachedOnStopListener;
@@ -63,8 +54,8 @@ protected:
     virtual void objectOnInit(void)
     {
         zfsuper::objectOnInit();
-        this->childAnis = zfAlloc(ZFArrayEditable);
-        this->childBuf = zfAlloc(ZFArrayEditable);
+        this->childAnis = zfAlloc(ZFArray);
+        this->childBuf = zfAlloc(ZFArray);
     }
     zfoverride
     virtual void objectOnDealloc(void)
@@ -112,13 +103,13 @@ public:
         {
             for(zfindex i = 0; i < this->childDelayTaskIds.count(); ++i)
             {
-                ZFThreadExecuteCancel(this->childDelayTaskIds[i]);
+                ZFExecuteCancel(this->childDelayTaskIds[i]);
             }
             this->childDelayTaskIds.removeAll();
         }
         if(!this->childBuf->isEmpty())
         {
-            zfblockedAlloc(ZFArrayEditable, childToStop, this->childBuf);
+            zfblockedAlloc(ZFArray, childToStop, this->childBuf);
             this->childBuf->removeAll();
             if(this->cachedParallel)
             {
@@ -145,7 +136,7 @@ private:
     void doStartParallel(void)
     {
         zfidentity aniId = this->pimplOwner->aniId();
-        zfblockedAlloc(ZFArrayEditable, tmpArray, this->childAnis);
+        zfblockedAlloc(ZFArray, tmpArray, this->childAnis);
         this->childBuf->addFrom(this->childAnis);
         for(zfindex i = 0; aniId == this->pimplOwner->aniId() && i < tmpArray->count(); ++i)
         {
@@ -182,27 +173,24 @@ private:
         }
         else
         {
-            zfidentity childDelayTaskId = ZFThreadExecuteInMainThreadAfterDelay(
+            _ZFP_ZFAnimationGroupPrivate *selfTmp = this;
+            ZFLISTENER_LAMBDA_3(childOnDelayFinish
+                , _ZFP_ZFAnimationGroupPrivate *, selfTmp
+                , ZFAnimationGroupChildData *, childData
+                , zfidentity, aniId
+                , {
+                    if(aniId == selfTmp->pimplOwner->aniId())
+                    {
+                        childData->childAni()->aniStart();
+                    }
+                })
+            zfidentity childDelayTaskId = ZFExecuteAfterDelay(
                 childData->childDelayBeforeStart(),
-                ZFCallbackForMemberMethod(this, ZFMethodAccess(_ZFP_ZFAnimationGroupPrivate, onChildStartDelay)),
-                zfnull,
-                ZFListenerData()
-                    .param0Set(ZFValue::identityValueCreate(aniId).toObject())
-                    .param1Set(childData)
-                );
+                childOnDelayFinish);
             if(childDelayTaskId != zfidentityInvalid())
             {
                 this->childDelayTaskIds.add(childDelayTaskId);
             }
-        }
-    }
-    ZFLISTENER_INLINE(onChildStartDelay)
-    {
-        zfidentity aniId = ZFCastZFObjectUnchecked(ZFValue *, listenerData.param0)->identityValue();
-        ZFAnimationGroupChildData *childData = ZFCastZFObjectUnchecked(ZFAnimationGroupChildData *, listenerData.param1);
-        if(aniId == this->pimplOwner->aniId())
-        {
-            childData->childAni()->aniStart();
         }
     }
 private:
@@ -223,18 +211,22 @@ private:
         return zfnull;
     }
 private:
-    ZFLISTENER_INLINE(onChildStart_parallel)
+    ZFMETHOD_INLINE_2(void, onChildStart_parallel,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
-        ZFAnimationGroupChildData *childData = this->checkChild(listenerData.sender);
+        ZFAnimationGroupChildData *childData = this->checkChild(listenerData.sender());
         if(childData == zfnull)
         {
             return ;
         }
         this->pimplOwner->aniGroupOnChildStart(childData->childAni());
     }
-    ZFLISTENER_INLINE(onChildStop_parallel)
+    ZFMETHOD_INLINE_2(void, onChildStop_parallel,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
-        ZFAnimationGroupChildData *childData = this->checkChild(listenerData.sender, zfHint("autoRemove")zftrue);
+        ZFAnimationGroupChildData *childData = this->checkChild(listenerData.sender(), zfHint("autoRemove")zftrue);
         if(childData == zfnull)
         {
             return ;
@@ -247,19 +239,23 @@ private:
             this->pimplOwner->aniImplNotifyStop();
         }
     }
-    ZFLISTENER_INLINE(onChildStart_serial)
+    ZFMETHOD_INLINE_2(void, onChildStart_serial,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
         ZFAnimationGroupChildData *childData = this->childBuf->getFirst<ZFAnimationGroupChildData *>();
-        if(childData == zfnull || childData->childAni() != listenerData.sender)
+        if(childData == zfnull || childData->childAni() != listenerData.sender())
         {
             return ;
         }
         this->pimplOwner->aniGroupOnChildStart(childData->childAni());
     }
-    ZFLISTENER_INLINE(onChildStop_serial)
+    ZFMETHOD_INLINE_2(void, onChildStop_serial,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
         ZFAnimationGroupChildData *childData = this->childBuf->getFirst<ZFAnimationGroupChildData *>();
-        if(childData == zfnull || childData->childAni() != listenerData.sender)
+        if(childData == zfnull || childData->childAni() != listenerData.sender())
         {
             return ;
         }
@@ -329,7 +325,7 @@ zfbool ZFAnimationGroup::serializableOnSerializeFromData(ZF_IN const ZFSerializa
                     "null child animation");
                 return zffalse;
             }
-            this->childAniAdd(childData);
+            this->childAniDataAdd(childData);
 
             categoryData.resolveMark();
         }
@@ -352,7 +348,7 @@ zfbool ZFAnimationGroup::serializableOnSerializeToData(ZF_IN_OUT ZFSerializableD
             {
                 return zffalse;
             }
-            elementData.categorySet(ZFSerializableKeyword_ZFAnimationGroup_child);
+            elementData.category(ZFSerializableKeyword_ZFAnimationGroup_child);
             serializableData.elementAdd(elementData);
         }
     }
@@ -437,19 +433,10 @@ ZFMETHOD_DEFINE_1(ZFAnimationGroup, void, childAniAdd,
                   ZFMP_IN(ZFAnimation *, ani))
 {
     zfblockedAlloc(ZFAnimationGroupChildData, childData);
-    childData->childAniSet(ani);
-    this->childAniAdd(childData);
+    childData->childAni(ani);
+    this->childAniDataAdd(childData);
 }
-ZFMETHOD_DEFINE_2(ZFAnimationGroup, void, childAniAdd,
-                  ZFMP_IN(ZFAnimation *, ani),
-                  ZFMP_IN(zfbool, childAutoCopyTarget))
-{
-    zfblockedAlloc(ZFAnimationGroupChildData, childData);
-    childData->childAniSet(ani);
-    childData->childAutoCopyTargetSet(childAutoCopyTarget);
-    this->childAniAdd(childData);
-}
-ZFMETHOD_DEFINE_1(ZFAnimationGroup, void, childAniAdd,
+ZFMETHOD_DEFINE_1(ZFAnimationGroup, void, childAniDataAdd,
                   ZFMP_IN(ZFAnimationGroupChildData *, childData))
 {
     zfCoreAssert(childData != zfnull);
@@ -461,12 +448,12 @@ ZFMETHOD_DEFINE_0(ZFAnimationGroup, zfindex, childAniCount)
 {
     return d->childAnis->count();
 }
-ZFMETHOD_DEFINE_1(ZFAnimationGroup, ZFAnimation *, childAniGet,
+ZFMETHOD_DEFINE_1(ZFAnimationGroup, ZFAnimation *, childAniAtIndex,
                   ZFMP_IN(zfindex, index))
 {
     return d->childAnis->get<ZFAnimationGroupChildData *>(index)->childAni();
 }
-ZFMETHOD_DEFINE_1(ZFAnimationGroup, ZFAnimationGroupChildData *, childAniDataGet,
+ZFMETHOD_DEFINE_1(ZFAnimationGroup, ZFAnimationGroupChildData *, childAniDataAtIndex,
                   ZFMP_IN(zfindex, index))
 {
     return d->childAnis->get<ZFAnimationGroupChildData *>(index);
@@ -494,7 +481,11 @@ zfbool ZFAnimationGroup::aniImplCheckValid(void)
         ZFAnimationGroupChildData *childData = d->childAnis->get<ZFAnimationGroupChildData *>(i);
         if(childData->childAutoCopyTarget() && this->aniTarget() != zfnull)
         {
-            childData->childAni()->aniTargetSet(this->aniTarget());
+            childData->childAni()->aniTarget(this->aniTarget());
+        }
+        if(childData->childAutoCopyDuration())
+        {
+            childData->childAni()->aniDuration(this->aniDuration());
         }
         if(!childData->childAni()->aniValid())
         {

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -16,7 +7,7 @@ zfclass _ZFP_ZFCore_ZFStyle_test_Object : zfextends ZFStyleableObject
     ZFOBJECT_DECLARE(_ZFP_ZFCore_ZFStyle_test_Object, ZFStyleableObject)
 
     ZFPROPERTY_ASSIGN(zfint, myProperty)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(zfint, myProperty)
+    ZFPROPERTY_ON_ATTACH_INLINE(zfint, myProperty)
     {
         zfLogT() << propertyValue;
     }
@@ -38,19 +29,19 @@ protected:
         const zfchar *styleKey = _ZFP_ZFCore_ZFStyle_test_Object::ClassData()->classNameFull();
         {
             zfblockedAlloc(_ZFP_ZFCore_ZFStyle_test_Object, styleValue);
-            styleValue->myPropertySet(123);
+            styleValue->myProperty(123);
             ZFStyleSet(styleKey, styleValue);
         }
 
         this->testCaseOutputSeparator();
         this->testCaseOutput("attach object to style");
         zfblockedAlloc(_ZFP_ZFCore_ZFStyle_test_Object, obj);
-        obj->styleKeySet(_ZFP_ZFCore_ZFStyle_test_Object::ClassData()->classNameFull());
+        obj->styleKey(_ZFP_ZFCore_ZFStyle_test_Object::ClassData()->classNameFull());
 
         this->testCaseOutputSeparator();
         this->testCaseOutput("notify change style");
         ZFStyleChangeBegin();
-        ZFStyleSet("ZFCore_ZFStyle_test", zflineAlloc(ZFString));
+        ZFStyleSet("ZFCore_ZFStyle_test", zflineAlloc(v_zfstring));
         ZFStyleSet("ZFCore_ZFStyle_test", zfnull);
         ZFStyleChangeEnd();
 

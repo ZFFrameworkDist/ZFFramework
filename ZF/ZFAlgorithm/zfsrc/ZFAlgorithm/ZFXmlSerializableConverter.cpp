@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFXmlSerializableConverter.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -45,7 +36,7 @@ static zfbool _ZFP_ZFSerializableDataFromXml(ZF_OUT ZFSerializableData &serializ
         }
         return zffalse;
     }
-    serializableData.itemClassSet(xmlElement.xmlName());
+    serializableData.itemClass(xmlElement.xmlName());
 
     ZFXmlItem attribute = xmlElement.xmlAttributeFirst();
     while(!attribute.xmlIsNull())
@@ -59,7 +50,7 @@ static zfbool _ZFP_ZFSerializableDataFromXml(ZF_OUT ZFSerializableData &serializ
             }
             return zffalse;
         }
-        serializableData.attributeSet(attribute.xmlName(), attribute.xmlValue());
+        serializableData.attributeForName(attribute.xmlName(), attribute.xmlValue());
 
         attribute = attribute.xmlAttributeNext();
     }
@@ -124,14 +115,14 @@ ZFMETHOD_FUNC_DEFINE_3(ZFXmlItem, ZFSerializableDataToXml,
     }
 
     ZFXmlItem ret(ZFXmlType::e_XmlElement);
-    ret.xmlNameSet(serializableData.itemClass());
+    ret.xmlName(serializableData.itemClass());
 
     for(zfiterator it = serializableData.attributeIterator();
         serializableData.attributeIteratorIsValid(it);
-        serializableData.attributeIteratorNext(it))
+        serializableData.attributeIteratorNextValue(it))
     {
-        ret.xmlAttributeAdd(serializableData.attributeIteratorGetKey(it),
-            serializableData.attributeIteratorGet(it));
+        ret.xmlAttributeAdd(serializableData.attributeIteratorKey(it),
+            serializableData.attributeIteratorValue(it));
     }
 
     for(zfindex i = 0; i < serializableData.elementCount(); ++i)
@@ -169,7 +160,7 @@ ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFSerializableDataFromXml,
         return zffalse;
     }
 
-    ret.pathInfoSet(input.pathInfo());
+    ret.pathInfo(input.pathInfo());
     return zftrue;
 }
 ZFMETHOD_FUNC_DEFINE_2(ZFSerializableData, ZFSerializableDataFromXml,

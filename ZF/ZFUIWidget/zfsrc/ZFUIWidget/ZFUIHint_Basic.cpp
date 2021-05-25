@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIHint_Basic.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -15,27 +6,51 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 // hint with simple text and icon
 ZFSTYLE_DEFAULT_DEFINE(ZFUIHintContentBasic)
 
-ZFMETHOD_FUNC_DEFINE_2(zfautoObject, ZFUIHintMake,
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIHintContentBasic, zfbool, viewUIEnableTree)
+{
+    propertyValue = zffalse;
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIHintContentBasic, ZFUISize, viewSizeMin)
+{
+    propertyValue = ZFUISizeMake(
+        ZFUIGlobalStyle::DefaultStyle()->itemSizeButtonWidth(),
+        ZFUIGlobalStyle::DefaultStyle()->itemSizeButton());
+}
+
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIHintContentBasic, ZFUITextView *, buttonLabelStyleNormal)
+{
+    ZFUITextView *value = propertyValue.to<ZFUITextView *>();
+    value->textColor(ZFUIColorWhite());
+    value->textSingleLine(zffalse);
+    value->textSizeAutoChangeMinSize(0);
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIHintContentBasic, ZFUIImageView *, buttonBackgroundStyleNormal)
+{
+    ZFUIImageView *value = propertyValue;
+    value->image(zfRes("ZFUIWidget/ZFUIHintContentBasic_background.xml"));
+}
+
+ZFMETHOD_FUNC_DEFINE_2(zfautoObjectT<ZFUIHint *>, ZFUIHintMake,
                        ZFMP_IN(const zfchar *, text),
                        ZFMP_IN_OPT(ZFUIImage *, icon, zfnull))
 {
     zfblockedAlloc(ZFUIHint, hint);
 
     zfblockedAlloc(ZFAnimationNativeView, hintAniShow);
-    hint->hintAniShowSet(hintAniShow);
-    hintAniShow->aniAlphaFromSet(0);
+    hint->hintAniShow(hintAniShow);
+    hintAniShow->aniAlphaFrom(0);
     zfblockedAlloc(ZFAnimationNativeView, hintAniHide);
-    hint->hintAniHideSet(hintAniHide);
-    hintAniHide->aniAlphaToSet(0);
+    hint->hintAniHide(hintAniHide);
+    hintAniHide->aniAlphaTo(0);
 
     zfblockedAlloc(ZFUIHintContentBasic, hintContent);
-    hint->hintContentSet(hintContent);
-    hintContent->buttonLabelTextSet(text);
-    hintContent->buttonIconImageSet(icon);
+    hint->hintContent(hintContent);
+    hintContent->buttonLabelText(text);
+    hintContent->buttonIconImage(icon);
 
     return hint;
 }
-ZFMETHOD_FUNC_DEFINE_INLINE_2(zfautoObject, ZFUIHintShow,
+ZFMETHOD_FUNC_INLINE_DEFINE_2(zfautoObjectT<ZFUIHint *>, ZFUIHintShow,
                               ZFMP_IN(const zfchar *, text),
                               ZFMP_IN_OPT(ZFUIImage *, icon, zfnull))
 

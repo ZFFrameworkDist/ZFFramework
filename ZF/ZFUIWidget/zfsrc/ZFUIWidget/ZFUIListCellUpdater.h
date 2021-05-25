@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListCellUpdater.h
  * @brief utility to update #ZFUIListCell
@@ -30,7 +21,7 @@ public:
     zfindex cellCount; /**< @brief cell's total count */
     ZFUIOrientationEnum listOrientation; /**< @brief owner list container's orientation */
     ZFUISize listContainerSize; /**< @brief owner list container's size */
-    zfint cellSizeHint; /**< @brief list cell's size hint */
+    zffloat cellSizeHint; /**< @brief list cell's size hint */
 };
 ZFTYPEID_ACCESS_ONLY_DECLARE(ZFUIListCellUpdaterParam, ZFUIListCellUpdaterParam)
 ZFCORE_POD_COMPARER_DECLARE(ZFUIListCellUpdaterParam)

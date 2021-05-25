@@ -1,14 +1,16 @@
 # spec
-/private
-/master/ZF_docs/Doxygen/Doxygen.exe
+/master/ZF_docs/Doxygen/doxy*.exe
 /master/ZF_docs/Doxygen/libclang.dll
 
 # common
+**/.classpath
+**/.project
+**/.settings
 **/.svn
+**/_impl
 **/_release
 **/_repo
 **/_tmp
-**/_impl
 **/zfgensrc_*
 
 # Android

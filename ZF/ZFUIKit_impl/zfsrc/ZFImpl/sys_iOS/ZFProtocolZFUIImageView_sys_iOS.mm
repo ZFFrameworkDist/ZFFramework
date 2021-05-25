@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIImageView.h"
 
@@ -97,8 +88,8 @@ public:
         tmp = nil;
     }
 
-    virtual void imageSet(ZF_IN ZFUIImageView *imageView,
-                          ZF_IN ZFUIImage *image)
+    virtual void image(ZF_IN ZFUIImageView *imageView,
+                       ZF_IN ZFUIImage *image)
     {
         _ZFP_ZFUIImageViewImpl_sys_iOS_ImageView *nativeImplView = (__bridge _ZFP_ZFUIImageViewImpl_sys_iOS_ImageView *)imageView->nativeImplView();
         nativeImplView.ownerZFUIImage = image;

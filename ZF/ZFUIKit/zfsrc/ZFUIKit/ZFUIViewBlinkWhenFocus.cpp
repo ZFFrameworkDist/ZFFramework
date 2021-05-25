@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIViewBlinkWhenFocus.h"
 #include "ZFUIViewBlink.h"
 
@@ -32,7 +23,7 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewBlinkWhenFocus_settingInit, ZFLeve
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFUIViewBlinkWhenFocus_settingInit)
 {
     ZFUIViewBlinkWhenFocusFilter().filterRemoveAll();
-    ZFUIViewBlinkWhenFocusAutoApplySet(zftrue);
+    ZFUIViewBlinkWhenFocusAutoApply(zftrue);
 }
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewBlinkWhenFocus_settingInit)
 
@@ -50,11 +41,11 @@ ZF_GLOBAL_INITIALIZER_DESTROY(ZFUIViewBlinkWhenFocusAutoApply_autoStart)
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewBlinkWhenFocusAutoApply_autoStart)
 
 // ============================================================
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_focusChange);
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_mouseDown);
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_viewOnDealloc);
+static void _ZFP_ZFUIViewBlinkWhenFocus_focusChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData);
+static void _ZFP_ZFUIViewBlinkWhenFocus_mouseDown(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData);
+static void _ZFP_ZFUIViewBlinkWhenFocus_viewOnDealloc(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData);
 static zfbool _ZFP_ZFUIViewBlinkWhenFocus_started = zffalse;
-static zfint _ZFP_ZFUIViewBlinkWhenFocus_paused = 0;
+static zffloat _ZFP_ZFUIViewBlinkWhenFocus_paused = 0;
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewBlinkWhenFocusDataHolder, ZFLevelZFFrameworkNormal)
 {
     this->focusChangeListener = ZFCallbackForFunc(_ZFP_ZFUIViewBlinkWhenFocus_focusChange);
@@ -63,39 +54,39 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewBlinkWhenFocusDataHolder, ZFLevelZ
 
     this->viewBlinkOnListener = ZFCallbackForFunc(zfself::viewBlinkOn);
     this->viewBlinkOffListener = ZFCallbackForFunc(zfself::viewBlinkOff);
-    ZFObjectGlobalEventObserver().observerAdd(ZFGlobalEvent::EventViewBlinkOn(), this->viewBlinkOnListener);
-    ZFObjectGlobalEventObserver().observerAdd(ZFGlobalEvent::EventViewBlinkOff(), this->viewBlinkOffListener);
+    ZFGlobalObserver().observerAdd(ZFGlobalEvent::EventViewBlinkOn(), this->viewBlinkOnListener);
+    ZFGlobalObserver().observerAdd(ZFGlobalEvent::EventViewBlinkOff(), this->viewBlinkOffListener);
 }
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFUIViewBlinkWhenFocusDataHolder)
 {
-    ZFObjectGlobalEventObserver().observerRemove(ZFGlobalEvent::EventViewBlinkOn(), this->viewBlinkOnListener);
-    ZFObjectGlobalEventObserver().observerRemove(ZFGlobalEvent::EventViewBlinkOff(), this->viewBlinkOffListener);
-    ZFUIViewBlinkWhenFocusMaskImageSet(zfnull);
+    ZFGlobalObserver().observerRemove(ZFGlobalEvent::EventViewBlinkOn(), this->viewBlinkOnListener);
+    ZFGlobalObserver().observerRemove(ZFGlobalEvent::EventViewBlinkOff(), this->viewBlinkOffListener);
+    ZFUIViewBlinkWhenFocusMaskImage(zfnull);
 }
 public:
-    zfautoObject maskImageCur;
+    zfautoObjectT<ZFUIImage *> maskImageCur;
     ZFListener viewBlinkOnListener;
     ZFListener viewBlinkOffListener;
     ZFListener focusChangeListener;
     ZFListener mouseDownListener;
     ZFListener viewOnDeallocListener;
     ZFCoreArrayPOD<ZFUIView *> focusedViews;
-    static ZFLISTENER_PROTOTYPE_EXPAND(viewBlinkOn)
+    static void viewBlinkOn(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        ZFGlobalEventCenter::instance()->observerNotifyWithCustomSender(
-            listenerData.sender, ZFGlobalEvent::EventViewBlinkWhenFocusViewBlinkOn());
+        ZFGlobalObserver().observerNotifyWithCustomSender(
+            listenerData.sender(), ZFGlobalEvent::EventViewBlinkWhenFocusViewBlinkOn());
     }
-    static ZFLISTENER_PROTOTYPE_EXPAND(viewBlinkOff)
+    static void viewBlinkOff(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        ZFGlobalEventCenter::instance()->observerNotifyWithCustomSender(
-            listenerData.sender, ZFGlobalEvent::EventViewBlinkWhenFocusViewBlinkOff());
+        ZFGlobalObserver().observerNotifyWithCustomSender(
+            listenerData.sender(), ZFGlobalEvent::EventViewBlinkWhenFocusViewBlinkOff());
     }
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewBlinkWhenFocusDataHolder)
 
 // ============================================================
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_focusChange)
+static void _ZFP_ZFUIViewBlinkWhenFocus_focusChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
-    ZFUIView *view = listenerData.sender->to<ZFUIView *>();
+    ZFUIView *view = listenerData.sender<ZFUIView *>();
 
     if(view->objectIsPrivate())
     {
@@ -115,7 +106,7 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_focusChange)
         view->observerAdd(ZFUIView::EventViewOnEvent(), d->mouseDownListener);
         if(!ZFUIViewBlinkWhenFocusAutoApplyPaused())
         {
-            ZFUIViewBlink(view, d->maskImageCur.to<ZFUIImage *>());
+            ZFUIViewBlink(view, d->maskImageCur);
         }
     }
     else
@@ -125,15 +116,15 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_focusChange)
         view->observerRemove(ZFUIView::EventViewOnEvent(), d->mouseDownListener);
     }
 }
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_mouseDown)
+static void _ZFP_ZFUIViewBlinkWhenFocus_mouseDown(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
-    ZFUIView *view = listenerData.sender->to<ZFUIView *>();
+    ZFUIView *view = listenerData.sender<ZFUIView *>();
     if(view->objectIsPrivate())
     {
         return ;
     }
 
-    ZFUIMouseEvent *event = ZFCastZFObject(ZFUIMouseEvent *, listenerData.param0);
+    ZFUIMouseEvent *event = listenerData.param0<ZFUIMouseEvent *>();
     if(event == zfnull || event->mouseAction != ZFUIMouseAction::e_MouseDown)
     {
         return ;
@@ -145,13 +136,13 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_mouseDown)
     ZF_GLOBAL_INITIALIZER_CLASS(ZFUIViewBlinkWhenFocusDataHolder) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkWhenFocusDataHolder);
     if(!ZFUIViewBlinkWhenFocusAutoApplyPaused())
     {
-        ZFUIViewBlink(view, d->maskImageCur.to<ZFUIImage *>());
+        ZFUIViewBlink(view, d->maskImageCur);
     }
 }
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFUIViewBlinkWhenFocus_viewOnDealloc)
+static void _ZFP_ZFUIViewBlinkWhenFocus_viewOnDealloc(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
     ZF_GLOBAL_INITIALIZER_CLASS(ZFUIViewBlinkWhenFocusDataHolder) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkWhenFocusDataHolder);
-    ZFUIView *view = listenerData.sender->to<ZFUIView *>();
+    ZFUIView *view = listenerData.sender<ZFUIView *>();
     d->focusedViews.removeElement(view);
     view->observerRemove(ZFUIView::EventObjectBeforeDealloc(), d->viewOnDeallocListener);
     view->observerRemove(ZFUIView::EventViewOnEvent(), d->mouseDownListener);
@@ -165,10 +156,10 @@ ZFMETHOD_FUNC_DEFINE_1(void, ZFUIViewBlinkWhenFocusAutoApplyStart,
     ZF_GLOBAL_INITIALIZER_CLASS(ZFUIViewBlinkWhenFocusDataHolder) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkWhenFocusDataHolder);
 
     _ZFP_ZFUIViewBlinkWhenFocus_started = zftrue;
-    d->maskImageCur = ((img != zfnull) ? img : ZFUIViewBlinkWhenFocusMaskImage().to<ZFUIImage *>());
+    d->maskImageCur = ((img != zfnull) ? img : ZFUIViewBlinkWhenFocusMaskImage().toObject());
 
-    ZFObjectGlobalEventObserver().observerAdd(ZFUIView::EventViewFocusOnChange(), d->focusChangeListener);
-    ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyStart());
+    ZFGlobalObserver().observerAdd(ZFUIView::EventViewFocusOnChange(), d->focusChangeListener);
+    ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyStart());
 }
 ZFMETHOD_FUNC_DEFINE_0(void, ZFUIViewBlinkWhenFocusAutoApplyStop)
 {
@@ -180,7 +171,7 @@ ZFMETHOD_FUNC_DEFINE_0(void, ZFUIViewBlinkWhenFocusAutoApplyStop)
     _ZFP_ZFUIViewBlinkWhenFocus_started = zffalse;
 
     ZF_GLOBAL_INITIALIZER_CLASS(ZFUIViewBlinkWhenFocusDataHolder) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkWhenFocusDataHolder);
-    ZFObjectGlobalEventObserver().observerRemove(ZFUIView::EventViewFocusOnChange(), d->focusChangeListener);
+    ZFGlobalObserver().observerRemove(ZFUIView::EventViewFocusOnChange(), d->focusChangeListener);
     for(zfindex i = 0; i < d->focusedViews.count(); ++i)
     {
         ZFUIView *view = d->focusedViews[i];
@@ -188,7 +179,7 @@ ZFMETHOD_FUNC_DEFINE_0(void, ZFUIViewBlinkWhenFocusAutoApplyStop)
         view->observerRemove(ZFUIView::EventViewOnEvent(), d->mouseDownListener);
     }
     d->focusedViews.removeAll();
-    ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyStop());
+    ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyStop());
 }
 ZFMETHOD_FUNC_DEFINE_0(zfbool, ZFUIViewBlinkWhenFocusAutoApplyStarted)
 {
@@ -200,7 +191,7 @@ ZFMETHOD_FUNC_DEFINE_0(void, ZFUIViewBlinkWhenFocusAutoApplyPause)
     ++_ZFP_ZFUIViewBlinkWhenFocus_paused;
     if(_ZFP_ZFUIViewBlinkWhenFocus_paused == 1)
     {
-        ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyPause());
+        ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyPause());
     }
 }
 ZFMETHOD_FUNC_DEFINE_0(void, ZFUIViewBlinkWhenFocusAutoApplyResume)
@@ -209,7 +200,7 @@ ZFMETHOD_FUNC_DEFINE_0(void, ZFUIViewBlinkWhenFocusAutoApplyResume)
     --_ZFP_ZFUIViewBlinkWhenFocus_paused;
     if(_ZFP_ZFUIViewBlinkWhenFocus_paused == 0)
     {
-        ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyResume());
+        ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventViewBlinkWhenFocusAutoApplyResume());
     }
 }
 ZFMETHOD_FUNC_DEFINE_0(zfindex, ZFUIViewBlinkWhenFocusAutoApplyPaused)
@@ -234,7 +225,7 @@ public:
     ZFTimer *delayTimer;
     zftimet endTime;
     ZFListener doStopListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(doStop)
+    static void doStop(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
         ZFUIViewBlinkWhenFocusAutoApplyPauseForTimeCancel();
     }
@@ -260,12 +251,11 @@ ZFMETHOD_FUNC_DEFINE_1(void, ZFUIViewBlinkWhenFocusAutoApplyPauseForTime,
     {
         d->delayTimer = zfAlloc(ZFTimer);
         d->delayTimer->observerAdd(ZFTimer::EventTimerOnActivate(), d->doStopListener);
-        d->delayTimer->timerActivateInMainThreadSet(zftrue);
     }
     d->delayTimer->timerStop();
 
     d->endTime = endTime;
-    d->delayTimer->timerIntervalSet(time);
+    d->delayTimer->timerInterval(time);
     ZFUIViewBlinkWhenFocusAutoApplyPause();
     d->started = zftrue;
     d->delayTimer->timerStart();

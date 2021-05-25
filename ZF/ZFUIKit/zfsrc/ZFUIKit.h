@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIKit.h
  * @brief header file for ZFUIKit module
@@ -20,6 +11,7 @@
 #include "ZFUIKit/ZFObjectIO_image.h"
 #include "ZFUIKit/ZFTimeLineCurve_UI.h"
 #include "ZFUIKit/ZFUIColor_common.h"
+#include "ZFUIKit/ZFUIDraw.h"
 #include "ZFUIKit/ZFUIEvent.h"
 #include "ZFUIKit/ZFUIGlobalStyle.h"
 #include "ZFUIKit/ZFUIImage.h"
@@ -29,7 +21,6 @@
 #include "ZFUIKit/ZFUIKeyEvent.h"
 #include "ZFUIKit/ZFUIKeyboardState.h"
 #include "ZFUIKit/ZFUIKitDef.h"
-#include "ZFUIKit/ZFUILayoutParam.h"
 #include "ZFUIKit/ZFUIMouseEvent.h"
 #include "ZFUIKit/ZFUINativeViewWrapper.h"
 #include "ZFUIKit/ZFUIOnScreenKeyboardState.h"
@@ -49,10 +40,6 @@
 #include "ZFUIKit/ZFUIViewCapture.h"
 #include "ZFUIKit/ZFUIViewFocus.h"
 #include "ZFUIKit/ZFUIViewPositionOnScreen.h"
-#include "ZFUIKit/ZFUIViewStateAni.h"
-#include "ZFUIKit/ZFUIViewStateAniAutoApply.h"
-#include "ZFUIKit/ZFUIViewStateAni_alpha.h"
-#include "ZFUIKit/ZFUIViewStateAni_move.h"
 #include "ZFUIKit/ZFUIViewTreePrint.h"
 #include "ZFUIKit/ZFUIViewType.h"
 #include "ZFUIKit/ZFUIViewUtil.h"

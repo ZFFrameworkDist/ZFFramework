@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIButtonBasic.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -53,7 +44,7 @@ public:
                 value = this->pimplOwner->buttonLabelStyleNormal()->text();
             }
         }
-        this->buttonLabel->textSet(value);
+        this->buttonLabel->text(value);
     }
     void updateButtonIcon(void)
     {
@@ -77,7 +68,7 @@ public:
                 value = this->pimplOwner->buttonIconStyleNormal()->image();
             }
         }
-        this->buttonIcon->imageSet(value);
+        this->buttonIcon->image(value);
     }
     void updateButtonBackground(void)
     {
@@ -101,19 +92,19 @@ public:
                 value = this->pimplOwner->buttonBackgroundStyleNormal()->image();
             }
         }
-        this->buttonBackground->imageSet(value);
+        this->buttonBackground->image(value);
     }
 
 public:
     #define _ZFP_ZFUIButtonBasic_LISTENER_EXPAND_STYLE_CHANGED(T_Component, T_State) \
-        static ZFLISTENER_PROTOTYPE_EXPAND(button##T_Component##Style##T_State##Changed) \
+        static void button##T_Component##Style##T_State##Changed(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData) \
         { \
-            const ZFProperty *property = listenerData.param0->to<v_ZFProperty *>()->zfv; \
+            const ZFProperty *property = listenerData.param0<v_ZFProperty *>()->zfv; \
             ZFUIButtonBasic *button = userData->objectHolded(); \
             button->prepareButton##T_Component(); \
             if(button->buttonState() == ZFUIButtonState::e_##T_State) \
             { \
-                ZFPropertyCopy(property, button->button##T_Component()->toObject(), listenerData.sender); \
+                ZFPropertyCopy(property, button->button##T_Component()->toObject(), listenerData.sender()); \
             } \
             else if(property == ZFPropertyAccess(ZFUITextView, text)) \
             { \
@@ -181,14 +172,14 @@ ZFOBJECT_REGISTER(ZFUIButtonBasic)
 ZFSTYLE_DEFAULT_DEFINE(ZFUIButtonBasic)
 
 #define _ZFP_ZFUIBUTTONBASIC_BUTTON_COMPONENT_DEFINE(Type, ComponentName, StateName) \
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButtonBasic, Type, button##ComponentName##Style##StateName) \
+    ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButtonBasic, Type, button##ComponentName##Style##StateName) \
     { \
         this->button##ComponentName##Style##StateName()->toObject()->observerAdd( \
             ZFObject::EventObjectPropertyValueOnUpdate(), \
             ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIButtonBasicListenerHolder)->button##ComponentName##Style##StateName##ChangedListener, \
             this->objectHolder()); \
     } \
-    ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(ZFUIButtonBasic, Type, button##ComponentName##Style##StateName) \
+    ZFPROPERTY_ON_DETACH_DEFINE(ZFUIButtonBasic, Type, button##ComponentName##Style##StateName) \
     { \
         this->button##ComponentName##Style##StateName()->toObject()->observerRemove( \
             ZFObject::EventObjectPropertyValueOnUpdate(), \
@@ -213,6 +204,178 @@ _ZFP_ZFUIBUTTONBASIC_BUTTON_COMPONENT_DEFINE(ZFUIImageView *, Background, Checke
 _ZFP_ZFUIBUTTONBASIC_BUTTON_COMPONENT_DEFINE(ZFUIImageView *, Background, CheckedHighlighted)
 _ZFP_ZFUIBUTTONBASIC_BUTTON_COMPONENT_DEFINE(ZFUIImageView *, Background, Disabled)
 
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUITextView *, buttonLabelStyleNormal)
+{
+    ZFUITextView *v = propertyValue.to<ZFUITextView *>();
+    v->textColor(ZFUIGlobalStyle::DefaultStyle()->controlColorNormal());
+
+    this->prepareButtonLabel();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUITextView *, buttonLabelStyleHighlighted)
+{
+    ZFUITextView *v = propertyValue.to<ZFUITextView *>();
+    v->textColor(ZFUIGlobalStyle::DefaultStyle()->controlColorHighlighted());
+
+    this->prepareButtonLabel();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUITextView *, buttonLabelStyleChecked)
+{
+    ZFUITextView *v = propertyValue.to<ZFUITextView *>();
+    v->textColor(ZFUIGlobalStyle::DefaultStyle()->controlColorChecked());
+
+    this->prepareButtonLabel();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUITextView *, buttonLabelStyleCheckedHighlighted)
+{
+    ZFUITextView *v = propertyValue.to<ZFUITextView *>();
+    v->textColor(ZFUIGlobalStyle::DefaultStyle()->controlColorCheckedHighlighted());
+
+    this->prepareButtonLabel();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUITextView *, buttonLabelStyleDisabled)
+{
+    ZFUITextView *v = propertyValue.to<ZFUITextView *>();
+    v->textColor(ZFUIGlobalStyle::DefaultStyle()->controlColorDisabled());
+
+    this->prepareButtonLabel();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonIconStyleNormal)
+{
+    this->prepareButtonIcon();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonIconStyleHighlighted)
+{
+    this->prepareButtonIcon();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonIconStyleChecked)
+{
+    this->prepareButtonIcon();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonIconStyleCheckedHighlighted)
+{
+    this->prepareButtonIcon();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonIconStyleDisabled)
+{
+    this->prepareButtonIcon();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonBackgroundStyleNormal)
+{
+    this->prepareButtonBackground();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonBackgroundStyleHighlighted)
+{
+    this->prepareButtonBackground();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonBackgroundStyleChecked)
+{
+    this->prepareButtonBackground();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonBackgroundStyleCheckedHighlighted)
+{
+    this->prepareButtonBackground();
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonBasic, ZFUIImageView *, buttonBackgroundStyleDisabled)
+{
+    this->prepareButtonBackground();
+}
+
+ZFMETHOD_DEFINE_1(ZFUIButtonBasic, ZFUITextView *, buttonLabelStyle,
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    switch(forState)
+    {
+        case ZFUIButtonState::e_Normal:
+            return this->buttonLabelStyleNormal();
+        case ZFUIButtonState::e_Highlighted:
+            return this->buttonLabelStyleHighlighted();
+        case ZFUIButtonState::e_Checked:
+            return this->buttonLabelStyleChecked();
+        case ZFUIButtonState::e_CheckedHighlighted:
+            return this->buttonLabelStyleCheckedHighlighted();
+        case ZFUIButtonState::e_Disabled:
+            return this->buttonLabelStyleDisabled();
+        default:
+            zfCoreCriticalShouldNotGoHere();
+            return zfnull;
+    }
+}
+ZFMETHOD_DEFINE_1(ZFUIButtonBasic, ZFUIImageView *, buttonIconStyle,
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    switch(forState)
+    {
+        case ZFUIButtonState::e_Normal:
+            return this->buttonIconStyleNormal();
+        case ZFUIButtonState::e_Highlighted:
+            return this->buttonIconStyleHighlighted();
+        case ZFUIButtonState::e_Checked:
+            return this->buttonIconStyleChecked();
+        case ZFUIButtonState::e_CheckedHighlighted:
+            return this->buttonIconStyleCheckedHighlighted();
+        case ZFUIButtonState::e_Disabled:
+            return this->buttonIconStyleDisabled();
+        default:
+            zfCoreCriticalShouldNotGoHere();
+            return zfnull;
+    }
+}
+ZFMETHOD_DEFINE_1(ZFUIButtonBasic, ZFUIImageView *, buttonBackgroundStyle,
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    switch(forState)
+    {
+        case ZFUIButtonState::e_Normal:
+            return this->buttonBackgroundStyleNormal();
+        case ZFUIButtonState::e_Highlighted:
+            return this->buttonBackgroundStyleHighlighted();
+        case ZFUIButtonState::e_Checked:
+            return this->buttonBackgroundStyleChecked();
+        case ZFUIButtonState::e_CheckedHighlighted:
+            return this->buttonBackgroundStyleCheckedHighlighted();
+        case ZFUIButtonState::e_Disabled:
+            return this->buttonBackgroundStyleDisabled();
+        default:
+            zfCoreCriticalShouldNotGoHere();
+            return zfnull;
+    }
+}
+ZFMETHOD_DEFINE_1(ZFUIButtonBasic, const zfchar *, buttonLabelText,
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    return this->buttonLabelStyle(forState)->text();
+}
+ZFMETHOD_DEFINE_2(ZFUIButtonBasic, void, buttonLabelText,
+                  ZFMP_IN(const zfchar *, text),
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    this->buttonLabelStyle(forState)->text(text);
+}
+
+ZFMETHOD_DEFINE_1(ZFUIButtonBasic, ZFUIImage *, buttonIconImage,
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    return this->buttonIconStyle(forState)->image();
+}
+ZFMETHOD_DEFINE_2(ZFUIButtonBasic, void, buttonIconImage,
+                  ZFMP_IN(ZFUIImage *, image),
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    this->buttonIconStyle(forState)->image(image);
+}
+
+ZFMETHOD_DEFINE_1(ZFUIButtonBasic, ZFUIImage *, buttonBackgroundImage,
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    return this->buttonBackgroundStyle(forState)->image();
+}
+ZFMETHOD_DEFINE_2(ZFUIButtonBasic, void, buttonBackgroundImage,
+                  ZFMP_IN(ZFUIImage *, image),
+                  ZFMP_IN_OPT(ZFUIButtonStateEnum, forState, ZFUIButtonState::e_Normal))
+{
+    this->buttonBackgroundStyle(forState)->image(image);
+}
+
 void ZFUIButtonBasic::objectOnInit(void)
 {
     zfsuper::objectOnInit();
@@ -228,45 +391,6 @@ void ZFUIButtonBasic::objectOnDealloc(void)
     zfpoolDelete(d);
     d = zfnull;
     zfsuper::objectOnDealloc();
-}
-void ZFUIButtonBasic::objectOnInitFinish(void)
-{
-    zfsuper::objectOnInitFinish();
-
-    const ZFClass *cls = this->classData();
-    if(d->buttonLabel == zfnull)
-    {
-        if(cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonLabelStyleNormal))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonLabelStyleHighlighted))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonLabelStyleChecked))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonLabelStyleCheckedHighlighted))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonLabelStyleDisabled)))
-        {
-            this->prepareButtonLabel();
-        }
-    }
-    if(d->buttonBackground == zfnull)
-    {
-        if(cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonBackgroundStyleNormal))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonBackgroundStyleHighlighted))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonBackgroundStyleChecked))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonBackgroundStyleCheckedHighlighted))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonBackgroundStyleDisabled)))
-        {
-            this->prepareButtonBackground();
-        }
-    }
-    if(d->buttonIcon == zfnull)
-    {
-        if(cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonIconStyleNormal))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonIconStyleHighlighted))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonIconStyleChecked))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonIconStyleCheckedHighlighted))
-            || cls->propertyHasOverrideInitStep(ZFPropertyAccess(zfself, buttonIconStyleDisabled)))
-        {
-            this->prepareButtonIcon();
-        }
-    }
 }
 
 void ZFUIButtonBasic::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
@@ -340,7 +464,7 @@ void ZFUIButtonBasic::layoutOnMeasure(ZF_OUT ZFUISize &ret,
     }
 
     ZFUISize contentSize = ZFUISizeZero();
-    zfint contentSpace = 0;
+    zffloat contentSpace = 0;
     switch(this->buttonContentIconPosition())
     {
         case ZFUIOrientation::e_Left:
@@ -385,17 +509,17 @@ void ZFUIButtonBasic::layoutOnMeasure(ZF_OUT ZFUISize &ret,
     ret.width = zfmMax(backgroundSize.width, contentSize.width);
     ret.height = zfmMax(backgroundSize.height, contentSize.height);
 }
-void ZFUIButtonBasic::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
+void ZFUIButtonBasic::internalViewOnLayout(ZF_IN const ZFUIRect &bounds)
 {
-    zfsuper::internalBgViewOnLayout(bounds);
+    zfsuper::internalViewOnLayout(bounds);
 
     ZFUIView *backgroundView = ZFCastZFObjectUnchecked(ZFUIView *, d->buttonBackground);
     if(backgroundView != zfnull)
     {
-        backgroundView->layout(ZFUIRectApplyMargin(bounds, this->buttonBackgroundMargin()));
+        backgroundView->viewFrame(ZFUIRectApplyMargin(bounds, this->buttonBackgroundMargin()));
     }
 
-    ZFUISize sizeHint = ZFUISizeApplyMargin(bounds.size, this->buttonContentMargin());
+    ZFUISize sizeHint = ZFUISizeApplyMargin(ZFUIRectGetSize(bounds), this->buttonContentMargin());
 
     ZFUIView *labelView = ZFCastZFObjectUnchecked(ZFUIView *, d->buttonLabel);
     ZFUIView *iconView = ZFCastZFObjectUnchecked(ZFUIView *, d->buttonIcon);
@@ -413,7 +537,7 @@ void ZFUIButtonBasic::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
     }
 
     ZFUIRect contentFrame = ZFUIRectZero();
-    zfint contentSpace = 0;
+    zffloat contentSpace = 0;
     switch(this->buttonContentIconPosition())
     {
         case ZFUIOrientation::e_Left:
@@ -431,22 +555,22 @@ void ZFUIButtonBasic::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
             {
                 if(iconView != zfnull)
                 {
-                    iconView->layout(ZFUIAlignApply(ZFUIAlign::e_LeftInner, contentFrame, iconSize));
+                    iconView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_LeftInner, contentFrame, iconSize));
                 }
                 if(labelView != zfnull)
                 {
-                    labelView->layout(ZFUIAlignApply(ZFUIAlign::e_RightInner, contentFrame, labelSize));
+                    labelView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_RightInner, contentFrame, labelSize));
                 }
             }
             else
             {
                 if(iconView != zfnull)
                 {
-                    iconView->layout(ZFUIAlignApply(ZFUIAlign::e_RightInner, contentFrame, iconSize));
+                    iconView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_RightInner, contentFrame, iconSize));
                 }
                 if(labelView != zfnull)
                 {
-                    labelView->layout(ZFUIAlignApply(ZFUIAlign::e_LeftInner, contentFrame, labelSize));
+                    labelView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_LeftInner, contentFrame, labelSize));
                 }
             }
             break;
@@ -465,22 +589,22 @@ void ZFUIButtonBasic::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
             {
                 if(iconView != zfnull)
                 {
-                    iconView->layout(ZFUIAlignApply(ZFUIAlign::e_TopInner, contentFrame, iconSize));
+                    iconView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_TopInner, contentFrame, iconSize));
                 }
                 if(labelView != zfnull)
                 {
-                    labelView->layout(ZFUIAlignApply(ZFUIAlign::e_BottomInner, contentFrame, labelSize));
+                    labelView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_BottomInner, contentFrame, labelSize));
                 }
             }
             else
             {
                 if(iconView != zfnull)
                 {
-                    iconView->layout(ZFUIAlignApply(ZFUIAlign::e_BottomInner, contentFrame, iconSize));
+                    iconView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_BottomInner, contentFrame, iconSize));
                 }
                 if(labelView != zfnull)
                 {
-                    labelView->layout(ZFUIAlignApply(ZFUIAlign::e_TopInner, contentFrame, labelSize));
+                    labelView->viewFrame(ZFUIAlignApply(ZFUIAlign::e_TopInner, contentFrame, labelSize));
                 }
             }
             break;

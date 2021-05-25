@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFThread_taskRequest.h
  * @brief thread utility
@@ -30,10 +21,6 @@ public:
     ZFPROPERTY_ASSIGN_READONLY(zfidentity, taskId, zfidentityInvalid())
     /** @brief see #ZFThreadTaskRequest */
     ZFPROPERTY_ASSIGN(ZFListener, taskCallback)
-    /** @brief see #ZFThreadTaskRequest */
-    ZFPROPERTY_RETAIN(ZFObject *, taskParam0)
-    /** @brief see #ZFThreadTaskRequest */
-    ZFPROPERTY_RETAIN(ZFObject *, taskParam1)
     /** @brief see #ZFThreadTaskRequest */
     ZFPROPERTY_RETAIN(ZFObject *, taskUserData)
     /** @brief see #ZFThreadTaskRequest */
@@ -94,14 +81,13 @@ ZFEXPORT_VAR_READONLY_ALIAS_DECLARE(ZFListener, ZFThreadTaskRequestMergeCallback
  * @brief request a task that would be run on main thread after a proper time,
  *   safe to be called in background thread
  *
- * task's param is the params passed to this method,
- * and return value is ignored\n
+ * task's return value would be ignored\n
  * \n
  * tasks are ensured scheduled in different CPU time\n
  * \n
  * if duplicated task is found, the mergeCallback would be called\n
  * two tasks are treated as duplicated task if task callback and owner are both the same,
- * while param0/param1/userData won't be compared
+ * while userData won't be compared
  *
  * \n
  * the mergeCallback's param0 is a #ZFThreadTaskRequestMergeCallbackData
@@ -116,11 +102,9 @@ ZFEXPORT_VAR_READONLY_ALIAS_DECLARE(ZFListener, ZFThreadTaskRequestMergeCallback
  * to disable merge, set taskRequestDataMerged to null, and old/new task would be scheduled separately\n
  * or, you may use the pre-defined callbacks such as #ZFThreadTaskRequestMergeCallbackDoNotMerge
  */
-ZFMETHOD_FUNC_DECLARE_6(zfidentity, ZFThreadTaskRequest,
+ZFMETHOD_FUNC_DECLARE_4(zfidentity, ZFThreadTaskRequest,
                         ZFMP_IN(const ZFListener &, taskCallback),
                         ZFMP_IN_OPT(ZFObject *, taskUserData, zfnull),
-                        ZFMP_IN_OPT(ZFObject *, taskParam0, zfnull),
-                        ZFMP_IN_OPT(ZFObject *, taskParam1, zfnull),
                         ZFMP_IN_OPT(ZFObject *, taskOwner, zfnull),
                         ZFMP_IN_OPT(const ZFListener &, taskMergeCallback, ZFThreadTaskRequestMergeCallbackDefault()))
 /** @brief see #ZFThreadTaskRequest */
@@ -135,11 +119,9 @@ ZFMETHOD_FUNC_DECLARE_1(void, ZFThreadTaskCancel,
 /**
  * @brief see #ZFThreadTaskRequest
  */
-ZFMETHOD_FUNC_DECLARE_4(void, ZFThreadTaskCancelExactly,
+ZFMETHOD_FUNC_DECLARE_2(void, ZFThreadTaskCancelExactly,
                         ZFMP_IN(const ZFListener &, task),
-                        ZFMP_IN_OPT(ZFObject *, userData, zfnull),
-                        ZFMP_IN_OPT(ZFObject *, param0, zfnull),
-                        ZFMP_IN_OPT(ZFObject *, param1, zfnull))
+                        ZFMP_IN_OPT(ZFObject *, userData, zfnull))
 /**
  * @brief see #ZFThreadTaskRequest
  */

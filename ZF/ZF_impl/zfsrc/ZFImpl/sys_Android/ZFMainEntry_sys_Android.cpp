@@ -1,14 +1,6 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZF_impl.h"
 #include "ZFCore/ZFMainEntry.h"
+#include "ZFCore/protocol/ZFProtocolZFMainEntry.h"
 
 #if ZF_ENV_sys_Android
 
@@ -135,16 +127,16 @@ ZF_NAMESPACE_GLOBAL_END
 
 #include "ZFCore/ZFLogLevel.h"
 JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFMainEntry,
-                         void, native_1debugModeSet,
+                         void, native_1debugMode,
                          jboolean value)
 {
     if(value)
     {
-        ZFLogLevelSet(ZFLogLevel::e_Verbose);
+        ZFLogLevelDefault(ZFLogLevel::e_Verbose);
     }
     else
     {
-        ZFLogLevelSet(ZFLogLevel::EnumDefault());
+        ZFLogLevelDefault(ZFLogLevel::EnumDefault());
     }
 }
 JNI_METHOD_DECLARE_END()

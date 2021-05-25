@@ -1,14 +1,5 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLua_test.h"
-#include "ZFUIKit.h"
+#include "ZFUIWidget.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -23,15 +14,17 @@ protected:
         zfsuper::testCaseOnStart();
 
         zfautoObject luaResult = ZFLuaExecute(ZFInputForResFile("test_ZFLua_app.lua"));
-        ZFUIWindow *window = luaResult;
-        zfCoreAssert(window != zfnull);
-        window->observerAdd(
-            ZFUIWindow::EventWindowOnHide(),
-            ZFCallbackForMemberMethod(this, ZFMethodAccess(zfself, windowOnHide)));
+        ZFUIPageManager *pm = luaResult;
+        zfCoreAssert(pm != zfnull);
+        pm->observerAdd(
+            ZFUIPageManager::EventManagerOnDestroy(),
+            ZFCallbackForMemberMethod(this, ZFMethodAccess(zfself, managerOnDestroy)));
     }
 
 private:
-    ZFLISTENER_INLINE(windowOnHide)
+    ZFMETHOD_INLINE_2(void, managerOnDestroy,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
         this->testCaseStop(ZFResultType::e_Success);
         ZFLuaGC();

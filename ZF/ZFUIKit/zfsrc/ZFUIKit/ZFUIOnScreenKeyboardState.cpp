@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIOnScreenKeyboardState.h"
 #include "protocol/ZFProtocolZFUIOnScreenKeyboardState.h"
 #include "ZFUIWindow.h"
@@ -24,11 +15,11 @@ ZFMETHOD_DEFINE_1(ZFUIOnScreenKeyboardState, ZFUIOnScreenKeyboardState *, instan
     {
         sysWindow = ZFUISysWindow::mainWindow();
     }
-    ZFUIOnScreenKeyboardState *ret = sysWindow->tagGet<ZFUIOnScreenKeyboardState *>("_ZFP_ZFUIOnScreenKeyboardState");
+    ZFUIOnScreenKeyboardState *ret = sysWindow->objectTag<ZFUIOnScreenKeyboardState *>("_ZFP_ZFUIOnScreenKeyboardState");
     if(ret == zfnull)
     {
         zfblockedAlloc(ZFUIOnScreenKeyboardState, tmp);
-        sysWindow->tagSet("_ZFP_ZFUIOnScreenKeyboardState", tmp);
+        sysWindow->objectTag("_ZFP_ZFUIOnScreenKeyboardState", tmp);
         tmp->_ZFP_ZFUIOnScreenKeyboardState_keyboardOwnerSysWindow = sysWindow;
         ret = tmp;
     }
@@ -61,12 +52,18 @@ ZFMETHOD_DEFINE_0(ZFUIOnScreenKeyboardState, const ZFUIRect &, keyboardFramePrev
 ZFMETHOD_DEFINE_1(ZFUIOnScreenKeyboardState, void, keyboardFixClientFrameT,
                   ZFMP_OUT(ZFUIRect &, clientFrame))
 {
-    zffloat scale = this->keyboardOwnerSysWindow()->rootView()->scaleFixed();
+    zffloat scale = this->keyboardOwnerSysWindow()->rootView()->UIScaleFixed();
     ZFPROTOCOL_ACCESS(ZFUIOnScreenKeyboardState)->keyboardFixClientFrame(
         this,
         ZFUIRectApplyScale(this->keyboardFrame(), scale),
         clientFrame);
     ZFUIRectApplyScaleReversely(clientFrame, clientFrame, scale);
+}
+ZFMETHOD_DEFINE_0(ZFUIOnScreenKeyboardState, ZFUIRect, keyboardFixClientFrame)
+{
+    ZFUIRect ret = ZFUIRectZero();
+    this->keyboardFixClientFrameT(ret);
+    return ret;
 }
 
 void ZFUIOnScreenKeyboardState::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)

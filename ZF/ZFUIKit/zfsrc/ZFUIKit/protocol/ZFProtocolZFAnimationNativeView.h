@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFAnimationNativeView.h
  * @brief protocol for ZFAnimationNativeView
@@ -48,8 +39,8 @@ public:
      * -  aniAlpha (zffloat)
      * -  aniScaleX/Y/Z (zffloat)
      * -  aniTranslateX/Y/Z (zffloat)
-     * -  aniTranslatePixelX/Y/Z (zfint)
-     * -  aniRotateX/Y/Z (zfint)
+     * -  aniTranslatePixelX/Y/Z (zffloat)
+     * -  aniRotateX/Y/Z (zffloat)
      *
      * @note more than one ani may added to same view,
      *   you must also implement this logic

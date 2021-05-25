@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFPathType_common.h
  * @brief common #ZFPathInfo
@@ -47,7 +38,7 @@ ZFPATHTYPE_DECLARE(storageSharedPath)
  *
  * pathData is file's relative path within #ZFFilePathForCache
  *
- * note, the cache path's content would be removed accorrding to #ZFFilePathForCacheClear
+ * note, the cache path's content would be removed according to #ZFFilePathForCacheClear
  * @note path must be well formed, use #ZFFilePathFormat if necessary
  */
 ZFPATHTYPE_DECLARE(cachePath)

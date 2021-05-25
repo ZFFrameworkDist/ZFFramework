@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFUIImageView.h
  * @brief protocol for ZFUIImageView
@@ -42,15 +33,15 @@ public:
      * it's ensured set null when owner image view deallocated\n
      * note that implementation must implement the nine patch logic
      */
-    virtual void imageSet(ZF_IN ZFUIImageView *imageView,
-                          ZF_IN ZFUIImage *image) zfpurevirtual;
+    virtual void image(ZF_IN ZFUIImageView *imageView,
+                       ZF_IN ZFUIImage *image) zfpurevirtual;
     /**
      * @brief called when image's nine patch setting changed,
      *   ensured called once when change image
      *
      * note that the image's size is applied by #ZFUIImage::imageScale,
      * you should take care of the actual scale logic manually
-     * @note size is in pixel unit, you may revert it accorrding imageScale
+     * @note size is in pixel unit, you may revert it according imageScale
      */
     virtual void imageNinePatchChanged(ZF_IN ZFUIImageView *imageView,
                                        ZF_IN zffloat imageScale,

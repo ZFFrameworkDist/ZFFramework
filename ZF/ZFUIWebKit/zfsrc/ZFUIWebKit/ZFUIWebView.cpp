@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWebView.h"
 #include "protocol/ZFProtocolZFUIWebView.h"
 
@@ -76,7 +67,7 @@ void ZFUIWebView::objectOnInit(void)
             ZFPROTOCOL_ACCESS(ZFUIWebView)->nativeWebViewDestroy(view->to<ZFUIWebView *>(), nativeImplView);
         }
     };
-    this->nativeImplViewSet(ZFPROTOCOL_ACCESS(ZFUIWebView)->nativeWebViewCreate(this),
+    this->nativeImplView(ZFPROTOCOL_ACCESS(ZFUIWebView)->nativeWebViewCreate(this),
                             _ZFP_ZFUIWebView_nativeImplViewDestroy::action);
 }
 void ZFUIWebView::objectOnDealloc(void)

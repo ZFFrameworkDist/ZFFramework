@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFMethodSerializable.h"
 #include "ZFObjectImpl.h"
 
@@ -51,6 +42,56 @@ ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFMethod, const ZFMethod *, {
 
         return zftrue;
     })
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, const zfchar *, methodInternalId)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, zfbool, methodIsUserRegister)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, zfbool, methodIsDynamicRegister)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFObject *, methodDynamicRegisterUserData)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, const zfchar *, methodName)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, const zfchar *, methodReturnTypeId)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, const zfchar *, methodReturnTypeName)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, zfindex, methodParamCount)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, zfindex, methodParamCountMin)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_8(v_ZFMethod, zfbool, methodParamTypeIdIsMatch
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId0, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId1, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId2, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId3, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId4, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId5, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId6, zfnull)
+    , ZFMP_IN_OPT(const zfchar *, methodParamTypeId7, zfnull)
+    )
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, zfbool, methodParamTypeIdIsMatch, ZFMP_IN(const ZFMethod *, method))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, const zfchar *, methodParamTypeIdAtIndex, ZFMP_IN(zfindex, index))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, const zfchar *, methodParamTypeNameAtIndex, ZFMP_IN(zfindex, index))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, const zfchar *, methodParamNameAtIndex, ZFMP_IN(zfindex, index))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, ZFMethodParamDefaultValueCallback, methodParamDefaultValueCallbackAtIndex, ZFMP_IN(zfindex, index))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, zfautoObject, methodParamDefaultValueAtIndex, ZFMP_IN(zfindex, index))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, zfindex, methodParamDefaultBeginIndex)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFFuncAddrType, methodInvoker)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, void, methodInvoker, ZFMP_IN(ZFFuncAddrType, methodInvoker))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFFuncAddrType, methodInvokerOrg)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFMethodGenericInvoker, methodGenericInvoker)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_8(v_ZFMethod, zfautoObject, methodGenericInvoke
+    , ZFMP_IN_OPT(ZFObject *, ownerObjOrNull, zfnull)
+    , ZFMP_IN_OPT(ZFObject *, param0, ZFMethodGenericInvokerDefaultParam())
+    , ZFMP_IN_OPT(ZFObject *, param1, ZFMethodGenericInvokerDefaultParam())
+    , ZFMP_IN_OPT(ZFObject *, param2, ZFMethodGenericInvokerDefaultParam())
+    , ZFMP_IN_OPT(ZFObject *, param3, ZFMethodGenericInvokerDefaultParam())
+    , ZFMP_IN_OPT(ZFObject *, param4, ZFMethodGenericInvokerDefaultParam())
+    , ZFMP_IN_OPT(ZFObject *, param5, ZFMethodGenericInvokerDefaultParam())
+    , ZFMP_IN_OPT(ZFObject *, param6, ZFMethodGenericInvokerDefaultParam())
+    /* ZFMETHOD_MAX_PARAM , ZFMP_IN_OPT(ZFObject *, param7, ZFMethodGenericInvokerDefaultParam()) */
+    /* ZFMETHOD_MAX_PARAM , ZFMP_OUT_OPT(zfbool *, success, zfnull) */
+    /* ZFMETHOD_MAX_PARAM , ZFMP_OUT_OPT(zfstring *, errorHint, zfnull) */
+    )
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFMethodGenericInvoker, methodGenericInvokerOrg)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFMethod, void, methodGenericInvoker, ZFMP_IN(ZFMethodGenericInvoker, methodGenericInvoker))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, const ZFClass *, methodOwnerClass)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFMethodPrivilegeType, methodPrivilegeType)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, ZFMethodType, methodType)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, zfbool, methodIsFunctionType)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFMethod, const zfchar *, methodNamespace)
 
 /* ZFMETHOD_MAX_PARAM */
 const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *classOrNamespace,
@@ -65,38 +106,16 @@ const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *classOrNamespace,
                                 , ZF_IN_OPT const zfchar *methodParamTypeId7 /* = zfnull */
                                 )
 {
-    const ZFClass *cls = zfnull;
-    if(classOrNamespace != zfnull && *classOrNamespace != '\0')
-    {
-        cls = ZFClass::classForName(classOrNamespace);
-    }
-
-    if(cls == zfnull)
-    {
-        return ZFMethodFuncGet(classOrNamespace, methodName
-                , methodParamTypeId0
-                , methodParamTypeId1
-                , methodParamTypeId2
-                , methodParamTypeId3
-                , methodParamTypeId4
-                , methodParamTypeId5
-                , methodParamTypeId6
-                , methodParamTypeId7
-            );
-    }
-    else
-    {
-        return cls->methodForName(methodName
-                , methodParamTypeId0
-                , methodParamTypeId1
-                , methodParamTypeId2
-                , methodParamTypeId3
-                , methodParamTypeId4
-                , methodParamTypeId5
-                , methodParamTypeId6
-                , methodParamTypeId7
-            );
-    }
+    return ZFMethodForName(classOrNamespace, methodName
+            , methodParamTypeId0
+            , methodParamTypeId1
+            , methodParamTypeId2
+            , methodParamTypeId3
+            , methodParamTypeId4
+            , methodParamTypeId5
+            , methodParamTypeId6
+            , methodParamTypeId7
+        );
 }
 const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *methodSig,
                                 ZF_IN const ZFCoreArray<ZFIndexRange> &methodSigPos)
@@ -109,55 +128,26 @@ const ZFMethod *ZFMethodFromSig(ZF_IN const zfchar *methodSig,
     zfstring classOrNamespace(methodSig, methodSigPos[0].start, methodSigPos[0].count);
     zfstring methodName(methodSig, methodSigPos[1].start, methodSigPos[1].count);
 
-    const ZFClass *cls = zfnull;
-    if(methodSigPos[0].count > 0)
-    {
-        cls = ZFClass::classForName(classOrNamespace);
-    }
-
     if(methodSigPos[2].count == 0)
     {
-        if(cls == zfnull)
-        {
-            return ZFMethodFuncGet(classOrNamespace, methodName);
-        }
-        else
-        {
-            return cls->methodForName(methodName);
-        }
+        return ZFMethodForName(classOrNamespace, methodName);
     }
     else
     {
-        if(cls == zfnull)
-        {
-            return ZFMethodFuncGet(classOrNamespace, methodName
-                    , zfstring(methodSig, methodSigPos[2].start, methodSigPos[2].count)
-                    , zfstring(methodSig, methodSigPos[3].start, methodSigPos[3].count)
-                    , zfstring(methodSig, methodSigPos[4].start, methodSigPos[4].count)
-                    , zfstring(methodSig, methodSigPos[5].start, methodSigPos[5].count)
-                    , zfstring(methodSig, methodSigPos[6].start, methodSigPos[6].count)
-                    , zfstring(methodSig, methodSigPos[7].start, methodSigPos[7].count)
-                    , zfstring(methodSig, methodSigPos[8].start, methodSigPos[8].count)
-                    , zfstring(methodSig, methodSigPos[9].start, methodSigPos[9].count)
-                );
-        }
-        else
-        {
-            return cls->methodForName(methodName
-                    , zfstring(methodSig, methodSigPos[2].start, methodSigPos[2].count)
-                    , zfstring(methodSig, methodSigPos[3].start, methodSigPos[3].count)
-                    , zfstring(methodSig, methodSigPos[4].start, methodSigPos[4].count)
-                    , zfstring(methodSig, methodSigPos[5].start, methodSigPos[5].count)
-                    , zfstring(methodSig, methodSigPos[6].start, methodSigPos[6].count)
-                    , zfstring(methodSig, methodSigPos[7].start, methodSigPos[7].count)
-                    , zfstring(methodSig, methodSigPos[8].start, methodSigPos[8].count)
-                    , zfstring(methodSig, methodSigPos[9].start, methodSigPos[9].count)
-                );
-        }
+        return ZFMethodForName(classOrNamespace, methodName
+                , zfstring(methodSig, methodSigPos[2].start, methodSigPos[2].count)
+                , zfstring(methodSig, methodSigPos[3].start, methodSigPos[3].count)
+                , zfstring(methodSig, methodSigPos[4].start, methodSigPos[4].count)
+                , zfstring(methodSig, methodSigPos[5].start, methodSigPos[5].count)
+                , zfstring(methodSig, methodSigPos[6].start, methodSigPos[6].count)
+                , zfstring(methodSig, methodSigPos[7].start, methodSigPos[7].count)
+                , zfstring(methodSig, methodSigPos[8].start, methodSigPos[8].count)
+                , zfstring(methodSig, methodSigPos[9].start, methodSigPos[9].count)
+            );
     }
 }
 
-zfbool ZFMethodSigSplit(ZF_OUT ZFCoreArray<ZFIndexRange> &ret,
+zfbool ZFMethodSigSplit(ZF_IN_OUT ZFCoreArray<ZFIndexRange> &ret,
                         ZF_IN const zfchar *src,
                         ZF_IN_OPT zfindex srcLen /* = zfindexMax() */)
 {
@@ -218,7 +208,7 @@ ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_8(const ZFMethod *, ZFMethodFromSig, ZFMP_I
     /* ZFMETHOD_MAX_PARAM , ZFMP_IN_OPT(const zfchar *, methodParamTypeId7, zfnull) */
     )
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(const ZFMethod *, ZFMethodFromSig, ZFMP_IN(const zfchar *, methodSig), ZFMP_IN(const ZFCoreArray<ZFIndexRange> &, methodSigPos))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFMethodSigSplit, ZFMP_OUT(ZFCoreArray<ZFIndexRange> &, ret), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFMethodSigSplit, ZFMP_IN_OUT(ZFCoreArray<ZFIndexRange> &, ret), ZFMP_IN(const zfchar *, src), ZFMP_IN_OPT(zfindex, srcLen, zfindexMax()))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

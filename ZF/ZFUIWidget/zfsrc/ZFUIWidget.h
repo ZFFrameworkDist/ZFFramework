@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIWidget.h
  * @brief header file for ZFUIWidget module
@@ -15,8 +6,7 @@
 #ifndef _ZFI_ZFUIWidget_h_
 #define _ZFI_ZFUIWidget_h_
 
-#include "ZFUIWidget/ZFUIAnimatedImage.h"
-#include "ZFUIWidget/ZFUIAnimatedImageView.h"
+#include "ZFUIWidget/ZFUIAniImageView.h"
 #include "ZFUIWidget/ZFUIAutoLayout.h"
 #include "ZFUIWidget/ZFUIAutoLayoutMaker.h"
 #include "ZFUIWidget/ZFUIButton.h"
@@ -47,10 +37,7 @@
 #include "ZFUIWidget/ZFUIOnScreenKeyboardAutoFit.h"
 #include "ZFUIWidget/ZFUIOnScreenKeyboardAutoResize.h"
 #include "ZFUIWidget/ZFUIPage.h"
-#include "ZFUIWidget/ZFUIPageBasic.h"
-#include "ZFUIWidget/ZFUIPageManager.h"
-#include "ZFUIWidget/ZFUIPageManagerBasic.h"
-#include "ZFUIWidget/ZFUIPageRequest.h"
+#include "ZFUIWidget/ZFUIPageAni.h"
 #include "ZFUIWidget/ZFUITextEditWidget.h"
 #include "ZFUIWidget/ZFUIViewLayout.h"
 #include "ZFUIWidget/ZFUIWidgetDef.h"

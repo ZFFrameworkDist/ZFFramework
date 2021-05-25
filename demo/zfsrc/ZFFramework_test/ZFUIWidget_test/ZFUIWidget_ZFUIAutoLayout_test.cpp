@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,8 +18,8 @@ protected:
 
         zfblockedAlloc(ZFUIAutoLayout, layout);
         container->childAdd(layout, ZFUISizeParamFillFill());
-        layout->layoutParam()->layoutMarginSet(ZFUIMarginMake(40));
-        layout->viewBackgroundColorSet(ZFUIColorRed());
+        layout->layoutParam()->layoutMargin(ZFUIMarginMake(40));
+        layout->viewBackgroundColor(ZFUIColorRed());
 
         ZFCoreArrayPOD<ZFUIView *> v;
         for(zfindex i = 0; i < 5; ++i)
@@ -36,8 +27,8 @@ protected:
             zfblockedAlloc(ZFUITextView, t);
             layout->childAdd(t);
             v.add(t);
-            t->textSet(zfstringWithFormat("text %zi", i));
-            t->viewBackgroundColorSet(ZFUIColorRandom());
+            t->text(zfstringWithFormat("text %zi", i));
+            t->viewBackgroundColor(ZFUIColorRandom());
         }
 
         zfal_maker(v[0]).left().toParentLeft().right().toLeft(v[1]);
@@ -54,11 +45,11 @@ private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIAutoLayout *layout)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingForLayoutRequest(settings, layout);
 
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout->layoutParam(), ZFUISizeParam, ZFPropertyAccess(ZFUIViewLayoutParam, sizeParam),
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout->layoutParam(), ZFUISizeParam, ZFPropertyAccess(ZFUILayoutParam, sizeParam),
             ZFCoreArrayPODCreate(ZFUISizeParam
                 , ZFUISizeParamWrapWrap()
                 , ZFUISizeParamFillWrap()

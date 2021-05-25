@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIFlowLayout.h
  * @brief flow container view
@@ -24,13 +15,13 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * @brief layout param for #ZFUIFlowLayout
  *
  * for #ZFUIFlowLayout,
- * #ZFUIViewLayoutParam::layoutAlign and #ZFUIViewLayoutParam::layoutMargin
+ * #ZFUILayoutParam::layoutAlign and #ZFUILayoutParam::layoutMargin
  * would be relative to sibling child,
  * instead of the container view
  */
-zfclass ZF_ENV_EXPORT ZFUIFlowLayoutParam : zfextends ZFUIViewLayoutParam
+zfclass ZF_ENV_EXPORT ZFUIFlowLayoutParam : zfextends ZFUILayoutParam
 {
-    ZFOBJECT_DECLARE(ZFUIFlowLayoutParam, ZFUIViewLayoutParam)
+    ZFOBJECT_DECLARE(ZFUIFlowLayoutParam, ZFUILayoutParam)
 
     /**
      * @brief weight for the view, 0 by default
@@ -48,14 +39,14 @@ zfclass ZF_ENV_EXPORT ZFUIFlowLayoutParam : zfextends ZFUIViewLayoutParam
      * -  child1 = parentSize * 4 / 9
      * -  child2 = parentSize * 3 / 9
      */
-    ZFPROPERTY_ASSIGN(zfint, layoutWeight)
+    ZFPROPERTY_ASSIGN(zffloat, layoutWeight)
 
     /**
      * @brief whether reserve space if child is not visible, false by default
      */
     ZFPROPERTY_ASSIGN(zfbool, layoutReserveSpaceWhenNotVisible)
 
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIAlignFlags, layoutAlign)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUIAlignFlags, layoutAlign)
     {
         propertyValue = ZFUIAlign::e_Center;
     }
@@ -92,7 +83,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIOrientationEnum, layoutOrientationMain,
                                 ZFUIOrientation::e_Left)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIOrientationEnum, layoutOrientationMain)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIOrientationEnum, layoutOrientationMain)
     /**
      * @brief secondary direction to layout children, #ZFUIOrientation::e_Top by default
      *
@@ -107,26 +98,26 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIOrientationEnum, layoutOrientationSecondary,
                                 ZFUIOrientation::e_Top)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIOrientationEnum, layoutOrientationSecondary)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIOrientationEnum, layoutOrientationSecondary)
 
     /**
      * @brief extra margin independent from children's layout param's margin, #ZFUIMarginZero by default
      */
     ZFPROPERTY_ASSIGN(ZFUIMargin, layoutChildMargin)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIMargin, layoutChildMargin)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIMargin, layoutChildMargin)
 
     /**
      * @brief extra space between each child independent from children's layout param,
      *   in x direction, 0 by default
      */
-    ZFPROPERTY_ASSIGN(zfint, layoutChildSpaceX)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, layoutChildSpaceX)
+    ZFPROPERTY_ASSIGN(zffloat, layoutChildSpaceX)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, layoutChildSpaceX)
     /**
      * @brief extra space between each child independent from children's layout param,
      *   in y direction, 0 by default
      */
-    ZFPROPERTY_ASSIGN(zfint, layoutChildSpaceY)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, layoutChildSpaceY)
+    ZFPROPERTY_ASSIGN(zffloat, layoutChildSpaceY)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, layoutChildSpaceY)
 
     // ============================================================
     // override ZFUIView

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCache.h
  * @brief util object to hold #ZFObject as cache
@@ -28,53 +19,72 @@ zfclass ZF_ENV_EXPORT ZFCache : zfextends ZFObject
     ZFOBJECT_DECLARE(ZFCache, ZFObject)
 
 public:
-    /** @brief callback for impl */
-    typedef zfbool (*CacheOnAddImpl)(ZF_IN ZFObject *cache);
-
-public:
-    /** @brief callback for impl */
-    ZFCoreArrayPOD<ZFCache::CacheOnAddImpl> cacheOnAddImpl;
+    // ============================================================
+    // events
+    /**
+     * @brief see #ZFObject::observerNotify
+     *
+     * called when cache added,
+     * param0 is the added cache
+     */
+    ZFOBSERVER_EVENT(CacheOnAdd)
+    /**
+     * @brief see #ZFObject::observerNotify
+     *
+     * called when cache removed,
+     * param0 is the removed cache
+     */
+    ZFOBSERVER_EVENT(CacheOnRemove)
 
 public:
     /**
      * @brief max cache size, 10 by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfindex, cacheMaxSize, 10)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfindex, cacheMaxSize)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfindex, cacheMaxSize)
 
     /**
      * @brief whether invoke #cacheTrim when receive #ZFGlobalEvent::EventAppOnMemoryLow, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, cacheTrimWhenReceiveMemoryWarning, zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, cacheTrimWhenReceiveMemoryWarning)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, cacheTrimWhenReceiveMemoryWarning)
 
     /**
-     * @brief leave how many cache alive while #cacheTrim, 3 by default
+     * @brief leave how many cache alive while #cacheTrim, 0.2 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfindex, cacheTrimThreshold, 3)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, cacheTrimThreshold, 0.2f)
 
 public:
     /**
      * @brief add cache
      *
-     * if cache exceeds #cacheMaxSize,
-     * the cacheValue would be discarded
+     * when cache exceeds #cacheMaxSize,
+     * the oldest cache would be removed
      */
-    ZFMETHOD_DECLARE_1(void, cacheAdd,
+    ZFMETHOD_DECLARE_2(void, cacheAdd,
+                       ZFMP_IN(const zfchar *, cacheKey),
                        ZFMP_IN(ZFObject *, cacheValue))
     /**
-     * @brief access cache, or return #zfautoObjectNull if not exist
+     * @brief access cache, or return null if not exist
      */
-    ZFMETHOD_DECLARE_0(zfautoObject, cacheGet)
+    ZFMETHOD_DECLARE_1(zfautoObject, cacheGet,
+                       ZFMP_IN(const zfchar *, cacheKey))
 
+    /**
+     * @brief remove all cache with cacheKey
+     */
+    ZFMETHOD_DECLARE_1(void, cacheRemove,
+                       ZFMP_IN(const zfchar *, cacheKey))
     /**
      * @brief remove all cache
      */
     ZFMETHOD_DECLARE_0(void, cacheRemoveAll)
+
     /**
      * @brief trim the cache to reduce memory
      *
      * by default, this method would call #cacheTrimBySize
+     * according to #cacheTrimThreshold
      */
     ZFMETHOD_DECLARE_0(void, cacheTrim)
     /**
@@ -94,6 +104,18 @@ public:
      */
     ZFMETHOD_DECLARE_1(void, cacheGetAllT,
                        ZFMP_IN_OUT(ZFCoreArray<zfautoObject> &, ret))
+
+protected:
+    /** @brief see #EventCacheOnAdd */
+    virtual void cacheOnAdd(ZF_IN ZFObject *cache)
+    {
+        this->observerNotify(zfself::EventCacheOnAdd(), cache);
+    }
+    /** @brief see #EventCacheOnRemove */
+    virtual void cacheOnRemove(ZF_IN ZFObject *cache)
+    {
+        this->observerNotify(zfself::EventCacheOnRemove(), cache);
+    }
 
 protected:
     zfoverride

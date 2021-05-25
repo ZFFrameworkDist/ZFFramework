@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreLog.h
  * @brief internal log utility
@@ -55,11 +46,11 @@ extern ZF_ENV_EXPORT void _ZFP_ZFCoreLogOutputCallbackDefault(ZF_IN const zfchar
  * @warning within the callback, you must not access any other ZFFramework's module,
  *   otherwise dead lock may be occurred
  */
-extern ZF_ENV_EXPORT void zfCoreLogOutputCallbackSet(ZF_IN_OPT ZFCoreLogOutputCallbackType callback = ZFCoreLogOutputCallbackDefault);
+extern ZF_ENV_EXPORT void zfCoreLogOutputCallback(ZF_IN ZFCoreLogOutputCallbackType callback);
 /**
  * @brief get the output callback for zfCoreLog
  */
-extern ZF_ENV_EXPORT ZFCoreLogOutputCallbackType zfCoreLogOutputCallbackGet(void);
+extern ZF_ENV_EXPORT ZFCoreLogOutputCallbackType zfCoreLogOutputCallback(void);
 
 // ============================================================
 extern ZF_ENV_EXPORT void _ZFP_zfCoreLog(ZF_IN const ZFCallerInfo &callerInfo,
@@ -81,7 +72,7 @@ extern ZF_ENV_EXPORT void _ZFP_zfCoreLogV(ZF_IN const ZFCallerInfo &callerInfo,
  *   usually to output critical error messages,
  *   you should not use other log method in your app
  * @warning this method is not thread safe
- * @see zfCoreLogOutputCallbackSet, zfCoreCriticalError
+ * @see zfCoreLogOutputCallback, zfCoreCriticalError
  */
 #define zfCoreLog(format, ...) _ZFP_zfCoreLog(ZFCallerInfoMake(), zftrue, format, ##__VA_ARGS__)
 /** @brief see #zfCoreLog */
@@ -157,7 +148,7 @@ extern ZF_ENV_EXPORT void _ZFP_zfCoreCriticalError(ZF_IN const ZFCallerInfo &cal
  *   zfCoreLog(xxx);
  *   zfCoreCriticalError();
  * @endcode
- * this is useful to redirect #zfCoreLog by #zfCoreLogOutputCallbackSet,
+ * this is useful to redirect #zfCoreLog by #zfCoreLogOutputCallback,
  * to save critical error messages to proper location
  */
 #define zfCoreCriticalErrorPrepare() _ZFP_zfCoreCriticalErrorPrepare(ZFCallerInfoMake())

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFRegExp.h"
 #include "protocol/ZFProtocolZFRegExp.h"
 
@@ -78,7 +69,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFRegExpResult, ZFRegExpResult, {
         }
         return zftrue;
     }, {
-        serializableData.itemClassSet(ZFTypeId_ZFRegExpResult());
+        serializableData.itemClass(ZFTypeId_ZFRegExpResult());
 
         if(v.matched)
         {
@@ -87,7 +78,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFRegExpResult, ZFRegExpResult, {
             {
                 return zffalse;
             }
-            element.propertyNameSet(ZFSerializableKeyword_ZFRegExpResult_matched);
+            element.propertyName(ZFSerializableKeyword_ZFRegExpResult_matched);
             serializableData.elementAdd(element);
         }
 
@@ -98,7 +89,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFRegExpResult, ZFRegExpResult, {
             {
                 return zffalse;
             }
-            element.propertyNameSet(ZFSerializableKeyword_ZFRegExpResult_matchedRange);
+            element.propertyName(ZFSerializableKeyword_ZFRegExpResult_matchedRange);
             serializableData.elementAdd(element);
         }
 
@@ -109,13 +100,12 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFRegExpResult, ZFRegExpResult, {
             {
                 return zffalse;
             }
-            element.propertyNameSet(ZFSerializableKeyword_ZFRegExpResult_namedGroups);
+            element.propertyName(ZFSerializableKeyword_ZFRegExpResult_namedGroups);
             serializableData.elementAdd(element);
         }
 
         return zftrue;
     })
-
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFRegExpResult, zfbool, matched)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFRegExpResult, ZFIndexRange, matchedRange)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFRegExpResult, ZFCoreArrayPOD<ZFIndexRange>, namedGroups)

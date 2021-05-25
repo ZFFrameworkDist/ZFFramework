@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file zfautoObject.h
  * @brief smart pointer for ZFObject
@@ -97,39 +88,6 @@ zfautoObjectT<T_ZFObjectBase>::zfautoObjectT(ZF_IN T_ZFObject const &obj)
     {
         _ZFP_zfautoObjectTError();
     }
-}
-
-template<typename T_ZFObjectBase>
-zfautoObjectT<T_ZFObjectBase> &zfautoObjectT<T_ZFObjectBase>::operator = (ZF_IN zfautoObject const &ref)
-{
-    zfautoObject::operator = (ref);
-    if(this->toObject() != zfnull && ZFCastZFObject(T_ZFObjectBase, this->toObject()) == zfnull)
-    {
-        _ZFP_zfautoObjectTError();
-    }
-    return *this;
-}
-template<typename T_ZFObjectBase>
-template<typename T_ZFObject>
-zfautoObjectT<T_ZFObjectBase> &zfautoObjectT<T_ZFObjectBase>::operator = (ZF_IN T_ZFObject *obj)
-{
-    zfautoObject::operator = (obj);
-    if(this->toObject() != zfnull && ZFCastZFObject(T_ZFObjectBase, this->toObject()) == zfnull)
-    {
-        _ZFP_zfautoObjectTError();
-    }
-    return *this;
-}
-template<typename T_ZFObjectBase>
-template<typename T_ZFObject>
-zfautoObjectT<T_ZFObjectBase> &zfautoObjectT<T_ZFObjectBase>::operator = (ZF_IN T_ZFObject const &obj)
-{
-    zfautoObject::operator = (obj);
-    if(this->toObject() != zfnull && ZFCastZFObject(T_ZFObjectBase, this->toObject()) == zfnull)
-    {
-        _ZFP_zfautoObjectTError();
-    }
-    return *this;
 }
 
 template<typename T_ZFObjectBase>

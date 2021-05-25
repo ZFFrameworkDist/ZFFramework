@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFObjectIO_image.h"
 
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -30,7 +21,7 @@ void ZFObjectIO_image_imageExtRemove(ZF_IN const zfchar *imageExt)
 {
     _ZFP_ZFObjectIO_image_imageExtMap().erase(imageExt);
 }
-void ZFObjectIO_image_imageExtGetAllT(ZF_OUT ZFCoreArrayPOD<const zfchar *> &ret)
+void ZFObjectIO_image_imageExtGetAllT(ZF_IN_OUT ZFCoreArrayPOD<const zfchar *> &ret)
 {
     zfstlmap<zfstlstringZ, zfbool> &m = _ZFP_ZFObjectIO_image_imageExtMap();
     for(zfstlmap<zfstlstringZ, zfbool>::iterator it = m.begin(); it != m.end(); ++it)
@@ -53,7 +44,7 @@ ZFOBJECTIO_DEFINE(image, ZFM_EXPAND({
         const zfchar *fileExt = ZFObjectIOImplCheckFileExt(pathInfo);
         return (fileExt != zfnull && m.find(fileExt) != m.end());
     }), {
-        ret = ZFUIImageLoadFromInput(input);
+        ret = ZFUIImageLoadFromFile(input);
         if(ret == zfnull)
         {
             zfstringAppend(outErrorHint,
@@ -75,7 +66,7 @@ ZFOBJECTIO_DEFINE(image, ZFM_EXPAND({
                 ZFUIImage::ClassData()->classNameFull());
             return zffalse;
         }
-        if(!ZFUIImageEncodeToFile(output, image))
+        if(!ZFUIImageSaveToFile(output, image))
         {
             zfstringAppend(outErrorHint,
                 "unable to convert image %s to image file",

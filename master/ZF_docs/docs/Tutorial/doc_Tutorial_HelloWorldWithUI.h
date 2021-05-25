@@ -7,7 +7,7 @@
  *   // you may need to setup your project's include path first
  *   #include "ZFUIKit.h"
  *
- *   ZFMAIN_ENTRY(params)
+ *   ZFMAIN_ENTRY()
  *   {
  *       // typically we will start UI by creating a ZFUIWindow
  *       zfblockedAlloc(ZFUIWindow, window);
@@ -16,15 +16,13 @@
  *
  *       // create a text view and set text content
  *       zfblockedAlloc(ZFUITextView, textView);
- *       textView->textSet("hello world");
+ *       textView->text("hello world");
  *
  *       // add to window
  *       window->childAdd(textView);
  *
  *       // make it center in window
- *       textView->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
- *
- *       return 0;
+ *       textView->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
  *   }
  * @endcode
  */

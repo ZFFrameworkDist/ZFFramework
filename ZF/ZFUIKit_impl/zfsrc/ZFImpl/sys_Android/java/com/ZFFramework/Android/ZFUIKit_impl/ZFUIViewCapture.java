@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import android.graphics.Bitmap;
@@ -15,10 +6,11 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 
+import com.ZFFramework.Android.ZF_impl.ZFMainEntry;
+
 public class ZFUIViewCapture {
-    @SuppressWarnings("deprecation")
     public static Object native_viewCapture(Object nativeView) {
-        View nativeViewTmp = (View)nativeView;
+        View nativeViewTmp = (View) nativeView;
         boolean drawingCacheEnabledSaved = nativeViewTmp.isDrawingCacheEnabled();
         int drawingCacheBackgroundColorSaved = nativeViewTmp.getDrawingCacheBackgroundColor();
         int drawingCacheQualitySaved = nativeViewTmp.getDrawingCacheQuality();
@@ -31,6 +23,6 @@ public class ZFUIViewCapture {
         nativeViewTmp.setDrawingCacheQuality(drawingCacheQualitySaved);
         nativeViewTmp.setDrawingCacheEnabled(drawingCacheEnabledSaved);
         nativeViewTmp.destroyDrawingCache();
-        return new BitmapDrawable(bmp);
+        return new BitmapDrawable(ZFMainEntry.appContext().getResources(), bmp);
     }
 }

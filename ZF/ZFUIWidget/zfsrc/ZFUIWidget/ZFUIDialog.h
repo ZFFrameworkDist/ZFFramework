@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIDialog.h
  * @brief abstract dialog
@@ -33,8 +24,8 @@ extern ZF_ENV_EXPORT ZFObjectCreator ZFUIDialogDefaultLayoutParamCreator;
  * @brief see #ZFUIDialogDefaultLayoutParamCreator
  *
  * by default, the layout param would be:
- * -  have #ZFUIAlign::e_Center as #ZFUIViewLayoutParam::layoutAlign
- * -  have #ZFUIGlobalStyle::itemMargin as #ZFUIViewLayoutParam::layoutMargin
+ * -  have #ZFUIAlign::e_Center as #ZFUILayoutParam::layoutAlign
+ * -  have #ZFUIGlobalStyle::itemMargin as #ZFUILayoutParam::layoutMargin
  */
 extern ZF_ENV_EXPORT zfautoObject ZFUIDialogDefaultLayoutParamCreatorDefault(void);
 /**
@@ -143,7 +134,7 @@ public:
     // ============================================================
     // properties
     /**
-     * @brief whether this dialog update layout accorrding to #ZFUISysWindow::sysWindowMargin,
+     * @brief whether this dialog update layout according to #ZFUISysWindow::sysWindowMargin,
      *   true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, sysWindowMarginShouldApply, zftrue)
@@ -152,7 +143,7 @@ public:
      * @brief dialog's background color, #ZFUIGlobalStyle::colorMask by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, dialogWindowColor, ZFUIGlobalStyle::DefaultStyle()->colorMask())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, dialogWindowColor)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIColor, dialogWindowColor)
     /**
      * @brief whether auto dim window background by an alpha change animation, true by default
      *
@@ -163,8 +154,8 @@ public:
     /**
      * @brief dialog's layout param, created by #ZFUIDialogDefaultLayoutParamCreator by default
      */
-    ZFPROPERTY_RETAIN_READONLY(ZFUIViewLayoutParam *, dialogLayoutParam,
-                               ZFUIDialogDefaultLayoutParamCreator().to<ZFUIViewLayoutParam *>())
+    ZFPROPERTY_RETAIN_READONLY(ZFUILayoutParam *, dialogLayoutParam,
+                               ZFUIDialogDefaultLayoutParamCreator().to<ZFUILayoutParam *>())
 
     /**
      * @brief dialog's show animation, #ZFUIDialogDefaultAniShowCreator by default
@@ -185,7 +176,7 @@ public:
      */
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUIImage *, dialogBackgroundImage,
                                 zfRes("ZFUIWidget/ZFUIDialog_background.xml"))
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIImage *, dialogBackgroundImage)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIImage *, dialogBackgroundImage)
 
     /**
      * @brief whether automatically focus to dialog content, true by default
@@ -212,27 +203,26 @@ public:
      * which is internal view and won't be serialized
      */
     ZFPROPERTY_RETAIN(ZFUIView *, dialogView)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIView *, dialogView)
-    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIView *, dialogView)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIView *, dialogView)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUIView *, dialogView)
 
     /**
-     * @brief whether automatically fix frame accorrding to #ZFUIOnScreenKeyboardAutoResizeStart,
+     * @brief whether automatically fix frame according to #ZFUIOnScreenKeyboardAutoResizeStart,
      *   true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoResize, zftrue)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, dialogWindowAutoResize)
 
     /**
-     * @brief whether automatically fix frame accorrding to #ZFUIOnScreenKeyboardAutoFitStart,
+     * @brief whether automatically fix frame according to #ZFUIOnScreenKeyboardAutoFitLayout,
      *   false by default
      *
-     * auto fit settings can be changed by #dialogWindowAutoFit
+     * auto fit settings can be changed by #dialogWindowAutoFitLayout
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, dialogWindowAutoFit, zffalse)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, dialogWindowAutoFit)
     /** @brief see #dialogWindowAutoFit */
-    ZFMETHOD_INLINE_0(ZFUIOnScreenKeyboardAutoFitLayout *, dialogWindowAutoFitLayout)
-    {
-        return ZFCastZFObject(ZFUIOnScreenKeyboardAutoFitLayout *, this->dialogWindow()->viewDelegate());
-    }
+    ZFMETHOD_DECLARE_0(ZFUIOnScreenKeyboardAutoFitLayout *, dialogWindowAutoFitLayout)
 
 public:
     /**

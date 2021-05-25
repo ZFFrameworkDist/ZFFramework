@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIDialogContentBasic.h"
 #include "ZFUIDialogContentBasic_Buttons.h"
 #include "ZFUILinearLayout.h"
@@ -14,10 +5,29 @@
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFSTYLE_DEFAULT_DEFINE(ZFUIDialogContentBasic)
-
 // ============================================================
 ZFOBJECT_REGISTER(ZFUIDialogContentBasic)
+ZFSTYLE_DEFAULT_DEFINE(ZFUIDialogContentBasic)
+
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIDialogContentBasic, ZFUISize, viewSizeMin)
+{
+    propertyValue = ZFUISizeMake(
+        ZFUIGlobalStyle::DefaultStyle()->itemSizeDialogWidth(),
+        ZFUIGlobalStyle::DefaultStyle()->itemSizeDialog());
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIDialogContentBasic, ZFUITextView *, titleTextView)
+{
+    zfblockedAlloc(ZFUITextView, titleTextView);
+    propertyValue = titleTextView;
+    titleTextView->textSize(ZFUIGlobalStyle::DefaultStyle()->textSizeBig());
+    titleTextView->textAppearance(ZFUITextAppearance::e_Bold);
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIDialogContentBasic, ZFUITextView *, contentTextView)
+{
+    zfblockedAlloc(ZFUITextView, contentTextView);
+    propertyValue = contentTextView;
+    contentTextView->textSingleLine(zffalse);
+}
 
 // ============================================================
 zfclassNotPOD _ZFP_ZFUIDialogContentBasicPrivate
@@ -144,10 +154,10 @@ const zfchar *ZFUIDialogContentBasic::dialogButtonText(ZF_IN ZFUIDialogButtonTyp
     ZFUIButtonBasic *button = ZFCastZFObjectUnchecked(ZFUIButtonBasic *, this->dialogButton(dialogButtonType, zffalse));
     return ((button != zfnull) ? button->buttonLabelText() : zfnull);
 }
-void ZFUIDialogContentBasic::dialogButtonTextSet(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType,
-                                                 ZF_IN const zfchar *text)
+void ZFUIDialogContentBasic::dialogButtonText(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType,
+                                              ZF_IN const zfchar *text)
 {
-    this->dialogButton(dialogButtonType)->to<ZFUIButtonBasic *>()->buttonLabelTextSet(text);
+    this->dialogButton(dialogButtonType)->to<ZFUIButtonBasic *>()->buttonLabelText(text);
 }
 void ZFUIDialogContentBasic::dialogButtonRemove(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType)
 {
@@ -286,20 +296,20 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIDialogContentBasicDataHolder, ZFLevelZ
 public:
     ZFListener textChangeListener;
     ZFListener containerChildChangeListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(textChange)
+    static void textChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        const ZFProperty *property = listenerData.param0->to<v_ZFProperty *>()->zfv;
+        const ZFProperty *property = listenerData.param0<v_ZFProperty *>()->zfv;
         if(property != ZFPropertyAccess(ZFUITextView, text))
         {
             return ;
         }
-        ZFUITextView *textView = listenerData.sender->to<ZFUITextView *>();
-        textView->viewVisibleSet(!textView->text().isEmpty());
+        ZFUITextView *textView = listenerData.sender<ZFUITextView *>();
+        textView->viewVisible(!textView->text().isEmpty());
     }
-    static ZFLISTENER_PROTOTYPE_EXPAND(containerChildChange)
+    static void containerChildChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        ZFUIView *containerView = listenerData.sender->to<ZFUIView *>();
-        containerView->viewVisibleSet(containerView->childCount() > 0);
+        ZFUIView *containerView = listenerData.sender<ZFUIView *>();
+        containerView->viewVisible(containerView->childCount() > 0);
     }
 ZF_GLOBAL_INITIALIZER_END(ZFUIDialogContentBasicDataHolder)
 
@@ -310,22 +320,22 @@ void ZFUIDialogContentBasic::objectOnInit(void)
 
     d->mainContainer = zfAlloc(ZFUILinearLayout);
     this->internalFgViewAdd(d->mainContainer);
-    d->mainContainer->layoutOrientationSet(ZFUIOrientation::e_Top);
-    d->mainContainer->layoutChildSpaceSet(ZFUIGlobalStyle::DefaultStyle()->itemSpace());
+    d->mainContainer->layoutOrientation(ZFUIOrientation::e_Top);
+    d->mainContainer->layoutChildSpace(ZFUIGlobalStyle::DefaultStyle()->itemSpace());
 
     { // title
         ZFUITextView *titleTextView = this->titleTextView()->to<ZFUITextView *>();
         d->mainContainer->childAdd(titleTextView);
-        titleTextView->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
+        titleTextView->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
         titleTextView->observerAdd(ZFObject::EventObjectPropertyValueOnUpdate(),
             ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIDialogContentBasicDataHolder)->textChangeListener);
-        titleTextView->viewVisibleSet(!titleTextView->text().isEmpty());
-        titleTextView->textColorSet(ZFUIGlobalStyle::DefaultStyle()->textColorSecondary());
-        titleTextView->textSingleLineSet(zffalse);
+        titleTextView->viewVisible(!titleTextView->text().isEmpty());
+        titleTextView->textColor(ZFUIGlobalStyle::DefaultStyle()->textColorSecondary());
+        titleTextView->textSingleLine(zffalse);
 
         d->dialogTitleContainer = zfAlloc(ZFUIViewLayout);
         d->mainContainer->childAdd(d->dialogTitleContainer);
-        d->dialogTitleContainer->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
+        d->dialogTitleContainer->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
         d->dialogTitleContainer->observerAdd(ZFUIView::EventViewChildOnChange(),
             ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIDialogContentBasicDataHolder)->containerChildChangeListener);
     }
@@ -333,15 +343,15 @@ void ZFUIDialogContentBasic::objectOnInit(void)
     { // content
         ZFUITextView *contentTextView = this->contentTextView()->to<ZFUITextView *>();
         d->mainContainer->childAdd(contentTextView);
-        contentTextView->layoutParam()->layoutAlignSet(ZFUIAlign::e_LeftInner);
+        contentTextView->layoutParam()->layoutAlign(ZFUIAlign::e_LeftInner);
         contentTextView->observerAdd(ZFObject::EventObjectPropertyValueOnUpdate(),
             ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIDialogContentBasicDataHolder)->textChangeListener);
-        contentTextView->viewVisibleSet(!contentTextView->text().isEmpty());
+        contentTextView->viewVisible(!contentTextView->text().isEmpty());
 
         d->dialogContentContainer = zfAlloc(ZFUIViewLayout);
         d->mainContainer->childAdd(d->dialogContentContainer);
-        d->dialogContentContainer->layoutParam()->layoutAlignSet(ZFUIAlign::e_LeftInner);
-        d->dialogContentContainer->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(1);
+        d->dialogContentContainer->layoutParam()->layoutAlign(ZFUIAlign::e_LeftInner);
+        d->dialogContentContainer->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(1);
         d->dialogContentContainer->observerAdd(ZFUIView::EventViewChildOnChange(),
             ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIDialogContentBasicDataHolder)->containerChildChangeListener);
     }
@@ -349,13 +359,13 @@ void ZFUIDialogContentBasic::objectOnInit(void)
     { // button
         d->dialogButtonContainer = zfAlloc(ZFUIViewLayout);
         d->mainContainer->childAdd(d->dialogButtonContainer);
-        d->dialogButtonContainer->layoutParam()->layoutAlignSet(ZFUIAlign::e_RightInner);
+        d->dialogButtonContainer->layoutParam()->layoutAlign(ZFUIAlign::e_RightInner);
 
         d->dialogButtonLayout = zfAlloc(ZFUILinearLayout);
         d->dialogButtonContainer->childAdd(d->dialogButtonLayout);
-        d->dialogButtonLayout->layoutParam()->layoutAlignSet(ZFUIAlign::e_RightInner);
-        d->dialogButtonLayout->layoutOrientationSet(ZFUIOrientation::e_Right);
-        d->dialogButtonLayout->layoutChildSpaceSet(ZFUIGlobalStyle::DefaultStyle()->itemSpace());
+        d->dialogButtonLayout->layoutParam()->layoutAlign(ZFUIAlign::e_RightInner);
+        d->dialogButtonLayout->layoutOrientation(ZFUIOrientation::e_Right);
+        d->dialogButtonLayout->layoutChildSpace(ZFUIGlobalStyle::DefaultStyle()->itemSpace());
     }
 }
 void ZFUIDialogContentBasic::objectOnDealloc(void)
@@ -389,10 +399,10 @@ void ZFUIDialogContentBasic::layoutOnMeasure(ZF_OUT ZFUISize &ret,
 {
     ret = d->mainContainer->layoutMeasure(sizeHint, sizeParam);
 }
-void ZFUIDialogContentBasic::internalFgViewOnLayout(ZF_IN const ZFUIRect &bounds)
+void ZFUIDialogContentBasic::internalViewOnLayout(ZF_IN const ZFUIRect &bounds)
 {
-    zfsuper::internalFgViewOnLayout(bounds);
-    d->mainContainer->layout(bounds);
+    zfsuper::internalViewOnLayout(bounds);
+    d->mainContainer->viewFrame(bounds);
 }
 zfbool ZFUIDialogContentBasic::internalViewShouldLayout(ZF_IN ZFUIView *internalView)
 {

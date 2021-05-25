@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFTimer.h"
 
@@ -62,8 +53,11 @@
     {
         [self._timer invalidate];
         self._timer = nil;
-        self._timerNotifiedFlag = NO;
-        self.impl->notifyTimerStop(self.ownerZFTimer);
+        if(self._timerNotifiedFlag)
+        {
+            self._timerNotifiedFlag = NO;
+            self.impl->notifyTimerStop(self.ownerZFTimer);
+        }
     }
 }
 - (zfbool)_timerOwnerIsTaskIdValid:(NSNumber *)savedTimerTaskId
@@ -90,8 +84,7 @@
 
     if(!self._timerNotifiedFlag)
     {
-        self._timerNotifiedFlag = YES;
-        self.impl->notifyTimerStart(self.ownerZFTimer);
+        [self performSelectorOnMainThread:@selector(_timerOwnerOnTimerStartOnMainThread:) withObject:taskId waitUntilDone:YES];
     }
     if(self.ownerZFTimer->timerActivateInMainThread())
     {
@@ -101,6 +94,15 @@
     {
         self.impl->notifyTimerActivate(self.ownerZFTimer);
     }
+}
+- (void)_timerOwnerOnTimerStartOnMainThread:(NSNumber *)taskId
+{
+    if(![self _timerOwnerIsTaskIdValid:taskId])
+    {
+        return ;
+    }
+    self._timerNotifiedFlag = YES;
+    self.impl->notifyTimerStart(self.ownerZFTimer);
 }
 - (void)_timerOwnerOnTimerEventOnMainThread:(NSNumber *)taskId
 {
@@ -115,7 +117,7 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFPROTOCOL_IMPLEMENTATION_BEGIN(ZFTimerImpl_sys_iOS, ZFTimer, ZFProtocolLevel::e_SystemNormal)
-    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("iOS:NSObject_NSTimer")
+    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("iOS:NSObject:NSTimer")
 public:
     virtual void *nativeTimerCreate(ZF_IN ZFTimer *timer)
     {

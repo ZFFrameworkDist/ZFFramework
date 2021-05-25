@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUITextEdit.h
  * @brief view to supply simple edit logic
@@ -117,8 +108,8 @@ public:
      * @brief see #ZFObject::observerNotify
      *
      * called when text is about to change\n
-     * param0 is the text (as #ZFString) that about to change\n
-     * param1 is a #ZFValueEditable::boolValue
+     * param0 is the text (as #v_zfstring) that about to change\n
+     * param1 is a #v_zfbool
      * shows whether the text should change,
      * set to false to show the text should not be changed\n
      * @note if #ZFUITextEdit::textEditFilter has been set,
@@ -131,7 +122,7 @@ public:
      * @brief see #ZFObject::observerNotify
      *
      * called when text changed,
-     * param0 is the old text (as #ZFString)
+     * param0 is the old text (as #v_zfstring)
      */
     ZFOBSERVER_EVENT(TextOnChange)
     /**
@@ -151,36 +142,30 @@ public:
 public:
     // ============================================================
     // properties
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(zfbool, viewFocusable)
-    {
-        propertyValue = zftrue;
-    }
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
-    {
-        propertyValue = ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeControl());
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(zfbool, viewFocusable)
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUISize, viewSizeMin)
 
 public:
     /**
      * @brief whether the text is editable, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, textEditEnable, zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, textEditEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, textEditEnable)
     /**
      * @brief whether the text is secured, false by default
      */
     ZFPROPERTY_ASSIGN(zfbool, textEditSecured)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, textEditSecured)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, textEditSecured)
     /**
      * @brief keyboard hint, see #ZFUITextEditKeyboardType, #ZFUITextEditKeyboardType::EnumDefault by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUITextEditKeyboardTypeEnum, textEditKeyboardType, ZFUITextEditKeyboardType::EnumDefault())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUITextEditKeyboardTypeEnum, textEditKeyboardType)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextEditKeyboardTypeEnum, textEditKeyboardType)
     /**
      * @brief keyboard hint, see #ZFUITextEditKeyboardReturnType, #ZFUITextEditKeyboardReturnType::EnumDefault by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUITextEditKeyboardReturnTypeEnum, textEditKeyboardReturnType, ZFUITextEditKeyboardReturnType::EnumDefault())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUITextEditKeyboardReturnTypeEnum, textEditKeyboardReturnType)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextEditKeyboardReturnTypeEnum, textEditKeyboardReturnType)
     /**
      * @brief action to perform when click return, see #ZFUITextEditKeyboardReturnAction, #ZFUITextEditKeyboardReturnAction::EnumDefault by default
      */
@@ -189,13 +174,7 @@ public:
      * @brief text place holder
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, textPlaceHolder, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUITextView *, textPlaceHolder)
-    {
-        zfblockedAlloc(ZFUITextView, textPlaceHolder);
-        propertyValue = textPlaceHolder;
-        textPlaceHolder->textColorSet(ZFUIGlobalStyle::DefaultStyle()->textColorHint());
-        textPlaceHolder->textSizeSet(ZFUIGlobalStyle::DefaultStyle()->textSizeSmall());
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUITextView *, textPlaceHolder)
 
     /**
      * @brief text filter, null by default
@@ -207,14 +186,14 @@ public:
      * @note null or empty text would always treated as match for safe
      */
     ZFPROPERTY_RETAIN(ZFRegExp *, textEditFilter)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFRegExp *, textEditFilter)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFRegExp *, textEditFilter)
 
     /**
      * @brief text edit's cursor position
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFIndexRange, textSelectRange, ZFIndexRangeZero())
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(ZFIndexRange, textSelectRange)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFIndexRange, textSelectRange)
+    ZFPROPERTY_ON_VERIFY_DECLARE(ZFIndexRange, textSelectRange)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFIndexRange, textSelectRange)
 
     /**
      * @brief whether #textEditNotifyConfirm when lost focus, true by default
@@ -226,8 +205,8 @@ public:
      * @brief text, may be null if not set
      */
     ZFPROPERTY_ASSIGN(zfstring, text)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(ZFString *, text)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFString *, text)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zfstring, text)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfstring, text)
 
     /**
      * @brief text appearance, #ZFUIGlobalStyle::textAppearance by default
@@ -236,7 +215,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUITextAppearanceEnum, textAppearance,
                                 ZFUIGlobalStyle::DefaultStyle()->textAppearance())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUITextAppearanceEnum, textAppearance)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextAppearanceEnum, textAppearance)
 
     /**
      * @brief text alignment, #ZFUIGlobalStyle::textAlign by default
@@ -246,14 +225,14 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIAlignFlags, textAlign,
                                 ZFUIGlobalStyle::DefaultStyle()->textAlign())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIAlignFlags, textAlign)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIAlignFlags, textAlign)
 
     /**
      * @brief text color, #ZFUIGlobalStyle::textColorDefault by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, textColor,
                                 ZFUIGlobalStyle::DefaultStyle()->textColorDefault())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, textColor)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIColor, textColor)
 
     /**
      * @brief text shadow color, #ZFUIColorZero by default, use transparent to disable text shadow
@@ -262,7 +241,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, textShadowColor,
                                 ZFUIColorZero())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, textShadowColor)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIColor, textShadowColor)
 
     /**
      * @brief text shadow offset, (1, 1) by default
@@ -271,54 +250,26 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUISize, textShadowOffset,
                                 (ZFUISizeMake(1, 1)))
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUISize, textShadowOffset)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUISize, textShadowOffset)
 
     /**
-     * @brief text size in pixel, #ZFUIGlobalStyle::textSizeNormal by default
+     * @brief text size, #ZFUIGlobalStyle::textSizeNormal by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, textSize,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, textSize,
                                 ZFUIGlobalStyle::DefaultStyle()->textSizeNormal())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, textSize)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, textSize)
 
 public:
     /**
      * @brief see #ZFUITextEdit
      */
-    ZFMETHOD_INLINE_1(void, textStyleCopyFrom,
-                      ZFMP_IN(ZFUITextView *, src))
-    {
-        if(src == zfnull)
-        {
-            return ;
-        }
-
-        this->textSet(src->text());
-        this->textAppearanceSet(src->textAppearance());
-        this->textAlignSet(src->textAlign());
-        this->textColorSet(src->textColor());
-        this->textShadowColorSet(src->textShadowColor());
-        this->textShadowOffsetSet(src->textShadowOffset());
-        this->textSizeSet(src->textSize());
-    }
+    ZFMETHOD_DECLARE_1(void, textStyleCopyFrom,
+                       ZFMP_IN(ZFUITextView *, src))
     /**
      * @brief see #ZFUITextEdit
      */
-    ZFMETHOD_INLINE_1(void, textStyleCopyTo,
-                      ZFMP_IN(ZFUITextView *, dst))
-    {
-        if(dst == zfnull)
-        {
-            return ;
-        }
-
-        dst->textSet(this->text());
-        dst->textAppearanceSet(this->textAppearance());
-        dst->textAlignSet(this->textAlign());
-        dst->textColorSet(this->textColor());
-        dst->textShadowColorSet(this->textShadowColor());
-        dst->textShadowOffsetSet(this->textShadowOffset());
-        dst->textSizeSet(this->textSize());
-    }
+    ZFMETHOD_DECLARE_1(void, textStyleCopyTo,
+                       ZFMP_IN(ZFUITextView *, dst))
 
 protected:
     zfoverride
@@ -353,7 +304,7 @@ public:
     /**
      * @brief whether text should change
      *
-     * by default, this method would check accorrding to #ZFUITextEdit::textEditFilter,
+     * by default, this method would check according to #ZFUITextEdit::textEditFilter,
      * and null or empty string would always treated as allowed for safe
      */
     ZFMETHOD_DECLARE_1(zfbool, textShouldChange,
@@ -386,10 +337,7 @@ protected:
     virtual void textOnEditConfirm(void);
 public:
     /** @brief see #EventTextOnEditConfirm */
-    ZFMETHOD_INLINE_0(void, textEditNotifyConfirm)
-    {
-        this->textOnEditConfirm();
-    }
+    ZFMETHOD_DECLARE_0(void, textEditNotifyConfirm)
 
     // ============================================================
     // override
@@ -398,9 +346,9 @@ protected:
      * @brief text edit view would update text settings when scale changed
      */
     zfoverride
-    virtual void scaleOnChange(void);
+    virtual void UIScaleOnChange(void);
     /**
-     * @brief text edit view would measure accorrding text size
+     * @brief text edit view would measure according text size
      */
     zfoverride
     virtual void layoutOnMeasure(ZF_OUT ZFUISize &ret,
@@ -418,7 +366,7 @@ protected:
     zfoverride
     virtual zfbool internalViewShouldLayout(ZF_IN ZFUIView *internalView);
     zfoverride
-    virtual void internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds);
+    virtual void internalViewOnLayout(ZF_IN const ZFUIRect &bounds);
 
 private:
     _ZFP_ZFUITextEditPrivate *d;

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFCore_impl;
 
 import java.util.Timer;
@@ -31,6 +22,12 @@ public final class ZFTimer {
             super.handleMessage(msg);
             ZFTimerTask timerTask = (ZFTimerTask)msg.obj;
             if(timerTask._running) {
+                if(timerTask._firstTime) {
+                    timerTask._firstTime = false;
+                    ZFTimer.native_notifyTimerStart(timerTask._zfjniPointerToken);
+                }
+            }
+            if(timerTask._running) {
                 ZFTimer.native_notifyTimerActivate(timerTask._zfjniPointerToken);
             }
         }
@@ -39,24 +36,13 @@ public final class ZFTimer {
         protected boolean _firstTime = true;
         protected boolean _running = true;
         protected long _zfjniPointerToken = 0;
-        protected boolean _timerActivateInMainThread = false;
         public ZFTimerTask(long zfjniPointerToken, boolean timerActivateInMainThread) {
             _zfjniPointerToken = zfjniPointerToken;
-            _timerActivateInMainThread = timerActivateInMainThread;
         }
         @Override
         public void run() {
             if(_running) {
-                if(_firstTime) {
-                    _firstTime = false;
-                    ZFTimer.native_notifyTimerStart(_zfjniPointerToken);
-                }
-                if(_timerActivateInMainThread) {
-                    _mainThreadCallback.sendMessage(Message.obtain(_mainThreadCallback, 0, this));
-                }
-                else {
-                    ZFTimer.native_notifyTimerActivate(_zfjniPointerToken);
-                }
+                _mainThreadCallback.sendMessage(Message.obtain(_mainThreadCallback, 0, this));
             }
         }
         @Override

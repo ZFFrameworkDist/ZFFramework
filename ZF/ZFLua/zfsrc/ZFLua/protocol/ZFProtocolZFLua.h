@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFLua.h
  * @brief protocol for ZFLua
@@ -33,7 +24,7 @@ public:
     virtual void luaStateChange(ZF_IN void *L) zfpurevirtual;
 
     /** @brief see #ZFLuaStateListT */
-    virtual void luaStateList(ZF_OUT ZFCoreArray<void *> &ret) zfpurevirtual;
+    virtual void luaStateList(ZF_IN_OUT ZFCoreArray<void *> &ret) zfpurevirtual;
 
     /** @brief see #ZFLuaStateAttach */
     virtual void *luaStateOpen(void) zfpurevirtual;
@@ -45,7 +36,10 @@ public:
     /** @brief see #ZFLuaStateDetach */
     virtual void luaStateDetach(ZF_IN void *L) zfpurevirtual;
 
-    /** @brief see #ZFLuaExecute */
+    /**
+     * @brief see #ZFLuaExecute,
+     *   impl must supply all methods mentioned in #ZFLuaExecute
+     */
     virtual zfbool luaExecute(ZF_IN void *L,
                               ZF_IN const ZFPathInfo *pathInfoOrNull,
                               ZF_IN const ZFInput &input,

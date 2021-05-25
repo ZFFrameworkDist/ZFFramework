@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFAny.h
  * @brief util class to cast ZFObject types freely
@@ -21,8 +12,8 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 zfclassFwd ZFObject;
 zfclassFwd ZFInterface;
 
-ZFM_CLASS_HAS_MEMBER_DECLARE(ZFAny, toObject, ZFObject *(T::*F)(void))
-template<typename T_Type, int isZFObject>
+ZFM_CLASS_HAS_MEMBER_DECLARE(ZFAny, toObject, ZFObject *(T::*F)(void) const)
+template<typename T_Type, int has_toObject>
 zfclassNotPOD _ZFP_ZFAnyCastT
 {
 public:

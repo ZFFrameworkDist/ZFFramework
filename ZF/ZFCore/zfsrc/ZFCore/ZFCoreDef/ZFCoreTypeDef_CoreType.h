@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreTypeDef_CoreType.h
  * @brief types for ZFFramework
@@ -188,7 +179,7 @@ ZFT_INT_STRONG(zft_zfuint32, zfflags)
  *     while event name would be stable
  *
  *   because of the above reasons,
- *   #zfidentity would always be serialized by the name of #ZFIdMapGetName
+ *   #zfidentity would always be serialized by the name of #ZFIdMapNameForId
  */
 ZFT_INT_STRONG(zft_zfuint32, zfidentity)
 /** @brief zero value */

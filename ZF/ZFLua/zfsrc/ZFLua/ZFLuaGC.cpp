@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLuaGC.h"
 #include "ZFLuaState.h"
 #include "protocol/ZFProtocolZFLua.h"
@@ -27,27 +18,27 @@ ZFMETHOD_FUNC_DEFINE_1(void, ZFLuaGCImmediately,
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFLuaGCHolder, ZFLevelZFFrameworkNormal)
 {
     this->luaStateOnDetachListener = ZFCallbackForFunc(luaStateOnDetach);
-    ZFGlobalEventCenter::instance()->observerAdd(
+    ZFGlobalObserver().observerAdd(
         ZFGlobalEvent::EventLuaStateOnDetach(),
         this->luaStateOnDetachListener);
 }
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFLuaGCHolder)
 {
-    ZFGlobalEventCenter::instance()->observerRemove(
+    ZFGlobalObserver().observerRemove(
         ZFGlobalEvent::EventLuaStateOnDetach(),
         this->luaStateOnDetachListener);
 }
 zfstlmap<void *, zfbool> m;
 ZFListener luaStateOnDetachListener;
-static ZFLISTENER_PROTOTYPE_EXPAND(luaStateOnDetach)
+static void luaStateOnDetach(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
     zfCoreMutexLocker();
     zfstlmap<void *, zfbool> &m = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFLuaGCHolder)->m;
-    m.erase(listenerData.param0->to<v_VoidPointer *>()->zfv);
+    m.erase(listenerData.param0<v_ZFPtr *>()->zfv);
 }
 ZF_GLOBAL_INITIALIZER_END(ZFLuaGCHolder)
 
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFLuaGCResolve)
+static void _ZFP_ZFLuaGCResolve(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
     zfstlmap<void *, zfbool> &m = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFLuaGCHolder)->m;
     zfCoreMutexLock();
@@ -99,9 +90,9 @@ ZF_GLOBAL_INITIALIZER_DESTROY(ZFLuaGCAutoApply)
         this->classChangeListener);
 }
 ZFListener classChangeListener;
-static ZFLISTENER_PROTOTYPE_EXPAND(classChange)
+static void classChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
-    const ZFClassDataChangeData *data = listenerData.param0->to<ZFPointerHolder *>()->holdedDataPointer<const ZFClassDataChangeData *>();
+    const ZFClassDataChangeData *data = listenerData.param0<ZFPointerHolder *>()->holdedDataPointer<const ZFClassDataChangeData *>();
     if(data->changedClass != zfnull && data->changeType == ZFClassDataChangeTypeDetach)
     {
         ZFCoreArrayPOD<void *> L;

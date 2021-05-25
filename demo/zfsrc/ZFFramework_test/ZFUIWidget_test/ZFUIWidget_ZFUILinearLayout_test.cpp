@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,8 +18,8 @@ protected:
 
         zfblockedAlloc(ZFUILinearLayout, layout);
         container->childAdd(layout);
-        layout->layoutParam()->layoutMarginSet(ZFUIMarginMake(40));
-        layout->viewBackgroundColorSet(ZFUIColorRed());
+        layout->layoutParam()->layoutMargin(ZFUIMarginMake(40));
+        layout->viewBackgroundColor(ZFUIColorRed());
 
         this->prepareChildren(layout);
 
@@ -42,30 +33,30 @@ private:
         {
             zfblockedAlloc(ZFUITextView, child);
             layout->childAdd(child);
-            child->textSet(zfstringWithFormat("text %zi", i));
-            child->textAlignSet(ZFUIAlign::e_Center);
-            child->viewBackgroundColorSet(ZFUIColorRandom());
+            child->text(zfstringWithFormat("text %zi", i));
+            child->textAlign(ZFUIAlign::e_Center);
+            child->viewBackgroundColor(ZFUIColorRandom());
         }
 
-        layout->childAtIndex(1)->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(1);
-        layout->childAtIndex(2)->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(2);
+        layout->childAtIndex(1)->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(1);
+        layout->childAtIndex(2)->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(2);
 
         zfblockedAlloc(ZFUILinearLayout, l);
         layout->childAdd(l);
-        l->layoutOrientationSet(ZFUIOrientation::e_Bottom);
+        l->layoutOrientation(ZFUIOrientation::e_Bottom);
         for(zfindex i = 0; i < 3; ++i)
         {
             zfblockedAlloc(ZFUITextView, child);
             l->childAdd(child);
-            child->textSet(zfstringWithFormat("text %zi", 3 + i));
-            child->textAlignSet(ZFUIAlign::e_Center);
-            child->viewBackgroundColorSet(ZFUIColorRandom());
+            child->text(zfstringWithFormat("text %zi", 3 + i));
+            child->textAlign(ZFUIAlign::e_Center);
+            child->viewBackgroundColor(ZFUIColorRandom());
         }
     }
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUILinearLayout *layout)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingForLayoutRequest(settings, layout);
 
@@ -85,15 +76,15 @@ private:
                 , ZFUIMarginMake(24)
                 ));
 
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout, zfint, ZFPropertyAccess(ZFUILinearLayout, layoutChildSpace),
-            ZFCoreArrayPODCreate(zfint
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout, zffloat, ZFPropertyAccess(ZFUILinearLayout, layoutChildSpace),
+            ZFCoreArrayPODCreate(zffloat
                 , 0
                 , 8
                 , 12
                 , 24
                 ));
 
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout->layoutParam(), ZFUISizeParam, ZFPropertyAccess(ZFUIViewLayoutParam, sizeParam),
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout->layoutParam(), ZFUISizeParam, ZFPropertyAccess(ZFUILayoutParam, sizeParam),
             ZFCoreArrayPODCreate(ZFUISizeParam
                 , ZFUISizeParamWrapWrap()
                 , ZFUISizeParamFillWrap()

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUITextEditWidget.h
  * @brief basic text edit widget
@@ -38,12 +29,7 @@ public:
      * note, image's nine patch would be added to #ZFUIView::nativeImplViewMargin
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUIImageView *, textEditBackgroundView, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIImageView *, textEditBackgroundView)
-    {
-        zfblockedAlloc(ZFUIImageView, textEditBackgroundView);
-        propertyValue = textEditBackgroundView;
-        textEditBackgroundView->imageSet(zfRes("ZFUIWidget/ZFUITextEditWidget_background.xml"));
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUIImageView *, textEditBackgroundView)
 
     /**
      * @brief the clear button
@@ -51,20 +37,13 @@ public:
      * note, the clear button's size would be added to #ZFUIView::nativeImplViewMargin
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUIButtonBasic *, textEditClearButton, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIButtonBasic *, textEditClearButton)
-    {
-        zfblockedAlloc(ZFUIButtonBasic, textEditClearButton);
-        propertyValue = textEditClearButton;
-        textEditClearButton->buttonIconImageSet(zfRes("ZFUIWidget/ZFUITextEditWidget_clearButton.xml"));
-        textEditClearButton->viewSizeMinSet(ZFUISizeZero());
-        textEditClearButton->viewVisibleSet(zffalse);
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUIButtonBasic *, textEditClearButton)
 
     /**
      * @brief whether automatically show or hide clear button, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, textEditClearButtonAutoEnable, zffalse)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, textEditClearButtonAutoEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, textEditClearButtonAutoEnable)
 
 protected:
     zfoverride
@@ -80,7 +59,7 @@ protected:
     zfoverride
     virtual zfbool internalViewShouldLayout(ZF_IN ZFUIView *internalView);
     zfoverride
-    virtual void internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds);
+    virtual void internalViewOnLayout(ZF_IN const ZFUIRect &bounds);
     zfoverride
     virtual void textOnChange(ZF_IN const zfchar *oldText);
 };

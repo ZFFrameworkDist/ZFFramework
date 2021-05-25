@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIScrollView.h
  * @brief scroll view
@@ -114,11 +105,11 @@ public:
      * called when scrolled by user, activated if any of these methods called manually or event occurred:
      * -  #scrollByPoint
      * -  #scrollBySpeed
-     * -  #scrollContentFrameSet or #scrollContentFrameSetAnimated
+     * -  #scrollContentFrame or #scrollContentFrameAnimated
      * -  #autoScrollStartX series
      * -  drag begin
      *
-     * "called manually" means not overrided by #scrollOverrideSet
+     * "called manually" means not overrided by #scrollOverride
      */
     ZFOBSERVER_EVENT(ScrollOnScrolledByUser)
 
@@ -130,32 +121,32 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, scrollEnable,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollEnable)
 
     /**
      * @brief if content is larger than scroll view, make it scrollable even if reaches edge, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, scrollBounceHorizontal,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollBounceHorizontal)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollBounceHorizontal)
     /**
      * @brief if content is larger than scroll view, make it scrollable even if reaches edge, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, scrollBounceVertical,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollBounceVertical)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollBounceVertical)
     /**
      * @brief scrollable even if content is not larger than scrollview, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, scrollBounceHorizontalAlways,
                                 zffalse)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollBounceHorizontalAlways)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollBounceHorizontalAlways)
     /**
      * @brief scrollable even if content is not larger than scrollview, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, scrollBounceVerticalAlways,
                                 zffalse)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollBounceVerticalAlways)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollBounceVerticalAlways)
 
     /**
      * @brief whether limit scroll horizontal or vertical only, false by default
@@ -170,7 +161,7 @@ public:
      * if align to page, #scrollAlignToAxis would be activated no matter what value of it
      */
     ZFPROPERTY_ASSIGN(zfbool, scrollAlignToPageHorizontal)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollAlignToPageHorizontal)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollAlignToPageHorizontal)
     /**
      * @brief whether align to page when scroll, false by default
      *
@@ -179,22 +170,22 @@ public:
      * if align to page, #scrollAlignToAxis would be activated no matter what value of it
      */
     ZFPROPERTY_ASSIGN(zfbool, scrollAlignToPageVertical)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, scrollAlignToPageVertical)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, scrollAlignToPageVertical)
 
     /**
      * @brief scroll view's content frame
      *
      * change this value would have no scroll animation,
      * and any of previous scroll animation would be stopped\n
-     * use #ZFUIScrollView::scrollContentFrameSetAnimated if you want to start scroll animation,
-     * or #ZFUIScrollView::scrollContentFrameSetWhileAnimating if you want to change frame
+     * use #ZFUIScrollView::scrollContentFrameAnimated if you want to start scroll animation,
+     * or #ZFUIScrollView::scrollContentFrameUpdate if you want to change frame
      * and keep previous scroll animation
      * @note the rect's 0 point starts from #nativeImplViewMargin + #scrollAreaMargin,
      *   instead of the view's frame
      */
     ZFPROPERTY_ASSIGN(ZFUIRect, scrollContentFrame)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIRect, scrollContentFrame)
-    zffinal void _ZFP_ZFUIScrollView_scrollContentFrameSetByImpl(ZF_IN const ZFUIRect &rect);
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIRect, scrollContentFrame)
+    zffinal void _ZFP_ZFUIScrollView_scrollContentFrameByImpl(ZF_IN const ZFUIRect &rect);
 
 protected:
     zfoverride
@@ -238,7 +229,11 @@ protected:
     zfoverride
     virtual void layoutOnLayoutFinish(ZF_IN const ZFUIRect &bounds);
     zfoverride
-    virtual void layoutedFrameFixedOnUpdateForChild(ZF_OUT ZFUIRect &ret, ZF_IN const ZFUIRect &childFrame);
+    virtual inline void layoutChildOffsetOnUpdate(ZF_IN_OUT ZFUIPoint &ret)
+    {
+        ret.x += this->scrollContentFrame().x;
+        ret.y += this->scrollContentFrame().y;
+    }
 
     /**
      * @brief (ZFTAG_LIMITATION) due to implementations limitation, ZFUIScrollView may or may not have mouse event callbacks
@@ -300,19 +295,19 @@ public:
      * by default, #ZFUIScrollThumbHorizontalClass and #ZFUIScrollThumbHorizontalClass
      * would be used
      */
-    ZFMETHOD_DECLARE_1(void, scrollThumbHorizontalClassSet,
+    ZFMETHOD_DECLARE_1(void, scrollThumbHorizontalClass,
                        ZFMP_IN(const ZFClass *, cls))
     /**
-     * @brief see #scrollThumbHorizontalClassSet
+     * @brief see #scrollThumbHorizontalClass
      */
     ZFMETHOD_DECLARE_0(const ZFClass *, scrollThumbHorizontalClass)
     /**
-     * @brief see #scrollThumbHorizontalClassSet
+     * @brief see #scrollThumbHorizontalClass
      */
-    ZFMETHOD_DECLARE_1(void, scrollThumbVerticalClassSet,
+    ZFMETHOD_DECLARE_1(void, scrollThumbVerticalClass,
                        ZFMP_IN(const ZFClass *, cls))
     /**
-     * @brief see #scrollThumbHorizontalClassSet
+     * @brief see #scrollThumbHorizontalClass
      */
     ZFMETHOD_DECLARE_0(const ZFClass *, scrollThumbVerticalClass)
 protected:
@@ -332,7 +327,7 @@ public:
      * @brief class for internal scroller, must be type of #ZFUIScroller,
      *   #ZFUIScrollerClass by default
      *
-     * scroller can only be changed by #ZFUIScrollerClassSet,
+     * scroller can only be changed by #ZFUIScrollerClass,
      * and only affect newly created scroll view
      */
     ZFMETHOD_DECLARE_0(const ZFClass *, scrollerClass)
@@ -343,46 +338,34 @@ public:
      *
      * positive if normal scroll, negative if bouncing
      */
-    ZFMETHOD_INLINE_0(zfint, scrollContentOffsetLeft)
-    {
-        return -this->scrollContentFrame().point.x;
-    }
+    ZFMETHOD_DECLARE_0(zffloat, scrollContentOffsetLeft)
     /** @brief see #scrollContentOffsetLeft */
-    ZFMETHOD_INLINE_0(zfint, scrollContentOffsetTop)
-    {
-        return -this->scrollContentFrame().point.y;
-    }
+    ZFMETHOD_DECLARE_0(zffloat, scrollContentOffsetTop)
     /** @brief see #scrollContentOffsetLeft */
-    ZFMETHOD_INLINE_0(zfint, scrollContentOffsetRight)
-    {
-        return this->scrollArea().size.width - ZFUIRectGetRight(this->scrollContentFrame());
-    }
+    ZFMETHOD_DECLARE_0(zffloat, scrollContentOffsetRight)
     /** @brief see #scrollContentOffsetLeft */
-    ZFMETHOD_INLINE_0(zfint, scrollContentOffsetBottom)
-    {
-        return this->scrollArea().size.height - ZFUIRectGetBottom(this->scrollContentFrame());
-    }
+    ZFMETHOD_DECLARE_0(zffloat, scrollContentOffsetBottom)
 
 public:
     /**
      * @brief animated change scroll content frame
      *
-     * this is a util method to combine #scrollContentFrameSetWhileAnimating
+     * this is a util method to combine #scrollContentFrameUpdate
      * and #scrollByPoint
      */
-    ZFMETHOD_DECLARE_1(void, scrollContentFrameSetAnimated,
+    ZFMETHOD_DECLARE_1(void, scrollContentFrameAnimated,
                        ZFMP_IN(const ZFUIRect &, scrollContentFrame))
     /**
      * @brief change scroll content frame without interrupt current scroll animation
      */
-    ZFMETHOD_DECLARE_1(void, scrollContentFrameSetWhileAnimating,
+    ZFMETHOD_DECLARE_1(void, scrollContentFrameUpdate,
                        ZFMP_IN(const ZFUIRect &, scrollContentFrame))
     /**
      * @brief animated scroll to desired position
      */
     ZFMETHOD_DECLARE_2(void, scrollByPoint,
-                       ZFMP_IN(zfint, xPos),
-                       ZFMP_IN(zfint, yPos))
+                       ZFMP_IN(zffloat, xPos),
+                       ZFMP_IN(zffloat, yPos))
     /**
      * @brief return end point of #scrollByPoint, or current content offset if not scrolling
      */
@@ -391,16 +374,16 @@ public:
      * @brief scroll by desired initial speed, in pixels per second
      */
     ZFMETHOD_DECLARE_2(void, scrollBySpeed,
-                       ZFMP_IN(zfint, xSpeedInPixelsPerSecond),
-                       ZFMP_IN(zfint, ySpeedInPixelsPerSecond))
+                       ZFMP_IN(zffloat, xSpeedInPixelsPerSecond),
+                       ZFMP_IN(zffloat, ySpeedInPixelsPerSecond))
     /**
      * @brief return current speed of #scrollBySpeed
      */
-    ZFMETHOD_DECLARE_0(zfint, scrollBySpeedCurrentSpeedX)
+    ZFMETHOD_DECLARE_0(zffloat, scrollBySpeedCurrentSpeedX)
     /**
      * @brief return current speed of #scrollBySpeed
      */
-    ZFMETHOD_DECLARE_0(zfint, scrollBySpeedCurrentSpeedY)
+    ZFMETHOD_DECLARE_0(zffloat, scrollBySpeedCurrentSpeedY)
     /**
      * @brief return predicted end point of #scrollBySpeed, or current content offset if not scrolling,
      *   valid only if isn't bouncing and won't bouncing when stop
@@ -419,16 +402,16 @@ public:
      * auto scroll would be stopped if:
      * -  #autoScrollStopX/#autoScrollStopY is called
      * -  drag event occurred
-     * -  #scrollByPoint/#scrollContentFrameSetAnimated occurred
+     * -  #scrollByPoint/#scrollContentFrameAnimated occurred
      * -  scroll reached content's edge
      */
     ZFMETHOD_DECLARE_1(void, autoScrollStartX,
-                       ZFMP_IN(zfint, speedInPixelsPerSecond))
+                       ZFMP_IN(zffloat, speedInPixelsPerSecond))
     /**
      * @brief see #autoScrollStartX
      */
     ZFMETHOD_DECLARE_1(void, autoScrollStartY,
-                       ZFMP_IN(zfint, speedInPixelsPerSecond))
+                       ZFMP_IN(zffloat, speedInPixelsPerSecond))
     /**
      * @brief see #autoScrollStartX
      */
@@ -440,11 +423,11 @@ public:
     /**
      * @brief current auto scroll speed, 0 means not auto scrolling, see #autoScrollStartX
      */
-    ZFMETHOD_DECLARE_0(zfint, autoScrollSpeedX)
+    ZFMETHOD_DECLARE_0(zffloat, autoScrollSpeedX)
     /**
      * @brief current auto scroll speed, 0 means not auto scrolling, see #autoScrollStartX
      */
-    ZFMETHOD_DECLARE_0(zfint, autoScrollSpeedY)
+    ZFMETHOD_DECLARE_0(zffloat, autoScrollSpeedY)
 
 public:
     /**
@@ -476,8 +459,8 @@ protected:
      * this method can be called more than one time,
      * but must be paired
      */
-    zffinal void scrollOverrideSet(ZF_IN zfbool scrollOverride);
-    /** @brief see #scrollOverrideSet */
+    zffinal void scrollOverride(ZF_IN zfbool scrollOverride);
+    /** @brief see #scrollOverride */
     zffinal zfbool scrollOverride(void);
 
     // ============================================================

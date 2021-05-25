@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFObjectSmartPointer.h
  * @brief smart pointer for ZFObject
@@ -152,7 +143,7 @@ public:
     }
     ~_ZFP_zflockfree_zfblockedAllocContainer(void)
     {
-        zflockfree_zfRelease(this->obj);
+        zfRelease(this->obj);
     }
 public:
     T_ZFObject *obj;
@@ -161,10 +152,10 @@ public:
  * @brief alloc a ZFObject looks like on a stack
  *
  * @code
- *   ZFString *saved = zfnull;
+ *   v_zfstring *saved = zfnull;
  *   {
  *       zfblockedAlloc(
- *           ZFString, // object's type
+ *           v_zfstring, // object's type
  *           s, // object's name
  *           "init value" // params passed to object's objectOnInit
  *       );
@@ -223,7 +214,7 @@ public:
     }
     ~_ZFP_zflockfree_zfblockedReleaseContainer(void)
     {
-        zflockfree_zfRelease(this->obj);
+        zfRelease(this->obj);
     }
 private:
     ZFObject *obj;

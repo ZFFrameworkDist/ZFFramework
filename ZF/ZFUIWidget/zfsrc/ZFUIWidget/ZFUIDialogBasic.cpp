@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIDialogBasic.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -25,7 +16,7 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIDialogContentClassInit, ZFLevelZFFrame
 }
 ZF_GLOBAL_INITIALIZER_END(ZFUIDialogContentClassInit)
 
-ZFMETHOD_FUNC_DEFINE_1(void, ZFUIDialogContentClassSet,
+ZFMETHOD_FUNC_DEFINE_1(void, ZFUIDialogContentClass,
                        ZFMP_IN(const ZFClass *, cls))
 {
     if(cls == zfnull)
@@ -58,19 +49,19 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIDialogBasicDataHolder, ZFLevelZFFramew
 public:
     ZFListener dialogButtonOnAddListener;
     ZFListener dialogButtonOnRemoveListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(dialogButtonOnAdd)
+    static void dialogButtonOnAdd(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
         userData->objectHolded<ZFUIDialogBasic *>()
-            ->_ZFP_ZFUIDialogBasic_dialogButtonOnAdd(listenerData.param0->to<ZFUIButton *>());
+            ->_ZFP_ZFUIDialogBasic_dialogButtonOnAdd(listenerData.param0<ZFUIButton *>());
     }
-    static ZFLISTENER_PROTOTYPE_EXPAND(dialogButtonOnRemove)
+    static void dialogButtonOnRemove(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
         userData->objectHolded<ZFUIDialogBasic *>()
-            ->_ZFP_ZFUIDialogBasic_dialogButtonOnRemove(listenerData.param0->to<ZFUIButton *>());
+            ->_ZFP_ZFUIDialogBasic_dialogButtonOnRemove(listenerData.param0<ZFUIButton *>());
     }
 ZF_GLOBAL_INITIALIZER_END(ZFUIDialogBasicDataHolder)
 
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialogContent)
+ZFPROPERTY_ON_VERIFY_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialogContent)
 {
     if(propertyValueOld == zfnull)
     {
@@ -83,10 +74,10 @@ ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialo
         return ;
     }
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialogContent)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialogContent)
 {
     this->dialogInternalContainer()->childAdd(this->dialogContent()->to<ZFUIView *>());
-    this->dialogContent()->to<ZFUIView *>()->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
+    this->dialogContent()->to<ZFUIView *>()->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
 
     this->dialogContent()->toObject()->observerAdd(
         ZFUIDialogContent::EventDialogButtonOnAdd(),
@@ -97,7 +88,7 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialo
         ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIDialogBasicDataHolder)->dialogButtonOnRemoveListener,
         this->objectHolder());
 }
-ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialogContent)
+ZFPROPERTY_ON_DETACH_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialogContent)
 {
     if(this->dialogContent() != zfnull)
     {
@@ -114,7 +105,7 @@ ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(ZFUIDialogBasic, ZFUIDialogContent *, dialo
 void ZFUIDialogBasic::objectOnInit(void)
 {
     zfsuper::objectOnInit();
-    this->dialogContentSet(this->dialogContent());
+    this->dialogContent(this->dialogContent());
 }
 void ZFUIDialogBasic::objectOnDeallocPrepare(void)
 {

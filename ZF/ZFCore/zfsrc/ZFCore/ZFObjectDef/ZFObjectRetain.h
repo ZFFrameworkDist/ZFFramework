@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFObjectRetain.h
  * @brief retain count logic for ZFFramework
@@ -169,16 +160,16 @@ inline void _ZFP_zfRelease(ZF_IN T_ZFObject obj)
  * -  you are unable to check all cached objects,
  *   but you may clear all cache by #zfAllocCacheRemoveAll
  * -  the cached object should be stateless,
- *   the #ZFObject::tagRemoveAll and #ZFObject::observerRemoveAll
+ *   the #ZFObject::objectTagRemoveAll and #ZFObject::observerRemoveAll
  *   would be called to clear the cached object's state
  * -  the cached object type must supply #ZFALLOC_CACHE_RELEASE
  *   to reset the cache state
  *   @code
- *     zfclass YourObject : zfextends ZFObject
+ *     zfclass YourObject : zfextends SomeParent
  *     {
  *         ZFALLOC_CACHE_RELEASE({
- *             // call super if necessary
- *             zfsuper::zfAllocCacheRelease(obj);
+ *             // if SomeParent also declared ZFALLOC_CACHE_RELEASE,
+ *             // SomeParent's cache clear logic would be automatically called first
  *             cache->xxx.clear();
  *         })
  *     };
@@ -219,6 +210,7 @@ inline void _ZFP_zfRelease(ZF_IN T_ZFObject obj)
         } \
         static void zfAllocCacheRelease(ZF_IN ZFObject *_obj) \
         { \
+            zfsuper::zfAllocCacheRelease(_obj); \
             zfself *cache = ZFCastZFObjectUnchecked(zfself *, _obj); \
             ZFUNUSED(cache); \
             action \
@@ -231,6 +223,7 @@ inline void _ZFP_zfRelease(ZF_IN T_ZFObject obj)
         /** @cond ZFPrivateDoc */ \
         static void zfAllocCacheRelease(ZF_IN ZFObject *_obj) \
         { \
+            zfsuper::zfAllocCacheRelease(_obj); \
             zfself *cache = ZFCastZFObjectUnchecked(zfself *, _obj); \
             ZFUNUSED(cache); \
             action \
@@ -245,6 +238,7 @@ public:
     static void zfAllocCacheRelease(ZF_IN ZFObject *obj)
     {
     }
+    /** @endcond */
 };
 
 /**

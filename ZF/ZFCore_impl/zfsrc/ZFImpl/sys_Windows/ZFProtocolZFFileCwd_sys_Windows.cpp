@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Windows_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFFileCwd.h"
 #include "ZFCore/ZFString.h"
@@ -24,7 +15,7 @@ public:
         wchar_t *buf = _wgetcwd(NULL, 0);
         if(buf)
         {
-            ZFString::toUTF8(_pathForCwd, buf, ZFStringEncoding::e_UTF16);
+            zfstringToUTF8(_pathForCwd, buf, ZFStringEncoding::e_UTF16);
             free(buf);
             return _pathForCwd;
         }
@@ -35,7 +26,7 @@ public:
     }
     virtual zfbool pathForCwdChange(ZF_IN const zfchar *pathForCwd)
     {
-        return (_wchdir(ZFString::toUTF16(pathForCwd, ZFStringEncoding::e_UTF8).cString()) == 0);
+        return (_wchdir(zfstringToUTF16(pathForCwd, ZFStringEncoding::e_UTF8).cString()) == 0);
     }
 ZFPROTOCOL_IMPLEMENTATION_END(ZFFileCwdImpl_sys_Windows)
 ZFPROTOCOL_IMPLEMENTATION_REGISTER(ZFFileCwdImpl_sys_Windows)

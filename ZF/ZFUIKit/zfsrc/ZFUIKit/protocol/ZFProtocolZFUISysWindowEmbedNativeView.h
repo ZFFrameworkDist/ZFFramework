@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFUISysWindowEmbedNativeView.h
  * @brief protocol for ZFUISysWindow
@@ -28,13 +19,13 @@ public:
      * @brief used to attach window's root view to native container
      *
      * the attached child must fill parent,
-     * and change frame accorrding to parent's size automatically
+     * and change frame according to parent's size automatically
      */
     virtual void nativeViewAdd(ZF_IN void *parent, ZF_IN void *child) zfpurevirtual;
     /**
      * @brief remove native view, see #nativeViewAdd
      */
-    virtual void nativeViewRemote(ZF_IN void *parent, ZF_IN void *child) zfpurevirtual;
+    virtual void nativeViewRemove(ZF_IN void *parent, ZF_IN void *child) zfpurevirtual;
 ZFPROTOCOL_INTERFACE_END(ZFUISysWindowEmbedNativeView)
 
 ZF_NAMESPACE_GLOBAL_END

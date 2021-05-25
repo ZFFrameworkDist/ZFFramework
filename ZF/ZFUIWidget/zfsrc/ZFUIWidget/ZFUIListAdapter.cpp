@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIListAdapter.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -18,7 +9,31 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIListAdapter, ListCellOnUpdate)
 ZFOBSERVER_EVENT_REGISTER(ZFUIListAdapter, ListCellCacheOnRecycle)
 
 // ============================================================
-ZFMETHOD_DEFINE_2(ZFUIListAdapter, zfint, cellSizeAtIndex,
+ZFMETHOD_DEFINE_0(ZFUIListAdapter, ZFUIOrientationEnum, listOrientation)
+{
+    return this->_ZFP_ZFUIListAdapter_listOrientation;
+}
+ZFMETHOD_DEFINE_0(ZFUIListAdapter, const ZFUISize &, listContainerSize)
+{
+    return this->_ZFP_ZFUIListAdapter_listContainerSize;
+}
+
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIListAdapter, zffloat, cellSizeHint)
+{
+    this->listAdapterNotifyReload();
+}
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIListAdapter, zfbool, cellSizeFill)
+{
+    this->listAdapterNotifyReload();
+}
+
+ZFMETHOD_DEFINE_1(ZFUIListAdapter, void, listAdapterNotifyReload,
+                  ZFMP_IN_OPT(zfindex, atIndexOrMax, zfindexMax()))
+{
+    this->listAdapterOnReload(atIndexOrMax);
+}
+
+ZFMETHOD_DEFINE_2(ZFUIListAdapter, zffloat, cellSizeAtIndex,
                   ZFMP_IN(zfindex, index),
                   ZFMP_IN(ZFUIListCell *, cell))
 {
@@ -47,14 +62,14 @@ ZFMETHOD_DEFINE_2(ZFUIListAdapter, zfint, cellSizeAtIndex,
 #define _ZFP_ZFUIListAdapter_cacheKey(cacheKey, key) \
     zfchar *cacheKey = zfsConnect("_ZFP_ZFUIListAdapter_cacheKey", key); \
     zfblockedFree(cacheKey)
-ZFMETHOD_DEFINE_1(ZFUIListAdapter, zfautoObject, cellCacheDefaultAccess,
+ZFMETHOD_DEFINE_1(ZFUIListAdapter, zfautoObjectT<ZFUIListCell *>, cellCacheDefaultAccess,
                   ZFMP_IN(const zfchar *, key))
 {
     _ZFP_ZFUIListAdapter_cacheKey(cacheKey, key);
-    ZFArrayEditable *cacheList = this->toObject()->tagGet<ZFArrayEditable *>(cacheKey);
+    ZFArray *cacheList = this->toObject()->objectTag<ZFArray *>(cacheKey);
     if(cacheList != zfnull && !cacheList->isEmpty())
     {
-        zfautoObject ret = cacheList->getLast();
+        zfautoObjectT<ZFUIListCell *> ret = cacheList->getLast();
         cacheList->removeLast();
         return ret;
     }
@@ -68,11 +83,11 @@ ZFMETHOD_DEFINE_2(ZFUIListAdapter, void, cellCacheDefaultRecycle,
                   ZFMP_IN(ZFUIListCell *, cell))
 {
     _ZFP_ZFUIListAdapter_cacheKey(cacheKey, key);
-    ZFArrayEditable *cacheList = this->toObject()->tagGet<ZFArrayEditable *>(cacheKey);
+    ZFArray *cacheList = this->toObject()->objectTag<ZFArray *>(cacheKey);
     if(cacheList == zfnull)
     {
-        cacheList = zfAlloc(ZFArrayEditable);
-        this->toObject()->tagSet(cacheKey, cacheList);
+        cacheList = zfAlloc(ZFArray);
+        this->toObject()->objectTag(cacheKey, cacheList);
         zfRelease(cacheList);
     }
     cacheList->add(cell);
@@ -80,7 +95,7 @@ ZFMETHOD_DEFINE_2(ZFUIListAdapter, void, cellCacheDefaultRecycle,
 
 // ============================================================
 ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFUIListAdapter, zfindex, cellCount)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFUIListAdapter, zfautoObject, cellAtIndex, ZFMP_IN(zfindex, index))
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_1(ZFUIListAdapter, zfautoObjectT<ZFUIListCell *>, cellAtIndex, ZFMP_IN(zfindex, index))
 
 ZF_NAMESPACE_GLOBAL_END
 

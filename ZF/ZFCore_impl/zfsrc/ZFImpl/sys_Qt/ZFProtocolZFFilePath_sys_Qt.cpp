@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Qt_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFFilePath.h"
 #include "ZFCore/ZFString.h"
@@ -25,7 +16,10 @@ public:
         if(this->_pathForModule.isEmpty())
         {
             this->_pathForModule = QCoreApplication::applicationDirPath().toStdString().c_str();
-            zfCoreAssert(!this->_pathForModule.isEmpty());
+            if(this->_pathForModule.isEmpty())
+            {
+                this->_pathForModule = "./";
+            }
         }
         return this->_pathForModule;
     }
@@ -34,7 +28,10 @@ public:
         if(this->_pathForModuleFile.isEmpty())
         {
             this->_pathForModuleFile = QCoreApplication::applicationFilePath().toStdString().c_str();
-            zfCoreAssert(!this->_pathForModuleFile.isEmpty());
+            if(this->_pathForModuleFile.isEmpty())
+            {
+                this->_pathForModuleFile = "./unknown";
+            }
         }
         return this->_pathForModuleFile;
     }
@@ -53,7 +50,7 @@ public:
         }
         return this->_pathForSetting;
     }
-    virtual void pathForSettingSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForSetting(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForSetting = path;
     }
@@ -62,7 +59,7 @@ public:
     {
         if(this->_pathForStorage.isEmpty())
         {
-            ZFFilePathFormat(this->_pathForStorage, QStandardPaths::writableLocation(QStandardPaths::DataLocation).toStdString().c_str());
+            ZFFilePathFormat(this->_pathForStorage, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString().c_str());
             if(this->_pathForStorage.isEmpty())
             {
                 this->_pathForStorage = this->pathForModule();
@@ -72,7 +69,7 @@ public:
         }
         return this->_pathForStorage;
     }
-    virtual void pathForStorageSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForStorage(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForStorage = path;
     }
@@ -91,7 +88,7 @@ public:
         }
         return this->_pathForStorageShared;
     }
-    virtual void pathForStorageSharedSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForStorageShared(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForStorageShared = path;
     }
@@ -110,7 +107,7 @@ public:
         }
         return this->_pathForCache;
     }
-    virtual void pathForCacheSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForCache(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForCache = path;
     }

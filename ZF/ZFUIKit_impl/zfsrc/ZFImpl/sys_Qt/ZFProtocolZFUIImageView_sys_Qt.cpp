@@ -1,22 +1,13 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Qt_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIImageView.h"
 
 #if ZF_ENV_sys_Qt
 
+#include <QGraphicsWidget>
 #include <QImage>
-#include <QWidget>
 #include <QPainter>
 
-class _ZFP_ZFUIImageViewImpl_sys_Qt_ImageView : public QWidget
+class _ZFP_ZFUIImageViewImpl_sys_Qt_ImageView : public QGraphicsWidget
 {
     Q_OBJECT
 
@@ -27,7 +18,7 @@ public:
 
 public:
     _ZFP_ZFUIImageViewImpl_sys_Qt_ImageView(ZF_IN ZFUIImageView *owner)
-    : QWidget()
+    : QGraphicsWidget()
     , _ZFP_owner(owner)
     , _ZFP_imageScale(1)
     , _ZFP_imageNinePatchScaled(ZFUIMarginZero())
@@ -35,21 +26,20 @@ public:
     }
 
 protected:
-    virtual void paintEvent(QPaintEvent *event)
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr)
     {
-        QWidget::paintEvent(event);
+        QGraphicsWidget::paint(painter, option, widget);
         if(_ZFP_owner == zfnull || _ZFP_owner->image() == zfnull || _ZFP_owner->image()->nativeImage() == zfnull)
         {
             return ;
         }
 
         QImage *image = (QImage *)_ZFP_owner->image()->nativeImage();
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform);
-        QRect bounds(QPoint(), this->geometry().size());
+        painter->setRenderHint(QPainter::SmoothPixmapTransform);
+        QRectF bounds(QPointF(), this->geometry().size());
         if(_ZFP_imageNinePatchScaled == ZFUIMarginZero())
         {
-            painter.drawImage(bounds, *image);
+            painter->drawImage(bounds, *image);
             return ;
         }
 
@@ -57,17 +47,17 @@ protected:
         zfmemset(drawDatas, 0, sizeof(drawDatas));
         zfindex drawDatasCount = ZFUIImageImplNinePatchCalc(
                 drawDatas,
-                ZFUISizeApplyScaleReversely(ZFImpl_sys_Qt_ZFUIKit_impl_ZFUISizeFromQSize(image->size()), _ZFP_imageScale),
+                ZFUISizeApplyScaleReversely(ZFImpl_sys_Qt_ZFUISizeFromQSize(image->size()), _ZFP_imageScale),
                 _ZFP_imageNinePatchScaled,
-                ZFImpl_sys_Qt_ZFUIKit_impl_ZFUISizeFromQSize(bounds.size()));
+                ZFImpl_sys_Qt_ZFUISizeFromQSizeF(bounds.size()));
 
         for(zfindex i = 0; i < drawDatasCount; ++i)
         {
             const ZFUIImageImplNinePatchDrawData &drawData = drawDatas[i];
-            painter.drawImage(
-                ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIRectToQRect(drawData.dst),
+            painter->drawImage(
+                ZFImpl_sys_Qt_ZFUIRectToQRect(drawData.dst),
                 *image,
-                ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIRectToQRect(ZFUIRectApplyScale(drawData.src, _ZFP_imageScale)));
+                ZFImpl_sys_Qt_ZFUIRectToQRect(ZFUIRectApplyScale(drawData.src, _ZFP_imageScale)));
         }
     }
 };
@@ -75,7 +65,7 @@ protected:
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFPROTOCOL_IMPLEMENTATION_BEGIN(ZFUIImageViewImpl_sys_Qt, ZFUIImageView, ZFProtocolLevel::e_SystemHigh)
-    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("Qt:QWidget")
+    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("Qt:QGraphicsWidget")
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_BEGIN()
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_ITEM(ZFUIImage, "Qt:QImage")
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_END()
@@ -91,8 +81,8 @@ public:
         delete ZFCastStatic(_ZFP_ZFUIImageViewImpl_sys_Qt_ImageView *, nativeImageView);
     }
 
-    virtual void imageSet(ZF_IN ZFUIImageView *imageView,
-                          ZF_IN ZFUIImage *image)
+    virtual void image(ZF_IN ZFUIImageView *imageView,
+                       ZF_IN ZFUIImage *image)
     {
         _ZFP_ZFUIImageViewImpl_sys_Qt_ImageView *nativeImplView = ZFCastStatic(_ZFP_ZFUIImageViewImpl_sys_Qt_ImageView *, imageView->nativeImplView());
         nativeImplView->update();

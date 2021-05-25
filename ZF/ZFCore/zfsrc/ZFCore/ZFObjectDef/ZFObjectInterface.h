@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFObjectInterface.h
  * @brief interface declare
@@ -39,19 +30,16 @@ protected:
     virtual ~_ZFP_ObjI_Base(void) {}
 
 public:
-    static const ZFClass *ClassData(void)
-    {
-        return zfnull;
-    }
+    static const ZFClass *ClassData(void) {return zfnull;}
 public:
     static void _ZFP_Obj_initImpl(ZFClass *cls) {}
 public:
-    static void _ZFP_ObjI_ICk(void)
-    {
-    }
+    static void _ZFP_ObjI_ICk(void) {}
 };
 #define _ZFP_ZFINTERFACE_DECLARE(InterfaceName, ParentInterface) \
     ZFCLASS_DISALLOW_COPY_CONSTRUCTOR(InterfaceName) \
+    public: \
+        static void _ZFP_zftIsZFObject(void) {} \
     protected: \
         /** @brief typedef for super (always #ZFInterface for an interface type) */ \
         typedef ParentInterface zfsuper; \

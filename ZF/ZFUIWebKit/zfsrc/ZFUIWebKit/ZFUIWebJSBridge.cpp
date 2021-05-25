@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWebJSBridge.h"
 #include "protocol/ZFProtocolZFUIWebJSBridge.h"
 
@@ -49,13 +40,13 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIWebJSBridge, WebMessageAfterRecv)
 ZFMETHOD_DEFINE_1(ZFUIWebJSBridge, ZFUIWebJSBridge *, instanceForWebView,
                   ZFMP_IN(ZFUIWebView *, webView))
 {
-    ZFUIWebJSBridge *ret = webView->tagGet<ZFUIWebJSBridge *>(_ZFP_ZFUIWebJSBridge_tagKey);
+    ZFUIWebJSBridge *ret = webView->objectTag<ZFUIWebJSBridge *>(_ZFP_ZFUIWebJSBridge_tagKey);
     if(ret == zfnull)
     {
         zfautoObject tmp = ZFUIWebJSBridge::ClassData()->newInstance();
         ret = tmp;
         ret->d->webView = webView;
-        webView->tagSet(_ZFP_ZFUIWebJSBridge_tagKey, ret);
+        webView->objectTag(_ZFP_ZFUIWebJSBridge_tagKey, ret);
     }
     return ret;
 }

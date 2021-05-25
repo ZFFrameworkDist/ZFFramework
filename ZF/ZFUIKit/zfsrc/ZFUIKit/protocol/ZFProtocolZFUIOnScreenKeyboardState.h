@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFUIOnScreenKeyboardState.h
  * @brief protocol for #ZFUIOnScreenKeyboardState
@@ -43,10 +34,10 @@ public:
                                         ZF_OUT ZFUIRect &clientFrame)
     {
         ZFUIViewPositionOnScreen(clientFrame, keyboardState->keyboardOwnerSysWindow()->rootView());
-        ZFUIRectApplyScale(clientFrame, clientFrame, keyboardState->keyboardOwnerSysWindow()->rootView()->scaleFixed());
+        ZFUIRectApplyScale(clientFrame, clientFrame, keyboardState->keyboardOwnerSysWindow()->rootView()->UIScaleFixed());
         if(ZFUIRectGetBottom(clientFrame) > ZFUIRectGetTop(keyboardFrame))
         {
-            clientFrame.size.height -= ZFUIRectGetBottom(clientFrame) - ZFUIRectGetTop(keyboardFrame);
+            clientFrame.height -= ZFUIRectGetBottom(clientFrame) - ZFUIRectGetTop(keyboardFrame);
         }
     }
 
@@ -58,7 +49,7 @@ public:
      */
     zffinal void notifyKeyboardStateOnChange(ZF_IN ZFUIOnScreenKeyboardState *keyboardState)
     {
-        zffloat scale = keyboardState->keyboardOwnerSysWindow()->rootView()->scaleFixed();
+        zffloat scale = keyboardState->keyboardOwnerSysWindow()->rootView()->UIScaleFixed();
         zfbool keyboardShowingNew = this->keyboardShowing(keyboardState);
         ZFUIRect keyboardFrameNew = ZFUIRectApplyScaleReversely(this->keyboardFrame(keyboardState), scale);
         if(keyboardShowingNew == keyboardState->_ZFP_ZFUIOnScreenKeyboardState_keyboardShowing

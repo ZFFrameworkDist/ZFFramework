@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreMutex.h
  * @brief core mutex
@@ -47,7 +38,7 @@ inline ZFCoreMutexImplCallbackLock ZFCoreMutexImplGetLock(void) {return _ZFP_ZFC
 inline ZFCoreMutexImplCallbackUnlock ZFCoreMutexImplGetUnlock(void) {return _ZFP_ZFCoreMutexImplUnlock;}
 
 /** @brief see #ZFCoreMutexImplSet */
-inline zfbool ZFCoreMutexImplAvailable(void) {return _ZFP_ZFCoreMutexImplObject;}
+inline zfbool ZFCoreMutexImplAvailable(void) {return (_ZFP_ZFCoreMutexImplObject != zfnull);}
 
 // ============================================================
 /**

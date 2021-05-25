@@ -1,19 +1,8 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIImageView.h"
 #include "protocol/ZFProtocolZFUIView.h"
 #include "protocol/ZFProtocolZFUIImageView.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
-
-ZFSTYLE_DEFAULT_DEFINE(ZFUIImageView)
 
 // ============================================================
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIImageViewListenerHolder, ZFLevelZFFrameworkEssential)
@@ -22,10 +11,11 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIImageViewListenerHolder, ZFLevelZFFram
 }
 public:
     ZFListener imageNinePatchChangedListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(imageNinePatchChanged)
+    static void imageNinePatchChanged(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        const ZFProperty *property = listenerData.param0->to<v_ZFProperty *>()->zfv;
-        if(property == ZFPropertyAccess(ZFUIImage, imageNinePatch))
+        const ZFProperty *property = listenerData.param0<v_ZFProperty *>()->zfv;
+        if(property == ZFPropertyAccess(ZFUIImage, imageNinePatch)
+            || property == ZFPropertyAccess(ZFUIImage, imageScale))
         {
             ZFUIImageView *imageView = userData->objectHolded();
             ZFUIImage *image = imageView->image();
@@ -40,8 +30,18 @@ ZF_GLOBAL_INITIALIZER_END(ZFUIImageViewListenerHolder)
 // ============================================================
 // ZFUIImageView
 ZFOBJECT_REGISTER(ZFUIImageView)
+ZFSTYLE_DEFAULT_DEFINE(ZFUIImageView)
 
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIImageView, ZFUIImage *, image)
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIImageView, zfbool, viewUIEnable)
+{
+    propertyValue = zffalse;
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIImageView, zfbool, viewUIEnableTree)
+{
+    propertyValue = zffalse;
+}
+
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIImageView, ZFUIImage *, image)
 {
     ZF_GLOBAL_INITIALIZER_CLASS(ZFUIImageViewListenerHolder) *listenerHolder = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIImageViewListenerHolder);
     if(this->image() != zfnull)
@@ -49,7 +49,7 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIImageView, ZFUIImage *, image)
         this->image()->observerAdd(ZFObject::EventObjectPropertyValueOnUpdate(), listenerHolder->imageNinePatchChangedListener, this->objectHolder());
     }
 
-    ZFPROTOCOL_ACCESS(ZFUIImageView)->imageSet(this,
+    ZFPROTOCOL_ACCESS(ZFUIImageView)->image(this,
         this->image() && this->image()->nativeImage()
             ? this->image()
             : zfnull);
@@ -61,14 +61,33 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIImageView, ZFUIImage *, image)
             image->imageScaleFixed(),
             ZFUIMarginApplyScale(image->imageNinePatch(), image->imageScaleFixed()));
     }
-    this->layoutRequest();
+
+    if(((propertyValueOld != zfnull) ? propertyValueOld.to<ZFUIImage *>()->imageSize() : ZFUISizeZero())
+        != ((this->image() != zfnull) ? this->image()->imageSize() : ZFUISizeZero()))
+    {
+        this->layoutRequest();
+    }
 }
-ZFPROPERTY_OVERRIDE_ON_DETACH_DEFINE(ZFUIImageView, ZFUIImage *, image)
+ZFPROPERTY_ON_DETACH_DEFINE(ZFUIImageView, ZFUIImage *, image)
 {
     ZF_GLOBAL_INITIALIZER_CLASS(ZFUIImageViewListenerHolder) *listenerHolder = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIImageViewListenerHolder);
     if(this->image() != zfnull)
     {
         this->image()->observerRemove(ZFObject::EventObjectPropertyValueOnUpdate(), listenerHolder->imageNinePatchChangedListener);
+    }
+}
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIImageView, ZFUIContentScaleTypeEnum, imageScaleType)
+{
+    if(propertyValue != propertyValueOld)
+    {
+        this->layoutRequest();
+    }
+}
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIImageView, ZFUIMargin, imageMargin)
+{
+    if(propertyValue != propertyValueOld)
+    {
+        this->nativeImplViewMarginUpdate();
     }
 }
 
@@ -79,6 +98,12 @@ ZFMETHOD_DEFINE_1(ZFUIImageView, void, measureImageView,
     ZFUISizeApplyMarginReversely(ret, ret, this->imageMargin());
 }
 
+ZFOBJECT_ON_INIT_DEFINE_1(ZFUIImageView,
+                          ZFMP_IN(ZFUIImage *, image))
+{
+    this->objectOnInit();
+    this->image(image);
+}
 void ZFUIImageView::objectOnInit(void)
 {
     zfsuper::objectOnInit();
@@ -93,13 +118,13 @@ void ZFUIImageView::objectOnInit(void)
             ZFPROTOCOL_ACCESS(ZFUIImageView)->nativeImageViewDestroy(view->to<ZFUIImageView *>(), nativeImplView);
         }
     };
-    this->nativeImplViewSet(
+    this->nativeImplView(
         ZFPROTOCOL_ACCESS(ZFUIImageView)->nativeImageViewCreate(this),
         _ZFP_ZFUIImageView_nativeImplViewDestroy::action);
 }
 void ZFUIImageView::objectOnDealloc(void)
 {
-    this->imageSet(zfnull);
+    this->image(zfnull);
     zfsuper::objectOnDealloc();
 }
 

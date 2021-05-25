@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreStringUtil.h
  * @brief string utilities for ZFFramework
@@ -200,56 +191,44 @@ inline zfint zfsToInt(ZF_IN const zfchar *src,
  */
 template<typename T_Float>
 ZF_ENV_EXPORT zfbool zfsFromFloatT(ZF_OUT zfstring &s,
-                                   ZF_IN T_Float n,
-                                   ZF_IN_OPT zfindex decimalLenOrMax = zfindexMax())
+                                   ZF_IN T_Float n)
 {
-    if(n == 0)
+    zfchar buf[64] = {0};
+    sprintf(buf, "%lf", (double)n);
+    const zfchar *p = buf;
+    while(*p && *p != '.') {++p;}
+    if(*p == '\0')
     {
-        s += '0';
+        s += buf;
         return zftrue;
     }
-    if(n < 0)
+    const zfchar *pEnd = p + zfslen(p) - 1;
+    if(*pEnd == '0')
     {
-        s += '-';
-        n = 0 - n;
-    }
-
-    zfsFromIntT(s, (unsigned long)n);
-    s += '.';
-    n -= (unsigned long)n;
-
-    unsigned long t;
-    if(decimalLenOrMax == zfindexMax())
-    {
-        if(sizeof(T_Float) <= 4) {t = (unsigned long)(n * 10000);}
-        else if(sizeof(T_Float) <= 8) {t = (unsigned long)(n * 1000000);}
-        else {t = (unsigned long)(n * 100000000);}
-        if(t > 0)
+        do {--pEnd;} while(*pEnd == '0');
+        if(pEnd == p)
         {
-            while((t % 10) == 0) {t /= 10;}
+            s.append(buf, p - buf);
+        }
+        else
+        {
+            s.append(buf, pEnd + 1 - buf);
         }
     }
     else
     {
-        unsigned long e = 1;
-        for(zfindex i = 0; i < decimalLenOrMax; ++i)
-        {
-            e *= 10;
-        }
-        t = (unsigned long)(n * e);
+        s += buf;
     }
-    zfsFromIntT(s, t);
     return zftrue;
 }
 /**
  * @brief see #zfsFromFloatT
  */
 template<typename T_Float>
-ZF_ENV_EXPORT zfstring zfsFromFloat(ZF_IN T_Float n,
-                                    ZF_IN_OPT zfindex decimalLenOrMax = zfindexMax())
+ZF_ENV_EXPORT zfstring zfsFromFloat(ZF_IN T_Float n)
 {
     zfstring s;
-    zfsFromFloatT(s, n, decimalLenOrMax);
+    zfsFromFloatT(s, n);
     return s;
 }
 
@@ -752,6 +731,12 @@ inline zfindex zfstringFindLastNotOf(ZF_IN const zfstring &src, ZF_IN zfchar fin
 {
     return zfstringFindLastNotOf(src.cString(), src.length(), &find, 1);
 }
+// ============================================================
+// zfstringReplace
+/** @brief replace string, return replaced count */
+extern ZF_ENV_EXPORT zfindex zfstringReplace(ZF_IN_OUT zfstring &s, ZF_IN const zfchar *replaceFrom, ZF_IN const zfchar *replaceTo, ZF_IN_OPT zfindex maxCount = zfindexMax());
+/** @brief replace string, return replaced count */
+extern ZF_ENV_EXPORT zfindex zfstringReplaceReversely(ZF_IN_OUT zfstring &s, ZF_IN const zfchar *replaceFrom, ZF_IN const zfchar *replaceTo, ZF_IN_OPT zfindex maxCount = zfindexMax());
 
 ZF_NAMESPACE_GLOBAL_END
 

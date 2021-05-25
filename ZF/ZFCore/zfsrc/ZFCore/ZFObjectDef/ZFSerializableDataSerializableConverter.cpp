@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFSerializableDataSerializableConverter.h"
 #include "ZFObjectImpl.h"
 #include "ZFSerializableUtil.h"
@@ -97,7 +88,7 @@ zfbool ZFSerializableDataFromZfsd(ZF_OUT ZFSerializableData &serializableData,
     zfbool ret = ZFSerializableDataFromZfsd(serializableData, buf.bufferAsString(), buf.bufferAsStringLength(), outErrorHint);
     if(ret)
     {
-        serializableData.pathInfoSet(input.pathInfo());
+        serializableData.pathInfo(input.pathInfo());
     }
     return ret;
 }
@@ -300,12 +291,12 @@ zfbool _ZFP_ZFSerializableDataFromZfsd(ZF_OUT ZFSerializableData &serializableDa
 
         if(pRight == pLeft + 1 && *pLeft == _ZFP_ZFSD_NullClass)
         {
-            serializableData.itemClassSet(zfnull);
+            serializableData.itemClass(zfnull);
         }
         else
         {
             zfCoreDataDecode(decodedTmp, pLeft, pRight - pLeft);
-            serializableData.itemClassSet(decodedTmp.cString());
+            serializableData.itemClass(decodedTmp.cString());
             decodedTmp.removeAll();
         }
 
@@ -348,7 +339,7 @@ zfbool _ZFP_ZFSerializableDataFromZfsd(ZF_OUT ZFSerializableData &serializableDa
                 // save
                 if(!attributeName.isEmpty() && !decodedTmp.isEmpty())
                 {
-                    serializableData.attributeSet(attributeName.cString(), decodedTmp.cString());
+                    serializableData.attributeForName(attributeName.cString(), decodedTmp.cString());
                 }
                 decodedTmp.removeAll();
 
@@ -458,12 +449,12 @@ zfbool ZFSerializableDataToZfsd(ZF_OUT zfstring &result,
     {
         for(zfiterator it = serializableData.attributeIterator();
             serializableData.attributeIteratorIsValid(it);
-            serializableData.attributeIteratorNext(it))
+            serializableData.attributeIteratorNextValue(it))
         {
             result += _ZFP_ZFSD_Space;
-            zfCoreDataEncode(result, serializableData.attributeIteratorGetKey(it), zfindexMax(), _ZFP_ZFSerializableEscapeCharMap);
+            zfCoreDataEncode(result, serializableData.attributeIteratorKey(it), zfindexMax(), _ZFP_ZFSerializableEscapeCharMap);
             result += _ZFP_ZFSD_AttrAssign;
-            _ZFP_ZFSD_AttrValueEncode(result, serializableData.attributeIteratorGet(it));
+            _ZFP_ZFSD_AttrValueEncode(result, serializableData.attributeIteratorValue(it));
         }
     }
 
@@ -473,7 +464,7 @@ zfbool ZFSerializableDataToZfsd(ZF_OUT zfstring &result,
         result += _ZFP_ZFSD_ChildBegin;
         for(zfindex i = 0; i < serializableData.elementCount(); ++i)
         {
-            if(!ZFSerializableDataToZfsd(result, serializableData.elementAtIndex(i), outErrorHint))
+            if(!ZFSerializableDataToZfsd(result, serializableData.elementAtIndex(i), outErrorHint, prettyPrint))
             {
                 return zffalse;
             }
@@ -527,7 +518,7 @@ static zfbool _ZFP_ZFSerializableDataToZfsdPretty(ZF_OUT zfstring &result,
     {
         for(zfiterator it = serializableData.attributeIterator();
             serializableData.attributeIteratorIsValid(it);
-            serializableData.attributeIteratorNext(it))
+            serializableData.attributeIteratorNextValue(it))
         {
             if(needBreak)
             {
@@ -535,9 +526,9 @@ static zfbool _ZFP_ZFSerializableDataToZfsdPretty(ZF_OUT zfstring &result,
                 _ZFP_ZFSerializableDataToZfsdPrettyIndent(result, indentLevel + 1);
             }
             result += _ZFP_ZFSD_Space;
-            zfCoreDataEncode(result, serializableData.attributeIteratorGetKey(it), zfindexMax(), _ZFP_ZFSerializableEscapeCharMap);
+            zfCoreDataEncode(result, serializableData.attributeIteratorKey(it), zfindexMax(), _ZFP_ZFSerializableEscapeCharMap);
             result += _ZFP_ZFSD_AttrAssign;
-            _ZFP_ZFSD_AttrValueEncode(result, serializableData.attributeIteratorGet(it));
+            _ZFP_ZFSD_AttrValueEncode(result, serializableData.attributeIteratorValue(it));
         }
     }
 
@@ -630,7 +621,7 @@ ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfstring, ZFSerializableDataToZfsd, ZFMP_
 
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFObjectFromZfsd, ZFMP_OUT(zfautoObject &, ret), ZFMP_IN(const ZFInput &, input), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(zfautoObject, ZFObjectFromZfsd, ZFMP_IN(const ZFInput &, input), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_3(zfbool, ZFObjectToZfsd, ZFMP_IN_OUT(const ZFOutput &, output), ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_4(zfbool, ZFObjectToZfsd, ZFMP_IN_OUT(const ZFOutput &, output), ZFMP_IN(ZFObject *, obj), ZFMP_OUT_OPT(zfstring *, outErrorHint, zfnull), ZFMP_IN_OPT(zfbool, prettyPrint, zftrue))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

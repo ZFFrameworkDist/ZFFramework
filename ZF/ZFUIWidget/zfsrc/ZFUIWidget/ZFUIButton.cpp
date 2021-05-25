@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIButton.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
 
@@ -49,7 +40,7 @@ static inline _ZFP_ZFUIButtonMouseData _ZFP_ZFUIButtonMouseDataFromEvent(ZF_IN Z
 }
 #define _ZFP_ZFUIButtonMouseDataToEvent(event, mouseData) \
     zfblockedAllocWithCache(ZFUIMouseEvent, event); \
-    event->eventResolvedSet(zffalse); \
+    event->eventResolved(zffalse); \
     event->mouseId = mouseData.mouseId; \
     event->mouseAction = mouseData.mouseAction; \
     event->mousePoint = mouseData.mousePoint; \
@@ -64,48 +55,38 @@ public:
     ZFCoreArrayPOD<zfidentity> ignoredMouses;
     ZFCoreArrayPOD<_ZFP_ZFUIButtonMouseData> processingMouses;
     zfstlmap<zfidentity, ZFUIPoint> prevMousePointMap;
-    zfbool buttonEnableCache;
+    zfbool buttonEnableFlag;
     zfbool buttonHighlightedFlag;
     zftimet buttonLastClickTimestamp;
 
 public:
-    void buttonEnableSet(ZF_IN zfbool buttonEnable)
+    void buttonEnable(ZF_IN zfbool buttonEnable)
     {
-        if(this->buttonEnableCache == buttonEnable)
+        if(this->buttonEnableFlag == buttonEnable)
         {
             return ;
         }
-        this->buttonEnableCache = buttonEnable;
+        this->buttonEnableFlag = buttonEnable;
 
-        if(buttonEnable)
-        {
-            this->buttonStateUpdate(this->buttonHighlightedFlag);
-        }
-        else
-        {
-            this->buttonState = ZFUIButtonState::e_Disabled;
-            _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnDisabled)
-            this->pimplOwner->buttonStateOnUpdate();
+        this->buttonStateUpdate(this->buttonHighlightedFlag);
 
-            if(!this->processingMouses.isEmpty())
+        if(!this->processingMouses.isEmpty())
+        {
+            for(zfindex i = 0; i < this->processingMouses.count(); ++i)
             {
-                for(zfindex i = 0; i < this->processingMouses.count(); ++i)
-                {
-                    this->ignoredMouses.add(this->processingMouses[i].mouseId);
-                }
-                ZFCoreArrayPOD<_ZFP_ZFUIButtonMouseData> tmp;
-                tmp.copyFrom(this->processingMouses);
-                this->processingMouses.removeAll();
+                this->ignoredMouses.add(this->processingMouses[i].mouseId);
+            }
+            ZFCoreArrayPOD<_ZFP_ZFUIButtonMouseData> tmp = this->processingMouses;
+            this->processingMouses = ZFCoreArrayPOD<_ZFP_ZFUIButtonMouseData>();
 
-                for(zfindex i = 0; i < tmp.count(); ++i)
-                {
-                    const _ZFP_ZFUIButtonMouseData &mouseData = tmp[i];
-                    this->prevMousePointMap.erase(mouseData.mouseId);
-                    _ZFP_ZFUIButtonMouseDataToEvent(event, mouseData);
+            for(zfindex i = 0; i < tmp.count(); ++i)
+            {
+                const _ZFP_ZFUIButtonMouseData &mouseData = tmp[i];
+                this->prevMousePointMap.erase(mouseData.mouseId);
+                _ZFP_ZFUIButtonMouseDataToEvent(event, mouseData);
 
-                    _ZFP_ZFUIButton_DEBUG_EVENT(buttonMouseOnUp)
-                    this->pimplOwner->buttonMouseOnUp(event);
-                }
+                _ZFP_ZFUIButton_DEBUG_EVENT(buttonMouseOnUp)
+                this->pimplOwner->buttonMouseOnUp(event);
             }
         }
     }
@@ -114,30 +95,39 @@ public:
     void buttonStateUpdate(ZF_IN zfbool highlighted)
     {
         this->buttonHighlightedFlag = highlighted;
-        if(this->buttonHighlightedFlag)
+        if(this->buttonEnableFlag)
         {
-            if(this->pimplOwner->buttonChecked())
+            if(this->buttonHighlightedFlag)
             {
-                this->buttonState = ZFUIButtonState::e_CheckedHighlighted;
+                if(this->pimplOwner->buttonChecked())
+                {
+                    this->buttonState = ZFUIButtonState::e_CheckedHighlighted;
+                }
+                else
+                {
+                    this->buttonState = ZFUIButtonState::e_Highlighted;
+                }
+                _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnHighlighted)
+                this->pimplOwner->buttonStateOnUpdate();
             }
             else
             {
-                this->buttonState = ZFUIButtonState::e_Highlighted;
+                if(this->pimplOwner->buttonChecked())
+                {
+                    this->buttonState = ZFUIButtonState::e_Checked;
+                }
+                else
+                {
+                    this->buttonState = ZFUIButtonState::e_Normal;
+                }
+                _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnNormal)
+                this->pimplOwner->buttonStateOnUpdate();
             }
-            _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnHighlighted)
-            this->pimplOwner->buttonStateOnUpdate();
         }
         else
         {
-            if(this->pimplOwner->buttonChecked())
-            {
-                this->buttonState = ZFUIButtonState::e_Checked;
-            }
-            else
-            {
-                this->buttonState = ZFUIButtonState::e_Normal;
-            }
-            _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnNormal)
+            this->buttonState = ZFUIButtonState::e_Disabled;
+            _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnDisabled)
             this->pimplOwner->buttonStateOnUpdate();
         }
     }
@@ -149,7 +139,7 @@ public:
         {
             case ZFUIMouseAction::e_MouseDown:
             {
-                if(!this->buttonEnableCache)
+                if(!this->buttonEnableFlag)
                 {
                     _ZFP_ZFUIButton_DEBUG_LOG("      %s disabled", ZFObjectInfo(mouseEvent).cString())
                     this->ignoredMouses.add(mouseEvent->mouseId);
@@ -211,7 +201,7 @@ public:
                 zfCoreCriticalShouldNotGoHere();
                 return ;
         }
-        mouseEvent->eventResolvedSet(zftrue);
+        mouseEvent->eventResolved(zftrue);
         _ZFP_ZFUIButton_DEBUG_LOG(" end  %s", ZFObjectInfo(mouseEvent).cString())
     }
 
@@ -237,7 +227,7 @@ private:
                     break;
                 }
                 ZFUIPoint &prevMousePoint = prevMousePointMapIt->second;
-                ZFUIRect bounds = ZFUIRectGetBounds(this->pimplOwner->layoutedFrame());
+                ZFUIRect bounds = ZFUIRectGetBounds(this->pimplOwner->viewFrame());
                 zfbool mouseInside = this->buttonClickedInside(bounds, mouseEvent->mousePoint);
                 zfbool mouseInsidePrev = this->buttonClickedInside(bounds, prevMousePoint);
                 prevMousePoint = mouseEvent->mousePoint;
@@ -278,7 +268,7 @@ private:
                 this->prevMousePointMap.erase(prevMousePointMapIt);
 
                 zfbool mouseInside = this->buttonClickedInside(
-                    ZFUIRectGetBounds(this->pimplOwner->layoutedFrame()),
+                    ZFUIRectGetBounds(this->pimplOwner->viewFrame()),
                     mouseEvent->mousePoint);
 
                 this->buttonHighlightedFlag = zffalse;
@@ -288,32 +278,19 @@ private:
                     this->pimplOwner->buttonMouseOnUpInside(mouseEvent);
                     if(this->pimplOwner->buttonCheckable())
                     {
-                        this->pimplOwner->buttonCheckedSet(!this->pimplOwner->buttonChecked());
+                        this->pimplOwner->buttonChecked(!this->pimplOwner->buttonChecked());
                     }
                     else
                     {
-                        this->buttonState = ZFUIButtonState::e_Normal;
-                        _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnNormal)
-                        this->pimplOwner->buttonStateOnUpdate();
+                        this->buttonStateUpdate(this->buttonHighlightedFlag);
                     }
                     this->buttonClicked(mouseEvent);
                 }
                 else
                 {
-                    if(this->pimplOwner->buttonChecked())
-                    {
-                        this->buttonState = ZFUIButtonState::e_Checked;
-                        _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnChecked)
-                        this->pimplOwner->buttonStateOnUpdate();
-                    }
-                    else
-                    {
-                        this->buttonState = ZFUIButtonState::e_Normal;
-                        _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnNormal)
-                        this->pimplOwner->buttonStateOnUpdate();
-                    }
                     _ZFP_ZFUIButton_DEBUG_EVENT(buttonMouseOnUp)
                     this->pimplOwner->buttonMouseOnUp(mouseEvent);
+                    this->buttonStateUpdate(this->buttonHighlightedFlag);
                 }
             }
                 break;
@@ -371,7 +348,7 @@ public:
     , ignoredMouses()
     , processingMouses()
     , prevMousePointMap()
-    , buttonEnableCache(zftrue)
+    , buttonEnableFlag(zftrue)
     , buttonHighlightedFlag(zffalse)
     , buttonLastClickTimestamp(0)
     {
@@ -392,36 +369,36 @@ ZFOBSERVER_EVENT_REGISTER(ZFUIButton, ButtonMouseOnMoveOutside)
 ZFOBSERVER_EVENT_REGISTER(ZFUIButton, ButtonMouseOnUpInside)
 ZFOBSERVER_EVENT_REGISTER(ZFUIButton, ButtonMouseOnUp)
 
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButton, zfbool, buttonEnable)
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButton, zfbool, viewFocusable)
 {
-    d->buttonEnableSet(this->buttonEnable());
+    propertyValue = zftrue;
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButton, zfbool, buttonCheckable)
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButton, ZFUISize, viewSizeMin)
+{
+    propertyValue = ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeButton());
+}
+
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButton, zfbool, buttonEnable)
+{
+    d->buttonEnable(this->buttonEnable());
+}
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButton, zfbool, buttonCheckable)
 {
     if(!this->buttonCheckable() && this->buttonChecked())
     {
-        this->buttonCheckedSet(zffalse);
+        this->buttonChecked(zffalse);
     }
 }
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUIButton, zfbool, buttonChecked)
+ZFPROPERTY_ON_VERIFY_DEFINE(ZFUIButton, zfbool, buttonChecked)
 {
     if(!this->buttonCheckable())
     {
         propertyValue = zffalse;
     }
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButton, zfbool, buttonChecked)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButton, zfbool, buttonChecked)
 {
-    if(this->buttonEnable())
-    {
-        d->buttonStateUpdate(d->buttonHighlightedFlag);
-    }
-    else
-    {
-        d->buttonState = ZFUIButtonState::e_Disabled;
-        _ZFP_ZFUIButton_DEBUG_EVENT(buttonStateOnDisabled)
-        this->buttonStateOnUpdate();
-    }
+    d->buttonStateUpdate(d->buttonHighlightedFlag);
 }
 
 void ZFUIButton::objectOnInit(void)
@@ -429,6 +406,11 @@ void ZFUIButton::objectOnInit(void)
     zfsuper::objectOnInit();
     d = zfpoolNew(_ZFP_ZFUIButtonPrivate);
     d->pimplOwner = this;
+}
+void ZFUIButton::objectOnInitFinish(void)
+{
+    zfsuper::objectOnInitFinish();
+    this->buttonStateOnUpdate();
 }
 void ZFUIButton::objectOnDealloc(void)
 {
@@ -446,8 +428,38 @@ ZFMETHOD_DEFINE_1(ZFUIButton, void, buttonSimulateClick,
                   ZFMP_IN_OPT(ZFUIEvent *, event, zfnull))
 {
     zfCoreAssert(ZFThread::currentThread() == ZFThread::mainThread());
-
+    d->buttonHighlightedFlag = zffalse;
+    if(this->buttonCheckable())
+    {
+        this->buttonChecked(!this->buttonChecked());
+    }
+    else
+    {
+        d->buttonStateUpdate(d->buttonHighlightedFlag);
+    }
     d->buttonClicked(event);
+}
+
+ZFMETHOD_DEFINE_5(ZFUIButton, zfidentity, onClick,
+                  ZFMP_IN(const ZFListener &, observer),
+                  ZFMP_IN_OPT(ZFObject *, userData, zfnull),
+                  ZFMP_IN_OPT(ZFObject *, owner, zfnull),
+                  ZFMP_IN_OPT(zfbool, autoRemoveAfterActivate, zffalse),
+                  ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
+{
+    return this->observerAdd(ZFUIButton::EventButtonOnClick(),
+            observer, userData, owner, autoRemoveAfterActivate, observerLevel
+        );
+}
+ZFMETHOD_DEFINE_4(ZFUIButton, zfidentity, onClickForOnce,
+                  ZFMP_IN(const ZFListener &, observer),
+                  ZFMP_IN_OPT(ZFObject *, userData, zfnull),
+                  ZFMP_IN_OPT(ZFObject *, owner, zfnull),
+                  ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
+{
+    return this->observerAddForOnce(ZFUIButton::EventButtonOnClick(),
+            observer, userData, owner, observerLevel
+        );
 }
 
 void ZFUIButton::viewEventOnMouseEvent(ZF_IN ZFUIMouseEvent *mouseEvent)
@@ -478,7 +490,15 @@ void ZFUIButton::viewEventOnKeyEvent(ZF_IN ZFUIKeyEvent *keyEvent)
                 case ZFUIKeyAction::e_KeyRepeat:
                     break;
                 case ZFUIKeyAction::e_KeyUp:
-                    d->buttonStateUpdate(zffalse);
+                    d->buttonHighlightedFlag = zffalse;
+                    if(this->buttonCheckable())
+                    {
+                        this->buttonChecked(!this->buttonChecked());
+                    }
+                    else
+                    {
+                        d->buttonStateUpdate(d->buttonHighlightedFlag);
+                    }
                     d->buttonClicked(keyEvent);
                     break;
                 case ZFUIKeyAction::e_KeyCancel:
@@ -488,26 +508,16 @@ void ZFUIButton::viewEventOnKeyEvent(ZF_IN ZFUIKeyEvent *keyEvent)
                     zfCoreCriticalShouldNotGoHere();
                     break;
             }
-            keyEvent->eventResolvedSet(zftrue);
+            keyEvent->eventResolved(zftrue);
             break;
         default:
             break;
     }
 }
 
-void ZFUIButton::viewPropertyOnUpdate(void)
-{
-    zfsuper::viewPropertyOnUpdate();
-    this->buttonStateUpdate();
-}
-
 ZFMETHOD_DEFINE_0(ZFUIButton, ZFUIButtonStateEnum, buttonState)
 {
     return d->buttonState;
-}
-ZFMETHOD_DEFINE_0(ZFUIButton, void, buttonStateUpdate)
-{
-    this->buttonStateOnUpdate();
 }
 
 ZF_NAMESPACE_GLOBAL_END

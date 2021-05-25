@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFClassDynamicRegister.h
  * @brief dynamic register a ZFClass
@@ -27,6 +18,10 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *
  * @note dynamic registered contents would be removed automatically
  *   during #ZFFrameworkCleanup as level #ZFLevelZFFrameworkHigh
+ * @note it's ensured safe to unregister class even if
+ *   allocated object instance still exists,
+ *   at this case ZFObject::classData would return parent class
+ *   after the class unregistered
  */
 extern ZF_ENV_EXPORT const ZFClass *ZFClassDynamicRegister(ZF_IN const zfchar *classNameFull,
                                                            ZF_IN_OPT const ZFClass *parent = zfnull,

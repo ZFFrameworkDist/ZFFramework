@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 
 package com.ZFFramework.Android.ZFUIKit_impl;
 
@@ -40,7 +31,7 @@ public class ZFAnimationNativeView {
         public long zfjniPointerOwnerZFAnimationNativeView = 0;
 
         private NativeAnimationListener _animationListener = null;
-        public void nativeAnimationListenerSet(NativeAnimationListener listener) {
+        public void nativeAnimationListener(NativeAnimationListener listener) {
             if(this._animationListener != null) {
                 this._animationListener.nativeAniDetach();
             }
@@ -281,7 +272,7 @@ public class ZFAnimationNativeView {
                                              Object nativeView) {
         NativeAnimation nativeAnimationTmp = (NativeAnimation)nativeAnimation;
         View nativeViewTmp = (View)nativeView;
-        nativeAnimationTmp.nativeAnimationListenerSet(new NativeAnimationListener(nativeAnimationTmp, nativeViewTmp));
+        nativeAnimationTmp.nativeAnimationListener(new NativeAnimationListener(nativeAnimationTmp, nativeViewTmp));
 
         AnimationSet as = null;
         boolean asNeedStart = false;
@@ -324,7 +315,7 @@ public class ZFAnimationNativeView {
     public static void native_nativeAniStop(Object nativeAnimation,
                                             Object nativeView) {
         NativeAnimation nativeAnimationTmp = (NativeAnimation)nativeAnimation;
-        nativeAnimationTmp.nativeAnimationListenerSet(null);
+        nativeAnimationTmp.nativeAnimationListener(null);
         View nativeViewTmp = (View)nativeView;
 
         List<NativeAnimation> attached = _anis.get(nativeViewTmp);

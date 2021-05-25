@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFFileResProcess.h"
 #include "ZFCore/ZFString.h"
@@ -169,7 +160,7 @@ public:
 
     // ============================================================
     // res RW
-    virtual ZFToken resOpen(ZF_IN const zfchar *resPath)
+    virtual void *resOpen(ZF_IN const zfchar *resPath)
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
         _ZFP_ZFProtocolZFFileResProcess_sys_Android_FileToken *d = zfnew(_ZFP_ZFProtocolZFFileResProcess_sys_Android_FileToken);
@@ -197,9 +188,9 @@ public:
         }
         return d;
     }
-    virtual zfbool resClose(ZF_IN ZFToken token)
+    virtual zfbool resClose(ZF_IN void *token)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zffalse;
         }
@@ -209,20 +200,20 @@ public:
         zfdelete(d);
         return zftrue;
     }
-    virtual zfindex resTell(ZF_IN ZFToken token)
+    virtual zfindex resTell(ZF_IN void *token)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zfindexMax();
         }
         _ZFP_ZFProtocolZFFileResProcess_sys_Android_FileToken *d = ZFCastStatic(_ZFP_ZFProtocolZFFileResProcess_sys_Android_FileToken *, token);
         return (AAsset_getLength(d->token) - AAsset_getRemainingLength(d->token));
     }
-    virtual zfbool resSeek(ZF_IN ZFToken token,
+    virtual zfbool resSeek(ZF_IN void *token,
                            ZF_IN zfindex byteSize,
                            ZF_IN_OPT ZFSeekPos position = ZFSeekPosBegin)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zffalse;
         }
@@ -250,11 +241,11 @@ public:
         }
         return (AAsset_seek(d->token, seekSize, seekPos) != -1);
     }
-    virtual zfindex resRead(ZF_IN ZFToken token,
+    virtual zfindex resRead(ZF_IN void *token,
                             ZF_IN void *buf,
                             ZF_IN zfindex maxByteSize)
     {
-        if(token == ZFTokenInvalid() || maxByteSize == 0)
+        if(token == zfnull || maxByteSize == 0)
         {
             return 0;
         }
@@ -275,18 +266,18 @@ public:
         }
         return ret;
     }
-    virtual zfbool resIsEof(ZF_IN ZFToken token)
+    virtual zfbool resIsEof(ZF_IN void *token)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zffalse;
         }
         _ZFP_ZFProtocolZFFileResProcess_sys_Android_FileToken *d = ZFCastStatic(_ZFP_ZFProtocolZFFileResProcess_sys_Android_FileToken *, token);
         return d->isEof;
     }
-    virtual zfbool resIsError(ZF_IN ZFToken token)
+    virtual zfbool resIsError(ZF_IN void *token)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zffalse;
         }
@@ -342,7 +333,7 @@ public:
         jstring jsPath = (jstring)JNIUtilGetObjectArrayElement(jniEnv, d->files, d->curFileIndex);
         ++d->curFileIndex;
         const zfchar *sName = JNIUtilGetStringUTFChars(jniEnv, jsPath, zfnull);
-        zfstring refName = sName;
+        fd.fileName = sName;
         JNIUtilReleaseStringUTFChars(jniEnv, jsPath, sName);
 
         zfstring absPath = this->zfresPrefix;
@@ -352,7 +343,7 @@ public:
             absPath += d->parentPath;
             absPath += ZFFileSeparator();
         }
-        absPath += refName.cString();
+        absPath += fd.fileName.cString();
 
         AAsset *asset = AAssetManager_open(
             AAssetManager_fromJava(jniEnv, ZFImpl_sys_Android_assetManager()),
@@ -366,13 +357,9 @@ public:
         {
             AAsset_close(asset);
             fd.fileIsDir = zffalse;
-            if(zfstringFindReversely(refName, this->zfresPostfix) + this->zfresPostfixLen == refName.length())
+            if(zfstringFindReversely(fd.fileName, this->zfresPostfix) == fd.fileName.length() - this->zfresPostfixLen)
             {
-                fd.fileName.assign(refName.cString(), refName.length() - this->zfresPostfixLen);
-            }
-            else
-            {
-                fd.fileName = refName;
+                fd.fileName.remove(fd.fileName.length() - this->zfresPostfixLen);
             }
         }
 

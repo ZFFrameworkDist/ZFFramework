@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFXml.h
  * @brief protocol for ZFXml
@@ -23,6 +14,20 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * @brief protocol for ZFXml
  */
 ZFPROTOCOL_INTERFACE_BEGIN(ZFXml)
+public:
+    /**
+     * @brief see #ZFXmlEscapeCharEncode
+     */
+    virtual void xmlEscapeCharEncode(ZF_OUT const ZFOutput &dst,
+                                     ZF_IN const zfchar *src,
+                                     ZF_IN_OPT zfindex count = zfindexMax());
+    /**
+     * @brief see #ZFXmlEscapeCharEncode
+     */
+    virtual void xmlEscapeCharDecode(ZF_OUT const ZFOutput &dst,
+                                     ZF_IN const zfchar *src,
+                                     ZF_IN_OPT zfindex count = zfindexMax());
+
 public:
     /**
      * @brief parse xml document
@@ -45,7 +50,7 @@ public:
      *
      * to achieve memory pool logic, impl should:
      * -  supply memory pool token to hold state
-     * -  use #xmlMemoryPool_xmlNameSet/#xmlMemoryPool_xmlValueSet to store data
+     * -  use #xmlMemoryPool_xmlName/#xmlMemoryPool_xmlValue to store data
      * -  implement this method to release reference
      */
     virtual void xmlMemoryPoolRelease(ZF_IN void *token, ZF_IN const zfchar *value)
@@ -55,18 +60,18 @@ public:
 
 public:
     /** @brief see #xmlMemoryPoolRelease */
-    inline void xmlMemoryPool_xmlNameSet(ZF_IN ZFXmlItem &xmlItem,
-                                         ZF_IN const zfchar *xmlName,
-                                         ZF_IN void *token)
+    inline void xmlMemoryPool_xmlName(ZF_IN ZFXmlItem &xmlItem,
+                                      ZF_IN const zfchar *xmlName,
+                                      ZF_IN void *token)
     {
-        xmlItem._ZFP_ZFXml_xmlMemoryPool_xmlNameSet(xmlName, token);
+        xmlItem._ZFP_ZFXml_xmlMemoryPool_xmlName(xmlName, token);
     }
     /** @brief see #xmlMemoryPoolRelease */
-    inline void xmlMemoryPool_xmlValueSet(ZF_IN ZFXmlItem &xmlItem,
-                                          ZF_IN const zfchar *xmlValue,
-                                          ZF_IN void *token)
+    inline void xmlMemoryPool_xmlValue(ZF_IN ZFXmlItem &xmlItem,
+                                       ZF_IN const zfchar *xmlValue,
+                                       ZF_IN void *token)
     {
-        xmlItem._ZFP_ZFXml_xmlMemoryPool_xmlValueSet(xmlValue, token);
+        xmlItem._ZFP_ZFXml_xmlMemoryPool_xmlValue(xmlValue, token);
     }
 ZFPROTOCOL_INTERFACE_END(ZFXml)
 

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreTypeDef_OtherType.h
  * @brief types for ZFFramework
@@ -161,75 +152,34 @@ public:
 
 // ============================================================
 /**
- * @brief converter template typedef
- *
- * example:
- * @code
- *   static const zfint *MyConverter0(zfint const &v)
- *   {
- *       return &v;
- *   }
- *   static zfstring MyConverter1(const zfchar * const &v)
- *   {
- *       return zfstring(v);
- *   }
- *
- *   ZFTypeConverter<zfint, const zfint *>::TypeConverter converter0 = MyConverter0;
- *   zfint src0 = ...;
- *   const zfint *dst0 = ...;
- *   dst0 = converter0(src0);
- *
- *   ZFTypeConverter<const zfchar *, zfstring>::TypeConverter converter1 = MyConverter1;
- *   const zfchar *src1 = ...;
- *   zfstring dst0 = ...;
- *   dst1 = converter1(src1);
- * @endcode
- */
-template<typename T_Src, typename T_Dst>
-zfclassNotPOD ZFTypeConverter
-{
-public:
-    /**
-     * @brief see #ZFTypeConverter
-     */
-    typedef T_Dst (*TypeConverter)(ZF_IN T_Src const &);
-};
-
-/**
- * @brief dummy type converter that return the src itself
- */
-template<typename T_Type>
-T_Type ZFTypeConverterDummy(ZF_IN T_Type const &src)
-{
-    return src;
-}
-
-// ============================================================
-/**
- * @brief base type for info getter
- */
-template<typename T_Element>
-zfclassNotPOD ZF_ENV_EXPORT ZFCoreInfoGetter
-{
-public:
-    /** @brief see #ZFCoreInfoGetter */
-    typedef void (*InfoGetter)(ZF_IN_OUT zfstring &ret, ZF_IN T_Element const &v);
-};
-
-/**
  * @brief string if the content info not available
  */
 #define ZFTOKEN_ZFCoreInfoGetterNotAvailable "N/A"
 
-// ============================================================
 /**
- * @brief dummy token holder for generic type
+ * @brief generic info getter
+ *
+ * use #ZFOUTPUT_TYPE to declare for your own type
  */
-typedef void *ZFToken;
-/**
- * @brief invalid #ZFToken
- */
-#define ZFTokenInvalid() zfnull
+template<typename T_Element, typename T_ReservedFix = void>
+zfclassNotPOD ZF_ENV_EXPORT ZFCoreInfoGetter
+{
+public:
+    /** @brief see #ZFCoreInfoGetter */
+    static void InfoGetter(ZF_IN_OUT zfstring &ret, ZF_IN T_Element const &v)
+    {
+        ret += ZFTOKEN_ZFCoreInfoGetterNotAvailable;
+    }
+};
+
+/** @brief type for #ZFCoreInfoGetter */
+template<typename T_Element>
+zfclassNotPOD ZF_ENV_EXPORT ZFCoreInfoGetterType
+{
+public:
+    /** @brief type for #ZFCoreInfoGetter */
+    typedef void (*InfoGetter)(ZF_IN_OUT zfstring &ret, ZF_IN T_Element const &v);
+};
 
 // ============================================================
 /**

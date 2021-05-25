@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWebKit_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,14 +18,14 @@ protected:
 
         zfblockedAlloc(ZFUIWebView, testView);
         container->childAdd(testView);
-        testView->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
-        testView->layoutParam()->layoutMarginSet(ZFUIMarginMake(40));
-        testView->viewBackgroundColorSet(ZFUIColorRed());
+        testView->layoutParam()->sizeParam(ZFUISizeParamFillFill());
+        testView->layoutParam()->layoutMargin(ZFUIMarginMake(40));
+        testView->viewBackgroundColor(ZFUIColorRed());
 
         this->prepareSettingButton(window, testView);
 
         ZFLISTENER_LOCAL(loadStateOnChange, {
-            zfLogTrimT() << "webLoadingOnChange" << listenerData.sender->to<ZFUIWebView *>()->webLoading();
+            zfLogTrimT() << "webLoadingOnChange" << listenerData.sender<ZFUIWebView *>()->webLoading();
         })
         testView->observerAdd(ZFUIWebView::EventWebLoadStateOnChange(), loadStateOnChange);
 
@@ -45,7 +36,7 @@ private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIWebView *testView)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingButtonWithTestWindow(window, settings);
     }

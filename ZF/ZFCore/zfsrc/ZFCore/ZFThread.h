@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFThread.h
  * @brief thread utility
@@ -25,9 +16,9 @@ zfclassFwd _ZFP_ZFThreadPrivate;
  *
  * you can use thread by one of these method:
  * -  inherit from ZFThread and override ZFThread::threadOnRun
- * -  declare a callback and set as thread's run loop by #ZFThread::threadRunnableSet
+ * -  declare a callback and set as thread's run loop by #ZFThread::threadRunnable
  *
- * @note try to use ZFThreadExecuteInNewThread is recommended, since it may have thread pool
+ * @note try to use ZFExecuteInNewThread is recommended, since it may have thread pool
  */
 zfclass ZF_ENV_EXPORT ZFThread : zfextends ZFObject
 {
@@ -39,21 +30,18 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0/param1 is the params passed to the thread,
      * called in the same thread of the thread task
      */
     ZFOBSERVER_EVENT(ThreadOnStart)
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0/param1 is the params passed to the thread,
      * called in the same thread of the thread task
      */
     ZFOBSERVER_EVENT(ThreadOnStop)
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0/param1 is the params passed to the thread,
      * called in the same thread that cancel the task
      */
     ZFOBSERVER_EVENT(ThreadOnCancel)
@@ -71,37 +59,32 @@ public:
      * you must take good care when calling this method\n
      * main thread has no need to register
      */
-    ZFMETHOD_DECLARE_DETAIL_0(public, ZFMethodTypeStatic,
-                              void *, nativeThreadRegister)
+    ZFMETHOD_DECLARE_STATIC_0(void *, nativeThreadRegister)
     /**
      * @brief see #nativeThreadRegister
      *
      * it's safe to unregister in different thread using token
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              void, nativeThreadUnregister,
+    ZFMETHOD_DECLARE_STATIC_1(void, nativeThreadUnregister,
                               ZFMP_IN(void *, token))
 
 public:
     /**
      * @brief return main thread
      */
-    ZFMETHOD_DECLARE_DETAIL_0(public, ZFMethodTypeStatic,
-                              ZFThread *, mainThread)
+    ZFMETHOD_DECLARE_STATIC_0(ZFThread *, mainThread)
     /**
      * @brief return current thread,
      *   or zfnull if thread isn't started or registered by ZFThread
      *   or not registered by #ZFThread::nativeThreadRegister
      */
-    ZFMETHOD_DECLARE_DETAIL_0(public, ZFMethodTypeStatic,
-                              ZFThread *, currentThread)
+    ZFMETHOD_DECLARE_STATIC_0(ZFThread *, currentThread)
 
     /**
      * @brief make current thread sleep for miliSecs,
      *   note this method may be not accurate
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              void, sleep,
+    ZFMETHOD_DECLARE_STATIC_1(void, sleep,
                               ZFMP_IN(zftimet, miliSecs))
 
     // ============================================================
@@ -110,12 +93,7 @@ protected:
     /**
      * @brief init from listener
      */
-    ZFOBJECT_ON_INIT_INLINE_1(ZFMP_IN(const ZFListener &, runnable))
-    {
-        this->objectOnInit();
-        zfself::threadRunnableSet(runnable);
-    }
-
+    ZFOBJECT_ON_INIT_DECLARE_1(ZFMP_IN(const ZFListener &, runnable))
     zfoverride
     virtual void objectOnInit(void);
     zfoverride
@@ -142,10 +120,8 @@ public:
     /**
      * @brief start thread, do nothing if already started
      */
-    ZFMETHOD_DECLARE_3(void, threadStart,
-                       ZFMP_IN_OPT(ZFObject *, userData, zfnull),
-                       ZFMP_IN_OPT(ZFObject *, param0, zfnull),
-                       ZFMP_IN_OPT(ZFObject *, param1, zfnull))
+    ZFMETHOD_DECLARE_1(void, threadStart,
+                       ZFMP_IN_OPT(ZFObject *, userData, zfnull))
     /**
      * @brief return true if start is called and hasn't been stopped or end
      */
@@ -214,39 +190,38 @@ protected:
      *
      * see #threadRunnable
      */
-    ZFMETHOD_DECLARE_DETAIL_2(protected, ZFMethodTypeVirtual,
-                              void, threadOnRun,
-                              ZFMP_IN_OUT(ZFListenerData &, listenerData),
-                              ZFMP_IN(ZFObject *, userData))
+    ZFMETHOD_DECLARE_PROTECTED_2(void, threadOnRun,
+                                 ZFMP_IN(const ZFListenerData &, listenerData),
+                                 ZFMP_IN(ZFObject *, userData))
 
 public:
-    zffinal void _ZFP_ZFThread_threadOnStart(ZF_IN ZFObject *param0, ZF_IN ZFObject *param1)
+    zffinal void _ZFP_ZFThread_threadOnStart(void)
     {
-        this->threadOnStart(param0, param1);
+        this->threadOnStart();
     }
-    zffinal void _ZFP_ZFThread_threadOnStop(ZF_IN ZFObject *param0, ZF_IN ZFObject *param1)
+    zffinal void _ZFP_ZFThread_threadOnStop(void)
     {
-        this->threadOnStop(param0, param1);
+        this->threadOnStop();
     }
-    zffinal void _ZFP_ZFThread_threadOnCancel(ZF_IN ZFObject *param0, ZF_IN ZFObject *param1)
+    zffinal void _ZFP_ZFThread_threadOnCancel(void)
     {
-        this->threadOnCancel(param0, param1);
+        this->threadOnCancel();
     }
 protected:
     /** @brief see #EventThreadOnStart */
-    virtual inline void threadOnStart(ZF_IN ZFObject *param0, ZF_IN ZFObject *param1)
+    virtual inline void threadOnStart(void)
     {
-        this->observerNotify(ZFThread::EventThreadOnStart(), param0, param1);
+        this->observerNotify(ZFThread::EventThreadOnStart());
     }
     /** @brief see #EventThreadOnStop */
-    virtual inline void threadOnStop(ZF_IN ZFObject *param0, ZF_IN ZFObject *param1)
+    virtual inline void threadOnStop(void)
     {
-        this->observerNotify(ZFThread::EventThreadOnStop(), param0, param1);
+        this->observerNotify(ZFThread::EventThreadOnStop());
     }
     /** @brief see #EventThreadOnCancel */
-    virtual inline void threadOnCancel(ZF_IN ZFObject *param0, ZF_IN ZFObject *param1)
+    virtual inline void threadOnCancel(void)
     {
-        this->observerNotify(ZFThread::EventThreadOnCancel(), param0, param1);
+        this->observerNotify(ZFThread::EventThreadOnCancel());
     }
 
 public:

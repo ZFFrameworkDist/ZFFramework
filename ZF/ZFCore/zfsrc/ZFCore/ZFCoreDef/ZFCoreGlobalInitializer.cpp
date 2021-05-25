@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCoreGlobalInitializer.h"
 #include "ZFCoreMutex.h"
 #include "ZFCorePointer.h"
@@ -609,13 +600,13 @@ static void _ZFP_GI_dataUnregister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
     zfstring key;
     _ZFP_GI_keyForName(key, name, level);
 
-    zfiterator it = dataMap.iteratorForKey(key.cString());
-    if(!dataMap.iteratorIsValid(it))
+    zfiterator it = dataMap.iteratorFind(key.cString());
+    if(!dataMap.iteratorValid(it))
     {
         zfCoreCriticalShouldNotGoHere();
         return ;
     }
-    _ZFP_GI_Data *data = dataMap.iteratorGetValue<_ZFP_GI_Data *>(it);
+    _ZFP_GI_Data *data = dataMap.iteratorValue<_ZFP_GI_Data *>(it);
     data->ZFCoreLibDestroyFlag.removeElement(ZFCoreLibDestroyFlag);
     --(data->refCount);
     if(data->refCount == 0)

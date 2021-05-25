@@ -1,19 +1,10 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-zfclass ZFUIWidget_ZFUIPage_test_Page : zfextends ZFUIPageBasic
+zfclass ZFUIWidget_ZFUIPage_test_Page : zfextends ZFUIPage
 {
-    ZFOBJECT_DECLARE(ZFUIWidget_ZFUIPage_test_Page, ZFUIPageBasic)
+    ZFOBJECT_DECLARE(ZFUIWidget_ZFUIPage_test_Page, ZFUIPage)
 
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUILinearLayout *, _titleView, zflineAlloc(ZFUILinearLayout))
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUIButtonBasic *, _titleLeftView, zflineAlloc(ZFUIButtonBasic))
@@ -24,18 +15,20 @@ protected:
     zfoverride
     virtual void pageOnCreate(void)
     {
+        this->pageViewClass(ZFUILinearLayout::ClassData());
         zfsuper::pageOnCreate();
+        this->pageView()->to<ZFUILinearLayout *>()->layoutOrientation(ZFUIOrientation::e_Top);
 
-        this->pageContainer()->childAdd(this->_titleView());
-        this->_titleView()->layoutParam()->sizeParamSet(ZFUISizeParamFillWrap());
-        this->_titleView()->viewBackgroundColorSet(ZFUIColorRandom());
-        this->_titleView()->layoutOrientationSet(ZFUIOrientation::e_Left);
-        this->_titleView()->viewSizeMinSet(ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeButton()));
+        this->pageView()->childAdd(this->_titleView());
+        this->_titleView()->layoutParam()->sizeParam(ZFUISizeParamFillWrap());
+        this->_titleView()->viewBackgroundColor(ZFUIColorRandom());
+        this->_titleView()->layoutOrientation(ZFUIOrientation::e_Left);
+        this->_titleView()->viewSizeMin(ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeButton()));
 
         this->_titleView()->childAdd(this->_titleLeftView());
-        this->_titleLeftView()->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(1);
-        this->_titleLeftView()->buttonLabelTextSet("back");
-        this->_titleLeftView()->viewBackgroundColorSet(ZFUIColorRandom());
+        this->_titleLeftView()->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(1);
+        this->_titleLeftView()->buttonLabelText("back");
+        this->_titleLeftView()->viewBackgroundColor(ZFUIColorRandom());
         {
             ZFLISTENER_LOCAL(_titleLeftViewOnClick, {
                 userData->objectHolded<ZFUIPage *>()->pageDestroy();
@@ -44,20 +37,21 @@ protected:
         }
 
         this->_titleView()->childAdd(this->_titleCenterView());
-        this->_titleCenterView()->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(3);
-        this->_titleCenterView()->textSet(zfstringWithFormat("page %p", this));
-        this->_titleCenterView()->textAlignSet(ZFUIAlign::e_Center);
+        this->_titleCenterView()->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(3);
+        this->_titleCenterView()->text(zfstringWithFormat("page %p", this));
+        this->_titleCenterView()->textAlign(ZFUIAlign::e_Center);
 
-        this->pageContainer()->childAdd(this->_contentView());
-        this->_contentView()->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
-        this->_contentView()->viewBackgroundColorSet(ZFUIColorRandom());
-        this->_contentView()->buttonLabelTextSet(zfstringWithFormat("belong to %s", this->pageGroupId().cString()));
+        this->pageView()->childAdd(this->_contentView());
+        this->_contentView()->layoutParam()->sizeParam(ZFUISizeParamFillFill());
+        this->_contentView()->viewBackgroundColor(ZFUIColorRandom());
+        this->_contentView()->buttonLabelText(zfstringWithFormat("belong to %s", this->pageGroupId().cString()));
         {
             ZFLISTENER_LOCAL(_contentViewOnClick, {
                 ZFUIPage *page = userData->objectHolded();
-                page->pageManager()->requestPageCreate(ZFUIPageRequestPageCreateParam()
-                    .pageSet(zflineAlloc(zfself))
-                    .pageGroupIdSet(page->pageGroupId()));
+                zfblockedAlloc(ZFUIWidget_ZFUIPage_test_Page, newPage);
+                newPage->pageGroupId(page->pageGroupId());
+                page->pageManager()->pageCreate(newPage);
+                page->pageView()->viewId(zfstringWithFormat("%s:%p", page->pageGroupId().cString(), page));
             })
             this->_contentView()->observerAdd(ZFUIButton::EventButtonOnClick(), _contentViewOnClick, this->objectHolder());
         }
@@ -78,107 +72,112 @@ protected:
         zfindex index = this->pageManager()->pageList().find(this->pageGroupId().cString(), zfself::pageFindFirstByPageGroupId);
         if(index != zfindexMax() && this->pageManager()->pageAtIndex(index) != this)
         {
-            this->_titleLeftView()->viewVisibleSet(zftrue);
+            this->_titleLeftView()->viewVisible(zftrue);
         }
         else
         {
-            this->_titleLeftView()->viewVisibleSet(zffalse);
+            this->_titleLeftView()->viewVisible(zffalse);
         }
     }
+    zfoverride
+    virtual void pageAniOnPrepare(ZF_IN ZFEnum *resumeOrPauseReason, ZF_IN ZFUIPage *siblingPage)
+    {
+        ZFUIPageAniPrepareForSlide(this, resumeOrPauseReason, siblingPage);
+    }
 };
-zfclass ZFUIWidget_ZFUIPage_test_PageManager : zfextends ZFUIPageManagerBasic
+zfclass ZFUIWidget_ZFUIPage_test_PageManager : zfextends ZFUIPageManager
 {
-    ZFOBJECT_DECLARE(ZFUIWidget_ZFUIPage_test_PageManager, ZFUIPageManagerBasic)
+    ZFOBJECT_DECLARE(ZFUIWidget_ZFUIPage_test_PageManager, ZFUIPageManager)
 
-    ZFPROPERTY_RETAIN_WITH_INIT(ZFUIView *, _pageContainer, zflineAlloc(ZFUIView))
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUILinearLayout *, _buttonLayout, zflineAlloc(ZFUILinearLayout))
 
 protected:
     zfoverride
     virtual void managerOnCreate(void)
     {
+        this->managerContainerClass(ZFUILinearLayout::ClassData());
         zfsuper::managerOnCreate();
 
-        this->pageContainerSet(this->_pageContainer());
-
-        this->managerContainer()->childAdd(this->_pageContainer());
-        this->_pageContainer()->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
-        this->_pageContainer()->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(1);
+        this->managerContainer()->to<ZFUILinearLayout *>()->layoutOrientation(ZFUIOrientation::e_Top);
+        this->pageContainer()->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(1);
 
         this->managerContainer()->childAdd(this->_buttonLayout());
-        this->_buttonLayout()->layoutParam()->sizeParamSet(ZFUISizeParamFillWrap());
-        this->_buttonLayout()->layoutOrientationSet(ZFUIOrientation::e_Left);
+        this->_buttonLayout()->layoutParam()->sizeParam(ZFUISizeParamFillWrap());
+        this->_buttonLayout()->layoutOrientation(ZFUIOrientation::e_Left);
 
         for(zfindex i = 0; i < 4; ++i)
         {
-            zfblockedAlloc(ZFString, pageGroupId, zfstringWithFormat("pageGroup %zi", i));
-
-            this->requestPageCreate(ZFUIPageRequestPageCreateParam()
-                .pageSet(zflineAlloc(ZFUIWidget_ZFUIPage_test_Page))
-                .pageGroupIdSet(pageGroupId->stringValue())
-                .pageAutoResumeSet(zffalse));
+            zfblockedAlloc(v_zfstring, pageGroupId, zfstringWithFormat("pageGroup %zi", i));
 
             zfblockedAlloc(ZFUIButtonBasic, button);
             this->_buttonLayout()->childAdd(button);
-            button->layoutParam<ZFUILinearLayoutParam *>()->layoutWeightSet(1);
-            button->buttonLabelTextSet(zfstringWithFormat("tab %zi", i));
-            button->buttonCheckableSet(zftrue);
-            ZFLISTENER_LOCAL(buttonOnClick, {
-                ZFUIWidget_ZFUIPage_test_PageManager *pageManager = userData->tagGet("pageManager")->objectHolded();
-                ZFString *pageGroupId = userData->tagGet<ZFString *>("pageGroupId");
+            button->layoutParam<ZFUILinearLayoutParam *>()->layoutWeight(1);
+            button->buttonLabelText(zfstringWithFormat("tab %zi", i));
+            button->buttonCheckable(zftrue);
+            ZFLISTENER_LOCAL_BEGIN(buttonOnClick)
+            {
+                ZFUIWidget_ZFUIPage_test_PageManager *pageManager = userData->objectTag("pageManager")->objectHolded();
+                v_zfstring *pageGroupId = userData->objectTag<v_zfstring *>("pageGroupId");
 
-                if(!listenerData.sender->to<ZFUIButton *>()->buttonChecked())
-                {
-                    listenerData.sender->to<ZFUIButton *>()->buttonCheckedSet(zftrue);
+                if(!listenerData.sender<ZFUIButton *>()->buttonChecked())
+                { // click checked tab
+                    listenerData.sender<ZFUIButton *>()->buttonChecked(zftrue);
 
-                    zfbool first = zftrue;
-                    for(zfindex i = 0; i < pageManager->pageCount(); ++i)
+                    ZFCoreArrayPOD<ZFUIPage *> pageToDestroy;
+                    for(zfindex i = pageManager->pageCount() - 1; i != zfindexMax(); --i)
                     {
-                        if(pageManager->pageAtIndex(i)->pageGroupId().compare(pageGroupId->stringValue()) == 0)
+                        if(pageManager->pageAtIndex(i)->pageGroupId().compare(pageGroupId->zfv) == 0)
                         {
-                            if(first)
-                            {
-                                first = zffalse;
-                            }
-                            else
-                            {
-                                pageManager->pageAtIndex(i)->pageDestroy();
-                            }
+                            pageToDestroy.add(pageManager->pageAtIndex(i));
                         }
                     }
+                    if(pageToDestroy.count() > 1)
+                    {
+                        for(zfindex i = pageToDestroy.count() - 2; i != zfindexMax(); --i)
+                        {
+                            pageToDestroy[i]->pageDestroy();
+                        }
+                    }
+                }
+                else if(pageManager->pageListForGroupId(pageGroupId->zfv).isEmpty())
+                {
+                    zfblockedAlloc(ZFUIWidget_ZFUIPage_test_Page, page);
+                    page->pageGroupId(pageGroupId->zfv);
+                    pageManager->pageCreate(page);
+                    page->pageView()->viewId(zfstringWithFormat("%s:%p", page->pageGroupId().cString(), page));
                 }
                 else
                 {
                     for(zfindex i = 0; i < pageManager->_buttonLayout()->childCount(); ++i)
                     {
                         ZFUIButton *button = pageManager->_buttonLayout()->childAtIndex(i)->toAny();
-                        button->buttonCheckedSet(zffalse);
+                        button->buttonChecked(zffalse);
                     }
-                    listenerData.sender->to<ZFUIButton *>()->buttonCheckedSet(zftrue);
+                    listenerData.sender<ZFUIButton *>()->buttonChecked(zftrue);
 
                     zfblockedAlloc(ZFAnimationNativeView, resumeAni);
-                    resumeAni->aniScaleXFromSet(0.8f);
-                    resumeAni->aniScaleYFromSet(0.8f);
-                    resumeAni->aniAlphaFromSet(0.5f);
+                    resumeAni->aniScaleXFrom(0.8f);
+                    resumeAni->aniScaleYFrom(0.8f);
+                    resumeAni->aniAlphaFrom(0.5f);
                     zfblockedAlloc(ZFAnimationNativeView, pauseAni);
-                    pauseAni->aniAlphaToSet(0);
-                    pageManager->pageAniOverrideForOnce(resumeAni, pauseAni);
+                    pauseAni->aniAlphaTo(0);
+                    pageManager->pageAniOverride(resumeAni, pauseAni);
 
-                    pageManager->requestPageGroupResume(pageGroupId->stringValue());
+                    pageManager->pageResumeForGroupId(pageGroupId->zfv);
                 }
-            })
+            }
+            ZFLISTENER_LOCAL_END(buttonOnClick)
             zfblockedAlloc(ZFObject, userData);
-            userData->tagSet("pageManager", this->objectHolder());
-            userData->tagSet("pageGroupId", pageGroupId);
+            userData->objectTag("pageManager", this->objectHolder());
+            userData->objectTag("pageGroupId", pageGroupId);
             button->observerAdd(ZFUIButton::EventButtonOnClick(), buttonOnClick, userData);
             zffloat r = zfmRand(255) / 255.0f;
             zffloat g = zfmRand(255) / 255.0f;
             zffloat b = zfmRand(255) / 255.0f;
-            button->buttonBackgroundStyleNormal()->imageSet(ZFUIImageLoadFromColor(ZFUIColorMake(r, g, b, 0.25f)));
-            button->buttonBackgroundStyleHighlighted()->imageSet(ZFUIImageLoadFromColor(ZFUIColorMake(r, g, b)));
+            button->buttonBackgroundStyleNormal()->image(ZFUIImageLoadFromColor(ZFUIColorMake(r, g, b, 0.25f)));
+            button->buttonBackgroundStyleHighlighted()->image(ZFUIImageLoadFromColor(ZFUIColorMake(r, g, b)));
         }
-        this->pageAniOverrideForOnce(zfnull, zfnull);
-        this->_buttonLayout()->childAtIndex(0)->to<ZFUIButton *>()->buttonCheckedSet(zftrue);
+        this->_buttonLayout()->childAtIndex(0)->to<ZFUIButton *>()->buttonSimulateClick();
     }
 };
 
@@ -187,7 +186,7 @@ zfclass ZFUIWidget_ZFUIPage_test : zfextends ZFFramework_test_TestCase
     ZFOBJECT_DECLARE(ZFUIWidget_ZFUIPage_test, ZFFramework_test_TestCase)
 
 private:
-    ZFUIPageManagerBasic *_pageManager;
+    ZFUIPageManager *_pageManager;
 
 protected:
     zfoverride
@@ -201,18 +200,18 @@ protected:
         ZFUIKit_test_prepareTestWindow(window, container, this);
 
         this->_pageManager = zfAlloc(ZFUIWidget_ZFUIPage_test_PageManager);
-        this->_pageManager->embededCreate();
+        this->_pageManager->managerCreate();
         container->childAdd(this->_pageManager->managerContainer(), ZFUISizeParamFillFill());
-        this->_pageManager->managerContainer()->layoutParam()->layoutMarginSet(ZFUIMarginMake(20));
-        this->_pageManager->embededResume();
+        this->_pageManager->managerContainer()->layoutParam()->layoutMargin(ZFUIMarginMake(20));
+        this->_pageManager->managerResume();
 
         this->prepareSettingButton(window, this->_pageManager);
     }
     zfoverride
     virtual void testCaseOnStop(ZF_IN ZFResultTypeEnum testCaseResult)
     {
-        this->_pageManager->embededPause();
-        this->_pageManager->embededDestroy();
+        this->_pageManager->managerPause();
+        this->_pageManager->managerDestroy();
         zfRelease(this->_pageManager);
         this->_pageManager = zfnull;
         zfsuper::testCaseOnStop(testCaseResult);
@@ -220,9 +219,9 @@ protected:
 
 private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
-                              ZF_IN ZFUIPageManagerBasic *pageManager)
+                              ZF_IN ZFUIPageManager *pageManager)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingButtonWithTestWindow(window, settings);
     }

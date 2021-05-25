@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIViewUtil.h
  * @brief utils for ZFUIView
@@ -56,7 +47,7 @@ ZFMETHOD_FUNC_DECLARE_5(ZFUIView *, viewChildAt,
  * unlike #ZFUIViewPositionOnScreen,
  * this method does not depends on impl,
  * however, result may be invalid if view's parent contains #ZFUINativeViewWrapper\n
- * this method would calculate rect depends on #ZFUIView::layoutedFrameFixed recursively
+ * this method would calculate rect depends on #ZFUIView::layoutChildOffset recursively
  */
 ZFMETHOD_FUNC_DECLARE_3(void, viewRectToParent,
                         ZFMP_OUT(ZFUIRect &, rect),

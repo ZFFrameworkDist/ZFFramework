@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUITextView.h"
 
@@ -16,7 +7,7 @@
 @property (nonatomic, assign) ZFPROTOCOL_INTERFACE_CLASS(ZFUITextView) *impl;
 @property (nonatomic, assign) ZFUITextView *ownerZFUITextView;
 @property (nonatomic, strong) NSString *fontName;
-@property (nonatomic, assign) zfint textSize;
+@property (nonatomic, assign) zffloat textSize;
 @end
 @implementation _ZFP_ZFUITextViewImpl_sys_iOS_TextView
 // ============================================================
@@ -41,7 +32,7 @@
 {
     self.fontName = nil;
 }
-- (void)setTextSize:(zfint)newTextSize ZFImpl_sys_iOS_overrideProperty
+- (void)setTextSize:(zffloat)newTextSize ZFImpl_sys_iOS_overrideProperty
 {
     if(self->_textSize != newTextSize)
     {
@@ -71,14 +62,14 @@ public:
 // ============================================================
 // properties
 public:
-    virtual void textSet(ZF_IN ZFUITextView *textView,
-                         ZF_IN const zfchar *text)
+    virtual void text(ZF_IN ZFUITextView *textView,
+                      ZF_IN const zfchar *text)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
         nativeImplView.text = ZFImpl_sys_iOS_zfstringToNSString(text);
     }
-    virtual void textAppearanceSet(ZF_IN ZFUITextView *textView,
-                                   ZF_IN ZFUITextAppearanceEnum const &textAppearance)
+    virtual void textAppearance(ZF_IN ZFUITextView *textView,
+                                ZF_IN ZFUITextAppearanceEnum const &textAppearance)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
         switch(textAppearance)
@@ -105,8 +96,8 @@ public:
         }
         nativeImplView.font = [UIFont fontWithName:nativeImplView.fontName size:nativeImplView.textSize];
     }
-    virtual void textAlignSet(ZF_IN ZFUITextView *textView,
-                              ZF_IN ZFUIAlignFlags const &textAlign)
+    virtual void textAlign(ZF_IN ZFUITextView *textView,
+                           ZF_IN ZFUIAlignFlags const &textAlign)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
         if(ZFBitTest(textAlign, ZFUIAlign::e_LeftInner))
@@ -126,47 +117,47 @@ public:
             nativeImplView.textAlignment = NSTextAlignmentLeft;
         }
     }
-    virtual void textColorSet(ZF_IN ZFUITextView *textView,
-                              ZF_IN ZFUIColor const &textColor)
+    virtual void textColor(ZF_IN ZFUITextView *textView,
+                           ZF_IN ZFUIColor const &textColor)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
-        nativeImplView.textColor = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorToUIColor(textColor);
+        nativeImplView.textColor = ZFImpl_sys_iOS_ZFUIColorToUIColor(textColor);
     }
-    virtual void textShadowColorSet(ZF_IN ZFUITextView *textView,
-                                    ZF_IN ZFUIColor const &textShadowColor)
+    virtual void textShadowColor(ZF_IN ZFUITextView *textView,
+                                 ZF_IN ZFUIColor const &textShadowColor)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
-        nativeImplView.shadowColor = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorToUIColor(textShadowColor);
+        nativeImplView.shadowColor = ZFImpl_sys_iOS_ZFUIColorToUIColor(textShadowColor);
     }
-    virtual void textShadowOffsetSet(ZF_IN ZFUITextView *textView,
-                                     ZF_IN ZFUISize const &textShadowOffset)
+    virtual void textShadowOffset(ZF_IN ZFUITextView *textView,
+                                  ZF_IN ZFUISize const &textShadowOffset)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
-        nativeImplView.shadowOffset = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeToCGSize(textShadowOffset);
+        nativeImplView.shadowOffset = ZFImpl_sys_iOS_ZFUISizeToCGSize(textShadowOffset);
     }
-    virtual void textSizeSet(ZF_IN ZFUITextView *textView,
-                             ZF_IN zfint textSize)
+    virtual void textSize(ZF_IN ZFUITextView *textView,
+                          ZF_IN zffloat textSize)
     {
         // changed during layoutNativeTextView
     }
-    virtual void textSizeAutoChangeMinSizeSet(ZF_IN ZFUITextView *textView,
-                                              ZF_IN zfint textSizeAutoChangeMinSize)
+    virtual void textSizeAutoChangeMinSize(ZF_IN ZFUITextView *textView,
+                                           ZF_IN zffloat textSizeAutoChangeMinSize)
     {
         // changed during layoutNativeTextView
     }
-    virtual void textSizeAutoChangeMaxSizeSet(ZF_IN ZFUITextView *textView,
-                                              ZF_IN zfint textSizeAutoChangeMaxSize)
+    virtual void textSizeAutoChangeMaxSize(ZF_IN ZFUITextView *textView,
+                                           ZF_IN zffloat textSizeAutoChangeMaxSize)
     {
         // changed during layoutNativeTextView
     }
-    virtual void textSingleLineSet(ZF_IN ZFUITextView *textView,
-                                   ZF_IN zfbool textSingleLine)
+    virtual void textSingleLine(ZF_IN ZFUITextView *textView,
+                                ZF_IN zfbool textSingleLine)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
         nativeImplView.numberOfLines = (textSingleLine ? 1 : 0);
     }
-    virtual void textTruncateModeSet(ZF_IN ZFUITextView *textView,
-                                     ZF_IN ZFUITextTruncateModeEnum const &textTruncateMode)
+    virtual void textTruncateMode(ZF_IN ZFUITextView *textView,
+                                  ZF_IN ZFUITextTruncateModeEnum const &textTruncateMode)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
         switch(textTruncateMode)
@@ -194,10 +185,10 @@ public:
 public:
     virtual ZFUISize measureNativeTextView(ZF_IN ZFUITextView *textView,
                                            ZF_IN const ZFUISize &sizeHint,
-                                           ZF_IN zfint textSize)
+                                           ZF_IN zffloat textSize)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
-        CGSize sizeHintTmp = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeToCGSize(sizeHint);
+        CGSize sizeHintTmp = ZFImpl_sys_iOS_ZFUISizeToCGSize(sizeHint);
         if(sizeHintTmp.width <= 0)
         {
             sizeHintTmp.width = 30000;
@@ -212,15 +203,15 @@ public:
         }
         else
         {
-            zfint textSizeSaved = nativeImplView.textSize;
+            zffloat textSizeSaved = nativeImplView.textSize;
             nativeImplView.textSize = textSize;
             sizeHintTmp = [nativeImplView sizeThatFits:sizeHintTmp];
             nativeImplView.textSize = textSizeSaved;
         }
-        return ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeFromCGSize(sizeHintTmp);
+        return ZFImpl_sys_iOS_ZFUISizeFromCGSize(sizeHintTmp);
     }
 
-    virtual zfint textSizeCurrent(ZF_IN ZFUITextView *textView)
+    virtual zffloat textSizeCurrent(ZF_IN ZFUITextView *textView)
     {
         return ((__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView()).textSize;
     }
@@ -229,7 +220,7 @@ public:
                                       ZF_IN const ZFUISize &viewSize)
     {
         _ZFP_ZFUITextViewImpl_sys_iOS_TextView *nativeImplView = (__bridge _ZFP_ZFUITextViewImpl_sys_iOS_TextView *)textView->nativeImplView();
-        zfint fixedTextSize = this->calcTextSizeAutoChange(textView, viewSize);
+        zffloat fixedTextSize = this->calcTextSizeAutoChange(textView, viewSize);
         nativeImplView.textSize = fixedTextSize;
     }
 ZFPROTOCOL_IMPLEMENTATION_END(ZFUITextViewImpl_sys_iOS)

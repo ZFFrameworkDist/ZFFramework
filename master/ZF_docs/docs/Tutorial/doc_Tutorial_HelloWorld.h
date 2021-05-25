@@ -8,11 +8,10 @@
  *   #include "ZFCore.h"
  *
  *   // declare app's main entry
- *   ZFMAIN_ENTRY(params)
+ *   ZFMAIN_ENTRY()
  *   {
  *       // well, hello world to ZFFramework
  *       zfLogT() << "hello world";
- *       return 0;
  *   }
  * @endcode
  *

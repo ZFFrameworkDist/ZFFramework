@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Qt_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFThreadTaskRequest.h"
 
@@ -24,8 +15,8 @@ public:
     {
         ZFListenerHolder *task = zfAlloc(ZFListenerHolder);
         task->runnable = runnable;
-        task->listenerData.param0Set(param0);
-        task->listenerData.param1Set(param1);
+        task->listenerData.param0(param0);
+        task->listenerData.param1(param1);
         this->tasks.queuePut(task);
         QCoreApplication::instance()->postEvent(this, new QEvent(_ZFP_ZFThreadTaskRequestImpl_sys_Qt_TaskEvent), Qt::LowEventPriority);
     }

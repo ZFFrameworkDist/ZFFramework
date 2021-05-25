@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWheelEvent.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -16,9 +7,9 @@ ZFOBJECT_REGISTER(ZFUIWheelEvent)
 void ZFUIWheelEvent::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
 {
     ret += "wheel (";
-    zfsFromIntT(ret, this->wheelX);
+    zfsFromFloatT(ret, this->wheelX);
     ret += ", ";
-    zfsFromIntT(ret, this->wheelY);
+    zfsFromFloatT(ret, this->wheelY);
     ret += ")";
 
     if(this->eventResolved())
@@ -28,8 +19,8 @@ void ZFUIWheelEvent::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
 }
 
 // ============================================================
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIWheelEvent, zfint, wheelX)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIWheelEvent, zfint, wheelY)
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIWheelEvent, zffloat, wheelX)
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIWheelEvent, zffloat, wheelY)
 
 ZF_NAMESPACE_GLOBAL_END
 

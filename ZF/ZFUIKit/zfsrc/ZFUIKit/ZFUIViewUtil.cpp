@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIViewUtil.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -38,7 +29,7 @@ ZFMETHOD_FUNC_DEFINE_2(zfbool, viewIsChildOf,
             {
                 return zftrue;
             }
-            tmp = tmp->viewParentVirtual();
+            tmp = tmp->viewParent();
         } while(tmp != zfnull);
     }
     return zffalse;
@@ -57,21 +48,18 @@ ZFMETHOD_FUNC_DEFINE_5(ZFUIView *, viewChildAt,
     {
         return zfnull;
     }
-    if(pos.x < 0 || pos.y < 0 || pos.x > view->layoutedFrame().size.width || pos.y > view->layoutedFrame().size.height)
+    if(pos.x < 0 || pos.y < 0 || pos.x > view->viewFrame().width || pos.y > view->viewFrame().height)
     {
         return zfnull;
     }
-
-    ZFUIRect layoutedFrameFixed = ZFUIRectZero();
 
     ZFCoreArrayPOD<ZFUIView *> childList = view->internalFgViewArray();
     for(zfindex i = childList.count() - 1; i != zfindexMax(); --i)
     {
         ZFUIView *child = childList[i];
-        child->layoutedFrameFixedT(layoutedFrameFixed);
-        ZFUIView *tmp = ZFUIViewUtil::viewChildAt(childList[i], ZFUIPointMake(
-                pos.x - layoutedFrameFixed.point.x,
-                pos.y - layoutedFrameFixed.point.y
+        ZFUIView *tmp = ZFUIViewUtil::viewChildAt(child, ZFUIPointMake(
+                pos.x - child->viewFrame().x,
+                pos.y - child->viewFrame().y
             ),
             filterDisabledView,
             filterInternalView,
@@ -82,14 +70,14 @@ ZFMETHOD_FUNC_DEFINE_5(ZFUIView *, viewChildAt,
         }
     }
 
+    ZFUIPoint layoutChildOffset = view->layoutChildOffset();
     childList = view->childArray();
     for(zfindex i = childList.count() - 1; i != zfindexMax(); --i)
     {
         ZFUIView *child = childList[i];
-        child->layoutedFrameFixedT(layoutedFrameFixed);
-        ZFUIView *tmp = ZFUIViewUtil::viewChildAt(childList[i], ZFUIPointMake(
-                pos.x - layoutedFrameFixed.point.x,
-                pos.y - layoutedFrameFixed.point.y
+        ZFUIView *tmp = ZFUIViewUtil::viewChildAt(child, ZFUIPointMake(
+                pos.x - (child->viewFrame().x + layoutChildOffset.x),
+                pos.y - (child->viewFrame().y + layoutChildOffset.y)
             ),
             filterDisabledView,
             filterInternalView,
@@ -104,10 +92,9 @@ ZFMETHOD_FUNC_DEFINE_5(ZFUIView *, viewChildAt,
     for(zfindex i = childList.count() - 1; i != zfindexMax(); --i)
     {
         ZFUIView *child = childList[i];
-        child->layoutedFrameFixedT(layoutedFrameFixed);
-        ZFUIView *tmp = ZFUIViewUtil::viewChildAt(childList[i], ZFUIPointMake(
-                pos.x - layoutedFrameFixed.point.x,
-                pos.y - layoutedFrameFixed.point.y
+        ZFUIView *tmp = ZFUIViewUtil::viewChildAt(child, ZFUIPointMake(
+                pos.x - child->viewFrame().x,
+                pos.y - child->viewFrame().y
             ),
             filterDisabledView,
             filterInternalView,
@@ -136,14 +123,13 @@ ZFMETHOD_FUNC_DEFINE_3(void, viewRectToParent,
         rect = ZFUIRectZero();
         return ;
     }
-    view->layoutedFrameFixedT(rect);
-    ZFUIRect layoutedFrameFixed = ZFUIRectZero();
+    rect = view->viewFrame();
     while(view->viewParent() != zfnull && view != parent)
     {
         view = view->viewParent();
-        view->layoutedFrameFixedT(layoutedFrameFixed);
-        rect.point.x += layoutedFrameFixed.point.x;
-        rect.point.y += layoutedFrameFixed.point.y;
+        ZFUIPoint layoutChildOffset = view->layoutChildOffset();
+        rect.x += layoutChildOffset.x;
+        rect.y += layoutChildOffset.y;
     }
     if(view != parent)
     {

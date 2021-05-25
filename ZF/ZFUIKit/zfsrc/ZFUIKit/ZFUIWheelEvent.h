@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIWheelEvent.h
  * @brief wheel event for ui elements
@@ -30,13 +21,15 @@ public:
     /**
      * @brief wheel rotate count in x direction
      *
-     * positive value means wheel from left to right
+     * positive value means wheel from right to left
      */
-    zfint wheelX;
+    zffloat wheelX;
     /**
-     * @brief see #wheelX
+     * @brief wheel rotate count in y direction
+     *
+     * positive value means wheel from bottom to top
      */
-    zfint wheelY;
+    zffloat wheelY;
 
 protected:
     zfoverride

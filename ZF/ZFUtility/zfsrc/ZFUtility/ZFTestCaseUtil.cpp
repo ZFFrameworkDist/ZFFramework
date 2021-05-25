@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFTestCaseUtil.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -51,7 +42,7 @@ zfbool ZFTestCaseRun(ZF_IN const zfchar *classNameFull,
 }
 
 // ============================================================
-static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData);
+static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData);
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFTestCaseRunAllHolder, ZFLevelZFFrameworkEssential)
 {
     this->running = zffalse;
@@ -59,7 +50,7 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFTestCaseRunAllHolder, ZFLevelZFFramework
     this->testCaseFinishListener = ZFCallbackForFunc(_ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish);
 }
 public:
-    void testCaseList(ZF_OUT ZFCoreArray<const ZFClass *> &ret)
+    void testCaseList(ZF_IN_OUT ZFCoreArray<const ZFClass *> &ret)
     {
         this->testCaseListPrepare();
         ret.addFrom(this->testCases);
@@ -74,7 +65,7 @@ public:
 
         this->testCaseListPrepare();
 
-        ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventTestCaseRunAllOnStart());
+        ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventTestCaseRunAllOnStart());
 
         this->testCaseRunNext();
     }
@@ -95,7 +86,7 @@ public:
             toStop->testCaseStop(ZFResultType::e_Cancel);
         }
 
-        ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventTestCaseRunAllOnStop());
+        ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventTestCaseRunAllOnStop());
     }
 
     void testCaseRunNext(void)
@@ -148,7 +139,7 @@ private:
     }
 ZF_GLOBAL_INITIALIZER_END(ZFTestCaseRunAllHolder)
 
-static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData)
+static void _ZFP_ZFTestCaseRunAllHolder_testCaseOnFinish(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
     ZF_GLOBAL_INITIALIZER_INSTANCE(ZFTestCaseRunAllHolder)->testCaseRunNext();
 }
@@ -162,7 +153,7 @@ void ZFTestCaseRunAllStop(void)
     ZF_GLOBAL_INITIALIZER_INSTANCE(ZFTestCaseRunAllHolder)->testCaseStop();
 }
 
-void ZFTestCaseGetAllT(ZF_OUT ZFCoreArray<const ZFClass *> &ret)
+void ZFTestCaseGetAllT(ZF_IN_OUT ZFCoreArray<const ZFClass *> &ret)
 {
     ZF_GLOBAL_INITIALIZER_INSTANCE(ZFTestCaseRunAllHolder)->testCaseList(ret);
 }

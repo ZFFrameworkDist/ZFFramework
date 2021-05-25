@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIButton.h
  * @brief abstract button
@@ -124,34 +115,28 @@ public:
 public:
     // ============================================================
     // properties
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(zfbool, viewFocusable)
-    {
-        propertyValue = zftrue;
-    }
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
-    {
-        propertyValue = ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeButton());
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(zfbool, viewFocusable)
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUISize, viewSizeMin)
 
     /**
      * @brief true if the button is enabled, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonEnable,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, buttonEnable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, buttonEnable)
     /**
      * @brief true if the button is checkable button, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonCheckable,
                                 zffalse)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, buttonCheckable)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, buttonCheckable)
     /**
      * @brief true if the button is checked, valid only if #buttonCheckable, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonChecked,
                                 zffalse)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfbool, buttonChecked)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, buttonChecked)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zfbool, buttonChecked)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, buttonChecked)
     /**
      * @brief mouse up tolerance to detect as click, (0 - #ZFUIGlobalStyle::itemMargin) by default
      *
@@ -173,6 +158,8 @@ protected:
     zfoverride
     virtual void objectOnInit(void);
     zfoverride
+    virtual void objectOnInitFinish(void);
+    zfoverride
     virtual void objectOnDealloc(void);
 
 public:
@@ -191,13 +178,29 @@ public:
     ZFMETHOD_DECLARE_1(void, buttonSimulateClick,
                        ZFMP_IN_OPT(ZFUIEvent *, event, zfnull))
 
+    /**
+     * @brief util to observe #EventButtonOnClick
+     */
+    ZFMETHOD_DECLARE_5(zfidentity, onClick,
+                       ZFMP_IN(const ZFListener &, observer),
+                       ZFMP_IN_OPT(ZFObject *, userData, zfnull),
+                       ZFMP_IN_OPT(ZFObject *, owner, zfnull),
+                       ZFMP_IN_OPT(zfbool, autoRemoveAfterActivate, zffalse),
+                       ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
+    /**
+     * @brief util to observe #EventButtonOnClick
+     */
+    ZFMETHOD_DECLARE_4(zfidentity, onClickForOnce,
+                       ZFMP_IN(const ZFListener &, observer),
+                       ZFMP_IN_OPT(ZFObject *, userData, zfnull),
+                       ZFMP_IN_OPT(ZFObject *, owner, zfnull),
+                       ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
+
 protected:
     zfoverride
     virtual void viewEventOnMouseEvent(ZF_IN ZFUIMouseEvent *mouseEvent);
     zfoverride
     virtual void viewEventOnKeyEvent(ZF_IN ZFUIKeyEvent *keyEvent);
-    zfoverride
-    virtual void viewPropertyOnUpdate(void);
 
 protected:
     /** @brief see #EventButtonOnClick */
@@ -248,10 +251,6 @@ public:
      * @brief current button state
      */
     ZFMETHOD_DECLARE_0(ZFUIButtonStateEnum, buttonState)
-    /**
-     * @brief manually update current button state without notify event
-     */
-    ZFMETHOD_DECLARE_0(void, buttonStateUpdate)
 
 protected:
     /** @brief see #EventButtonStateOnUpdate */

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIButtonGroup.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -28,13 +19,13 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIButtonGroupListenerHolder, ZFLevelZFFr
 }
 public:
     ZFListener buttonEventListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(buttonEvent)
+    static void buttonEvent(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
         ZFUIButtonGroup *buttonGroup = userData->objectHolded();
-        ZFUIButton *button = listenerData.sender->to<ZFUIButton *>();
+        ZFUIButton *button = listenerData.sender<ZFUIButton *>();
         zfindex buttonIndex = buttonGroup->buttonFind(button);
         zfCoreAssert(buttonIndex != zfindexMax());
-        buttonGroup->_ZFP_ZFUIButtonGroup_buttonGroupOnEvent(button, buttonIndex, listenerData.eventId);
+        buttonGroup->_ZFP_ZFUIButtonGroup_buttonGroupOnEvent(button, buttonIndex, listenerData.eventId());
     }
 ZF_GLOBAL_INITIALIZER_END(ZFUIButtonGroupListenerHolder)
 static void _ZFP_ZFUIButtonGroup_setup_common(ZF_IN ZFUIButtonGroup *buttonGroup,
@@ -90,29 +81,29 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIButtonGroupListenerHolder_Tab, ZFLevel
 }
 public:
     ZFListener buttonOnClickListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(buttonOnClick)
+    static void buttonOnClick(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
         ZFUIButtonGroup *buttonGroup = userData->objectHolded();
-        ZFUIButton *button = listenerData.sender->to<ZFUIButton *>();
+        ZFUIButton *button = listenerData.sender<ZFUIButton *>();
         zfindex buttonIndex = buttonGroup->buttonFind(button);
         zfCoreAssert(buttonIndex != zfindexMax());
         if(buttonIndex == buttonGroup->buttonTabChecked())
         {
             if(buttonGroup->buttonTabAllowUnchecked())
             {
-                buttonGroup->buttonTabCheckedSet(zfindexMax());
+                buttonGroup->buttonTabChecked(zfindexMax());
                 buttonGroup->_ZFP_ZFUIButtonGroup_buttonTabOnChange(button, buttonIndex);
             }
             else
             {
-                button->buttonCheckedSet(zftrue);
+                button->buttonChecked(zftrue);
             }
             buttonGroup->_ZFP_ZFUIButtonGroup_buttonTabOnClickChecked(button, buttonIndex);
         }
         else
         {
             zfindex buttonIndexPrev = buttonGroup->buttonTabChecked();
-            buttonGroup->buttonTabCheckedSet(buttonIndex);
+            buttonGroup->buttonTabChecked(buttonIndex);
             buttonGroup->_ZFP_ZFUIButtonGroup_buttonTabOnChange(button, buttonIndexPrev);
         }
     }
@@ -123,8 +114,8 @@ static void _ZFP_ZFUIButtonGroup_setup_Tab(ZF_IN ZFUIButtonGroup *buttonGroup,
 {
     _ZFP_ZFUIButtonGroup_setup_common(buttonGroup, button, buttonIndex);
 
-    button->buttonCheckableSet(zftrue);
-    button->buttonCheckedSet(zffalse);
+    button->buttonCheckable(zftrue);
+    button->buttonChecked(zffalse);
 
     button->observerAdd(
         ZFUIButton::EventButtonOnClick(),
@@ -133,7 +124,7 @@ static void _ZFP_ZFUIButtonGroup_setup_Tab(ZF_IN ZFUIButtonGroup *buttonGroup,
 
     if(!buttonGroup->buttonTabAllowUnchecked() && buttonGroup->buttonTabChecked() == zfindexMax())
     {
-        buttonGroup->buttonTabCheckedSet(buttonIndex);
+        buttonGroup->buttonTabChecked(buttonIndex);
     }
 }
 static void _ZFP_ZFUIButtonGroup_cleanup_Tab(ZF_IN ZFUIButtonGroup *buttonGroup,
@@ -145,18 +136,18 @@ static void _ZFP_ZFUIButtonGroup_cleanup_Tab(ZF_IN ZFUIButtonGroup *buttonGroup,
         ZFUIButton::EventButtonOnClick(),
         ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIButtonGroupListenerHolder_Tab)->buttonOnClickListener);
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButtonGroup, zfbool, buttonTabAllowUnchecked)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButtonGroup, zfbool, buttonTabAllowUnchecked)
 {
     if(!this->buttonTabAllowUnchecked() && this->buttonCount() > 0 && this->buttonTabChecked() == zfindexMax())
     {
-        this->buttonTabCheckedSet(0);
+        this->buttonTabChecked(0);
     }
 }
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUIButtonGroup, zfindex, buttonTabChecked)
+ZFPROPERTY_ON_VERIFY_DEFINE(ZFUIButtonGroup, zfindex, buttonTabChecked)
 {
     propertyValue = ((propertyValue >= this->buttonCount()) ? zfindexMax() : propertyValue);
 }
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButtonGroup, zfindex, buttonTabChecked)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButtonGroup, zfindex, buttonTabChecked)
 {
     if(this->buttonTabChecked() != propertyValueOld)
     {
@@ -166,11 +157,11 @@ ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButtonGroup, zfindex, buttonTabChecked)
         }
         if(propertyValueOld != zfindexMax())
         {
-            this->buttonAtIndex(propertyValueOld)->buttonCheckedSet(zffalse);
+            this->buttonAtIndex(propertyValueOld)->buttonChecked(zffalse);
         }
         if(this->buttonTabChecked() != zfindexMax())
         {
-            this->buttonAtIndex(this->buttonTabChecked())->buttonCheckedSet(zftrue);
+            this->buttonAtIndex(this->buttonTabChecked())->buttonChecked(zftrue);
         }
     }
 }
@@ -210,7 +201,7 @@ static void _ZFP_ZFUIButtonGroup_cleanup(ZF_IN ZFUIButtonGroup *buttonGroup,
     }
 }
 
-ZFPROPERTY_OVERRIDE_ON_ATTACH_DEFINE(ZFUIButtonGroup, ZFUIButtonGroupTypeEnum, buttonGroupType)
+ZFPROPERTY_ON_ATTACH_DEFINE(ZFUIButtonGroup, ZFUIButtonGroupTypeEnum, buttonGroupType)
 {
     if(this->buttonGroupType() == propertyValueOld)
     {

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFPathType_res.h
  * @brief #ZFPathInfo impl as res file
@@ -37,7 +28,7 @@ ZFPATHTYPE_DECLARE(res)
  *
  * auto open and auto close files, may return a null callback if open file error
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFInput, ZFInputForResFile,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFInput, ZFInputForResFile,
                                ZFMP_IN(const zfchar *, resFilePath))
 {
     ZFInput ret;

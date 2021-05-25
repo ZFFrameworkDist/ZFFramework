@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIRootView.h
  * @brief root view for holding a ZFUIView's tree
@@ -18,6 +9,7 @@
 #include "ZFUIView.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
+zfclassFwd ZFUISysWindow;
 zfclassFwd ZFUIWindow;
 /**
  * @brief root view for holding a ZFUIView's tree
@@ -32,20 +24,19 @@ zffinal zfclass ZF_ENV_EXPORT ZFUIRootView : zfextends ZFUIView
 
 public:
     /**
-     * @brief set scale for root view, as well as all of its children
+     * @brief owner #ZFUISysWindow
      */
-    ZFMETHOD_DECLARE_1(void, scaleForAppSet,
-                       ZFMP_IN(zffloat, scale))
+    zffinal ZFUISysWindow *rootViewOwnerSysWindow(void)
+    {
+        return this->_ZFP_ZFUIRootView_rootViewOwnerSysWindow;
+    }
 
-public:
     /**
      * @brief all #ZFUIWindow attached to the root view
      */
     ZFMETHOD_DECLARE_0(const ZFCoreArrayPOD<ZFUIWindow *> &, windowList)
 
 protected:
-    zfoverride
-    virtual void viewDelegateSet(ZF_IN ZFUIView *viewDelegate);
     zfoverride
     virtual void viewOnAddToParent(ZF_IN ZFUIView *parent);
     zfoverride
@@ -63,6 +54,7 @@ protected:
     virtual void layoutOnLayout(ZF_IN const ZFUIRect &bounds);
 
 public:
+    ZFUISysWindow *_ZFP_ZFUIRootView_rootViewOwnerSysWindow;
     ZFCoreArrayPOD<ZFUIWindow *> _ZFP_ZFUIRootView_windowList;
 };
 

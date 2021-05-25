@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIImageIO.h"
 
@@ -62,6 +53,24 @@ public:
         JNIBlockedDeleteLocalRefWithEnv(tmp, jniEnv);
         return JNIUtilNewGlobalRef(jniEnv, tmp);
     }
+    virtual void *imageLoadInFrame(ZF_IN zffloat imageScale,
+                                   ZF_IN void *nativeImage,
+                                   ZF_IN const ZFUIRect &frameInImage)
+    {
+        JNIEnv *jniEnv = JNIGetJNIEnv();
+        static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, "native_imageLoadInFrame",
+            JNIGetMethodSig(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object), JNIParamTypeContainer()
+                .add(JNIType::S_float)
+                .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
+                .add(JNIType::S_int).add(JNIType::S_int).add(JNIType::S_int).add(JNIType::S_int)
+            ).c_str());
+        jobject tmp = JNIUtilCallStaticObjectMethod(jniEnv, this->jclsOwner, jmId,
+            imageScale,
+            ZFCastStatic(jobject, nativeImage),
+            (jint)frameInImage.x, (jint)frameInImage.y, (jint)frameInImage.width, (jint)frameInImage.height);
+        JNIBlockedDeleteLocalRefWithEnv(tmp, jniEnv);
+        return JNIUtilNewGlobalRef(jniEnv, tmp);
+    }
     virtual void *imageLoadFromColor(ZF_IN zffloat imageScale,
                                      ZF_IN const ZFUIColor &color,
                                      ZF_IN const ZFUISize &size)
@@ -73,7 +82,7 @@ public:
                 .add(JNIType::S_int).add(JNIType::S_int)
             ).c_str());
         jobject tmp = JNIUtilCallStaticObjectMethod(jniEnv, this->jclsOwner, jmId,
-            ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorToColor(color),
+            ZFImpl_sys_Android_ZFUIColorToColor(color),
             (jint)size.width, (jint)size.height);
         JNIBlockedDeleteLocalRefWithEnv(tmp, jniEnv);
         return JNIUtilNewGlobalRef(jniEnv, tmp);

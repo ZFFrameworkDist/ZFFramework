@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "zfnullObject.h"
 #include "ZFObjectImpl.h"
 #include "ZFCopyable.h"
@@ -40,13 +31,13 @@ public:
         return ZFCompareUncomparable;
     }
     zfoverride
-    virtual void tagSet(ZF_IN const zfchar *key, ZF_IN ZFObject *tag)
+    virtual void objectTag(ZF_IN const zfchar *key, ZF_IN ZFObject *tag)
     {
         zfCoreCriticalMessageTrim("setting tag to zfnullObject is not allowed, key: %s", key);
     }
 
 private:
-    ZFMETHOD_INLINE_DETAIL_0(private, ZFMethodTypeStatic,
+    ZFMETHOD_INLINE_DETAIL_0(private, ZFMethodTypeStatic, ZF_CALLER_LINE,
                              zfautoObject, ZFSerializableKeyword_serializableNewInstanceId)
     {
         return zfnullObject();

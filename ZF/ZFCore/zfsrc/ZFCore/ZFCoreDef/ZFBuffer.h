@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFBuffer.h
  * @brief buffer util
@@ -85,7 +76,7 @@ public:
      *
      * new size must be smaller than current size
      */
-    zffinal void bufferSizeSet(ZF_IN zfindex bufferSize)
+    zffinal void bufferSize(ZF_IN zfindex bufferSize)
     {
         if(bufferSize < d->bufferSize)
         {
@@ -97,7 +88,7 @@ public:
      *
      * note, for string type, you should ensure buffer size and append tail '\0' manually
      */
-    zffinal void bufferSet(ZF_IN void *buffer, ZF_IN zfindex bufferSize, ZF_IN zfbool bufferAutoFree)
+    zffinal void bufferChange(ZF_IN void *buffer, ZF_IN zfindex bufferSize, ZF_IN zfbool bufferAutoFree)
     {
         this->bufferFree();
         d->buffer = buffer;

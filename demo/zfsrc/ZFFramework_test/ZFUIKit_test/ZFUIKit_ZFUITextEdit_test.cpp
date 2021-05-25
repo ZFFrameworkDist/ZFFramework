@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIKit_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -26,25 +17,25 @@ protected:
         ZFUIKit_test_prepareTestWindow(window, container, this);
 
         ZFLISTENER_LOCAL(onClickReturn, {
-            ZFUITextEdit *textEdit = listenerData.sender->toAny();
+            ZFUITextEdit *textEdit = listenerData.sender()->toAny();
             textEdit->viewFocusRequest(zffalse);
         })
 
         zfblockedAlloc(ZFUITextEdit, view);
         container->childAdd(view);
-        view->layoutParam()->sizeParamSet(ZFUISizeParamFillWrap());
-        view->layoutParam()->layoutMarginSet(ZFUIMarginMake(40));
-        view->viewBackgroundColorSet(ZFUIColorRed());
+        view->layoutParam()->sizeParam(ZFUISizeParamFillWrap());
+        view->layoutParam()->layoutMargin(ZFUIMarginMake(40));
+        view->viewBackgroundColor(ZFUIColorRed());
         view->observerAdd(ZFUITextEdit::EventTextOnReturnClick(), onClickReturn);
-        view->textPlaceHolder()->textSet("first text edit");
+        view->textPlaceHolder()->text("first text edit");
 
         zfblockedAlloc(ZFUITextEdit, view2);
         container->childAdd(view2);
-        view2->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
-        view2->layoutParam()->layoutMarginSet(ZFUIMarginMake(40, 100, 40, 40));
-        view2->viewBackgroundColorSet(ZFUIColorBlue());
+        view2->layoutParam()->sizeParam(ZFUISizeParamFillFill());
+        view2->layoutParam()->layoutMargin(ZFUIMarginMake(40, 100, 40, 40));
+        view2->viewBackgroundColor(ZFUIColorBlue());
         view2->observerAdd(ZFUITextEdit::EventTextOnReturnClick(), onClickReturn);
-        view2->textPlaceHolder()->textSet("second text edit");
+        view2->textPlaceHolder()->text("second text edit");
 
         this->prepareSettingButton(window, view);
     }
@@ -53,7 +44,7 @@ private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUITextEdit *view)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
         ZFUIKit_test_prepareSettingForBoolProperty(settings, view, ZFPropertyAccess(ZFUITextEdit, textEditEnable));
 
         ZFUIKit_test_prepareSettingButtonWithTestWindow(window, settings);

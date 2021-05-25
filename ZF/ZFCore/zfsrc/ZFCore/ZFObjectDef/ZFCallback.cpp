@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCallback.h"
 #include "ZFObjectImpl.h"
 
@@ -30,11 +21,16 @@ public:
     zfuint refCount;
     zfchar *callbackId;
     _ZFP_ZFCallbackTagMap callbackTagMap;
+
     ZFCallbackType callbackType;
-    ZFObject *callbackOwnerObj; // assign only
+    ZFObject *callbackOwnerObject; // assign only
     zfuint callbackOwnerObjectRetainFlag;
     const ZFMethod *callbackMethod;
-    ZFFuncAddrType callbackRawFunc;
+    ZFFuncAddrType callbackRawFunction;
+    _ZFP_ZFCallbackLambda *callbackLambdaImpl;
+    ZFFuncAddrType callbackLambdaInvoker;
+    _ZFP_ZFCallbackLambda::DestroyCallback callbackLambdaImplDestroy;
+
     zfchar *serializableCustomType;
     ZFSerializableData *serializableCustomData;
     ZFPathInfo *pathInfo;
@@ -45,10 +41,13 @@ public:
     , callbackId(zfnull)
     , callbackTagMap()
     , callbackType(ZFCallbackTypeDummy)
-    , callbackOwnerObj(zfnull)
+    , callbackOwnerObject(zfnull)
     , callbackOwnerObjectRetainFlag(0)
     , callbackMethod(zfnull)
-    , callbackRawFunc(zfnull)
+    , callbackRawFunction(zfnull)
+    , callbackLambdaImpl(zfnull)
+    , callbackLambdaInvoker(zfnull)
+    , callbackLambdaImplDestroy(zfnull)
     , serializableCustomType(zfnull)
     , serializableCustomData(zfnull)
     , pathInfo(zfnull)
@@ -59,11 +58,15 @@ public:
         zffree(this->callbackId);
         if(this->callbackOwnerObjectRetainFlag != 0)
         {
-            zfRelease(this->callbackOwnerObj);
+            zfRelease(this->callbackOwnerObject);
         }
         zffree(this->serializableCustomType);
         zfdelete(this->serializableCustomData);
         zfdelete(this->pathInfo);
+        if(this->callbackLambdaImplDestroy)
+        {
+            this->callbackLambdaImplDestroy(this->callbackLambdaImpl);
+        }
     }
 };
 
@@ -115,9 +118,11 @@ ZFCallback::~ZFCallback(void)
     }
 }
 ZFCallback ZFCallback::_ZFP_ZFCallbackCreate(ZF_IN ZFCallbackType callbackType,
-                                             ZF_IN ZFObject *callbackOwnerObj,
+                                             ZF_IN ZFObject *callbackOwnerObject,
                                              ZF_IN const ZFMethod *callbackMethod,
-                                             ZF_IN ZFFuncAddrType callbackRawFunc)
+                                             ZF_IN ZFFuncAddrType callbackRawFunction,
+                                             ZF_IN _ZFP_ZFCallbackLambda *callbackLambdaImpl,
+                                             ZF_IN _ZFP_ZFCallbackLambda::DestroyCallback callbackLambdaImplDestroy)
 {
     ZFCallback callback;
     callback.d = zfnew(_ZFP_ZFCallbackPrivate);
@@ -134,25 +139,32 @@ ZFCallback ZFCallback::_ZFP_ZFCallbackCreate(ZF_IN ZFCallbackType callbackType,
             callback.d->callbackMethod = callbackMethod;
             break;
         case ZFCallbackTypeMemberMethod:
-            zfCoreAssertWithMessageTrim(callbackOwnerObj != zfnull && callbackMethod != zfnull,
+            zfCoreAssertWithMessageTrim(callbackOwnerObject != zfnull && callbackMethod != zfnull,
                 "[ZFCallback] invalid callback, ownerObj: %s, method: %s",
-                zfsFromPointer(callbackOwnerObj).cString(),
+                zfsFromPointer(callbackOwnerObject).cString(),
                 zfsFromPointer(callbackMethod).cString());
             zfCoreAssertWithMessageTrim(callbackMethod->methodType() != ZFMethodTypeStatic,
                 "[ZFCallback] method \"%s\" is not class member type",
                 callbackMethod->objectInfo().cString());
-            zfCoreAssertWithMessageTrim(callbackOwnerObj->classData()->classIsTypeOf(callbackMethod->methodOwnerClass()),
+            zfCoreAssertWithMessageTrim(callbackOwnerObject->classData()->classIsTypeOf(callbackMethod->methodOwnerClass()),
                 "[ZFCallback] object %s has no such method \"%s\"",
-                callbackOwnerObj->objectInfoOfInstance().cString(),
+                callbackOwnerObject->objectInfoOfInstance().cString(),
                 callbackMethod->objectInfo().cString());
             callback.d->callbackType = ZFCallbackTypeMemberMethod;
-            callback.d->callbackOwnerObj = callbackOwnerObj;
+            callback.d->callbackOwnerObject = callbackOwnerObject;
             callback.d->callbackMethod = callbackMethod;
             break;
         case ZFCallbackTypeRawFunction:
-            zfCoreAssertWithMessageTrim(callbackRawFunc != zfnull, "[ZFCallback] invalid function address");
+            zfCoreAssertWithMessageTrim(callbackRawFunction != zfnull, "[ZFCallback] invalid function address");
             callback.d->callbackType = ZFCallbackTypeRawFunction;
-            callback.d->callbackRawFunc = callbackRawFunc;
+            callback.d->callbackRawFunction = callbackRawFunction;
+            break;
+        case ZFCallbackTypeLambda:
+            zfCoreAssertWithMessageTrim(callbackLambdaImpl != zfnull && callbackLambdaImplDestroy != zfnull, "[ZFCallback] invalid lambda impl");
+            callback.d->callbackType = ZFCallbackTypeLambda;
+            callback.d->callbackLambdaImpl = callbackLambdaImpl;
+            callback.d->callbackLambdaInvoker = callbackLambdaImpl->_ZFP_ivk();
+            callback.d->callbackLambdaImplDestroy = callbackLambdaImplDestroy;
             break;
         default:
             zfCoreCriticalShouldNotGoHere();
@@ -180,7 +192,7 @@ void ZFCallback::objectInfoT(ZF_IN_OUT zfstring &ret) const
         case ZFCallbackTypeRawFunction:
             ret += ZFTOKEN_ZFObjectInfoLeft;
             ret += "ZFCallback func: ";
-            zfsFromPointerT(ret, ZFCastReinterpret(const void *, this->callbackFunctionAddr()));
+            zfsFromPointerT(ret, ZFCastReinterpret(const void *, this->callbackRawFunction()));
             ret += ZFTOKEN_ZFObjectInfoRight;
             break;
         default:
@@ -217,12 +229,12 @@ ZFCompareResult ZFCallback::objectCompare(ZF_IN const ZFCallback &ref) const
             this->callbackType() == ref.callbackType()
             && this->callbackOwnerObject() == ref.callbackOwnerObject()
             && this->callbackMethod() == ref.callbackMethod()
-            && this->callbackFunctionAddr() == ref.callbackFunctionAddr()
+            && this->callbackRawFunction() == ref.callbackRawFunction()
             ))
         ? ZFCompareTheSame : ZFCompareUncomparable);
 }
 
-void ZFCallback::callbackIdSet(ZF_IN const zfchar *callbackId)
+void ZFCallback::callbackId(ZF_IN const zfchar *callbackId)
 {
     if(d == zfnull)
     {
@@ -239,8 +251,8 @@ const zfchar *ZFCallback::callbackId(void) const
     return (d ? d->callbackId : zfnull);
 }
 
-void ZFCallback::callbackTagSet(ZF_IN const zfchar *key,
-                                ZF_IN ZFObject *tag)
+void ZFCallback::callbackTag(ZF_IN const zfchar *key,
+                             ZF_IN ZFObject *tag)
 {
     if(key == zfnull)
     {
@@ -276,7 +288,7 @@ void ZFCallback::callbackTagSet(ZF_IN const zfchar *key,
         }
     }
 }
-ZFObject *ZFCallback::callbackTagGet(ZF_IN const zfchar *key) const
+ZFObject *ZFCallback::callbackTag(ZF_IN const zfchar *key) const
 {
     if(d != zfnull && key != zfnull)
     {
@@ -295,8 +307,8 @@ void ZFCallback::callbackTagGetAllKeyValue(ZF_IN_OUT ZFCoreArray<const zfchar *>
     if(d != zfnull)
     {
         _ZFP_ZFCallbackTagMap &m = d->callbackTagMap;
-        allKey.capacitySet(allKey.count() + m.size());
-        allValue.capacitySet(allValue.count() + m.size());
+        allKey.capacity(allKey.count() + m.size());
+        allValue.capacity(allValue.count() + m.size());
         for(_ZFP_ZFCallbackTagMap::iterator it = m.begin(); it != m.end(); ++it)
         {
             allKey.add(it->first.c_str());
@@ -335,7 +347,7 @@ ZFCallbackType ZFCallback::callbackType(void) const
 
 ZFObject *ZFCallback::callbackOwnerObject(void) const
 {
-    return (d ? d->callbackOwnerObj : zfnull);
+    return (d ? d->callbackOwnerObject : zfnull);
 }
 
 const ZFMethod *ZFCallback::callbackMethod(void) const
@@ -343,9 +355,9 @@ const ZFMethod *ZFCallback::callbackMethod(void) const
     return (d ? d->callbackMethod : zfnull);
 }
 
-ZFFuncAddrType ZFCallback::callbackFunctionAddr(void) const
+ZFFuncAddrType ZFCallback::callbackRawFunction(void) const
 {
-    return (d ? d->callbackRawFunc : zfnull);
+    return (d ? d->callbackRawFunction : zfnull);
 }
 
 void ZFCallback::callbackClear(void)
@@ -355,9 +367,9 @@ void ZFCallback::callbackClear(void)
 
 void ZFCallback::callbackOwnerObjectRetain(void) const
 {
-    if(d != zfnull && d->callbackOwnerObj != zfnull && !d->callbackOwnerObjectRetainFlag)
+    if(d != zfnull && d->callbackOwnerObject != zfnull && !d->callbackOwnerObjectRetainFlag)
     {
-        zfRetain(d->callbackOwnerObj);
+        zfRetain(d->callbackOwnerObject);
         ++(d->callbackOwnerObjectRetainFlag);
     }
 }
@@ -368,12 +380,12 @@ void ZFCallback::callbackOwnerObjectRelease(void) const
         --(d->callbackOwnerObjectRetainFlag);
         if(d->callbackOwnerObjectRetainFlag == 0)
         {
-            zfRetainChange(d->callbackOwnerObj, zfnull);
+            zfRetainChange(d->callbackOwnerObject, zfnull);
         }
     }
 }
 
-void ZFCallback::callbackSerializeCustomTypeSet(ZF_IN const zfchar *customType)
+void ZFCallback::callbackSerializeCustomType(ZF_IN const zfchar *customType)
 {
     if(d == zfnull)
     {
@@ -385,7 +397,7 @@ const zfchar *ZFCallback::callbackSerializeCustomType(void) const
 {
     return (d ? d->serializableCustomType : zfnull);
 }
-void ZFCallback::callbackSerializeCustomDataSet(ZF_IN const ZFSerializableData *customData)
+void ZFCallback::callbackSerializeCustomData(ZF_IN const ZFSerializableData *customData)
 {
     if(d == zfnull)
     {
@@ -420,7 +432,7 @@ const ZFPathInfo *ZFCallback::pathInfo(void) const
 {
     return (d ? d->pathInfo : zfnull);
 }
-void ZFCallback::pathInfoSet(ZF_IN const ZFPathInfo *pathInfo)
+void ZFCallback::pathInfo(ZF_IN const ZFPathInfo *pathInfo)
 {
     if(d == zfnull)
     {
@@ -446,7 +458,7 @@ void ZFCallback::pathInfoSet(ZF_IN const ZFPathInfo *pathInfo)
         }
     }
 }
-void ZFCallback::pathInfoSet(ZF_IN const zfchar *pathType, ZF_IN const zfchar *pathData)
+void ZFCallback::pathInfo(ZF_IN const zfchar *pathType, ZF_IN const zfchar *pathData)
 {
     if(d == zfnull)
     {
@@ -474,13 +486,13 @@ void ZFCallback::pathInfoSet(ZF_IN const zfchar *pathType, ZF_IN const zfchar *p
     }
 }
 
-ZFFuncAddrType ZFCallback::_ZFP_ZFCallbackCached_callbackInvoker_rawFunction(void) const
+_ZFP_ZFCallbackLambda *ZFCallback::_ZFP_ZFCallback_callbackLambdaImpl(void) const
 {
-    return (d ? d->callbackRawFunc : zfnull);
+    return d->callbackLambdaImpl;
 }
-ZFObject *ZFCallback::_ZFP_ZFCallbackCached_callbackOwnerObj(void) const
+ZFFuncAddrType ZFCallback::_ZFP_ZFCallback_callbackLambdaInvoker(void) const
 {
-    return (d ? d->callbackOwnerObj : zfnull);
+    return d->callbackLambdaInvoker;
 }
 
 ZF_NAMESPACE_GLOBAL_END
@@ -489,38 +501,10 @@ ZF_NAMESPACE_GLOBAL_END
 #include "../ZFObject.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-// ============================================================
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackIdSet, ZFMP_IN(const zfchar *, callbackId))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const zfchar *, callbackId)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, callbackTagSet, ZFMP_IN(const zfchar *, key), ZFMP_IN(ZFObject *, tag))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, ZFObject *, callbackTagGet, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, callbackTagGetAllKeyValue, ZFMP_IN_OUT(ZFCoreArray<const zfchar *> &, allKey), ZFMP_IN_OUT(ZFCoreArray<ZFObject *> &, allValue))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackTagRemove, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, zfautoObject, callbackTagRemoveAndGet, ZFMP_IN(const zfchar *, key))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackTagRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, zfbool, callbackIsValid)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, ZFCallbackType, callbackType)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, ZFObject *, callbackOwnerObject)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFMethod *, callbackMethod)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, ZFFuncAddrType, callbackFunctionAddr)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackClear)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackOwnerObjectRetain)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, void, callbackOwnerObjectRelease)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomTypeSet, ZFMP_IN(const zfchar *, customType))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const zfchar *, callbackSerializeCustomType)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomDataSet, ZFMP_IN(const ZFSerializableData &, customData))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFSerializableData *, callbackSerializeCustomData)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, callbackSerializeCustomDisable, ZFMP_IN(zfbool, disable))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, zfbool, callbackSerializeCustomDisabled)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFCallback, const ZFPathInfo *, pathInfo)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFCallback, void, pathInfoSet, ZFMP_IN(const ZFPathInfo *, pathInfo))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFCallback, void, pathInfoSet, ZFMP_IN(const zfchar *, pathType), ZFMP_IN(const zfchar *, pathData))
-
-// ============================================================
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFCallback, ZFCallbackNull)
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFCallback, ZFCallbackForMethod, ZFMP_IN(const ZFMethod *, zfmethod))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(ZFCallback, ZFCallbackForMemberMethod, ZFMP_IN(ZFObject *, obj), ZFMP_IN(const ZFMethod *, zfmethod))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFCallback, ZFCallbackForFunc, ZFMP_IN(ZFFuncAddrType, callbackRawFunc))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFCallback, ZFCallbackForFunc, ZFMP_IN(ZFFuncAddrType, callbackRawFunction))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

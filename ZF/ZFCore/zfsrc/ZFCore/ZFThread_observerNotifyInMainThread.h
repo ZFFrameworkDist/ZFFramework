@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFThread_observerNotifyInMainThread.h
  * @brief thread utility
@@ -34,7 +25,7 @@ ZFMETHOD_FUNC_DECLARE_5(zfidentity, ZFObserverNotifyInMainThreadWithCustomSender
                         ZFMP_IN_OPT(ZFObject *, param0, zfnull),
                         ZFMP_IN_OPT(ZFObject *, param1, zfnull))
 /** @brief see #ZFObserverNotifyInMainThreadWithCustomSender */
-ZFMETHOD_FUNC_DECLARE_INLINE_4(zfidentity, ZFObserverNotifyInMainThread,
+ZFMETHOD_FUNC_INLINE_DECLARE_4(zfidentity, ZFObserverNotifyInMainThread,
                                ZFMP_IN(ZFObject *, obj),
                                ZFMP_IN(zfidentity, eventId),
                                ZFMP_IN_OPT(ZFObject *, param0, zfnull),

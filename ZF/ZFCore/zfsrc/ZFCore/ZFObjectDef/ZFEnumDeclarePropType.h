@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFEnumDeclarePropType.h
  * @brief ZFEnum declare impl
@@ -39,7 +30,7 @@ public:
     ZFTYPEID_DECLARE_WITH_CUSTOM_WRAPPER(EnumName##Enum, EnumName##Enum) \
     /** @cond ZFPrivateDoc */ \
     template<> \
-    zfclassNotPOD ZFTypeId<EnumName##Enum> : zfextendsNotPOD ZFTypeIdBase \
+    zfclassNotPOD ZFTypeId<EnumName##Enum> : zfextendsNotPOD ZFTypeInfo \
     { \
     public: \
         enum { \
@@ -61,14 +52,9 @@ public:
             return TypeId(); \
         } \
         zfoverride \
-        virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const \
+        virtual const ZFClass *typeIdClass(void) const \
         { \
-            zfCoreMutexLock(); \
-            EnumName *t = zflockfree_zfAlloc(EnumName); \
-            v.zflockfree_assign(t); \
-            zflockfree_zfRelease(t); \
-            zfCoreMutexUnlock(); \
-            return zftrue; \
+            return EnumName::ClassData(); \
         } \
         static zfbool ValueStore(ZF_OUT zfautoObject &obj, ZF_IN zfuint const &v) \
         { \
@@ -209,7 +195,7 @@ public:
     }; \
     /** @cond ZFPrivateDoc */ \
     template<> \
-    zfclassNotPOD ZFTypeId<EnumFlagsName> : zfextendsNotPOD ZFTypeIdBase \
+    zfclassNotPOD ZFTypeId<EnumFlagsName> : zfextendsNotPOD ZFTypeInfo \
     { \
     public: \
         enum { \
@@ -231,14 +217,9 @@ public:
             return TypeId(); \
         } \
         zfoverride \
-        virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const \
+        virtual const ZFClass *typeIdClass(void) const \
         { \
-            zfCoreMutexLock(); \
-            v_##EnumFlagsName *t = zflockfree_zfAllocWithCache(v_##EnumFlagsName); \
-            v = t; \
-            zflockfree_zfRelease(t); \
-            zfCoreMutexUnlock(); \
-            return zftrue; \
+            return v_##EnumFlagsName::ClassData(); \
         } \
         static zfbool ValueStore(ZF_OUT zfautoObject &obj, ZF_IN zfuint const &v) \
         { \
@@ -351,7 +332,7 @@ public:
             { \
                 return zffalse; \
             } \
-            v.enumValueSet((zfuint)flags); \
+            v.enumValue((zfuint)flags); \
             return zftrue; \
         }, { \
             return zfflagsToString(s, EnumName::ClassData(), (zfflags)v.enumValue()); \

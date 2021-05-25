@@ -28,10 +28,10 @@
  *   // get property value by normal method
  *   zfstring value = obj->myProperty();
  *   // set property value by normal method
- *   obj->myPropertySet(value);
+ *   obj->myProperty(value);
  * @endcode
  *
  * for advanced usage of method and property,
- * see @ref DocTag_Tutorial_Reflection "Reflection" for more info
+ * see @ref DocTag_Tutorial_Reflection for more info
  */
 

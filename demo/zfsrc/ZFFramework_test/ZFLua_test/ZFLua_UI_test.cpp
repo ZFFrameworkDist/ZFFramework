@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLua_test.h"
 #include "ZFUIKit.h"
 
@@ -25,12 +16,12 @@ protected:
         zfautoObject result = ZFLuaExecute(
                 "local window = ZFUIWindow()\n"
                 "window:windowShow()\n"
-                "window:viewBackgroundColorSet(ZFUIColorRandom())\n"
+                "window:viewBackgroundColor(ZFUIColorRandom())\n"
                 "local button = ZFUIButtonBasic()\n"
                 "window:childAdd(button)\n"
-                "button:layoutParam():layoutAlignSet(ZFUIAlign.e_TopInner() | ZFUIAlign.e_RightInner())\n"
-                "button:viewBackgroundColorSet(ZFUIColorRandom())\n"
-                "button:buttonLabelTextSet('close')\n"
+                "button:layoutParam():layoutAlign(ZFUIAlign.e_TopInner() | ZFUIAlign.e_RightInner())\n"
+                "button:viewBackgroundColor(ZFUIColorRandom())\n"
+                "button:buttonLabelText('close')\n"
                 "button:observerAdd(ZFUIButton.EventButtonOnClick(), function (listenerData, userData)\n"
                 "        userData:objectHolded():windowHide()\n"
                 "    end, window:objectHolder())\n"

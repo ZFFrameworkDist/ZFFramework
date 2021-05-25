@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Qt_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIImageIO.h"
 
@@ -41,12 +32,20 @@ public:
         }
         return this->_scaleImage(nativeImageTmp, imageScale, newSize, ninePatch);
     }
+    virtual void *imageLoadInFrame(ZF_IN zffloat imageScale,
+                                   ZF_IN void *nativeImage,
+                                   ZF_IN const ZFUIRect &frameInImage)
+    {
+        QImage *nativeImageTmp = ZFCastStatic(QImage *, nativeImage);
+        QImage retTmp = nativeImageTmp->copy(frameInImage.x, frameInImage.y, frameInImage.width, frameInImage.height);
+        return new QImage(retTmp);
+    }
     virtual void *imageLoadFromColor(ZF_IN zffloat imageScale,
                                      ZF_IN const ZFUIColor &color,
                                      ZF_IN const ZFUISize &size)
     {
         QImage *ret = new QImage(size.width, size.height, QImage::Format_ARGB32);
-        ret->fill(ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIColorToQColor(color));
+        ret->fill(ZFImpl_sys_Qt_ZFUIColorToQColor(color));
         return ret;
     }
 
@@ -60,7 +59,7 @@ private:
         zfmemset(drawDatas, 0, sizeof(drawDatas));
         zfindex drawDatasCount = ZFUIImageImplNinePatchCalc(
             drawDatas,
-            ZFImpl_sys_Qt_ZFUIKit_impl_ZFUISizeFromQSize(image->size()),
+            ZFImpl_sys_Qt_ZFUISizeFromQSize(image->size()),
             scaleUseNinePatch,
             scaleToSize);
 
@@ -70,7 +69,7 @@ private:
         for(zfindex i = 0; i < drawDatasCount; ++i)
         {
             const ZFUIImageImplNinePatchDrawData &drawData = drawDatas[i];
-            painter.drawImage(ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIRectToQRect(drawData.dst), *image, ZFImpl_sys_Qt_ZFUIKit_impl_ZFUIRectToQRect(drawData.src));
+            painter.drawImage(ZFImpl_sys_Qt_ZFUIRectToQRect(drawData.dst), *image, ZFImpl_sys_Qt_ZFUIRectToQRect(drawData.src));
         }
         return ret;
     }

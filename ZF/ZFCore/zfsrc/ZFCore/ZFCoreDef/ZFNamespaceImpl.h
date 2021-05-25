@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFNamespaceImpl.h
  * @brief namespace impl
@@ -16,6 +7,7 @@
 
 #include "ZFCoreTypeDef.h"
 #include "ZFCoreArray.h"
+#include "ZFCoreStaticRegister.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -35,11 +27,16 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define ZF_NAMESPACE_REGISTER(NameSpace, ParentNameSpace) \
     _ZFP_ZF_NAMESPACE_REGISTER(NameSpace, ParentNameSpace)
 #define _ZFP_ZF_NAMESPACE_REGISTER(NameSpace, ParentNameSpace) \
-    const char *_ZFP_ZF_NAMESPACE_NOT_DECLARED(void) \
+    const char *_ZFP_ZF_NAMESPACE_NOT_REGISTERED(void) \
     { \
-        static _ZFP_ZFNamespaceHolder d(ParentNameSpace::_ZFP_ZF_NAMESPACE_NOT_DECLARED(), #NameSpace); \
+        static _ZFP_ZFNamespaceHolder d(ParentNameSpace::_ZFP_ZF_NAMESPACE_NOT_REGISTERED(), #NameSpace); \
         return d.ns.cString(); \
-    }
+    } \
+    ZF_STATIC_REGISTER_INIT(_ZFP_NSReg) \
+    { \
+        _ZFP_ZF_NAMESPACE_NOT_REGISTERED(); \
+    } \
+    ZF_STATIC_REGISTER_END(_ZFP_NSReg)
 extern ZF_ENV_EXPORT zfstring _ZFP_ZFNamespaceRegister(ZF_IN const char *parent,
                                                        ZF_IN const char *child);
 extern ZF_ENV_EXPORT void _ZFP_ZFNamespaceUnregister(ZF_IN const char *ns);
@@ -70,7 +67,7 @@ public:
  *   the separator token can be accessed by #ZFNamespaceSeparator
  */
 #define ZF_NAMESPACE_CURRENT() \
-    _ZFP_ZF_NAMESPACE_NOT_DECLARED()
+    _ZFP_ZF_NAMESPACE_NOT_REGISTERED()
 
 // ============================================================
 /**
@@ -90,7 +87,7 @@ extern ZF_ENV_EXPORT const zfchar *ZFNamespaceSkipGlobal(ZF_IN const zfchar *ns)
  * if success, ret ensured to have at least one element even if the namespace is empty,
  * at this case, the only one element would be #ZFIndexRangeZero
  */
-extern ZF_ENV_EXPORT zfbool ZFNamespaceSplit(ZF_OUT ZFCoreArray<ZFIndexRange> &ret,
+extern ZF_ENV_EXPORT zfbool ZFNamespaceSplit(ZF_IN_OUT ZFCoreArray<ZFIndexRange> &ret,
                                              ZF_IN const zfchar *src,
                                              ZF_IN_OPT zfindex srcLen = zfindexMax());
 
@@ -98,7 +95,7 @@ extern ZF_ENV_EXPORT zfbool ZFNamespaceSplit(ZF_OUT ZFCoreArray<ZFIndexRange> &r
 /**
  * @brief get all namespace
  */
-extern ZF_ENV_EXPORT void ZFNamespaceGetAllT(ZF_OUT ZFCoreArray<const zfchar *> &ret);
+extern ZF_ENV_EXPORT void ZFNamespaceGetAllT(ZF_IN_OUT ZFCoreArray<const zfchar *> &ret);
 /** @brief see #ZFNamespaceGetAllT */
 inline ZFCoreArrayPOD<const zfchar *> ZFNamespaceGetAll(void)
 {
@@ -108,7 +105,7 @@ inline ZFCoreArrayPOD<const zfchar *> ZFNamespaceGetAll(void)
 }
 
 /** @brief see #ZFNamespaceGetAllT */
-extern ZF_ENV_EXPORT void ZFNamespaceGetAllT(ZF_OUT ZFCoreArray<const zfchar *> &ret,
+extern ZF_ENV_EXPORT void ZFNamespaceGetAllT(ZF_IN_OUT ZFCoreArray<const zfchar *> &ret,
                                              ZF_IN const zfchar *parent,
                                              ZF_IN_OPT zfbool recursive = zffalse);
 /** @brief see #ZFNamespaceGetAllT */

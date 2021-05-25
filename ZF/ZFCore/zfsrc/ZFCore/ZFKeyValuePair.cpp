@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFKeyValuePair.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -49,7 +40,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFKeyValuePairHolder, ZFKeyValuePairHo
             {
                 return zffalse;
             }
-            data.categorySet(ZFSerializableKeyword_ZFKeyValuePair_key);
+            data.category(ZFSerializableKeyword_ZFKeyValuePair_key);
             serializableData.elementAdd(data);
         }
         if(v.value != zfnull)
@@ -59,11 +50,13 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFKeyValuePairHolder, ZFKeyValuePairHo
             {
                 return zffalse;
             }
-            data.categorySet(ZFSerializableKeyword_ZFKeyValuePair_value);
+            data.category(ZFSerializableKeyword_ZFKeyValuePair_value);
             serializableData.elementAdd(data);
         }
         return zftrue;
     })
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFKeyValuePairHolder, zfautoObject, key)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFKeyValuePairHolder, zfautoObject, value)
 
 ZFTYPEID_ALIAS_DEFINE(ZFKeyValuePairHolder, ZFKeyValuePairHolder, ZFKeyValuePair, ZFKeyValuePair)
 

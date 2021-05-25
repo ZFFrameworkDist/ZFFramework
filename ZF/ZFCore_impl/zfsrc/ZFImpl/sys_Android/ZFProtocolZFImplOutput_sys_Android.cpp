@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFImplOutput.h"
 #include "ZFCore/ZFString.h"
@@ -15,7 +6,7 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 #define _ZFP_ZFImpl_sys_Android_ZFImplOutput_output(fmt, ...) \
-    AndroidLogDetail(AndroidLogLevelA, AndroidLogTagDefault, fmt, ##__VA_ARGS__)
+    AndroidLogDetail(AndroidLogLevelA, AndroidLogTagDefault(), fmt, ##__VA_ARGS__)
 
 zfclass _ZFP_I_ZFImplOutputImpl_sys_Android_SyncObject : zfextends ZFObject
 {
@@ -66,38 +57,25 @@ private:
     zfstring savedString;
     void checkOutput(ZF_IN_OUT zfstring &s)
     {
-        if(s.length() > 0)
+        if(s.isEmpty())
         {
-            if(s[s.length() - 1] == '\n')
+            return;
+        }
+
+        zfindex pL = 0;
+        do {
+            zfindex p = zfstringFind(s.cString() + pL, '\n');
+            if(p == zfindexMax())
             {
-                if(s.length() == 1)
-                {
-                    _ZFP_ZFImpl_sys_Android_ZFImplOutput_output(" ");
-                }
-                else
-                {
-                    s.remove(s.length() - 1);
-                    _ZFP_ZFImpl_sys_Android_ZFImplOutput_output("%s", s.cString());
-                }
-                s.removeAll();
+                break;
             }
-            else
-            {
-                zfindex index = zfstringFindReversely(s, '\n');
-                if(index != zfindexMax())
-                {
-                    if(index == 0)
-                    {
-                        _ZFP_ZFImpl_sys_Android_ZFImplOutput_output(" ");
-                    }
-                    else
-                    {
-                        s[index] = '\0';
-                        _ZFP_ZFImpl_sys_Android_ZFImplOutput_output("%s", s.cString());
-                    }
-                    s.remove(0, index + 1);
-                }
-            }
+            s[pL + p] = '\0';
+            _ZFP_ZFImpl_sys_Android_ZFImplOutput_output("%s", s.cString() + pL);
+            pL = pL + p + 1;
+        } while(zftrue);
+        if(pL != 0)
+        {
+            s.remove(0, pL);
         }
     }
 ZFPROTOCOL_IMPLEMENTATION_END(ZFImplOutputImpl_sys_Android)

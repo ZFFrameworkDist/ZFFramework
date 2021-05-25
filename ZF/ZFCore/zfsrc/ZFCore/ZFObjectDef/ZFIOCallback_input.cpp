@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFIOCallback_input.h"
 #include "ZFObjectImpl.h"
 
@@ -120,7 +111,7 @@ void ZFInputReadToString(ZF_IN_OUT zfstring &ret, ZF_IN_OUT const ZFInput &input
     zfindex totalSize = input.ioSize();
     if(totalSize != zfindexMax())
     {
-        ret.capacitySet(totalSize);
+        ret.capacity(totalSize);
     }
 
     #define _ZFP_ZFInputReadToString_blockSize 256
@@ -159,7 +150,7 @@ ZFBuffer ZFInputReadToBuffer(ZF_IN_OUT const ZFInput &input)
         }
         else
         {
-            ret.bufferSizeSet(totalSize);
+            ret.bufferSize(totalSize);
         }
     }
     else
@@ -175,7 +166,7 @@ ZFBuffer ZFInputReadToBuffer(ZF_IN_OUT const ZFInput &input)
             if(readCount < _ZFP_ZFInputReadToBuffer_blockSize - sizeof(zfchar))
             {
                 ret.bufferRealloc(size + sizeof(zfchar));
-                ret.bufferSizeSet(size);
+                ret.bufferSize(size);
                 break;
             }
         } while(zftrue);
@@ -221,12 +212,12 @@ zfindex ZFInputReadUntil(ZF_IN_OUT zfstring &ret,
                          ZF_IN_OUT const ZFInput &input,
                          ZF_IN_OPT const zfchar *charSet /* = " \t\r\n" */,
                          ZF_IN_OPT zfindex maxCount /* = zfindexMax() */,
-                         ZF_OUT_OPT zfchar *firstCharMatchedCharSet /* = zfnull */)
+                         ZF_OUT_OPT zfchar *firstMatchedChar /* = zfnull */)
 {
     zfindex readCount = 0;
-    if(firstCharMatchedCharSet != zfnull)
+    if(firstMatchedChar != zfnull)
     {
-        *firstCharMatchedCharSet = '\0';
+        *firstMatchedChar = '\0';
     }
     if(input.callbackIsValid())
     {
@@ -253,9 +244,9 @@ zfindex ZFInputReadUntil(ZF_IN_OUT zfstring &ret,
                 }
                 if(matched)
                 {
-                    if(firstCharMatchedCharSet != zfnull)
+                    if(firstMatchedChar != zfnull)
                     {
-                        *firstCharMatchedCharSet = buf[0];
+                        *firstMatchedChar = buf[0];
                     }
                     break;
                 }
@@ -322,8 +313,8 @@ static zfindex _ZFP_ZFInputDummy(ZF_OUT void *buf, ZF_IN zfindex count)
 ZFInput ZFInputDummy(void)
 {
     ZFInput ret = ZFCallbackForFunc(_ZFP_ZFInputDummy);
-    ret.callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomType_ZFInputDummy);
-    ret.callbackSerializeCustomDataSet(ZFSerializableData());
+    ret.callbackSerializeCustomType(ZFCallbackSerializeCustomType_ZFInputDummy);
+    ret.callbackSerializeCustomData(ZFSerializableData());
     return ret;
 }
 
@@ -363,38 +354,46 @@ protected:
     }
 
 public:
-    ZFMETHOD_INLINE_2(zfindex, onInput,
-                      ZFMP_IN(void *, buf),
-                      ZFMP_IN(zfindex, count))
-    {
-        if(buf == zfnull)
-        {
-            return src.execute(buf, count);
-        }
-        if(curPos - srcStart + count > srcCount)
-        {
-            count = srcCount - curPos + srcStart;
-        }
-        count = src.execute(buf, count);
-        curPos += count;
-        return count;
-    }
-    ZFMETHOD_INLINE_2(zfbool, ioSeek,
-                      ZFMP_IN(zfindex, byteSize),
-                      ZFMP_IN(ZFSeekPos, pos))
-    {
-        curPos = ZFIOCallbackCalcFSeek(srcStart, srcCount, curPos, byteSize, pos);
-        return zftrue;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioTell)
-    {
-        return curPos - srcStart;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioSize)
-    {
-        return srcStart + srcCount - curPos;
-    }
+    ZFMETHOD_DECLARE_2(zfindex, onInput,
+                       ZFMP_IN(void *, buf),
+                       ZFMP_IN(zfindex, count))
+    ZFMETHOD_DECLARE_2(zfbool, ioSeek,
+                       ZFMP_IN(zfindex, byteSize),
+                       ZFMP_IN(ZFSeekPos, pos))
+    ZFMETHOD_DECLARE_0(zfindex, ioTell)
+    ZFMETHOD_DECLARE_0(zfindex, ioSize)
 };
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFInputForInputInRangeOwner, zfindex, onInput,
+                  ZFMP_IN(void *, buf),
+                  ZFMP_IN(zfindex, count))
+{
+    if(buf == zfnull)
+    {
+        return src.execute(buf, count);
+    }
+    if(curPos - srcStart + count > srcCount)
+    {
+        count = srcCount - curPos + srcStart;
+    }
+    count = src.execute(buf, count);
+    curPos += count;
+    return count;
+}
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFInputForInputInRangeOwner, zfbool, ioSeek,
+                  ZFMP_IN(zfindex, byteSize),
+                  ZFMP_IN(ZFSeekPos, pos))
+{
+    curPos = ZFIOCallbackCalcFSeek(srcStart, srcCount, curPos, byteSize, pos);
+    return zftrue;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFInputForInputInRangeOwner, zfindex, ioTell)
+{
+    return curPos - srcStart;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFInputForInputInRangeOwner, zfindex, ioSize)
+{
+    return srcStart + srcCount - curPos;
+}
 ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
                                ZF_IN_OPT zfindex start /* = 0 */,
                                ZF_IN_OPT zfindex count /* = zfindexMax() */,
@@ -439,12 +438,12 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
     owner->curPos = start;
     ZFInput ret = ZFCallbackForMemberMethod(
         owner, ZFMethodAccess(_ZFP_I_ZFInputForInputInRangeOwner, onInput));
-    ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, owner);
+    ret.callbackTag(ZFCallbackTagKeyword_ioOwner, owner);
     zfRelease(owner);
 
     if(inputCallback.callbackId() != zfnull)
     {
-        ret.callbackIdSet(zfstringWithFormat("ZFInputForInputInRange[%zi, %zi]:%@", start, count, inputCallback.callbackId()));
+        ret.callbackId(zfstringWithFormat("ZFInputForInputInRange[%zi, %zi]:%@", start, count, inputCallback.callbackId()));
     }
 
     if(!inputCallback.callbackSerializeCustomDisabled())
@@ -453,11 +452,11 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
         if(ZFCallbackToData(inputData, inputCallback))
         {
             ZFSerializableData customData;
-            customData.itemClassSet(ZFSerializableKeyword_node);
+            customData.itemClass(ZFSerializableKeyword_node);
 
             zfbool success = zffalse;
             do {
-                inputData.categorySet(ZFSerializableKeyword_ZFInputForInputInRange_input);
+                inputData.category(ZFSerializableKeyword_ZFInputForInputInRange_input);
                 customData.elementAdd(inputData);
 
                 if(start != 0)
@@ -467,7 +466,7 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
                     {
                         break;
                     }
-                    startData.categorySet(ZFSerializableKeyword_ZFInputForInputInRange_start);
+                    startData.category(ZFSerializableKeyword_ZFInputForInputInRange_start);
                     customData.elementAdd(startData);
                 }
 
@@ -478,7 +477,7 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
                     {
                         break;
                     }
-                    countData.categorySet(ZFSerializableKeyword_ZFInputForInputInRange_count);
+                    countData.category(ZFSerializableKeyword_ZFInputForInputInRange_count);
                     customData.elementAdd(countData);
                 }
 
@@ -489,7 +488,7 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
                     {
                         break;
                     }
-                    autoRestorePosData.categorySet(ZFSerializableKeyword_ZFInputForInputInRange_autoRestorePos);
+                    autoRestorePosData.category(ZFSerializableKeyword_ZFInputForInputInRange_autoRestorePos);
                     customData.elementAdd(autoRestorePosData);
                 }
 
@@ -498,8 +497,8 @@ ZFInput ZFInputForInputInRange(ZF_IN const ZFInput &inputCallback,
 
             if(success)
             {
-                ret.callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomType_ZFInputForInputInRange);
-                ret.callbackSerializeCustomDataSet(customData);
+                ret.callbackSerializeCustomType(ZFCallbackSerializeCustomType_ZFInputForInputInRange);
+                ret.callbackSerializeCustomData(customData);
             }
         }
     }
@@ -568,38 +567,46 @@ public:
     })
 
 public:
-    ZFMETHOD_INLINE_2(zfindex, onInput,
-                      ZFMP_IN(void *, buf),
-                      ZFMP_IN(zfindex, count))
-    {
-        if(buf == zfnull)
-        {
-            return pEnd - p;
-        }
-        if(p + count > pEnd)
-        {
-            count = pEnd - p;
-        }
-        zfmemcpy(buf, p, count);
-        p += count;
-        return count;
-    }
-    ZFMETHOD_INLINE_2(zfbool, ioSeek,
-                      ZFMP_IN(zfindex, byteSize),
-                      ZFMP_IN(ZFSeekPos, pos))
-    {
-        p = pStart + ZFIOCallbackCalcFSeek(0, pEnd - pStart, p - pStart, byteSize, pos);
-        return zftrue;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioTell)
-    {
-        return p - pStart;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioSize)
+    ZFMETHOD_DECLARE_2(zfindex, onInput,
+                       ZFMP_IN(void *, buf),
+                       ZFMP_IN(zfindex, count))
+    ZFMETHOD_DECLARE_2(zfbool, ioSeek,
+                       ZFMP_IN(zfindex, byteSize),
+                       ZFMP_IN(ZFSeekPos, pos))
+    ZFMETHOD_DECLARE_0(zfindex, ioTell)
+    ZFMETHOD_DECLARE_0(zfindex, ioSize)
+};
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFInputForBufferUnsafeOwner, zfindex, onInput,
+                  ZFMP_IN(void *, buf),
+                  ZFMP_IN(zfindex, count))
+{
+    if(buf == zfnull)
     {
         return pEnd - p;
     }
-};
+    if(p + count > pEnd)
+    {
+        count = pEnd - p;
+    }
+    zfmemcpy(buf, p, count);
+    p += count;
+    return count;
+}
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFInputForBufferUnsafeOwner, zfbool, ioSeek,
+                  ZFMP_IN(zfindex, byteSize),
+                  ZFMP_IN(ZFSeekPos, pos))
+{
+    p = pStart + ZFIOCallbackCalcFSeek(0, pEnd - pStart, p - pStart, byteSize, pos);
+    return zftrue;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFInputForBufferUnsafeOwner, zfindex, ioTell)
+{
+    return p - pStart;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFInputForBufferUnsafeOwner, zfindex, ioSize)
+{
+    return pEnd - p;
+}
 static ZFInput _ZFP_ZFInputForBuffer(ZF_IN zfbool copy,
                                      ZF_IN const void *src,
                                      ZF_IN_OPT zfindex count /* = zfindexMax() */)
@@ -631,10 +638,10 @@ static ZFInput _ZFP_ZFInputForBuffer(ZF_IN zfbool copy,
     owner->p = owner->pStart;
     ZFInput ret = ZFCallbackForMemberMethod(
         owner, ZFMethodAccess(_ZFP_I_ZFInputForBufferUnsafeOwner, onInput));
-    ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, owner);
+    ret.callbackTag(ZFCallbackTagKeyword_ioOwner, owner);
     if(copy)
     {
-        ret.callbackTagSet(
+        ret.callbackTag(
             "ZFInputForBufferCopiedBuffer",
             zflineAlloc(ZFTypeHolder, srcTmp, ZFTypeHolderTypePOD));
 

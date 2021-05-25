@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListCellViewBasic.h
  * @brief basic list cell view with icon and label
@@ -36,61 +27,25 @@ public:
      * @brief cell's icon
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUIImageView *, cellIcon, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIImageView *, cellIcon)
-    {
-        zfblockedAlloc(ZFUIImageView, cellIcon);
-        propertyValue = cellIcon;
-        cellIcon->viewSizeMaxSet(ZFUISizeMake(ZFUIGlobalStyle::DefaultStyle()->itemSizeIcon()));
-    }
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(ZFUIImageView *, cellIcon)
-    {
-        this->cellIconContainer()->childAdd(this->cellIcon());
-        this->cellIcon()->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
-    }
-    ZFPROPERTY_OVERRIDE_ON_DETACH_INLINE(ZFUIImageView *, cellIcon)
-    {
-        this->cellIcon()->viewRemoveFromParent();
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUIImageView *, cellIcon)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIImageView *, cellIcon)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUIImageView *, cellIcon)
 
     /**
      * @brief cell's main label
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, cellLabelMain, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUITextView *, cellLabelMain)
-    {
-        zfblockedAlloc(ZFUITextView, cellLabelMain);
-        propertyValue = cellLabelMain;
-    }
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(ZFUITextView *, cellLabelMain)
-    {
-        this->cellLabelMainContainer()->childAdd(this->cellLabelMain());
-        this->cellLabelMain()->layoutParam()->layoutAlignSet(ZFUIAlign::e_LeftInner);
-    }
-    ZFPROPERTY_OVERRIDE_ON_DETACH_INLINE(ZFUITextView *, cellLabelMain)
-    {
-        this->cellLabelMain()->viewRemoveFromParent();
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUITextView *, cellLabelMain)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextView *, cellLabelMain)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUITextView *, cellLabelMain)
 
     /**
      * @brief cell's sub label
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, cellLabelSub, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUITextView *, cellLabelSub)
-    {
-        zfblockedAlloc(ZFUITextView, cellLabelSub);
-        propertyValue = cellLabelSub;
-        cellLabelSub->textColorSet(ZFUIGlobalStyle::DefaultStyle()->textColorSecondary());
-        cellLabelSub->textSizeSet(ZFUIGlobalStyle::DefaultStyle()->textSizeSmall());
-    }
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(ZFUITextView *, cellLabelSub)
-    {
-        this->cellLabelSubContainer()->childAdd(this->cellLabelSub());
-        this->cellLabelSub()->layoutParam()->layoutAlignSet(ZFUIAlign::e_LeftInner);
-    }
-    ZFPROPERTY_OVERRIDE_ON_DETACH_INLINE(ZFUITextView *, cellLabelSub)
-    {
-        this->cellLabelSub()->viewRemoveFromParent();
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUITextView *, cellLabelSub)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextView *, cellLabelSub)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUITextView *, cellLabelSub)
 
 public:
     /**

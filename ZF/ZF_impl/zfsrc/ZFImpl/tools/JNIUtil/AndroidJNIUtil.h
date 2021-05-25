@@ -10,9 +10,7 @@
 
 #include "JNIUtil.h"
 #if (defined(ANDROID) || defined(__ANDROID__))
-#include <jni.h>
 #include <android/log.h>
-#include <string>
 namespace AndroidJNIUtil {
 
 /** @brief verbose log level */
@@ -38,11 +36,14 @@ extern _JNI_EXPORT JNIUtil::JNIString &_AndroidLogTagDefault(void);
 /**
  * @brief default log tag, could be changed at runtime
  */
-#define AndroidLogTagDefault (AndroidJNIUtil::_AndroidLogTagDefault().c_str())
-/**
- * @brief change the default log tag
- */
-extern _JNI_EXPORT void AndroidLogTagDefaultSet(const char *s);
+inline const char *AndroidLogTagDefault(void)
+{
+    return _AndroidLogTagDefault().c_str();
+}
+inline void AndroidLogTagDefault(const char *s)
+{
+    _AndroidLogTagDefault() = (s ? s : "");
+}
 
 /**
  * @brief log with level, tag and fmt
@@ -54,7 +55,7 @@ extern _JNI_EXPORT void AndroidLogTagDefaultSet(const char *s);
  * @brief log with default level, default tag and fmt
  */
 #define AndroidLog(fmt, ...) \
-    AndroidLogDetail(AndroidLogLevelDefault, AndroidLogTagDefault, fmt, ##__VA_ARGS__)
+    AndroidLogDetail(AndroidLogLevelDefault, AndroidLogTagDefault(), fmt, ##__VA_ARGS__)
 
 }
 #endif // #if (defined(ANDROID) || defined(__ANDROID__))

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Android_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUISysWindow.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
@@ -163,11 +154,11 @@ public:
             ZFCastStatic(jobject, sysWindow->nativeWindow()));
         return ZFCastStatic(ZFUIOrientationEnum, ret);
     }
-    virtual void sysWindowOrientationFlagsSet(ZF_IN ZFUISysWindow *sysWindow,
-                                              ZF_IN const ZFUIOrientationFlags &flags)
+    virtual void sysWindowOrientationFlags(ZF_IN ZFUISysWindow *sysWindow,
+                                           ZF_IN const ZFUIOrientationFlags &flags)
     {
         JNIEnv *jniEnv = JNIGetJNIEnv();
-        static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, "native_sysWindowOrientationFlagsSet",
+        static jmethodID jmId = JNIUtilGetStaticMethodID(jniEnv, this->jclsOwner, "native_sysWindowOrientationFlags",
             JNIGetMethodSig(JNIType::S_void, JNIParamTypeContainer()
                 .add(JNIType::S_object(ZFImpl_sys_Android_JNI_NAME_Object))
                 .add(JNIType::S_int)
@@ -196,7 +187,7 @@ JNI_METHOD_DECLARE_BEGIN(ZFImpl_sys_Android_JNI_ID_ZFUISysWindow,
         ZFCastZFObject(ZFUISysWindow *, JNIConvertZFObjectFromJNIType(jniEnv, zfjniPointerOwnerZFUISysWindow)),
         ZFUIRectMake(0, 0, refWidth, refHeight),
         ZFUIMarginZero());
-    jint buf[] = {(jint)result.point.x, (jint)result.point.y, (jint)result.size.width, (jint)result.size.height};
+    jint buf[] = {(jint)result.x, (jint)result.y, (jint)result.width, (jint)result.height};
     JNIUtilSetIntArrayRegion(jniEnv, resultRect, 0, 4, buf);
 }
 JNI_METHOD_DECLARE_END()

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIViewCapture.h
  * @brief capture ZFUIView to ZFUIImage
@@ -22,8 +13,11 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 // ============================================================
 /**
  * @brief capture ZFUIView to ZFUIImage
+ *
+ * note: you could only capture view when the view fully layouted and displayed,
+ * use #ZFThreadTaskRequest if necessary
  */
-ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIViewCapture,
+ZFMETHOD_FUNC_DECLARE_1(zfautoObjectT<ZFUIImage *>, ZFUIViewCapture,
                         ZFMP_IN(ZFUIView *, view))
 
 ZF_NAMESPACE_GLOBAL_END

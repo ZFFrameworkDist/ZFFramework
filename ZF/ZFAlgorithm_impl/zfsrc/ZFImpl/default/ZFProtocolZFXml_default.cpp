@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_default_ZFAlgorithm_impl.h"
 #include "ZFAlgorithm/protocol/ZFProtocolZFXml.h"
 
@@ -89,9 +80,9 @@ private:
         {
             ZFXmlItem zfXmlAttribute(ZFXmlType::e_XmlAttribute);
             ++(docHolder->docRefCount);
-            this->xmlMemoryPool_xmlNameSet(zfXmlAttribute, implXmlAttribute.name(), docHolder);
+            this->xmlMemoryPool_xmlName(zfXmlAttribute, implXmlAttribute.name(), docHolder);
             ++(docHolder->docRefCount);
-            this->xmlMemoryPool_xmlValueSet(zfXmlAttribute, implXmlAttribute.value(), docHolder);
+            this->xmlMemoryPool_xmlValue(zfXmlAttribute, implXmlAttribute.value(), docHolder);
             zfXmlItem.xmlAttributeAdd(zfXmlAttribute);
 
             implXmlAttribute = implXmlAttribute.next_attribute();
@@ -116,7 +107,7 @@ private:
                     this->translateChildren(implXmlChild, zfXmlChild, docHolder);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }
@@ -125,21 +116,21 @@ private:
                     ZFXmlItem zfXmlChild(ZFXmlType::e_XmlText);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlValueSet(zfXmlChild, implXmlChild.value(), docHolder);
+                    this->xmlMemoryPool_xmlValue(zfXmlChild, implXmlChild.value(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }
                 case pugi::node_cdata:
                 {
                     ZFXmlItem zfXmlChild(ZFXmlType::e_XmlText);
-                    zfXmlChild.xmlTextCDATASet(zftrue);
+                    zfXmlChild.xmlTextCDATA(zftrue);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlValueSet(zfXmlChild, implXmlChild.value(), docHolder);
+                    this->xmlMemoryPool_xmlValue(zfXmlChild, implXmlChild.value(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }
@@ -148,9 +139,9 @@ private:
                     ZFXmlItem zfXmlChild(ZFXmlType::e_XmlComment);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlValueSet(zfXmlChild, implXmlChild.value(), docHolder);
+                    this->xmlMemoryPool_xmlValue(zfXmlChild, implXmlChild.value(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }
@@ -160,9 +151,9 @@ private:
                     this->translateAttribute(implXmlChild, zfXmlChild, docHolder);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlValueSet(zfXmlChild, implXmlChild.value(), docHolder);
+                    this->xmlMemoryPool_xmlValue(zfXmlChild, implXmlChild.value(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }
@@ -171,9 +162,9 @@ private:
                     ZFXmlItem zfXmlChild(ZFXmlType::e_XmlDocType);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlValueSet(zfXmlChild, implXmlChild.value(), docHolder);
+                    this->xmlMemoryPool_xmlValue(zfXmlChild, implXmlChild.value(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }
@@ -182,9 +173,9 @@ private:
                     ZFXmlItem zfXmlChild(ZFXmlType::e_XmlPI);
 
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlNameSet(zfXmlChild, implXmlChild.name(), docHolder);
+                    this->xmlMemoryPool_xmlName(zfXmlChild, implXmlChild.name(), docHolder);
                     ++(docHolder->docRefCount);
-                    this->xmlMemoryPool_xmlValueSet(zfXmlChild, implXmlChild.value(), docHolder);
+                    this->xmlMemoryPool_xmlValue(zfXmlChild, implXmlChild.value(), docHolder);
                     zfXmlItem.xmlChildAdd(zfXmlChild);
                     break;
                 }

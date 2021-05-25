@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -27,8 +18,8 @@ protected:
 
         zfblockedAlloc(ZFUIFlowLayout, layout);
         container->childAdd(layout);
-        layout->layoutParam()->layoutMarginSet(ZFUIMarginMake(40, 40 + ZFUIGlobalStyle::DefaultStyle()->itemSizeButton(), 40, 40));
-        layout->viewBackgroundColorSet(ZFUIColorRed());
+        layout->layoutParam()->layoutMargin(ZFUIMarginMake(40, 40 + ZFUIGlobalStyle::DefaultStyle()->itemSizeButton(), 40, 40));
+        layout->viewBackgroundColor(ZFUIColorRed());
 
         this->prepareAddRemoveButton(container, layout);
 
@@ -44,24 +35,24 @@ private:
             ZFUIView *layout = userData->objectHolded();
             zfblockedAlloc(ZFUITextView, view);
             layout->childAdd(view);
-            view->viewBackgroundColorSet(ZFUIColorRandom());
+            view->viewBackgroundColor(ZFUIColorRandom());
             zfindex textLength = zfmRand(1, 10);
             textLength = layout->childCount() + 1;
             zfstring text;
-            text.capacitySet(textLength);
+            text.capacity(textLength);
             zfchar c = '0' + ((layout->childCount() - 1) % 10);
             for(zfindex i = 0; i < textLength; ++i)
             {
                 text += c;
             }
-            view->textSet(text);
+            view->text(text);
         })
         addButton->observerAdd(ZFUIButton::EventButtonOnClick(), addButtonOnClick, layout->objectHolder());
-        addButton->buttonLabelTextSet("add");
+        addButton->buttonLabelText("add");
 
         zfblockedAlloc(ZFUIKit_test_Button, removeButton);
         container->childAdd(removeButton);
-        removeButton->layoutParam()->layoutMarginSet(ZFUIMarginMake(70, 0, 0, 0));
+        removeButton->layoutParam()->layoutMargin(ZFUIMarginMake(70, 0, 0, 0));
         ZFLISTENER_LOCAL(removeButtonOnClick, {
             ZFUIView *layout = userData->objectHolded();
             if(layout->childCount() > 0)
@@ -70,12 +61,12 @@ private:
             }
         })
         removeButton->observerAdd(ZFUIButton::EventButtonOnClick(), removeButtonOnClick, layout->objectHolder());
-        removeButton->buttonLabelTextSet("remove");
+        removeButton->buttonLabelText("remove");
     }
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIFlowLayout *layout)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingForLayoutRequest(settings, layout);
 
@@ -103,23 +94,23 @@ private:
                 , ZFUIMarginMake(24)
                 ));
 
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout, zfint, ZFPropertyAccess(ZFUIFlowLayout, layoutChildSpaceX),
-            ZFCoreArrayPODCreate(zfint
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout, zffloat, ZFPropertyAccess(ZFUIFlowLayout, layoutChildSpaceX),
+            ZFCoreArrayPODCreate(zffloat
                 , 0
                 , 8
                 , 12
                 , 24
                 ));
 
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout, zfint, ZFPropertyAccess(ZFUIFlowLayout, layoutChildSpaceY),
-            ZFCoreArrayPODCreate(zfint
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout, zffloat, ZFPropertyAccess(ZFUIFlowLayout, layoutChildSpaceY),
+            ZFCoreArrayPODCreate(zffloat
                 , 0
                 , 8
                 , 12
                 , 24
                 ));
 
-        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout->layoutParam(), ZFUISizeParam, ZFPropertyAccess(ZFUIViewLayoutParam, sizeParam),
+        ZFUIKit_test_prepareSettingForNormalProperty(settings, layout->layoutParam(), ZFUISizeParam, ZFPropertyAccess(ZFUILayoutParam, sizeParam),
             ZFCoreArrayPODCreate(ZFUISizeParam
                 , ZFUISizeParamWrapWrap()
                 , ZFUISizeParamFillWrap()

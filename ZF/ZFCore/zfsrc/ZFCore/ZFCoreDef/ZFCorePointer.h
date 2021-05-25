@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCorePointer.h
  * @brief light weight smart pointer
@@ -32,7 +23,7 @@ public:
     template<typename T_ZFCorePointer>
     static inline T_Pointer *toPointer(ZF_IN T_ZFCorePointer p)
     {
-        return ZFCastStatic(T_Pointer *, p->pointerValueGetNonConst());
+        return ZFCastStatic(T_Pointer *, p->pointerValueAccessNonConst());
     }
 };
 template<typename T_Pointer>
@@ -46,7 +37,7 @@ public:
     template<typename T_ZFCorePointer>
     static inline const T_Pointer *toPointer(ZF_IN T_ZFCorePointer p)
     {
-        return ZFCastStatic(const T_Pointer *, p->pointerValueGet());
+        return ZFCastStatic(const T_Pointer *, p->pointerValueAccess());
     }
 };
 
@@ -69,10 +60,14 @@ public:
     /** @brief see #objectInfo */
     virtual void objectInfoT(ZF_IN_OUT zfstring &ret) const
     {
-        zfstringAppend(ret, "<%p (%zi), content: %s>",
-            this->pointerValueGet(),
-            this->objectRetainCount(),
-            this->objectInfoOfContent().cString());
+        if(this->pointerValueAccess() == zfnull)
+        {
+            ret += ZFTOKEN_zfnull;
+        }
+        else
+        {
+            this->objectInfoOfContentT(ret);
+        }
     }
     /** @brief return object info */
     virtual inline zfstring objectInfo(void) const
@@ -101,7 +96,7 @@ public:
      */
     virtual ZFCompareResult objectCompare(ZF_IN const ZFCorePointerBase &another) const
     {
-        return ((this->pointerValueGet() == another.pointerValueGet())
+        return ((this->pointerValueAccess() == another.pointerValueAccess())
             ? ZFCompareTheSame
             : ZFCompareUncomparable);
     }
@@ -128,11 +123,11 @@ public:
     /**
      * @brief get the internal pointer
      */
-    virtual const void *pointerValueGet(void) const zfpurevirtual;
+    virtual const void *pointerValueAccess(void) const zfpurevirtual;
     /**
      * @brief get the internal pointer
      */
-    virtual void *pointerValueGetNonConst(void) const zfpurevirtual;
+    virtual void *pointerValueAccessNonConst(void) const zfpurevirtual;
 
     /**
      * @brief util method to get and cast to desired type
@@ -202,7 +197,7 @@ public:
     /**
      * @brief set the pointer value
      */
-    inline void pointerValueSet(ZF_IN T_Pointer const &value)
+    inline void pointerValue(ZF_IN T_Pointer const &value)
     {
         if(d->pointerValue != zfnull)
         {
@@ -255,7 +250,7 @@ public:
     ZFCorePointer(ZF_IN T_Pointer const &value)
     : d(zfnew(_ZFP_ZFCorePointerPrivate<T_Pointer>))
     {
-        this->pointerValueSet(value);
+        this->pointerValue(value);
     }
     ZFCorePointer(ZF_IN const ZFCorePointer<T_Pointer, T_ZFCorePointerType> &ref)
     : d(ref.d)
@@ -292,7 +287,7 @@ public:
     }
     ZFCorePointer<T_Pointer, T_ZFCorePointerType> &operator = (ZF_IN T_Pointer const &value)
     {
-        this->pointerValueSet(value);
+        this->pointerValue(value);
         return *this;
     }
     operator T_Pointer const & (void) const
@@ -308,15 +303,15 @@ public:
         this->objectInfoOfContentT(ret, zfnull);
     }
     /** @brief see #objectInfoOfContent */
-    virtual void objectInfoOfContentT(ZF_IN_OUT zfstring &ret, ZF_IN typename ZFCoreInfoGetter<T_Pointer>::InfoGetter elementInfoGetter) const
+    virtual void objectInfoOfContentT(ZF_IN_OUT zfstring &ret, ZF_IN typename ZFCoreInfoGetterType<T_Pointer>::InfoGetter infoGetter) const
     {
-        if(elementInfoGetter != zfnull)
+        if(infoGetter != zfnull)
         {
-            elementInfoGetter(ret, d->pointerValue);
+            infoGetter(ret, d->pointerValue);
         }
         else
         {
-            ret += ZFTOKEN_ZFCoreInfoGetterNotAvailable;
+            ZFCoreInfoGetter<T_Pointer>::InfoGetter(ret, d->pointerValue);
         }
     }
 
@@ -327,12 +322,12 @@ public:
         return zfnew((ZFCorePointer<T_Pointer, T_ZFCorePointerType>), *this);
     }
     zfoverride
-    virtual inline const void *pointerValueGet(void) const
+    virtual inline const void *pointerValueAccess(void) const
     {
         return d->pointerValue;
     }
     zfoverride
-    virtual inline void *pointerValueGetNonConst(void) const
+    virtual inline void *pointerValueAccessNonConst(void) const
     {
         return _ZFP_ZFCorePointerHelper<T_Pointer>::toNonConstRaw(d->pointerValue);
     }

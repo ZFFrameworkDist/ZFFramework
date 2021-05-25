@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFSerializableUtil.h"
 #include "ZFObjectImpl.h"
 
@@ -152,7 +143,7 @@ const zfchar *checkAttribute(ZF_IN const ZFSerializableData &serializableData,
         return zfnull;
     }
     serializableData.attributeIteratorResolveMark(it);
-    return serializableData.attributeIteratorGet(it);
+    return serializableData.attributeIteratorValue(it);
 }
 const zfchar *requireAttribute(ZF_IN const ZFSerializableData &serializableData,
                                ZF_IN const zfchar *desiredAttribute,
@@ -239,7 +230,7 @@ static zfbool _ZFP_ZFSerializableUtilPrintResolveStatus(ZF_IN const ZFSerializab
         zfbool hasUnresolvedAttribute = zffalse;
         for(zfiterator it = serializableData.attributeIterator();
             serializableData.attributeIteratorIsValid(it);
-            serializableData.attributeIteratorNext(it))
+            serializableData.attributeIteratorNextValue(it))
         {
             if(!serializableData.attributeIteratorResolved(it))
             {
@@ -253,9 +244,9 @@ static zfbool _ZFP_ZFSerializableUtilPrintResolveStatus(ZF_IN const ZFSerializab
                     outputCallback << "; ";
                 }
                 outputCallback
-                    << serializableData.attributeIteratorGetKey(it)
+                    << serializableData.attributeIteratorKey(it)
                     << "="
-                    << serializableData.attributeIteratorGet(it);
+                    << serializableData.attributeIteratorValue(it);
             }
         }
         if(hasUnresolvedAttribute)

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUtility_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -17,39 +8,39 @@ ZF_GLOBAL_INITIALIZER_INIT(ZFUtility_ZFAnimation_debug_LogEvent)
     this->taskOwner = zfAlloc(ZFObject);
 
     ZFLISTENER_LOCAL(aniOnAlloc, {
-        if(listenerData.sender->classData()->classIsTypeOf(ZFAnimation::ClassData()))
+        if(listenerData.sender()->classData()->classIsTypeOf(ZFAnimation::ClassData()))
         {
-            zfLogTrimT() << zfLogCurTimeString() << listenerData.sender << "alloc";
+            zfLogTrimT() << zfLogCurTimeString() << listenerData.sender() << "alloc";
         }
     })
-    ZFObjectGlobalEventObserver().observerAdd(ZFObject::EventObjectAfterAlloc(), aniOnAlloc);
+    ZFGlobalObserver().observerAdd(ZFObject::EventObjectAfterAlloc(), aniOnAlloc);
 
     ZFLISTENER_LOCAL(aniOnDealloc, {
-        if(listenerData.sender->classData()->classIsTypeOf(ZFAnimation::ClassData()))
+        if(listenerData.sender()->classData()->classIsTypeOf(ZFAnimation::ClassData()))
         {
-            zfLogTrimT() << zfLogCurTimeString() << listenerData.sender << "dealloc";
+            zfLogTrimT() << zfLogCurTimeString() << listenerData.sender() << "dealloc";
         }
     })
-    ZFObjectGlobalEventObserver().observerAdd(ZFObject::EventObjectBeforeDealloc(), aniOnDealloc);
+    ZFGlobalObserver().observerAdd(ZFObject::EventObjectBeforeDealloc(), aniOnDealloc);
 
     ZFLISTENER_LOCAL(aniOnInvalid, {
-        zfLogTrimT() << zfLogCurTimeString() << listenerData.sender << "invalid";
+        zfLogTrimT() << zfLogCurTimeString() << listenerData.sender() << "invalid";
     })
-    ZFObjectGlobalEventObserver().observerAdd(ZFAnimation::EventAniOnInvalid(), aniOnInvalid);
+    ZFGlobalObserver().observerAdd(ZFAnimation::EventAniOnInvalid(), aniOnInvalid);
 
     ZFLISTENER_LOCAL(aniOnStart, {
-        zfLogTrimT() << zfLogCurTimeString() << listenerData.sender << "start";
+        zfLogTrimT() << zfLogCurTimeString() << listenerData.sender() << "start";
     })
-    ZFObjectGlobalEventObserver().observerAdd(ZFAnimation::EventAniOnStart(), aniOnStart);
+    ZFGlobalObserver().observerAdd(ZFAnimation::EventAniOnStart(), aniOnStart);
 
     ZFLISTENER_LOCAL(aniOnStop, {
-        zfLogTrimT() << zfLogCurTimeString() << listenerData.sender << "stop";
+        zfLogTrimT() << zfLogCurTimeString() << listenerData.sender() << "stop";
     })
-    ZFObjectGlobalEventObserver().observerAdd(ZFAnimation::EventAniOnStop(), aniOnStop);
+    ZFGlobalObserver().observerAdd(ZFAnimation::EventAniOnStop(), aniOnStop);
 }
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFUtility_ZFAnimation_debug_LogEvent)
 {
-    ZFObjectGlobalEventObserver().observerRemoveByOwner(this->taskOwner);
+    ZFGlobalObserver().observerRemoveByOwner(this->taskOwner);
     zfRelease(this->taskOwner);
 }
 private:

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUITextView.h
  * @brief view to display plain text
@@ -35,21 +26,15 @@ zfclass ZF_ENV_EXPORT ZFUITextView : zfextends ZFUIView
 public:
     // ============================================================
     // properties
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(zfbool, viewUIEnable)
-    {
-        propertyValue = zffalse;
-    }
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(zfbool, viewUIEnableTree)
-    {
-        propertyValue = zffalse;
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(zfbool, viewUIEnable)
+    ZFPROPERTY_ON_INIT_DECLARE(zfbool, viewUIEnableTree)
 
 public:
     /**
      * @brief text, may be null if not set
      */
     ZFPROPERTY_ASSIGN(zfstring, text)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfstring, text)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfstring, text)
 
     /**
      * @brief text appearance, #ZFUIGlobalStyle::textAppearance by default
@@ -58,7 +43,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUITextAppearanceEnum, textAppearance,
                                 ZFUIGlobalStyle::DefaultStyle()->textAppearance())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUITextAppearanceEnum, textAppearance)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextAppearanceEnum, textAppearance)
 
     /**
      * @brief text alignment, #ZFUIGlobalStyle::textAlign by default
@@ -67,14 +52,14 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIAlignFlags, textAlign,
                                 ZFUIGlobalStyle::DefaultStyle()->textAlign())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIAlignFlags, textAlign)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIAlignFlags, textAlign)
 
     /**
      * @brief text color, #ZFUIGlobalStyle::textColorDefault by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, textColor,
                                 ZFUIGlobalStyle::DefaultStyle()->textColorDefault())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, textColor)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIColor, textColor)
 
     /**
      * @brief text shadow color, #ZFUIColorZero by default, use transparent to disable text shadow
@@ -83,7 +68,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIColor, textShadowColor,
                                 ZFUIColorZero())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIColor, textShadowColor)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIColor, textShadowColor)
 
     /**
      * @brief text shadow offset, (1, 1) by default
@@ -92,45 +77,45 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUISize, textShadowOffset,
                                 (ZFUISizeMake(1, 1)))
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUISize, textShadowOffset)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUISize, textShadowOffset)
 
     /**
-     * @brief text size in pixel, #ZFUIGlobalStyle::textSizeNormal by default
+     * @brief text size, #ZFUIGlobalStyle::textSizeNormal by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, textSize,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, textSize,
                                 ZFUIGlobalStyle::DefaultStyle()->textSizeNormal())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, textSize)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, textSize)
 
     /**
      * @brief if not 0, auto decrease text size
      *   when the view isn't big enough to hold current text,
      *   #ZFUIGlobalStyle::textSizeTiny by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, textSizeAutoChangeMinSize,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, textSizeAutoChangeMinSize,
                                 ZFUIGlobalStyle::DefaultStyle()->textSizeTiny())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, textSizeAutoChangeMinSize)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, textSizeAutoChangeMinSize)
     /**
      * @brief if not 0 and larger than #textSizeAutoChangeMinSize,
      *   auto increase text size when the view is bigger than current text need,
      *   0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, textSizeAutoChangeMaxSize,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, textSizeAutoChangeMaxSize,
                                 0)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, textSizeAutoChangeMaxSize)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, textSizeAutoChangeMaxSize)
 
     /**
      * @brief single line or not, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, textSingleLine,
                                 zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, textSingleLine)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, textSingleLine)
 
     /**
      * @brief text truncate mode, #ZFUITextTruncateMode::e_Disable by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUITextTruncateModeEnum, textTruncateMode,
                                 ZFUIGlobalStyle::DefaultStyle()->textTruncateMode())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUITextTruncateModeEnum, textTruncateMode)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUITextTruncateModeEnum, textTruncateMode)
 
 protected:
     zfoverride
@@ -161,7 +146,7 @@ public:
      *
      * if the view hasn't been layouted, the size may be invalid
      */
-    ZFMETHOD_DECLARE_0(zfint, textSizeCurrent)
+    ZFMETHOD_DECLARE_0(zffloat, textSizeCurrent)
 
     // ============================================================
     // override
@@ -170,16 +155,16 @@ protected:
      * @brief we would update text settings when scale changed
      */
     zfoverride
-    virtual void scaleOnChange(void);
+    virtual void UIScaleOnChange(void);
     /**
-     * @brief we would measure accorrding text size
+     * @brief we would measure according text size
      */
     zfoverride
     virtual void layoutOnMeasure(ZF_OUT ZFUISize &ret,
                                  ZF_IN const ZFUISize &sizeHint,
                                  ZF_IN const ZFUISizeParam &sizeParam);
     zfoverride
-    virtual void internalImplViewOnLayout(ZF_IN const ZFUIRect &bounds);
+    virtual void internalViewOnLayout(ZF_IN const ZFUIRect &bounds);
 };
 
 ZF_NAMESPACE_GLOBAL_END

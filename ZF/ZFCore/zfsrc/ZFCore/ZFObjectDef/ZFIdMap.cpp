@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFIdMap.h"
 #include "ZFObjectImpl.h"
 
@@ -155,7 +146,7 @@ void _ZFP_ZFIdMapUnregister(ZF_IN zfbool *ZFCoreLibDestroyFlag,
         zfdelete(data);
     }
 }
-const zfchar *ZFIdMapGetName(ZF_IN zfidentity idValue)
+const zfchar *ZFIdMapNameForId(ZF_IN zfidentity idValue)
 {
     zfCoreMutexLocker();
     _ZFP_ZFIdMapModuleData &moduleData = _ZFP_ZFIdMapModuleDataRef();
@@ -168,7 +159,7 @@ const zfchar *ZFIdMapGetName(ZF_IN zfidentity idValue)
     }
     return zfnull;
 }
-zfidentity ZFIdMapGetId(ZF_IN const zfchar *idName)
+zfidentity ZFIdMapIdForName(ZF_IN const zfchar *idName)
 {
     zfCoreMutexLocker();
     _ZFP_ZFIdMapModuleData &moduleData = _ZFP_ZFIdMapModuleDataRef();
@@ -181,13 +172,13 @@ zfidentity ZFIdMapGetId(ZF_IN const zfchar *idName)
     }
     return zfidentityInvalid();
 }
-void ZFIdMapGetAll(ZF_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF_OUT ZFCoreArrayPOD<const zfchar *> &idNames)
+void ZFIdMapGetAll(ZF_IN_OUT ZFCoreArrayPOD<zfidentity> &idValues, ZF_IN_OUT ZFCoreArrayPOD<const zfchar *> &idNames)
 {
     zfCoreMutexLocker();
     _ZFP_ZFIdMapModuleData &moduleData = _ZFP_ZFIdMapModuleDataRef();
 
-    idValues.capacitySet(idValues.count() + moduleData.dataIdMap.size());
-    idNames.capacitySet(idNames.count() + moduleData.dataIdMap.size());
+    idValues.capacity(idValues.count() + moduleData.dataIdMap.size());
+    idNames.capacity(idNames.count() + moduleData.dataIdMap.size());
     for(_ZFP_ZFIdMapDataIdMapType::iterator it = moduleData.dataIdMap.begin(); it != moduleData.dataIdMap.end(); ++it)
     {
         idValues.add(it->second->idValue);
@@ -210,9 +201,9 @@ ZF_NAMESPACE_GLOBAL_END
 #include "../ZFObject.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(const zfchar *, ZFIdMapGetName, ZFMP_IN(zfidentity, idValue))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfidentity, ZFIdMapGetId, ZFMP_IN(const zfchar *, idName))
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFIdMapGetAll, ZFMP_OUT(ZFCoreArrayPOD<zfidentity> &, idValues), ZFMP_OUT(ZFCoreArrayPOD<const zfchar *> &, idNames))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(const zfchar *, ZFIdMapNameForId, ZFMP_IN(zfidentity, idValue))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfidentity, ZFIdMapIdForName, ZFMP_IN(const zfchar *, idName))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFIdMapGetAll, ZFMP_IN_OUT(ZFCoreArrayPOD<zfidentity> &, idValues), ZFMP_IN_OUT(ZFCoreArrayPOD<const zfchar *> &, idNames))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(zfidentity, ZFIdMapDynamicRegister, ZFMP_IN(const zfchar *, idName))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(void, ZFIdMapDynamicUnregister, ZFMP_IN(zfidentity, idValue))
 

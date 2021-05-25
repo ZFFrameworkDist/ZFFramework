@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 #include "ZFAlgorithm/ZFXmlSerializableConverter.h"
@@ -33,7 +24,7 @@ protected:
 
         {
             zfblockedAlloc(_ZFP_ZFCore_ZFPropertyUserRegister_test_Object, obj);
-            obj->valueNormalSet(1);
+            obj->valueNormal(1);
 
             this->testCaseOutputSeparator();
             this->testCaseOutput("try modify and serialize a dynamically registered property, result");
@@ -52,13 +43,13 @@ protected:
 
         {
             zfblockedAlloc(_ZFP_ZFCore_ZFPropertyUserRegister_test_Object, obj);
-            obj->valueNormalSet(1);
+            obj->valueNormal(1);
 
             this->testCaseOutputSeparator();
             this->testCaseOutput("try modify and serialize a statically registered property, result");
 
             obj->classData()->propertyForName("valueStatic")->setterMethod()
-                ->execute<void, ZFString * const &>(obj, zflineAlloc(ZFString, "value"));
+                ->execute<void, v_zfstring * const &>(obj, zflineAlloc(v_zfstring, "value"));
             ZFObjectToXml(ZFOutputDefault(), obj);
         }
 
@@ -68,7 +59,7 @@ protected:
 ZFOBJECT_REGISTER(ZFCore_ZFPropertyUserRegister_test)
 
 ZFPROPERTY_USER_REGISTER_RETAIN(_ZFP_ZFCore_ZFPropertyUserRegister_test_Object,
-    ZFString *, valueStatic, ZFPropertyNoInitValue,
+    v_zfstring *, valueStatic, ZFPropertyNoInitValue,
     public, public)
 
 ZF_NAMESPACE_GLOBAL_END

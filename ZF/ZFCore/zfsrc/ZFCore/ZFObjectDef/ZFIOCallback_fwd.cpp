@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFIOCallback.h"
 #include "ZFObjectImpl.h"
 
@@ -38,7 +29,7 @@ zfindex ZFIOCallbackCalcFSeek(ZF_IN zfindex offset,
 zfbool ZFIOCallback::ioSeek(ZF_IN zfindex byteSize,
                             ZF_IN_OPT ZFSeekPos pos /* = ZFSeekPosBegin */) const
 {
-    ZFObject *owner = this->callbackTagGet(ZFCallbackTagKeyword_ioOwner);
+    ZFObject *owner = this->callbackTag(ZFCallbackTagKeyword_ioOwner);
     if(owner == zfnull)
     {
         return zffalse;
@@ -52,7 +43,7 @@ zfbool ZFIOCallback::ioSeek(ZF_IN zfindex byteSize,
 }
 zfindex ZFIOCallback::ioTell(void) const
 {
-    ZFObject *owner = this->callbackTagGet(ZFCallbackTagKeyword_ioOwner);
+    ZFObject *owner = this->callbackTag(ZFCallbackTagKeyword_ioOwner);
     if(owner == zfnull)
     {
         return zfindexMax();
@@ -66,7 +57,7 @@ zfindex ZFIOCallback::ioTell(void) const
 }
 zfindex ZFIOCallback::ioSize(void) const
 {
-    ZFObject *owner = this->callbackTagGet(ZFCallbackTagKeyword_ioOwner);
+    ZFObject *owner = this->callbackTag(ZFCallbackTagKeyword_ioOwner);
     if(owner == zfnull)
     {
         return zfindexMax();

@@ -1,17 +1,10 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIViewBlink.h"
 #include "ZFUIImageView.h"
 #include "ZFAnimationNativeView.h"
 
 #include "ZFUIKit/protocol/ZFProtocolZFAnimationNativeView.h"
+#include "ZFUIKit/protocol/ZFProtocolZFUIImage.h"
+#include "ZFUIKit/protocol/ZFProtocolZFUIImageIO.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -23,7 +16,6 @@ ZF_NAMESPACE_END(ZFGlobalEvent)
 // ============================================================
 #define _ZFP_ZFUIViewBlink_DEBUG_noAni 0
 #define _ZFP_ZFUIViewBlink_DEBUG_duration 0
-#define _ZFP_ZFUIViewBlink_DEBUG_color 0
 
 #define _ZFP_ZFUIViewBlink_tag_ani "_ZFP_ZFUIViewBlink_tag_ani"
 #define _ZFP_ZFUIViewBlink_tag_blinkView "_ZFP_ZFUIViewBlink_tag_blinkView"
@@ -46,21 +38,17 @@ public:
     ZFListener viewOnDeallocListener;
     ZFCoreArrayPOD<ZFUIView *> blinkingViews;
     ZFIdentityGenerator delayTaskIdGenerator;
-    static ZFLISTENER_PROTOTYPE_EXPAND(viewOnDealloc)
+    static void viewOnDealloc(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        _ZFP_ZFUIViewBlinkDoOff(listenerData.sender->to<ZFUIView *>());
+        _ZFP_ZFUIViewBlinkDoOff(listenerData.sender<ZFUIView *>());
     }
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewBlinkDataHolder)
 
 // ============================================================
 ZFTYPEID_ACCESS_ONLY_DEFINE(ZFUIViewBlinkParam, ZFUIViewBlinkParam)
-
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewBlinkParam, ZFUIImage * const &, blinkImage)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewBlinkParam, void, blinkImageSet, ZFMP_IN(ZFUIImage * const &, blinkImage))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewBlinkParam, zftimet const &, blinkDuration)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewBlinkParam, void, blinkDurationSet, ZFMP_IN(zftimet const &, blinkDuration))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewBlinkParam, zfindex const &, blinkCount)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewBlinkParam, void, blinkCountSet, ZFMP_IN(zfindex const &, blinkCount))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewBlinkParam, ZFUIImage *, blinkImage)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewBlinkParam, zftimet, blinkDuration)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewBlinkParam, zfindex, blinkCount)
 
 // ============================================================
 ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewBlink,
@@ -76,7 +64,7 @@ ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewBlink,
         _ZFP_ZFUIViewBlinkDoOn(view, blinkParam);
     }
 }
-ZFMETHOD_FUNC_DEFINE_INLINE_4(void, ZFUIViewBlink,
+ZFMETHOD_FUNC_INLINE_DEFINE_4(void, ZFUIViewBlink,
                               ZFMP_IN(ZFUIView *, view),
                               ZFMP_IN(ZFUIImage *, blinkImage),
                               ZFMP_IN_OPT(zftimet, blinkDuration, zftimetZero()),
@@ -87,7 +75,7 @@ ZFMETHOD_FUNC_DEFINE_INLINE_4(void, ZFUIViewBlink,
 static void _ZFP_ZFUIViewBlink_noAni_doOff(ZF_IN ZFUIView *view);
 static void _ZFP_ZFUIViewBlinkDoOn(ZF_IN ZFUIView *view, ZF_IN const ZFUIViewBlinkParam &blinkParam)
 {
-    _ZFP_ZFUIViewBlinkView *blinkView = view->tagGet<_ZFP_ZFUIViewBlinkView *>(_ZFP_ZFUIViewBlink_tag_blinkView);
+    _ZFP_ZFUIViewBlinkView *blinkView = view->objectTag<_ZFP_ZFUIViewBlinkView *>(_ZFP_ZFUIViewBlink_tag_blinkView);
     if(blinkView != zfnull)
     {
         return ;
@@ -96,11 +84,11 @@ static void _ZFP_ZFUIViewBlinkDoOn(ZF_IN ZFUIView *view, ZF_IN const ZFUIViewBli
     {
         zfblockedAlloc(_ZFP_ZFUIViewBlinkView, t);
         view->internalFgViewAdd(t);
-        view->tagSet(_ZFP_ZFUIViewBlink_tag_blinkView, t);
-        t->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
+        view->objectTag(_ZFP_ZFUIViewBlink_tag_blinkView, t);
+        t->layoutParam()->sizeParam(ZFUISizeParamFillFill());
         blinkView = t;
     }
-    blinkView->imageSet((blinkParam.blinkImage() != zfnull)
+    blinkView->image((blinkParam.blinkImage() != zfnull)
         ? blinkParam.blinkImage()
         : ZFUIViewBlinkImageDefault().to<ZFUIImage *>());
 
@@ -108,33 +96,33 @@ static void _ZFP_ZFUIViewBlinkDoOn(ZF_IN ZFUIView *view, ZF_IN const ZFUIViewBli
     {
         if(blinkParam.blinkCount() > 1)
         {
-            view->tagSet(_ZFP_ZFUIViewBlink_tag_blinkCountLeft, ZFValueEditable::indexValueCreate(blinkParam.blinkCount() - 1).toObject());
+            view->objectTag(_ZFP_ZFUIViewBlink_tag_blinkCountLeft, zflineAlloc(v_zfindex, blinkParam.blinkCount() - 1));
         }
 
         zfblockedAlloc(ZFAnimationNativeView, ani);
-        view->tagSet(_ZFP_ZFUIViewBlink_tag_ani, ani);
-        ani->aniAlphaToSet(0);
+        view->objectTag(_ZFP_ZFUIViewBlink_tag_ani, ani);
+        ani->aniAlphaTo(0);
         #if _ZFP_ZFUIViewBlink_DEBUG_duration
-            ani->aniDurationSet(5000);
+            ani->aniDuration(5000);
         #else
-            ani->aniDurationSet(blinkParam.blinkDuration());
+            ani->aniDuration(blinkParam.blinkDuration());
         #endif
 
         ZFLISTENER_LOCAL(aniOnStopListener, {
-            ZFAnimation *ani = listenerData.sender->to<ZFAnimation *>();
+            ZFAnimation *ani = listenerData.sender<ZFAnimation *>();
             ZFUIView *blinkView = ani->aniTarget()->to<ZFUIView *>();
             ZFUIView *view = userData->objectHolded();
 
-            ZFValueEditable *blinkCountLeft = view->tagGet<ZFValueEditable *>(_ZFP_ZFUIViewBlink_tag_blinkCountLeft);
+            v_zfindex *blinkCountLeft = view->objectTag<v_zfindex *>(_ZFP_ZFUIViewBlink_tag_blinkCountLeft);
             if(blinkCountLeft != zfnull)
             {
-                if(blinkCountLeft->indexValue() <= 1)
+                if(blinkCountLeft->zfv <= 1)
                 {
-                    view->tagRemove(_ZFP_ZFUIViewBlink_tag_blinkCountLeft);
+                    view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_blinkCountLeft);
                 }
                 else
                 {
-                    blinkCountLeft->indexValueSet(blinkCountLeft->indexValue() - 1);
+                    blinkCountLeft->zfv = blinkCountLeft->zfv - 1;
                 }
 
                 ani->aniStart();
@@ -143,42 +131,44 @@ static void _ZFP_ZFUIViewBlinkDoOn(ZF_IN ZFUIView *view, ZF_IN const ZFUIViewBli
 
             view->observerRemove(ZFObject::EventObjectBeforeDealloc(), ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->viewOnDeallocListener);
 
-            view->tagRemove(_ZFP_ZFUIViewBlink_tag_ani);
-            view->tagRemove(_ZFP_ZFUIViewBlink_tag_blinkView);
+            view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_ani);
+            view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_blinkView);
             blinkView->viewRemoveFromParent();
-            ani->aniTargetSet(zfnull);
+            ani->aniTarget(zfnull);
 
             ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->blinkingViews.removeElement(view);
-            ZFGlobalEventCenter::instance()->observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOff());
+            ZFGlobalObserver().observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOff());
         })
         view->observerAdd(ZFObject::EventObjectBeforeDealloc(), ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->viewOnDeallocListener);
-        ani->observerAdd(ZFAnimation::EventAniOnStopOrOnInvalid(), aniOnStopListener, view->objectHolder());
-        ani->aniTargetSet(blinkView);
+        ani->observerAdd(ZFAnimation::EventAniOnStopOrInvalid(), aniOnStopListener, view->objectHolder());
+        ani->aniTarget(blinkView);
 
-        ZFGlobalEventCenter::instance()->observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOn());
+        ZFGlobalObserver().observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOn());
         ani->aniStart();
     }
     else
     {
-        ZFLISTENER_LOCAL(blinkDelayOnFinish, {
+        view->observerAdd(ZFObject::EventObjectBeforeDealloc(), ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->viewOnDeallocListener);
+
+        ZFGlobalObserver().observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOn());
+        zfidentity delayTaskId = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->delayTaskIdGenerator.idAcquire();
+        zfblockedAlloc(v_zfidentity, delayTaskIdTag, delayTaskId);
+        view->objectTag(_ZFP_ZFUIViewBlink_tag_delayTaskId, delayTaskIdTag);
+
+        ZFLISTENER_LAMBDA_1(blinkDelayOnFinish,
+            zfautoObject, delayTaskIdTag, {
             ZFUIView *view = userData->objectHolded();
-            ZFValue *delayTaskId = listenerData.param0->to<ZFValue *>();
-            ZFValue *delayTaskIdCur = view->tagGet<ZFValue *>(_ZFP_ZFUIViewBlink_tag_delayTaskId);
+            v_zfidentity *delayTaskId = delayTaskIdTag;
+            v_zfidentity *delayTaskIdCur = view->objectTag<v_zfidentity *>(_ZFP_ZFUIViewBlink_tag_delayTaskId);
             if(delayTaskId != delayTaskIdCur)
             {
                 return ;
             }
 
-            ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->delayTaskIdGenerator.idRelease(delayTaskId->identityValue());
+            ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->delayTaskIdGenerator.idRelease(delayTaskId->zfv);
             _ZFP_ZFUIViewBlink_noAni_doOff(view);
         })
-        view->observerAdd(ZFObject::EventObjectBeforeDealloc(), ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->viewOnDeallocListener);
-
-        ZFGlobalEventCenter::instance()->observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOn());
-        zfidentity delayTaskId = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->delayTaskIdGenerator.idAcquire();
-        zfautoObject delayTaskIdTag = ZFValue::identityValueCreate(delayTaskId);
-        view->tagSet(_ZFP_ZFUIViewBlink_tag_delayTaskId, delayTaskIdTag.toObject());
-        zfidentity delayId = ZFThreadExecuteInMainThreadAfterDelay(
+        zfidentity delayId = ZFExecuteAfterDelay(
             #if _ZFP_ZFUIViewBlink_DEBUG_duration
                 (zftimet)5000
             #else
@@ -186,36 +176,34 @@ static void _ZFP_ZFUIViewBlinkDoOn(ZF_IN ZFUIView *view, ZF_IN const ZFUIViewBli
             #endif
             ,
             blinkDelayOnFinish,
-            view->objectHolder(),
-            ZFListenerData().param0Set(delayTaskIdTag.toObject())
-            );
-        view->tagSet(_ZFP_ZFUIViewBlink_tag_delayId, ZFValue::identityValueCreate(delayId).toObject());
+            view->objectHolder());
+        view->objectTag(_ZFP_ZFUIViewBlink_tag_delayId, zflineAlloc(v_zfidentity, delayId));
     }
 }
 static void _ZFP_ZFUIViewBlink_noAni_doOff(ZF_IN ZFUIView *view)
 {
-    ZFUIView *blinkView = view->tagGet<ZFUIView *>(_ZFP_ZFUIViewBlink_tag_blinkView);
+    ZFUIView *blinkView = view->objectTag<ZFUIView *>(_ZFP_ZFUIViewBlink_tag_blinkView);
 
-    view->tagRemove(_ZFP_ZFUIViewBlink_tag_blinkView);
+    view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_blinkView);
     blinkView->viewRemoveFromParent();
 
     ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder)->blinkingViews.removeElement(view);
-    view->tagRemove(_ZFP_ZFUIViewBlink_tag_delayTaskId);
-    view->tagRemove(_ZFP_ZFUIViewBlink_tag_delayId);
-    ZFGlobalEventCenter::instance()->observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOff());
+    view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_delayTaskId);
+    view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_delayId);
+    ZFGlobalObserver().observerNotifyWithCustomSender(view, ZFGlobalEvent::EventViewBlinkOff());
 }
 static void _ZFP_ZFUIViewBlinkDoOff(ZF_IN ZFUIView *view)
 {
-    _ZFP_ZFUIViewBlinkView *blinkView = view->tagGet<_ZFP_ZFUIViewBlinkView *>(_ZFP_ZFUIViewBlink_tag_blinkView);
+    _ZFP_ZFUIViewBlinkView *blinkView = view->objectTag<_ZFP_ZFUIViewBlinkView *>(_ZFP_ZFUIViewBlink_tag_blinkView);
     if(blinkView == zfnull)
     {
         return ;
     }
 
-    ZFAnimation *ani = view->tagGet<ZFAnimation *>(_ZFP_ZFUIViewBlink_tag_ani);
+    ZFAnimation *ani = view->objectTag<ZFAnimation *>(_ZFP_ZFUIViewBlink_tag_ani);
     if(ani != zfnull)
     {
-        view->tagRemove(_ZFP_ZFUIViewBlink_tag_blinkCountLeft);
+        view->objectTagRemove(_ZFP_ZFUIViewBlink_tag_blinkCountLeft);
         ani->aniStop();
     }
     else
@@ -230,15 +218,18 @@ ZFEXPORT_VAR_DEFINE(zfautoObject, ZFUIViewBlinkImageDefault, zfnull)
 ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewBlinkInitSetting, ZFLevelZFFrameworkNormal)
 {
     (void)ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewBlinkDataHolder);
-    #if _ZFP_ZFUIViewBlink_DEBUG_color
-        ZFUIViewBlinkImageDefaultSet(ZFUIImageLoadFromColor(ZFUIColorMake(1, 0, 0)));
-    #else
-        ZFUIViewBlinkImageDefaultSet(zfRes("ZFUIKit/ZFUIViewBlinkImage.xml"));
-    #endif
+    if(ZFPROTOCOL_IS_AVAILABLE(ZFUIImage))
+    {
+        ZFUIViewBlinkImageDefault(zfRes("ZFUIKit/ZFUIViewBlinkImage.xml"));
+    }
+    else if(ZFPROTOCOL_IS_AVAILABLE(ZFUIImageIO))
+    {
+        ZFUIViewBlinkImageDefault(ZFUIImageLoadFromColor(ZFUIColorMake(1, 0, 0)));
+    }
 }
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFUIViewBlinkInitSetting)
 {
-    ZFUIViewBlinkImageDefaultSet(zfnull);
+    ZFUIViewBlinkImageDefault(zfnull);
 }
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewBlinkInitSetting)
 

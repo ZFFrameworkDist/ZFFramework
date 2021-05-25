@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUISysWindow.h"
 #include "protocol/ZFProtocolZFUISysWindowEmbedNativeView.h"
 
@@ -36,11 +27,11 @@ public:
     }
     virtual void nativeWindowRootViewOnRemove(ZF_IN ZFUISysWindow *sysWindow)
     {
-        ZFPROTOCOL_ACCESS(ZFUISysWindowEmbedNativeView)->nativeViewRemote(
+        ZFPROTOCOL_ACCESS(ZFUISysWindowEmbedNativeView)->nativeViewRemove(
             this->nativeParent, sysWindow->rootView()->nativeView());
     }
 
-    virtual zfautoObject modalWindowShow(ZF_IN ZFUISysWindow *sysWindowOwner)
+    virtual zfautoObjectT<ZFUISysWindow *> modalWindowShow(ZF_IN ZFUISysWindow *sysWindowOwner)
     {
         return ZFUISysWindow::nativeWindowEmbedNativeView(this->nativeParent);
     }
@@ -52,12 +43,12 @@ public:
 };
 
 // ============================================================
-ZFMETHOD_DEFINE_1(ZFUISysWindow, zfautoObject, nativeWindowEmbedNativeView,
+ZFMETHOD_DEFINE_1(ZFUISysWindow, zfautoObjectT<ZFUISysWindow *>, nativeWindowEmbedNativeView,
                   ZFMP_IN(void *, nativeParent))
 {
     zfblockedAlloc(_ZFP_ZFUISysWindowEmbedNativeViewImpl, embedImpl);
     embedImpl->nativeParent = nativeParent;
-    zfautoObject ret = ZFUISysWindow::nativeWindowEmbed(embedImpl);
+    zfautoObjectT<ZFUISysWindow *> ret = ZFUISysWindow::nativeWindowEmbed(embedImpl);
     ZFUISysWindow *window = ret;
     embedImpl->notifyOnCreate(window, zfnull);
     embedImpl->notifyOnResume(window);

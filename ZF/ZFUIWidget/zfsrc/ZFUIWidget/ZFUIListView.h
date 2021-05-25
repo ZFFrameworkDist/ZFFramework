@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListView.h
  * @brief list view
@@ -44,9 +35,9 @@ zfclassFwd _ZFP_ZFUIListViewPrivate;
  * @code
  *   <ZFUIListView>
  *       <ListAdapterClass category="listAdapter" /> // used only if #listAdapterSerializable
- *       <ZFArrayEditable name="cellUpdater"> // all cell updater
+ *       <ZFArray name="cellUpdater"> // all cell updater
  *           ...
- *       </ZFArrayEditable>
+ *       </ZFArray>
  *   </ZFUIListView>
  * @endcode
  */
@@ -91,20 +82,20 @@ public:
     /**
      * @brief list adapter
      *
-     * no auto retain by default, use #listAdapterSetAutoRetain if necessary\n
+     * no auto retain by default, use #listAdapterAutoRetain if necessary\n
      * by default, the list adapter won't be serialized during the list view's serialization,
      * you can enable it by #listAdapterSerializable
      */
     ZFPROPERTY_ASSIGN(ZFUIListAdapter *, listAdapter)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIListAdapter *, listAdapter)
-    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIListAdapter *, listAdapter)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIListAdapter *, listAdapter)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUIListAdapter *, listAdapter)
     /**
      * @brief set and retain the list adapter
      *
      * by default, list adapter won't be retained by this list view to prevent recursive retain,
      * you may use this method to retain it automatically
      */
-    ZFMETHOD_DECLARE_1(void, listAdapterSetAutoRetain,
+    ZFMETHOD_DECLARE_1(void, listAdapterAutoRetain,
                        ZFMP_IN(ZFUIListAdapter *, listAdapter))
 
     /**
@@ -115,7 +106,7 @@ public:
     /**
      * @brief list updater to update list cells, holds #ZFUIListCellUpdater
      */
-    ZFPROPERTY_RETAIN_READONLY(ZFArrayEditable *, cellUpdater, zflineAlloc(ZFArrayEditable))
+    ZFPROPERTY_RETAIN_READONLY(ZFArray *, cellUpdater, zflineAlloc(ZFArray))
 
     /**
      * @brief direction to layout children, #ZFUIOrientation::e_Top by default
@@ -125,14 +116,14 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIOrientationEnum, listOrientation,
                                 ZFUIOrientation::e_Top)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIOrientationEnum, listOrientation)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIOrientationEnum, listOrientation)
 
     /**
-     * @brief whether auto update #ZFUIScrollView::scrollBounceVertical series accorrding to #listOrientation,
+     * @brief whether auto update #ZFUIScrollView::scrollBounceVertical series according to #listOrientation,
      *   true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, listBounce, zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, listBounce)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, listBounce)
 
     // ============================================================
     // override
@@ -235,7 +226,7 @@ public:
      * @brief return first visible cell's index, valid only if #listReloadRequested is not true
      *
      * index is ordered by #ZFUIListAdapter,
-     * so first cell may positioned at bottom accorrding to layout orientation
+     * so first cell may positioned at bottom according to layout orientation
      */
     ZFMETHOD_DECLARE_0(const ZFIndexRange &, listVisibleCellIndexRange)
 
@@ -251,14 +242,14 @@ public:
      */
     ZFMETHOD_DECLARE_3(void, scrollListCellToHead,
                        ZFMP_IN(zfindex, cellIndex),
-                       ZFMP_IN_OPT(zfint, offset, 0),
+                       ZFMP_IN_OPT(zffloat, offset, 0),
                        ZFMP_IN_OPT(zfbool, animated, zftrue))
     /**
      * @brief scroll cell to bottom, see #scrollListCellToHead
      */
     ZFMETHOD_DECLARE_3(void, scrollListCellToTail,
                        ZFMP_IN(zfindex, cellIndex),
-                       ZFMP_IN_OPT(zfint, offset, 0),
+                       ZFMP_IN_OPT(zffloat, offset, 0),
                        ZFMP_IN_OPT(zfbool, animated, zftrue))
 
     // ============================================================

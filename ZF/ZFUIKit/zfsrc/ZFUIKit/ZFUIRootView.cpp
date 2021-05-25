@@ -1,13 +1,5 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIRootView.h"
+#include "ZFUISysWindow.h"
 #include "ZFUIWindow.h"
 
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
@@ -16,26 +8,13 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFOBJECT_REGISTER(ZFUIRootView)
 
-ZFMETHOD_DEFINE_1(ZFUIRootView, void, scaleForAppSet,
-                  ZFMP_IN(zffloat, scale))
-{
-    if(scale > 0)
-    {
-        this->_ZFP_ZFUIView_scaleSetRecursively(scale * this->scaleForImpl(), this->scaleForImpl());
-    }
-}
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_0(ZFUIRootView, ZFUISysWindow *, rootViewOwnerSysWindow)
 
 ZFMETHOD_DEFINE_0(ZFUIRootView, const ZFCoreArrayPOD<ZFUIWindow *> &, windowList)
 {
     return _ZFP_ZFUIRootView_windowList;
 }
 
-void ZFUIRootView::viewDelegateSet(ZF_IN ZFUIView *viewDelegate)
-{
-    zfCoreAssertWithMessage(viewDelegate == zfnull,
-        "you must not set delegate view from ZFUIRootView, delegate: %s",
-        ZFObjectInfo(viewDelegate).cString());
-}
 void ZFUIRootView::viewOnAddToParent(ZF_IN ZFUIView *parent)
 {
     zfCoreCriticalMessage(
@@ -59,11 +38,11 @@ void ZFUIRootView::layoutOnMeasure(ZF_OUT ZFUISize &ret,
 static void _ZFP_ZFUIRootView_layoutParamApply(ZF_OUT ZFUIRect &ret,
                                                ZF_IN const ZFUIRect &rect,
                                                ZF_IN ZFUIView *child,
-                                               ZF_IN ZFUIViewLayoutParam *lp,
+                                               ZF_IN ZFUILayoutParam *lp,
                                                ZF_IN const ZFUIMargin &sysWindowMargin)
 {
     ZFUIMargin totalMargin = ZFUIMarginInc(lp->layoutMargin(), sysWindowMargin);
-    ZFUISize refSizeTmp = ZFUIRectApplyMargin(rect, totalMargin).size;
+    ZFUISize refSizeTmp = ZFUIRectGetSize(ZFUIRectApplyMargin(rect, totalMargin));
     if(refSizeTmp.width < 0)
     {
         refSizeTmp.width = 0;
@@ -98,8 +77,8 @@ void ZFUIRootView::layoutOnLayout(ZF_IN const ZFUIRect &bounds)
         ZFUIWindow *window = ZFCastZFObject(ZFUIWindow *, child);
         if(window == zfnull || !window->sysWindowMarginShouldApply())
         {
-            child->layout(
-                ZFUIViewLayoutParam::layoutParamApply(
+            child->viewFrame(
+                ZFUILayoutParam::layoutParamApply(
                     bounds,
                     child,
                     child->layoutParam()));
@@ -113,7 +92,7 @@ void ZFUIRootView::layoutOnLayout(ZF_IN const ZFUIRect &bounds)
             child,
             child->layoutParam(),
             window->windowOwnerSysWindow()->sysWindowMargin());
-        child->layout(result);
+        child->viewFrame(result);
     }
 }
 

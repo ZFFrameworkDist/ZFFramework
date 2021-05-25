@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFTextTemplateType.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -99,41 +90,40 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateIndexData, ZFTextTemplat
         serializableData.resolveMark();
         return zftrue;
     }, {
-        serializableData.itemClassSet(ZFTypeId_ZFTextTemplateIndexData());
+        serializableData.itemClass(ZFTypeId_ZFTextTemplateIndexData());
 
         if(v.indexStart != 0)
         {
-            serializableData.attributeSet(ZFSerializableKeyword_ZFTextTemplateIndexData_indexStart, zfindexToString(v.indexStart));
+            serializableData.attributeForName(ZFSerializableKeyword_ZFTextTemplateIndexData_indexStart, zfindexToString(v.indexStart));
         }
 
         if(v.indexOffset != 1)
         {
-            serializableData.attributeSet(ZFSerializableKeyword_ZFTextTemplateIndexData_indexOffset, zfintToString(v.indexOffset));
+            serializableData.attributeForName(ZFSerializableKeyword_ZFTextTemplateIndexData_indexOffset, zfintToString(v.indexOffset));
         }
 
         if(v.indexRadix != 10)
         {
-            serializableData.attributeSet(ZFSerializableKeyword_ZFTextTemplateIndexData_indexRadix, zfindexToString(v.indexRadix));
+            serializableData.attributeForName(ZFSerializableKeyword_ZFTextTemplateIndexData_indexRadix, zfindexToString(v.indexRadix));
         }
 
         if(!v.indexUpperCase)
         {
-            serializableData.attributeSet(ZFSerializableKeyword_ZFTextTemplateIndexData_indexUpperCase, zfboolToString(v.indexUpperCase));
+            serializableData.attributeForName(ZFSerializableKeyword_ZFTextTemplateIndexData_indexUpperCase, zfboolToString(v.indexUpperCase));
         }
 
         if(v.indexWidth != 0)
         {
-            serializableData.attributeSet(ZFSerializableKeyword_ZFTextTemplateIndexData_indexWidth, zfindexToString(v.indexWidth));
+            serializableData.attributeForName(ZFSerializableKeyword_ZFTextTemplateIndexData_indexWidth, zfindexToString(v.indexWidth));
         }
 
         if(v.indexFlag != ZFTextTemplateIndexFlag::EnumDefault())
         {
-            serializableData.attributeSet(ZFSerializableKeyword_ZFTextTemplateIndexData_indexFlag, ZFTextTemplateIndexFlagEnumToString(v.indexFlag));
+            serializableData.attributeForName(ZFSerializableKeyword_ZFTextTemplateIndexData_indexFlag, ZFTextTemplateIndexFlagEnumToString(v.indexFlag));
         }
 
         return zftrue;
     })
-
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFTextTemplateIndexData, zfindex, indexStart)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFTextTemplateIndexData, zfint, indexOffset)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFTextTemplateIndexData, zfindex, indexRadix)
@@ -232,10 +222,10 @@ void ZFTextTemplateParam::replaceDataAdd(ZF_IN const zfchar *key, ZF_IN const zf
     {
         return ;
     }
-    zfiterator it = d->replaceDataMap.iteratorForKey(key);
-    if(d->replaceDataMap.iteratorIsValid(it))
+    zfiterator it = d->replaceDataMap.iteratorFind(key);
+    if(d->replaceDataMap.iteratorValid(it))
     {
-        _ZFP_ZFTextTemplateReplaceData *replaceData = d->replaceDataMap.iteratorGetValue<_ZFP_ZFTextTemplateReplaceData *>(it);
+        _ZFP_ZFTextTemplateReplaceData *replaceData = d->replaceDataMap.iteratorValue<_ZFP_ZFTextTemplateReplaceData *>(it);
         if(value == zfnull)
         {
             d->replaceDataList.removeElement(replaceData);
@@ -284,10 +274,10 @@ const zfchar *ZFTextTemplateParam::replaceDataAtIndex(ZF_IN zfindex index) const
 }
 void ZFTextTemplateParam::replaceDataRemove(ZF_IN const zfchar *key)
 {
-    zfiterator it = d->replaceDataMap.iteratorForKey(key);
-    if(d->replaceDataMap.iteratorIsValid(it))
+    zfiterator it = d->replaceDataMap.iteratorFind(key);
+    if(d->replaceDataMap.iteratorValid(it))
     {
-        d->replaceDataList.removeElement(d->replaceDataMap.iteratorGetValue<_ZFP_ZFTextTemplateReplaceData *>(it));
+        d->replaceDataList.removeElement(d->replaceDataMap.iteratorValue<_ZFP_ZFTextTemplateReplaceData *>(it));
         d->replaceDataMap.iteratorRemove(it);
     }
 }
@@ -304,7 +294,7 @@ void ZFTextTemplateParam::replaceDataRemoveAll(void)
 }
 
 // ============================================================
-void ZFTextTemplateParam::enableDataDefaultSet(ZF_IN zfbool enableDataDefault)
+void ZFTextTemplateParam::enableDataDefault(ZF_IN zfbool enableDataDefault)
 {
     d->enableDataDefault = enableDataDefault;
 }
@@ -319,10 +309,10 @@ void ZFTextTemplateParam::enableDataAdd(ZF_IN const zfchar *key, ZF_IN zfbool va
     {
         return ;
     }
-    zfiterator it = d->enableDataMap.iteratorForKey(key);
-    if(d->enableDataMap.iteratorIsValid(it))
+    zfiterator it = d->enableDataMap.iteratorFind(key);
+    if(d->enableDataMap.iteratorValid(it))
     {
-        _ZFP_ZFTextTemplateEnableData *enableData = d->enableDataMap.iteratorGetValue<_ZFP_ZFTextTemplateEnableData *>(it);
+        _ZFP_ZFTextTemplateEnableData *enableData = d->enableDataMap.iteratorValue<_ZFP_ZFTextTemplateEnableData *>(it);
         enableData->value = value;
     }
     else
@@ -372,10 +362,10 @@ zfbool ZFTextTemplateParam::enableDataAtIndex(ZF_IN zfindex index) const
 }
 void ZFTextTemplateParam::enableDataRemove(ZF_IN const zfchar *key)
 {
-    zfiterator it = d->enableDataMap.iteratorForKey(key);
-    if(d->enableDataMap.iteratorIsValid(it))
+    zfiterator it = d->enableDataMap.iteratorFind(key);
+    if(d->enableDataMap.iteratorValid(it))
     {
-        d->enableDataList.removeElement(d->enableDataMap.iteratorGetValue<_ZFP_ZFTextTemplateEnableData *>(it));
+        d->enableDataList.removeElement(d->enableDataMap.iteratorValue<_ZFP_ZFTextTemplateEnableData *>(it));
         d->enableDataMap.iteratorRemove(it);
     }
 }
@@ -392,7 +382,7 @@ void ZFTextTemplateParam::enableDataRemoveAll(void)
 }
 
 // ============================================================
-void ZFTextTemplateParam::indexDataDefaultSet(ZF_IN const ZFTextTemplateIndexData &indexDataDefault)
+void ZFTextTemplateParam::indexDataDefault(ZF_IN const ZFTextTemplateIndexData &indexDataDefault)
 {
     d->indexDataDefault = indexDataDefault;
 }
@@ -407,10 +397,10 @@ void ZFTextTemplateParam::indexDataAdd(ZF_IN const zfchar *key, ZF_IN const ZFTe
     {
         return ;
     }
-    zfiterator it = d->indexDataMap.iteratorForKey(key);
-    if(d->indexDataMap.iteratorIsValid(it))
+    zfiterator it = d->indexDataMap.iteratorFind(key);
+    if(d->indexDataMap.iteratorValid(it))
     {
-        _ZFP_ZFTextTemplateIndexData *indexData = d->indexDataMap.iteratorGetValue<_ZFP_ZFTextTemplateIndexData *>(it);
+        _ZFP_ZFTextTemplateIndexData *indexData = d->indexDataMap.iteratorValue<_ZFP_ZFTextTemplateIndexData *>(it);
         indexData->value = value;
     }
     else
@@ -464,10 +454,10 @@ ZFTextTemplateIndexData *ZFTextTemplateParam::indexDataAtIndex(ZF_IN zfindex ind
 }
 void ZFTextTemplateParam::indexDataRemove(ZF_IN const zfchar *key)
 {
-    zfiterator it = d->indexDataMap.iteratorForKey(key);
-    if(d->indexDataMap.iteratorIsValid(it))
+    zfiterator it = d->indexDataMap.iteratorFind(key);
+    if(d->indexDataMap.iteratorValid(it))
     {
-        d->indexDataList.removeElement(d->indexDataMap.iteratorGetValue<_ZFP_ZFTextTemplateIndexData *>(it));
+        d->indexDataList.removeElement(d->indexDataMap.iteratorValue<_ZFP_ZFTextTemplateIndexData *>(it));
         d->indexDataMap.iteratorRemove(it);
     }
 }
@@ -670,9 +660,9 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
 
         v.replaceDataRemoveAll();
         v.enableDataRemoveAll();
-        v.enableDataDefaultSet(zffalse);
+        v.enableDataDefault(zffalse);
         v.indexDataRemoveAll();
-        v.indexDataDefaultSet(ZFTextTemplateIndexData());
+        v.indexDataDefault(ZFTextTemplateIndexData());
 
         const ZFSerializableData *element = zfnull;
 
@@ -730,7 +720,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
             {
                 return zffalse;
             }
-            v.enableDataDefaultSet(enableDataDefault);
+            v.enableDataDefault(enableDataDefault);
         }
 
         element = ZFSerializableUtil::checkElementByCategory(serializableData, ZFSerializableKeyword_ZFTextTemplateParam_index);
@@ -764,13 +754,13 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
             {
                 return zffalse;
             }
-            v.indexDataDefaultSet(indexDataDefault);
+            v.indexDataDefault(indexDataDefault);
         }
 
         serializableData.resolveMark();
         return zftrue;
     }, {
-        serializableData.itemClassSet(ZFTypeId_ZFTextTemplateParam());
+        serializableData.itemClass(ZFTypeId_ZFTextTemplateParam());
 
         if(v.replaceDataCount() > 0)
         {
@@ -782,12 +772,12 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
                 {
                     return zffalse;
                 }
-                itemData.propertyNameSet(v.replaceDataNameAtIndex(i));
+                itemData.propertyName(v.replaceDataNameAtIndex(i));
                 nodeData.elementAdd(itemData);
             }
 
-            nodeData.itemClassSet(ZFSerializableKeyword_node);
-            nodeData.categorySet(ZFSerializableKeyword_ZFTextTemplateParam_replace);
+            nodeData.itemClass(ZFSerializableKeyword_node);
+            nodeData.category(ZFSerializableKeyword_ZFTextTemplateParam_replace);
             serializableData.elementAdd(nodeData);
         }
 
@@ -801,12 +791,12 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
                 {
                     return zffalse;
                 }
-                itemData.propertyNameSet(v.enableDataNameAtIndex(i));
+                itemData.propertyName(v.enableDataNameAtIndex(i));
                 nodeData.elementAdd(itemData);
             }
 
-            nodeData.itemClassSet(ZFSerializableKeyword_node);
-            nodeData.categorySet(ZFSerializableKeyword_ZFTextTemplateParam_enable);
+            nodeData.itemClass(ZFSerializableKeyword_node);
+            nodeData.category(ZFSerializableKeyword_ZFTextTemplateParam_enable);
             serializableData.elementAdd(nodeData);
         }
 
@@ -817,7 +807,7 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
             {
                 return zffalse;
             }
-            nodeData.categorySet(ZFSerializableKeyword_ZFTextTemplateParam_enableDataDefault);
+            nodeData.category(ZFSerializableKeyword_ZFTextTemplateParam_enableDataDefault);
             serializableData.elementAdd(nodeData);
         }
 
@@ -831,12 +821,12 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
                 {
                     return zffalse;
                 }
-                itemData.propertyNameSet(v.indexDataNameAtIndex(i));
+                itemData.propertyName(v.indexDataNameAtIndex(i));
                 nodeData.elementAdd(itemData);
             }
 
-            nodeData.itemClassSet(ZFSerializableKeyword_node);
-            nodeData.categorySet(ZFSerializableKeyword_ZFTextTemplateParam_index);
+            nodeData.itemClass(ZFSerializableKeyword_node);
+            nodeData.category(ZFSerializableKeyword_ZFTextTemplateParam_index);
             serializableData.elementAdd(nodeData);
         }
 
@@ -848,14 +838,13 @@ ZFTYPEID_DEFINE_BY_SERIALIZABLE_CONVERTER(ZFTextTemplateParam, ZFTextTemplatePar
             }
             if(nodeData.attributeCount() > 0 || nodeData.elementCount() > 0)
             {
-                nodeData.categorySet(ZFSerializableKeyword_ZFTextTemplateParam_indexDataDefault);
+                nodeData.category(ZFSerializableKeyword_ZFTextTemplateParam_indexDataDefault);
                 serializableData.elementAdd(nodeData);
             }
         }
 
         return zftrue;
     })
-
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFTextTemplateParam, void, replaceDataAdd, ZFMP_IN(const zfchar *, key), ZFMP_IN(const zfchar *, value))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, const zfchar *, replaceData, ZFMP_IN(const zfchar *, key))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFTextTemplateParam, zfindex, replaceDataCount)
@@ -864,7 +853,7 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, const zfchar *,
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, replaceDataRemove, ZFMP_IN(const zfchar *, key))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, replaceDataRemoveAtIndex, ZFMP_IN(zfindex, index))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFTextTemplateParam, void, replaceDataRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, enableDataDefaultSet, ZFMP_IN(zfbool, enableDataDefault))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, enableDataDefault, ZFMP_IN(zfbool, enableDataDefault))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFTextTemplateParam, zfbool, enableDataDefault)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFTextTemplateParam, void, enableDataAdd, ZFMP_IN(const zfchar *, key), ZFMP_IN(zfbool, value))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, const zfbool *, enableData, ZFMP_IN(const zfchar *, key))
@@ -875,7 +864,7 @@ ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, zfbool, enableD
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, enableDataRemove, ZFMP_IN(const zfchar *, key))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, enableDataRemoveAtIndex, ZFMP_IN(zfindex, index))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFTextTemplateParam, void, enableDataRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, indexDataDefaultSet, ZFMP_IN(const ZFTextTemplateIndexData &, indexDataDefault))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, void, indexDataDefault, ZFMP_IN(const ZFTextTemplateIndexData &, indexDataDefault))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFTextTemplateParam, const ZFTextTemplateIndexData &, indexDataDefault)
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFTextTemplateParam, void, indexDataAdd, ZFMP_IN(const zfchar *, key), ZFMP_IN(const ZFTextTemplateIndexData &, value))
 ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFTextTemplateParam, const ZFTextTemplateIndexData *, indexData, ZFMP_IN(const zfchar *, key))

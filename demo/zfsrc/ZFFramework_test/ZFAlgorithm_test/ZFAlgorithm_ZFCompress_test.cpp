@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFAlgorithm_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -24,9 +15,9 @@ protected:
         this->testCaseOutputSeparator();
         this->testCaseOutput("compress buffer");
         {
-            ZFIOBufferedCallbackUsingBuffer io;
-            ZFCompress(io, ZFInputForBufferUnsafe("uncompressed text"));
-            ZFDecompress(ZFOutputDefault(), io);
+            zfblockedAlloc(ZFIOBufferByMemory, io);
+            ZFCompress(io->output(), ZFInputForBufferUnsafe("uncompressed text"));
+            ZFDecompress(ZFOutputDefault(), io->input());
         }
 
         this->testCaseOutputSeparator();
@@ -40,10 +31,10 @@ protected:
             this->testCaseOutput("original dst tree:");
             ZFFilePathInfoTreePrint(pathInfoDst, ZFOutputDefault(), "    ");
 
-            ZFIOBufferedCallbackUsingTmpFile io;
-            ZFCompressDir(io, pathInfoSrc);
+            zfblockedAlloc(ZFIOBufferByCacheFile, io);
+            ZFCompressDir(io->output(), pathInfoSrc);
 
-            ZFDecompressDir(pathInfoDst, io);
+            ZFDecompressDir(pathInfoDst, io->input());
             this->testCaseOutput("decompressed dst tree:");
             ZFFilePathInfoTreePrint(pathInfoDst, ZFOutputDefault(), "    ");
         }

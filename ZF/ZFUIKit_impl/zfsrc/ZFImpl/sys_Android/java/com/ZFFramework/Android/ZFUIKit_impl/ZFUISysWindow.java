@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import com.ZFFramework.Android.NativeUtil.ZFAndroidLog;
@@ -90,7 +81,7 @@ public final class ZFUISysWindow extends Activity {
         }
         return ((ZFUISysWindow)nativeWindow)._sysWindowOrientation;
     }
-    public static void native_sysWindowOrientationFlagsSet(Object nativeWindow,
+    public static void native_sysWindowOrientationFlags(Object nativeWindow,
                                                            int sysWindowOrientationFlags) {
         ZFUISysWindow nativeWindowTmp = (ZFUISysWindow)nativeWindow;
         nativeWindowTmp._sysWindowOrientationFlags = sysWindowOrientationFlags;

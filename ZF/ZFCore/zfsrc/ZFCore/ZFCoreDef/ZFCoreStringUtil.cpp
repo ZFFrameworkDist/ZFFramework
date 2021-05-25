@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCoreStringUtil.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -245,6 +236,36 @@ zfindex zfstringFindLastNotOf(ZF_IN const zfchar *src, ZF_IN zfindex srcLen, ZF_
         }
     }
     return zfindexMax();
+}
+zfindex zfstringReplace(ZF_IN_OUT zfstring &s, ZF_IN const zfchar *replaceFrom, ZF_IN const zfchar *replaceTo, ZF_IN_OPT zfindex maxCount /* = zfindexMax() */)
+{
+    zfindex replacedCount = 0;
+    zfindex replaceFromLen = zfslen(replaceFrom);
+    zfindex replaceToLen = zfslen(replaceTo);
+    zfindex pos = 0;
+    while(maxCount == zfindexMax() || replacedCount < maxCount)
+    {
+        pos = zfstringFind(s.cString() + pos, s.length() - pos, replaceFrom, replaceFromLen);
+        if(pos == zfindexMax()) {break;}
+        s.replace(pos, replaceFromLen, replaceTo);
+        pos += replaceToLen;
+        ++replacedCount;
+    }
+    return replacedCount;
+}
+zfindex zfstringReplaceReversely(ZF_IN_OUT zfstring &s, ZF_IN const zfchar *replaceFrom, ZF_IN const zfchar *replaceTo, ZF_IN_OPT zfindex maxCount /* = zfindexMax() */)
+{
+    zfindex replacedCount = 0;
+    zfindex replaceFromLen = zfslen(replaceFrom);
+    zfindex pos = s.length();
+    while(maxCount == zfindexMax() || replacedCount < maxCount)
+    {
+        pos = zfstringFindReversely(s.cString(), pos, replaceFrom, replaceFromLen);
+        if(pos == zfindexMax()) {break;}
+        s.replace(pos, replaceFromLen, replaceTo);
+        ++replacedCount;
+    }
+    return replacedCount;
 }
 
 ZF_NAMESPACE_GLOBAL_END

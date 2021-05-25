@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreDataPairSplit.h
  * @brief util to split data pairs from a string
@@ -34,7 +25,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * if leftToken has been set, then rightToken must also be set with same order\n
  * if rightToken not set, src can only be stopped by reach end
  */
-extern ZF_ENV_EXPORT zfbool zfCoreDataPairSplitString(ZF_OUT ZFCoreArray<ZFIndexRange> &outData,
+extern ZF_ENV_EXPORT zfbool zfCoreDataPairSplitString(ZF_IN_OUT ZFCoreArray<ZFIndexRange> &outData,
                                                       ZF_IN zfindex desiredCountOrIndexMax,
                                                       ZF_IN const zfchar *src,
                                                       ZF_IN_OPT zfindex srcLen = zfindexMax(),
@@ -48,7 +39,7 @@ extern ZF_ENV_EXPORT zfbool zfCoreDataPairSplitString(ZF_OUT ZFCoreArray<ZFIndex
  * @brief split data to int array format, see #zfCoreDataPairSplitString
  */
 template<typename T_int>
-zfbool zfCoreDataPairSplitInt(ZF_OUT ZFCoreArray<T_int> &outData,
+zfbool zfCoreDataPairSplitInt(ZF_IN_OUT ZFCoreArray<T_int> &outData,
                               ZF_IN zfindex desiredCountOrIndexMax,
                               ZF_IN const zfchar *src,
                               ZF_IN_OPT zfindex srcLen = zfindexMax(),
@@ -86,7 +77,7 @@ zfbool zfCoreDataPairSplitInt(ZF_OUT ZFCoreArray<T_int> &outData,
  * @brief split data to float array format, see #zfCoreDataPairSplitString
  */
 template<typename T_float>
-zfbool zfCoreDataPairSplitFloat(ZF_OUT ZFCoreArray<T_float> &outData,
+zfbool zfCoreDataPairSplitFloat(ZF_IN_OUT ZFCoreArray<T_float> &outData,
                                 ZF_IN zfindex desiredCountOrIndexMax,
                                 ZF_IN const zfchar *src,
                                 ZF_IN_OPT zfindex srcLen = zfindexMax(),

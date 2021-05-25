@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIListCellView.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -18,19 +9,19 @@ void ZFUIListCellView::objectOnInitFinish(void)
 {
     zfsuper::objectOnInitFinish();
 
-    zfint itemMargin = ZFUIGlobalStyle::DefaultStyle()->itemMargin();
+    zffloat itemMargin = ZFUIGlobalStyle::DefaultStyle()->itemMargin();
 
     this->internalBgViewAdd(this->cellIconContainer());
-    this->cellIconContainer()->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
-    this->cellIconContainer()->layoutParam()->layoutMarginSet(ZFUIMarginMake(itemMargin, itemMargin, 0, itemMargin));
+    this->cellIconContainer()->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
+    this->cellIconContainer()->layoutParam()->layoutMargin(ZFUIMarginMake(itemMargin, itemMargin, 0, itemMargin));
 
     this->internalBgViewAdd(this->cellCenterContainer());
-    this->cellCenterContainer()->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
-    this->cellCenterContainer()->layoutParam()->layoutMarginSet(ZFUIMarginMake(itemMargin));
+    this->cellCenterContainer()->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
+    this->cellCenterContainer()->layoutParam()->layoutMargin(ZFUIMarginMake(itemMargin));
 
     this->internalBgViewAdd(this->cellAccessoryContainer());
-    this->cellAccessoryContainer()->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
-    this->cellAccessoryContainer()->layoutParam()->layoutMarginSet(ZFUIMarginMake(0, itemMargin, itemMargin, itemMargin));
+    this->cellAccessoryContainer()->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
+    this->cellAccessoryContainer()->layoutParam()->layoutMargin(ZFUIMarginMake(0, itemMargin, itemMargin, itemMargin));
 }
 
 static void _ZFP_ZFUIListCellView_measureContent(ZF_IN ZFUIListCellView *view,
@@ -78,16 +69,16 @@ void ZFUIListCellView::layoutOnMeasure(ZF_OUT ZFUISize &ret,
     ret.width = cellIconSize.width + cellCenterSize.width + cellAccessorySize.width;
     ret.height = zfmMax(zfmMax(cellIconSize.height, cellCenterSize.height), cellAccessorySize.height);
 }
-void ZFUIListCellView::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
+void ZFUIListCellView::internalViewOnLayout(ZF_IN const ZFUIRect &bounds)
 {
-    zfsuper::internalBgViewOnLayout(bounds);
+    zfsuper::internalViewOnLayout(bounds);
 
     ZFUISize cellIconSize = ZFUISizeZero();
     ZFUISize cellCenterSize = ZFUISizeZero();
     ZFUISize cellAccessorySize = ZFUISizeZero();
-    _ZFP_ZFUIListCellView_measureContent(this, bounds.size, cellIconSize, cellCenterSize, cellAccessorySize);
+    _ZFP_ZFUIListCellView_measureContent(this, ZFUIRectGetSize(bounds), cellIconSize, cellCenterSize, cellAccessorySize);
 
-    this->cellIconContainer()->layout(ZFUIAlignApply(
+    this->cellIconContainer()->viewFrame(ZFUIAlignApply(
         ZFUIAlign::e_LeftInner | ZFUIAlignGetY(this->cellIconContainer()->layoutParam()->layoutAlign()),
         bounds,
         this->cellIconContainer()->layoutMeasuredSize(),
@@ -96,13 +87,13 @@ void ZFUIListCellView::internalBgViewOnLayout(ZF_IN const ZFUIRect &bounds)
     ZFUIMargin cellCenterMargin = this->cellCenterContainer()->layoutParam()->layoutMargin();
     cellCenterMargin.left += cellIconSize.width;
     cellCenterMargin.right += cellAccessorySize.width;
-    this->cellCenterContainer()->layout(ZFUIAlignApply(
+    this->cellCenterContainer()->viewFrame(ZFUIAlignApply(
         ZFUIAlign::e_LeftInner | ZFUIAlignGetY(this->cellCenterContainer()->layoutParam()->layoutAlign()),
         bounds,
         this->cellCenterContainer()->layoutMeasuredSize(),
         cellCenterMargin));
 
-    this->cellAccessoryContainer()->layout(ZFUIAlignApply(
+    this->cellAccessoryContainer()->viewFrame(ZFUIAlignApply(
         ZFUIAlign::e_RightInner | ZFUIAlignGetY(this->cellAccessoryContainer()->layoutParam()->layoutAlign()),
         bounds,
         this->cellAccessoryContainer()->layoutMeasuredSize(),

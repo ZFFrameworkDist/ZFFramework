@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFBase64.h
  * @brief base64 encoder and decoder
@@ -124,10 +115,8 @@ public:
 
 public:
     /** @brief see #ZFBase64EncodeCalcSize */
-    ZFMETHOD_INLINE_1(zfindex, base64EncodeCalcSize, ZFMP_IN(zfindex, srcLen))
-    {
-        return ZFBase64EncodeCalcSize(srcLen, this->base64LineBreakPos());
-    }
+    ZFMETHOD_DECLARE_1(zfindex, base64EncodeCalcSize,
+                       ZFMP_IN(zfindex, srcLen))
     /** @brief see #ZFBase64Encode */
     virtual inline zfbool base64Encode(ZF_OUT zfchar *buf,
                                        ZF_IN const void *src,
@@ -137,19 +126,14 @@ public:
         return ZFBase64Encode(buf, src, srcLen, outResultSize, this->base64Table(), this->base64Pad(), this->base64LineBreakPos());
     }
     /** @brief see #ZFBase64Encode */
-    ZFMETHOD_INLINE_3(zfbool, base64Encode,
-                      ZFMP_IN_OUT(const ZFOutput &, output),
-                      ZFMP_IN(const ZFInput &, input),
-                      ZFMP_OUT_OPT(zfindex *, outResultSize, zfnull))
-    {
-        return ZFBase64Encode(output, input, outResultSize, this->base64Table(), this->base64Pad(), this->base64LineBreakPos());
-    }
+    ZFMETHOD_DECLARE_3(zfbool, base64Encode,
+                       ZFMP_IN_OUT(const ZFOutput &, output),
+                       ZFMP_IN(const ZFInput &, input),
+                       ZFMP_OUT_OPT(zfindex *, outResultSize, zfnull))
 public:
     /** @brief see #ZFBase64DecodeCalcSize */
-    ZFMETHOD_INLINE_1(zfindex, base64DecodeCalcSize, ZFMP_IN(zfindex, srcLen))
-    {
-        return ZFBase64DecodeCalcSize(srcLen, this->base64LineBreakPos());
-    }
+    ZFMETHOD_DECLARE_1(zfindex, base64DecodeCalcSize,
+                       ZFMP_IN(zfindex, srcLen))
     /** @brief see #ZFBase64Decode */
     virtual inline zfbool base64Decode(ZF_OUT void *buf,
                                        ZF_IN const zfchar *src,
@@ -159,13 +143,10 @@ public:
         return ZFBase64Decode(buf, src, srcLen, outResultSize, this->base64Table(), this->base64Pad());
     }
     /** @brief see #ZFBase64Decode */
-    ZFMETHOD_INLINE_3(zfbool, base64Decode,
-                      ZFMP_IN_OUT(const ZFOutput &, output),
-                      ZFMP_IN(const ZFInput &, input),
-                      ZFMP_OUT_OPT(zfindex *, outResultSize, zfnull))
-    {
-        return ZFBase64Decode(output, input, outResultSize, this->base64Table(), this->base64Pad());
-    }
+    ZFMETHOD_DECLARE_3(zfbool, base64Decode,
+                       ZFMP_IN_OUT(const ZFOutput &, output),
+                       ZFMP_IN(const ZFInput &, input),
+                       ZFMP_OUT_OPT(zfindex *, outResultSize, zfnull))
 };
 
 ZF_NAMESPACE_GLOBAL_END

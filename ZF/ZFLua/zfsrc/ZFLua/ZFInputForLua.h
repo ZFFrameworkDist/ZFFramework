@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFInputForLua.h
  * @brief util to create #ZFInput for lua
@@ -30,15 +21,15 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *   ZFInputForLua(function(listenerData, userData)
  *       if listenerData:param1() == zfindexMax() then
  *           // return total input size
- *           listenerData:param1():zfvSet(yourTotalLength)
+ *           listenerData:param1():zfv(yourTotalLength)
  *       end
  *
  *       local buf = listenerData:param0()
  *       local count = listenerData:param1()
  *       // write to the buf
- *       buf:zfvSet(yourData)
+ *       buf:zfv(yourData)
  *       // save written length
- *       listenerData:param1():zfvSet(yourWrittenLength)
+ *       listenerData:param1():zfv(yourWrittenLength)
  *   end)
  * @endcode
  */

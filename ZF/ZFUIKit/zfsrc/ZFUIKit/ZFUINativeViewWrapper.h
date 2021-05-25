@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUINativeViewWrapper.h
  * @brief native view wrapper
@@ -25,7 +16,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *
  * used to hold a native view in ZFUIKit environment,
  * what you should do is create a #ZFUINativeViewWrapper
- * and store native view by #wrappedNativeViewSet\n
+ * and store native view by #wrappedNativeView\n
  * the embeded native view would be layouted to fill #ZFUINativeViewWrapper's frame,
  * to change it's layout logic, you should use it as a #ZFUIView\n
  * the #ZFUINativeViewWrapper itself is serializable,
@@ -40,11 +31,7 @@ protected:
     /**
      * @brief init with native view, see #ZFUINativeViewWrapper
      */
-    ZFOBJECT_ON_INIT_INLINE_1(ZFMP_IN(void *, wrappedNativeView))
-    {
-        this->objectOnInit();
-        zfself::wrappedNativeViewSet(wrappedNativeView);
-    }
+    ZFOBJECT_ON_INIT_DECLARE_1(ZFMP_IN(void *, wrappedNativeView))
 
     zfoverride
     virtual void objectOnInit(void) {zfsuper::objectOnInit();}
@@ -57,7 +44,7 @@ public:
     /**
      * @brief see #ZFUINativeViewWrapper
      */
-    ZFMETHOD_DECLARE_1(void, wrappedNativeViewSet,
+    ZFMETHOD_DECLARE_1(void, wrappedNativeView,
                        ZFMP_IN(void *, wrappedNativeView))
     /**
      * @brief see #ZFUINativeViewWrapper

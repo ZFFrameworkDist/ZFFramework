@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFProperty.h"
 #include "ZFObjectImpl.h"
 
@@ -36,7 +27,7 @@ zfbool ZFProperty::propertySerializable(void) const
     {
         return zffalse;
     }
-    const ZFTypeIdBase *t = ZFTypeIdGet(this->propertyTypeId());
+    const ZFTypeInfo *t = ZFTypeInfoForName(this->propertyTypeId());
     if(t == zfnull || !t->typeIdSerializable())
     {
         return zffalse;
@@ -48,16 +39,6 @@ ZFProperty::ZFProperty(void)
 : callbackIsValueAccessed(zfnull)
 , callbackIsInitValue(zfnull)
 , callbackValueReset(zfnull)
-, callbackValueSet(zfnull)
-, callbackValueGet(zfnull)
-, callbackValueGetRelease(zfnull)
-, callbackCompare(zfnull)
-, callbackGetInfo(zfnull)
-, callbackValueStore(zfnull)
-, callbackValueRelease(zfnull)
-, callbackSerializeFrom(zfnull)
-, callbackSerializeTo(zfnull)
-, callbackProgressUpdate(zfnull)
 , callbackUserRegisterInitValueSetup(zfnull)
 , _ZFP_ZFPropertyNeedInit(zftrue)
 , _ZFP_ZFProperty_propertyIsUserRegister(zffalse)
@@ -71,13 +52,12 @@ ZFProperty::ZFProperty(void)
 , _ZFP_ZFProperty_setterMethod(zfnull)
 , _ZFP_ZFProperty_getterMethod(zfnull)
 , _ZFP_ZFProperty_propertyClassOfRetainProperty(zfnull)
+, _ZFP_ZFProperty_callbackEnsureInit(zfnull)
 , _ZFP_ZFProperty_callbackDealloc(zfnull)
 , _ZFP_ZFPropertyLifeCycle_OnInit()
-, _ZFP_ZFPropertyLifeCycle_OnDealloc()
 , _ZFP_ZFPropertyLifeCycle_OnVerify()
 , _ZFP_ZFPropertyLifeCycle_OnAttach()
 , _ZFP_ZFPropertyLifeCycle_OnDetach()
-, _ZFP_ZFPropertyLifeCycle_OnUpdate()
 {
 }
 ZFProperty::~ZFProperty(void)
@@ -136,16 +116,16 @@ ZF_STATIC_INITIALIZER_END(ZFPropertyDataHolder)
 #define _ZFP_ZFPropertyMap (ZF_STATIC_INITIALIZER_INSTANCE(ZFPropertyDataHolder)->propertyMap)
 
 // ============================================================
-void ZFPropertyGetAllT(ZF_OUT ZFCoreArray<const ZFProperty *> &ret,
+void ZFPropertyGetAllT(ZF_IN_OUT ZFCoreArray<const ZFProperty *> &ret,
                        ZF_IN_OPT const ZFFilterForZFProperty *propertyFilter /* = zfnull */)
 {
     zfCoreMutexLocker();
     const ZFCoreMap &m = _ZFP_ZFPropertyMap;
     if(propertyFilter != zfnull)
     {
-        for(zfiterator it = m.iterator(); m.iteratorIsValid(it); )
+        for(zfiterator it = m.iterator(); m.iteratorValid(it); m.iteratorNext(it))
         {
-            _ZFP_ZFPropertyMapData *v = m.iteratorNextValue<_ZFP_ZFPropertyMapData *>(it);
+            _ZFP_ZFPropertyMapData *v = m.iteratorValue<_ZFP_ZFPropertyMapData *>(it);
             if(propertyFilter->filterCheckActive(&(v->propertyInfo)))
             {
                 ret.add(&(v->propertyInfo));
@@ -154,9 +134,9 @@ void ZFPropertyGetAllT(ZF_OUT ZFCoreArray<const ZFProperty *> &ret,
     }
     else
     {
-        for(zfiterator it = m.iterator(); m.iteratorIsValid(it); )
+        for(zfiterator it = m.iterator(); m.iteratorValid(it); m.iteratorNext(it))
         {
-            _ZFP_ZFPropertyMapData *v = m.iteratorNextValue<_ZFP_ZFPropertyMapData *>(it);
+            _ZFP_ZFPropertyMapData *v = m.iteratorValue<_ZFP_ZFPropertyMapData *>(it);
             ret.add(&(v->propertyInfo));
         }
     }
@@ -235,17 +215,8 @@ ZFProperty *_ZFP_ZFPropertyRegister(ZF_IN zfbool propertyIsUserRegister
                                     , ZF_IN ZFPropertyCallbackIsValueAccessed callbackIsValueAccessed
                                     , ZF_IN ZFPropertyCallbackIsInitValue callbackIsInitValue
                                     , ZF_IN ZFPropertyCallbackValueReset callbackValueReset
-                                    , ZF_IN ZFPropertyCallbackValueSet callbackValueSet
-                                    , ZF_IN ZFPropertyCallbackValueGet callbackValueGet
-                                    , ZF_IN ZFPropertyCallbackValueGetRelease callbackValueGetRelease
-                                    , ZF_IN ZFPropertyCallbackCompare callbackCompare
-                                    , ZF_IN ZFPropertyCallbackGetInfo callbackGetInfo
-                                    , ZF_IN ZFPropertyCallbackValueStore callbackValueStore
-                                    , ZF_IN ZFPropertyCallbackValueRelease callbackValueRelease
-                                    , ZF_IN ZFPropertyCallbackSerializeFrom callbackSerializeFrom
-                                    , ZF_IN ZFPropertyCallbackSerializeTo callbackSerializeTo
-                                    , ZF_IN ZFPropertyCallbackProgressUpdate callbackProgressUpdate
                                     , ZF_IN ZFPropertyCallbackUserRegisterInitValueSetup callbackUserRegisterInitValueSetup
+                                    , ZF_IN _ZFP_ZFPropertyCallbackEnsureInit callbackEnsureInit
                                     , ZF_IN _ZFP_ZFPropertyCallbackDealloc callbackDealloc
                                     )
 {
@@ -261,16 +232,6 @@ ZFProperty *_ZFP_ZFPropertyRegister(ZF_IN zfbool propertyIsUserRegister
     zfCoreAssert(callbackIsValueAccessed != zfnull);
     zfCoreAssert(callbackIsInitValue != zfnull);
     zfCoreAssert(callbackValueReset != zfnull);
-    zfCoreAssert(callbackValueSet != zfnull);
-    zfCoreAssert(callbackValueGet != zfnull);
-    zfCoreAssert(callbackValueGetRelease != zfnull);
-    zfCoreAssert(callbackCompare != zfnull);
-    zfCoreAssert(callbackGetInfo != zfnull);
-    zfCoreAssert(callbackValueStore != zfnull);
-    zfCoreAssert(callbackValueRelease != zfnull);
-    zfCoreAssert(callbackSerializeFrom != zfnull);
-    zfCoreAssert(callbackSerializeTo != zfnull);
-    zfCoreAssert(callbackProgressUpdate != zfnull);
 
     zfstring propertyInternalId;
     _ZFP_ZFPropertyInstanceSig(propertyInternalId, propertyOwnerClass->classNameFull(), name);
@@ -310,17 +271,8 @@ ZFProperty *_ZFP_ZFPropertyRegister(ZF_IN zfbool propertyIsUserRegister
         propertyInfo->callbackIsValueAccessed = callbackIsValueAccessed;
         propertyInfo->callbackIsInitValue = callbackIsInitValue;
         propertyInfo->callbackValueReset = callbackValueReset;
-        propertyInfo->callbackValueSet = callbackValueSet;
-        propertyInfo->callbackValueGet = callbackValueGet;
-        propertyInfo->callbackValueGetRelease = callbackValueGetRelease;
-        propertyInfo->callbackCompare = callbackCompare;
-        propertyInfo->callbackGetInfo = callbackGetInfo;
-        propertyInfo->callbackValueStore = callbackValueStore;
-        propertyInfo->callbackValueRelease = callbackValueRelease;
-        propertyInfo->callbackSerializeFrom = callbackSerializeFrom;
-        propertyInfo->callbackSerializeTo = callbackSerializeTo;
-        propertyInfo->callbackProgressUpdate = callbackProgressUpdate;
         propertyInfo->callbackUserRegisterInitValueSetup = callbackUserRegisterInitValueSetup;
+        propertyInfo->_ZFP_ZFProperty_callbackEnsureInit = callbackEnsureInit;
         propertyInfo->_ZFP_ZFProperty_callbackDealloc = callbackDealloc;
 
         propertyOwnerClass->_ZFP_ZFClass_propertyRegister(propertyInfo);
@@ -362,21 +314,7 @@ ZF_NAMESPACE_GLOBAL_END
 #include "../ZFObject.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyInternalId)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, zfbool, propertyIsUserRegister)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, zfbool, propertyIsDynamicRegister)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, zfbool, propertyIsDynamicRegisterWithCustomImpl)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, ZFObject *, propertyDynamicRegisterUserData)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFClass *, propertyOwnerClass)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyName)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyTypeName)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const zfchar *, propertyTypeId)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFMethod *, setterMethod)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFMethod *, getterMethod)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, zfbool, propertyIsRetainProperty)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFProperty, const ZFClass *, propertyClassOfRetainProperty)
-
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFPropertyGetAllT, ZFMP_OUT(ZFCoreArray<const ZFProperty *> &, ret), ZFMP_IN_OPT(const ZFFilterForZFProperty *, propertyFilter, zfnull))
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_2(void, ZFPropertyGetAllT, ZFMP_IN_OUT(ZFCoreArray<const ZFProperty *> &, ret), ZFMP_IN_OPT(const ZFFilterForZFProperty *, propertyFilter, zfnull))
 ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_1(ZFCoreArrayPOD<const ZFProperty *>, ZFPropertyGetAll, ZFMP_IN_OPT(const ZFFilterForZFProperty *, propertyFilter, zfnull))
 
 ZF_NAMESPACE_GLOBAL_END

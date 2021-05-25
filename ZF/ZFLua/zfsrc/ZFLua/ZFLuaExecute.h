@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFLuaExecute.h
  * @brief execute lua script
@@ -108,14 +99,16 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *       button:observerAdd(ZFUIButton.EventButtonOnClick(), function (listenerData, userData)
  *           end)
  *     @endcode
- *   -  `output:log(fmt, ...)`\n
+ *   -  `output:output(text, size)`\n
  *     write to output callback, typically usage:\n
- *     `zfLogT():log(fmt, xxx):log(fmt, xxx)`
+ *     `zfLogT():output(xxx):output(xxx)`
+ *   -  `input:input(buf, size)`\n
+ *     read from input callback
  * -  array
  *   -  `ZFCoreArrayCreate([a, b, c, ...])`\n
  *     create a array, params support these types:
  *     -  zfautoObject
- *     -  native lua number (stored as #ZFValue)
+ *     -  native lua number (stored as #v_zflongdouble)
  *     -  native lua string (stored as #v_zfstring)
  * -  param and return value
  *   -  simply use lua standard logic to process params and return values,
@@ -131,8 +124,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * -  util
  *   -  `zfstringAppend(s, fmt, ...)`
  *     or `zfstringWithFormat(fmt, ...)`\n
- *     fmt can be #v_zfstring, or native lua string,
- *     while only "%s" supported\n
+ *     fmt can be #v_zfstring, or native lua string\n
  *     following va_args support:
  *     -  #ZFObject, would be converted by #ZFObject::objectInfo
  *     -  lua string type
@@ -141,7 +133,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *     note: the va_args support params up to #ZFMETHOD_MAX_PARAM
  * -  path info
  *   -  `zfl_L()`\n
- *     lua_State of current chunk, stored as #v_VoidPointer
+ *     lua_State of current chunk, stored as #v_ZFPtr
  *   -  `ZFLuaPathInfo()`\n
  *     return path info of current context, null if not available
  *   -  `ZFLuaImport(localFilePath [, param0, param1, ...])`
@@ -151,7 +143,21 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *     or `ZFLuaImportOnce(inputCallback [, param0, param1, ...])`\n
  *     same as ZFLuaImport, but only run once for each input with same #ZFCallback::callbackId,
  *     you may also use ZFLuaImportOnceReset to reset the cache state\n
- *     this is useful to load #ZFDynamic contents from lua code
+ *     the recommended way to achieve "import" similar to other languages:
+ *     @code
+ *       // some lua module
+ *       if YourClass then return YourClass end
+ *       ZFDynamic()
+ *           :classBegin('YourClass')
+ *           :classEnd()
+ *
+ *       // other lua file that used the module:
+ *       ZFLuaImportOnce('SomePath/YourClass.lua')
+ *       // or import multiple quickly
+ *       // ZFLuaImportAll('SomePath')
+ *       // and use the module
+ *       local obj = YourClass()
+ *     @endcode
  *   -  `ZFLuaImportAll(localFilePath [, importCallback, importCallbackUserData, recursive])`
  *     or `ZFLuaImportAll(pathInfo [, importCallback, importCallbackUserData, recursive])`\n
  *     util method to import all lua files under specified path,
@@ -170,7 +176,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *     or zfLogTrimT()\n
  *     return a output callback to output, see above
  *   -  `zfl_tableInfo(v)`
- *     or `zfl_tableInfoPrint`\n
+ *     or `zfl_tableInfoPrint(v)`\n
  *     return string that represents the table
  *
  *

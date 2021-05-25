@@ -1,18 +1,16 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUINativeViewWrapper.h"
 #include "protocol/ZFProtocolZFUIView.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFOBJECT_REGISTER(ZFUINativeViewWrapper)
+
+ZFOBJECT_ON_INIT_DEFINE_1(ZFUINativeViewWrapper,
+                          ZFMP_IN(void *, wrappedNativeView))
+{
+    this->objectOnInit();
+    zfself::wrappedNativeView(wrappedNativeView);
+}
 
 void ZFUINativeViewWrapper::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
 {
@@ -24,7 +22,7 @@ void ZFUINativeViewWrapper::objectInfoOnAppend(ZF_IN_OUT zfstring &ret)
     }
 }
 
-ZFMETHOD_DEFINE_1(ZFUINativeViewWrapper, void, wrappedNativeViewSet,
+ZFMETHOD_DEFINE_1(ZFUINativeViewWrapper, void, wrappedNativeView,
                   ZFMP_IN(void *, wrappedNativeView))
 {
     zfclassNotPOD _ZFP_ZFUINativeViewWrapper_nativeImplViewDestroy
@@ -36,7 +34,7 @@ ZFMETHOD_DEFINE_1(ZFUINativeViewWrapper, void, wrappedNativeViewSet,
             // nothing to do
         }
     };
-    this->nativeImplViewSet(wrappedNativeView, _ZFP_ZFUINativeViewWrapper_nativeImplViewDestroy::action);
+    this->nativeImplView(wrappedNativeView, _ZFP_ZFUINativeViewWrapper_nativeImplViewDestroy::action);
 }
 ZFMETHOD_DEFINE_0(ZFUINativeViewWrapper, void *, wrappedNativeView)
 {
@@ -52,12 +50,12 @@ ZFMETHOD_DEFINE_2(ZFUINativeViewWrapper, void, measureNativeView,
         ret,
         this->wrappedNativeView(),
         ZFUISizeApplyScale(
-            ZFUIViewLayoutParam::sizeHintOffset(sizeHint, ZFUISizeMake(
+            ZFUILayoutParam::sizeHintOffset(sizeHint, ZFUISizeMake(
                     0 - ZFUIMarginGetWidth(nativeImplViewMargin),
                     0 - ZFUIMarginGetHeight(nativeImplViewMargin)
                 )),
-            this->scaleFixed()));
-    ZFUISizeApplyScaleReversely(ret, ret, this->scaleFixed());
+            this->UIScaleFixed()));
+    ZFUISizeApplyScaleReversely(ret, ret, this->UIScaleFixed());
     ZFUISizeApplyMarginReversely(ret, ret, nativeImplViewMargin);
 }
 

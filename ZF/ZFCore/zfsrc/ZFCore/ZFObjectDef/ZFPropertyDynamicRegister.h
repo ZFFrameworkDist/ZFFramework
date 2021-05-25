@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFPropertyDynamicRegister.h
  * @brief user registered ZFProperty
@@ -17,7 +8,6 @@
 
 #include "ZFMethodDynamicRegister.h"
 #include "ZFProperty.h"
-#include "ZFObjectSmartPointer.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
@@ -48,7 +38,7 @@ extern ZF_ENV_EXPORT void ZFPropertyDynamicUnregister(ZF_IN const ZFProperty *pr
 /**
  * @brief callback to setup init value for #ZFPropertyDynamicRegister
  *
- * returned object must be valid to #ZFTypeIdBase::typeIdWrapper
+ * returned object must be valid to #ZFTypeInfo::typeIdClass
  */
 typedef zfautoObject (*ZFPropertyDynamicRegisterInitValueCallback)(ZF_IN const ZFProperty *property);
 
@@ -59,67 +49,59 @@ zffinal zfclassLikePOD ZF_ENV_EXPORT ZFPropertyDynamicRegisterParam
 {
 public:
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyDynamicRegisterUserDataSet(ZF_IN ZFObject *propertyDynamicRegisterUserData);
+    ZFPropertyDynamicRegisterParam &propertyDynamicRegisterUserData(ZF_IN ZFObject *propertyDynamicRegisterUserData);
     /** @brief see #ZFPropertyDynamicRegister */
     ZFObject *propertyDynamicRegisterUserData(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyOwnerClassSet(ZF_IN const ZFClass *propertyOwnerClass);
+    ZFPropertyDynamicRegisterParam &propertyOwnerClass(ZF_IN const ZFClass *propertyOwnerClass);
     /** @brief see #ZFPropertyDynamicRegister */
     const ZFClass *propertyOwnerClass(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyTypeIdSet(ZF_IN const zfchar *propertyTypeId);
+    ZFPropertyDynamicRegisterParam &propertyTypeId(ZF_IN const zfchar *propertyTypeId);
     /** @brief see #ZFPropertyDynamicRegister */
     const zfchar *propertyTypeId(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyTypeNameSet(ZF_IN const zfchar *propertyTypeName);
+    ZFPropertyDynamicRegisterParam &propertyTypeName(ZF_IN const zfchar *propertyTypeName);
     /** @brief see #ZFPropertyDynamicRegister */
     const zfchar *propertyTypeName(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyNameSet(ZF_IN const zfchar *propertyName);
+    ZFPropertyDynamicRegisterParam &propertyName(ZF_IN const zfchar *propertyName);
     /** @brief see #ZFPropertyDynamicRegister */
     const zfchar *propertyName(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyClassOfRetainPropertySet(ZF_IN const ZFClass *propertyClassOfRetainProperty);
+    ZFPropertyDynamicRegisterParam &propertyClassOfRetainProperty(ZF_IN const ZFClass *propertyClassOfRetainProperty);
     /** @brief see #ZFPropertyDynamicRegister */
     const ZFClass *propertyClassOfRetainProperty(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyInitValueCallbackSet(ZF_IN ZFPropertyDynamicRegisterInitValueCallback propertyInitValueCallback);
+    ZFPropertyDynamicRegisterParam &propertyInitValueCallback(ZF_IN ZFPropertyDynamicRegisterInitValueCallback propertyInitValueCallback);
     /** @brief see #ZFPropertyDynamicRegister */
     ZFPropertyDynamicRegisterInitValueCallback propertyInitValueCallback(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertySetterTypeSet(ZF_IN ZFMethodPrivilegeType propertySetterType);
+    ZFPropertyDynamicRegisterParam &propertySetterType(ZF_IN ZFMethodPrivilegeType propertySetterType);
     /** @brief see #ZFPropertyDynamicRegister */
     ZFMethodPrivilegeType propertySetterType(void) const;
 
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyGetterTypeSet(ZF_IN ZFMethodPrivilegeType propertyGetterType);
+    ZFPropertyDynamicRegisterParam &propertyGetterType(ZF_IN ZFMethodPrivilegeType propertyGetterType);
     /** @brief see #ZFPropertyDynamicRegister */
     ZFMethodPrivilegeType propertyGetterType(void) const;
 
     // ============================================================
     // for custom impl
     /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyDynamicRegisterParam &propertyCustomImplSet(ZF_IN const ZFMethod *propertySetterMethod
-                                                          , ZF_IN const ZFMethod *propertyGetterMethod
-                                                          , ZF_IN ZFPropertyCallbackIsValueAccessed callbackIsValueAccessed
-                                                          , ZF_IN ZFPropertyCallbackIsInitValue callbackIsInitValue
-                                                          , ZF_IN ZFPropertyCallbackValueReset callbackValueReset
-                                                          , ZF_IN_OPT ZFPropertyCallbackValueSet callbackValueSet = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackValueGet callbackValueGet = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackValueGetRelease callbackValueGetRelease = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackCompare callbackCompare = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackGetInfo callbackGetInfo = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackValueStore callbackValueStore = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackValueRelease callbackValueRelease = zfnull
-                                                          , ZF_IN_OPT ZFPropertyCallbackProgressUpdate callbackProgressUpdate = zfnull
-                                                          );
+    ZFPropertyDynamicRegisterParam &propertyCustomImpl(ZF_IN const ZFMethod *propertySetterMethod
+                                                       , ZF_IN const ZFMethod *propertyGetterMethod
+                                                       , ZF_IN ZFPropertyCallbackIsValueAccessed callbackIsValueAccessed
+                                                       , ZF_IN ZFPropertyCallbackIsInitValue callbackIsInitValue
+                                                       , ZF_IN ZFPropertyCallbackValueReset callbackValueReset
+                                                       );
 
     /** @brief see #ZFPropertyDynamicRegister */
     const ZFMethod *propertyCustomImplSetterMethod(void) const;
@@ -131,22 +113,6 @@ public:
     ZFPropertyCallbackIsInitValue propertyCustomImplCallbackIsInitValue(void) const;
     /** @brief see #ZFPropertyDynamicRegister */
     ZFPropertyCallbackValueReset propertyCustomImplCallbackValueReset(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackValueSet propertyCustomImplCallbackValueSet(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackValueGet propertyCustomImplCallbackValueGet(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackValueGetRelease propertyCustomImplCallbackValueGetRelease(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackCompare propertyCustomImplCallbackCompare(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackGetInfo propertyCustomImplCallbackGetInfo(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackValueStore propertyCustomImplCallbackValueStore(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackValueRelease propertyCustomImplCallbackValueRelease(void) const;
-    /** @brief see #ZFPropertyDynamicRegister */
-    ZFPropertyCallbackProgressUpdate propertyCustomImplCallbackProgressUpdate(void) const;
 
     // ============================================================
 public:

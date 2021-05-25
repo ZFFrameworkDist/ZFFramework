@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIHint.h
  * @brief a quick UI hint to show short messages
@@ -68,8 +59,7 @@ public:
     /**
      * @brief get hint list in specified #ZFUISysWindow
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              ZFCoreArrayPOD<ZFUIHint *>, hintList,
+    ZFMETHOD_DECLARE_STATIC_1(ZFCoreArrayPOD<ZFUIHint *>, hintList,
                               ZFMP_IN_OPT(ZFUISysWindow *, inSysWindow, zfnull))
 
 public:
@@ -81,12 +71,12 @@ public:
      * -  have #ZFUIView::viewUIEnableTree been disabled
      * -  have #ZFUIGlobalStyle::itemSizeText as #ZFUIView::viewSizeMin
      * -  have #ZFUIWindow::windowLayoutParam as:
-     *   -  #ZFUISizeParamWrapWrap as #ZFUIViewLayoutParam::sizeParam
-     *   -  #ZFUIAlign::e_Center as #ZFUIViewLayoutParam::layoutAlign
-     *   -  #ZFUIGlobalStyle::itemMargin as #ZFUIViewLayoutParam::layoutMargin
+     *   -  #ZFUISizeParamWrapWrap as #ZFUILayoutParam::sizeParam
+     *   -  #ZFUIAlign::e_Center as #ZFUILayoutParam::layoutAlign
+     *   -  #ZFUIGlobalStyle::itemMargin as #ZFUILayoutParam::layoutMargin
      *
      * you should update the layout param of the hint window instead of the hint view,
-     * and the hint view would be layouted accorrding the hintWindow's layout param
+     * and the hint view would be layouted according the hintWindow's layout param
      */
     ZFMETHOD_DECLARE_0(ZFUIWindow *, hintWindow)
 
@@ -95,12 +85,9 @@ public:
      * @brief the actual hint view
      */
     ZFPROPERTY_RETAIN(ZFUIView *, hintContent)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIView *, hintContent)
-    ZFPROPERTY_OVERRIDE_ON_DETACH_DECLARE(ZFUIView *, hintContent)
-    /**
-     * @brief the animation to show the hint, null by default
-     */
-    ZFPROPERTY_RETAIN(ZFAnimation *, hintAniShow)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIView *, hintContent)
+    ZFPROPERTY_ON_DETACH_DECLARE(ZFUIView *, hintContent)
+
     /**
      * @brief hint duration in miliseconds, 0 to use #ZFUIHintDurationDefault, 0 by default
      *
@@ -108,21 +95,23 @@ public:
      */
     ZFPROPERTY_ASSIGN(zftimet, hintDuration)
     /** @brief util method to #hintDuration */
-    ZFMETHOD_INLINE_0(zftimet, hintDurationFixed)
-    {
-        return (this->hintDuration() > 0 ? this->hintDuration() : ZFUIHintDurationDefault());
-    }
+    ZFMETHOD_DECLARE_0(zftimet, hintDurationFixed)
+
+    /**
+     * @brief the animation to show the hint, null by default
+     */
+    ZFPROPERTY_RETAIN(ZFAnimation *, hintAniShow)
     /**
      * @brief the animation to hide the hint, null by default
      */
     ZFPROPERTY_RETAIN(ZFAnimation *, hintAniHide)
 
     /**
-     * @brief whether automatically fix frame accorrding to #ZFUIOnScreenKeyboardAutoResizeStart,
+     * @brief whether automatically fix frame according to #ZFUIOnScreenKeyboardAutoResizeStart,
      *   true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, hintWindowAutoResize, zftrue)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, hintWindowAutoResize)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, hintWindowAutoResize)
 
 public:
     /**

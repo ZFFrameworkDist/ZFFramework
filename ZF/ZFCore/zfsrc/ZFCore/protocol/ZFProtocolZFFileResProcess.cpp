@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFProtocolZFFileResProcess.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -74,38 +65,38 @@ zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resCopy(ZF_IN const zfchar 
 
 // ============================================================
 // res RW
-ZFToken ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resOpen(ZF_IN const zfchar *resPath)
+void *ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resOpen(ZF_IN const zfchar *resPath)
 {
     zfstring tmpPath;
     tmpPath += this->resRootPath();
     tmpPath += resPath;
     return ZFFileFileOpen(tmpPath.cString(), ZFFileOpenOption::e_Read);
 }
-zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resClose(ZF_IN ZFToken token)
+zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resClose(ZF_IN void *token)
 {
     return ZFFileFileClose(token);
 }
-zfindex ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resTell(ZF_IN ZFToken token)
+zfindex ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resTell(ZF_IN void *token)
 {
     return ZFFileFileTell(token);
 }
-zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resSeek(ZF_IN ZFToken token,
+zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resSeek(ZF_IN void *token,
                                                              ZF_IN zfindex byteSize,
                                                              ZF_IN_OPT ZFSeekPos position /* = ZFSeekPosBegin */)
 {
     return ZFFileFileSeek(token, byteSize, position);
 }
-zfindex ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resRead(ZF_IN ZFToken token,
+zfindex ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resRead(ZF_IN void *token,
                                                               ZF_IN void *buf,
                                                               ZF_IN zfindex maxByteSize)
 {
     return ZFFileFileRead(token, buf, maxByteSize);
 }
-zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resIsEof(ZF_IN ZFToken token)
+zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resIsEof(ZF_IN void *token)
 {
     return ZFFileFileIsEof(token);
 }
-zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resIsError(ZF_IN ZFToken token)
+zfbool ZFPROTOCOL_INTERFACE_CLASS(ZFFileResProcess)::resIsError(ZF_IN void *token)
 {
     return ZFFileFileIsError(token);
 }

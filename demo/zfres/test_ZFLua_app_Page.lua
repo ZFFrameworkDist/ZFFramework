@@ -6,8 +6,8 @@ local pm = args[1];
 pm:observerAdd(ZFUIPage.EventPageOnResume(), function(listenerData, userData)
         local page = listenerData:sender();
         local pm = page:pageManager();
-        pm:tagGet("leftButton"):viewVisibleSet(pm:pageCount() > 1);
-        pm:tagGet("centerButton"):buttonLabelTextSet(page:objectInfoOfInstance());
+        pm:objectTag("leftButton"):viewVisible(pm:pageCount() > 1);
+        pm:objectTag("centerButton"):buttonLabelText(page:objectInfoOfInstance());
     end, pm:objectHolder());
 
 _ZFP_ZFLua_app_test_setupPage = function(page)
@@ -16,18 +16,18 @@ _ZFP_ZFLua_app_test_setupPage = function(page)
                 local page = listenerData:sender();
 
                 local pageView = ZFUIButtonBasic();
-                page:pageContainer():childAdd(pageView, ZFUISizeParamFillFill());
+                page:pageView():childAdd(pageView, ZFUISizeParamFillFill());
 
-                pageView:buttonLabelTextSet(page:objectInfoOfInstance());
-                pageView:viewBackgroundColorSet(ZFUIColorRandom());
+                pageView:buttonLabelText(page:objectInfoOfInstance());
+                pageView:viewBackgroundColor(ZFUIColorRandom());
                 pageView:observerAdd(ZFUIButton.EventButtonOnClick(), function(listenerData, userData)
                         local page = userData:objectHolded();
-                        page:pageManager():requestPageCreate(_ZFP_ZFLua_app_test_setupPage(ZFUIPageBasic()));
+                        page:pageManager():pageCreate(_ZFP_ZFLua_app_test_setupPage(ZFUIPage()));
                     end, page:objectHolder());
             end);
         return page;
     end
 
-pm:requestPageCreate(_ZFP_ZFLua_app_test_setupPage(ZFUIPageBasic()));
-pm:pageAniOverrideForOnce(zfnull, zfnull);
+pm:pageCreate(_ZFP_ZFLua_app_test_setupPage(ZFUIPage()));
+pm:pageAniOverride(zfnull, zfnull);
 

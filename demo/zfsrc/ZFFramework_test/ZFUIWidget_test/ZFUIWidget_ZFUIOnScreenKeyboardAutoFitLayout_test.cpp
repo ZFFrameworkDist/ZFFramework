@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -25,28 +16,29 @@ protected:
         ZFUIView *container = zfnull;
         ZFUIKit_test_prepareTestWindow(window, container, this);
 
-        ZFUIOnScreenKeyboardAutoFitLayout *layout = ZFUIOnScreenKeyboardAutoFitStart(window);
+        zfblockedAlloc(ZFUIOnScreenKeyboardAutoFitLayout, layout);
+        container->childAdd(layout, ZFUISizeParamFillFill());
         this->prepareSettingButton(window, layout);
 
-        container->viewBackgroundColorSet(ZFUIColorGreen());
+        layout->viewBackgroundColor(ZFUIColorGreen());
         for(zfindex i = 0; i < 3; ++i)
         {
             zfblockedAlloc(ZFUITextEdit, view);
-            container->childAdd(view);
-            view->layoutParam()->sizeParamSet(ZFUISizeParamFillWrap());
-            view->viewBackgroundColorSet(ZFUIColorRandom());
-            view->layoutParam()->layoutMarginSet(ZFUIMarginMake(10));
+            layout->childAdd(view);
+            view->layoutParam()->sizeParam(ZFUISizeParamFillWrap());
+            view->viewBackgroundColor(ZFUIColorRandom());
+            view->layoutParam()->layoutMargin(ZFUIMarginMake(10));
         }
-        container->childAtIndex(0)->layoutParam()->layoutAlignSet(ZFUIAlign::e_TopInner);
-        container->childAtIndex(1)->layoutParam()->layoutAlignSet(ZFUIAlign::e_Center);
-        container->childAtIndex(2)->layoutParam()->layoutAlignSet(ZFUIAlign::e_BottomInner);
+        layout->childAtIndex(0)->layoutParam()->layoutAlign(ZFUIAlign::e_TopInner);
+        layout->childAtIndex(1)->layoutParam()->layoutAlign(ZFUIAlign::e_Center);
+        layout->childAtIndex(2)->layoutParam()->layoutAlign(ZFUIAlign::e_BottomInner);
     }
 
 private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIOnScreenKeyboardAutoFitLayout *layout)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
 
         ZFUIKit_test_prepareSettingForBoolProperty(settings, layout, ZFPropertyAccess(ZFUIOnScreenKeyboardAutoFitLayout, autoFitEnable));
         ZFUIKit_test_prepareSettingForBoolProperty(settings, layout, ZFPropertyAccess(ZFUIOnScreenKeyboardAutoFitLayout, autoFitFocusedViewToVisible));

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFAnimationTimeLine.h
  * @brief abstract animation based on time line
@@ -22,16 +13,22 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 // ============================================================
 zfclassFwd _ZFP_ZFAnimationTimeLinePrivate;
 /**
- * @brief abstract animation based on time line
+ * @brief animation based on time line
+ *
+ * this is a dummy animation holder which do nothing by default,
+ * you should either:
+ * -  supply subclass and implement actual animation by overriding
+ *   #aniTimeLineOnUpdate
+ * -  attach observer to #EventAniTimeLineOnUpdate
  *
  * serializable data:
  * @code
  *   <ZFAnimationTimeLine />
  * @endcode
  */
-zfabstract ZF_ENV_EXPORT ZFAnimationTimeLine : zfextends ZFAnimation
+zfclass ZF_ENV_EXPORT ZFAnimationTimeLine : zfextends ZFAnimation
 {
-    ZFOBJECT_DECLARE_ABSTRACT(ZFAnimationTimeLine, ZFAnimation)
+    ZFOBJECT_DECLARE(ZFAnimationTimeLine, ZFAnimation)
 
 public:
     // ============================================================
@@ -39,7 +36,7 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * param0 is a float #ZFValue containing current time line progress
+     * param0 is a float #v_zffloat containing current time line progress
      */
     ZFOBSERVER_EVENT(AniTimeLineOnUpdate)
 
@@ -63,15 +60,19 @@ public:
     /**
      * @brief curve for time line, null to use linear time line, null by default
      */
-    ZFPROPERTY_RETAIN(ZFTimeLineCurve *, aniTimeLineCurve)
+    ZFPROPERTY_RETAIN(ZFTimeLineCurve *, aniCurve)
     /**
-     * @brief interval to update time line, in miliseconds, 30 by default
+     * @brief interval to update time line, in miliseconds, 0 by default
+     *
+     * when this value is 0, we would use special logic to achieve global time line control:
+     * -# calculate frame count by #aniDurationFixed/#ZFGlobalTimerIntervalDefault
+     * -# step each frame by #ZFGlobalTimerInterval, until reach the frame count
+     *
+     * for example, if you increace #ZFGlobalTimerInterval,
+     * the animation would looks slower\n
+     * this is useful to achieve accurate time line control
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, aniTimeLineInterval, 30)
-    /**
-     * @brief whether time line callback should be called in main thread, true by default
-     */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, aniTimeLineNotifyInMainThread, zftrue)
+    ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, aniTimeLineInterval, 0)
 
     // ============================================================
     // start stop
@@ -85,11 +86,18 @@ protected:
     /**
      * @brief called to do the actual update
      *
-     * note, progress is based on #aniTimeLineCurve,
+     * note, progress is based on #aniCurve,
      * which typically has value in range [0, 1] as base value,
      * but may exceeds the range for bounce curve
      */
-    virtual void aniTimeLineOnUpdate(ZF_IN zffloat progress) zfpurevirtual;
+    virtual void aniTimeLineOnUpdate(ZF_IN zffloat progress);
+
+protected:
+    zfoverride
+    virtual zfbool serializableOnCheck(void)
+    {
+        return this->classData() != ZFAnimationTimeLine::ClassData();
+    }
 
 private:
     _ZFP_ZFAnimationTimeLinePrivate *d;

@@ -1,16 +1,8 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZF_impl.h"
 #include "ZFMainEntry_sys_iOS.h"
 #include "ZFCore/ZFMainEntry.h"
 #include "ZFCore/ZFArray.h"
+#include "ZFCore/protocol/ZFProtocolZFMainEntry.h"
 
 #if ZF_ENV_sys_iOS
 
@@ -91,7 +83,7 @@ ZF_NAMESPACE_GLOBAL_END
 }
 - (void)appOnReceiveMemoryWarning
 {
-    ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventAppOnMemoryLow());
+    ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventAppOnMemoryLow());
 }
 @end
 

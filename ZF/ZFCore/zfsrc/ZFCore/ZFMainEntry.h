@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFMainEntry.h
  * @brief app's main entry wrapper
@@ -18,47 +9,59 @@
 #include "ZFObject.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-typedef zfint (*_ZFP_ZFMainFuncType)(ZF_IN_OPT ZFCoreArray<zfstring> const &params);
-extern ZF_ENV_EXPORT void _ZFP_ZFMainRegister(ZF_IN _ZFP_ZFMainFuncType func);
+// ============================================================
 /**
  * @brief app's main entry wrapper
  *
  * typical usage:
  * @code
  *   // in your main.cpp
- *   #include "ZFMainEntry.h"
- *   ZFMAIN_ENTRY(params)
+ *   ZFMAIN_ENTRY()
  *   {
+ *       // params hold the params from certain app routine,
+ *       // it's not ensured each implementation would have same params format
+ *       ZFCoreArray<zfstring> const &params = ZFApp::appParams();
+ *
  *       // do your work,
  *       // which usually is creating your main window
  *
- *       // params hold the params from certain app routine,
- *       // it's not ensured each implementation would have same params format,
- *       // also note that params is not ensured keep alive during app life time
- *       return 0;
+ *       // specify exit code if necessary
+ *       ZFApp::appExitCode(-1);
  *   }
  * @endcode
  */
-#define ZFMAIN_ENTRY(paramName) \
-    zfint _ZFMain(ZF_IN_OPT ZFCoreArray<zfstring> const &paramName); \
+#define ZFMAIN_ENTRY() \
+    static void _ZFMain(void); \
     ZF_STATIC_REGISTER_INIT(ZFMainEntryRegister) \
     { \
-        _ZFP_ZFMainRegister(_ZFMain); \
+        zfCoreAssertWithMessageTrim(_ZFP_ZFMainFunc() == zfnull, "ZFMAIN_ENTRY already registered"); \
+        _ZFP_ZFMainFunc() = _ZFMain; \
     } \
     ZF_STATIC_REGISTER_END(ZFMainEntryRegister) \
-    zfint _ZFMain(ZF_IN_OPT ZFCoreArray<zfstring> const &paramName)
+    static void _ZFMain(void)
+
+// ============================================================
+ZF_NAMESPACE_BEGIN(ZFApp)
 
 /**
- * @brief enter main app entry
+ * @brief get the app params
  *
- * used by implementation only
+ * NOTE: the app params only avaialble after #ZFMAIN_ENTRY
  */
-extern ZF_ENV_EXPORT zfint ZFMainExecute(ZF_IN_OPT ZFCoreArray<zfstring> const &params = ZFCoreArray<zfstring>());
+ZFMETHOD_FUNC_DECLARE_0(const ZFCoreArray<zfstring> &, appParams)
 
-/**
- * @brief util method to call #ZFFrameworkInit, #ZFMainExecute and #ZFFrameworkCleanup
- */
-extern ZF_ENV_EXPORT int ZFMainCommonEntry(ZF_IN int argc = 0, char **argv = zfnull);
+/** @brief exit code for app, 0 by default */
+ZFMETHOD_FUNC_DECLARE_1(void, appExitCode, ZFMP_IN(zfint, exitCode))
+/** @brief exit code for app, 0 by default */
+ZFMETHOD_FUNC_DECLARE_0(zfint, appExitCode)
+
+ZF_NAMESPACE_END(ZFApp)
+
+// ============================================================
+typedef void (*_ZFP_ZFMainFuncType)(void);
+extern ZF_ENV_EXPORT _ZFP_ZFMainFuncType &_ZFP_ZFMainFunc(void);
+extern ZF_ENV_EXPORT ZFCoreArray<zfstring> &_ZFP_ZFApp_appParams(void);
+extern ZF_ENV_EXPORT zfint &_ZFP_ZFApp_appExitCode(void);
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFMainEntry_h_

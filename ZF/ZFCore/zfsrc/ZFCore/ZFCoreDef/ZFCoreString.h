@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreString.h
  * @brief string impl to reduce dependency of std::string
@@ -258,11 +249,6 @@ public:
     /** @brief append string */
     inline _zfstr &append(ZF_IN const _zfstr &s) {this->append(s.cString(), s.length()); return *this;}
     /** @brief append string */
-    inline _zfstr &append(ZF_IN const _zfstr &s, ZF_IN zfindex pos, ZF_IN zfindex len = zfindexMax())
-    {
-        return this->append(s.cString() + pos, (pos < s.length()) ? ((len > s.length() - pos) ? (s.length() - pos) : len) : 0);
-    }
-    /** @brief append string */
     inline _zfstr &append(ZF_IN const T_Char *s) {return this->append(s, zfindexMax());}
     /** @brief append string */
     _zfstr &append(ZF_IN const T_Char *s, ZF_IN zfindex len)
@@ -286,11 +272,6 @@ public:
 public:
     /** @brief replace all content of the string */
     inline _zfstr &assign(ZF_IN const _zfstr &s) {return this->assign(s.cString(), s.length());}
-    /** @brief replace all content of the string */
-    inline _zfstr &assign(ZF_IN const _zfstr &s, ZF_IN zfindex pos, ZF_IN zfindex len = zfindexMax())
-    {
-        return this->assign(s.cString() + pos, (pos < s.length()) ? ((len > s.length() - pos) ? (s.length() - pos) : len) : 0);
-    }
     /** @brief replace all content of the string */
     inline _zfstr &assign(ZF_IN const T_Char *s) {return this->assign(s, zfindexMax());}
     /** @brief replace all content of the string */
@@ -318,11 +299,6 @@ public:
 public:
     /** @brief insert string */
     inline _zfstr &insert(ZF_IN zfindex insertAt, ZF_IN const _zfstr &s) {return this->insert(insertAt, s.cString(), s.length());}
-    /** @brief insert string */
-    inline _zfstr &insert(ZF_IN zfindex insertAt, ZF_IN const _zfstr &s, ZF_IN zfindex pos, ZF_IN zfindex len = zfindexMax())
-    {
-        return this->insert(insertAt, s.cString() + pos, (pos < s.length()) ? ((len > s.length() - pos) ? (s.length() - pos) : len) : 0);
-    }
     /** @brief insert string */
     inline _zfstr &insert(ZF_IN zfindex insertAt, ZF_IN const T_Char *s) {return this->insert(insertAt, s, zfindexMax());}
     /** @brief insert string */
@@ -352,11 +328,6 @@ public:
 public:
     /** @brief replace string in range */
     inline _zfstr &replace(ZF_IN zfindex replacePos, ZF_IN zfindex replaceLen, ZF_IN const _zfstr &s) {return this->replace(replacePos, replaceLen, s.cString(), s.length());}
-    /** @brief replace string in range */
-    _zfstr &replace(ZF_IN zfindex replacePos, ZF_IN zfindex replaceLen, ZF_IN const _zfstr &s, ZF_IN zfindex pos, ZF_IN zfindex len = zfindexMax())
-    {
-        return this->replace(replacePos, replaceLen, s.cString() + pos, (pos < s.length()) ? ((len > s.length() - pos) ? (s.length() - pos) : len) : 0);
-    }
     /** @brief replace string in range */
     inline _zfstr &replace(ZF_IN zfindex replacePos, ZF_IN zfindex replaceLen, ZF_IN const T_Char *s) {return this->replace(replacePos, replaceLen, s, zfindexMax());}
     /** @brief replace string in range */
@@ -420,7 +391,7 @@ public:
 
 public:
     /** @brief ensure the string's capacity */
-    inline void capacitySet(ZF_IN zfindex capacity) {_capacityRequire(capacity);}
+    inline void capacity(ZF_IN zfindex capacity) {_capacityRequire(capacity);}
     /** @brief capacity of the string */
     zfindex capacity(void)
     {
@@ -511,7 +482,7 @@ private:
                     capacity *= 2;
                 }
                 T_Char *buf = (T_Char *)zfmalloc(capacity * sizeof(T_Char));
-                zfmemcpy(buf, d.d.buf, d.length * sizeof(T_Char));
+                zfmemcpy(buf, d.d.buf, (d.length + 1) * sizeof(T_Char));
                 d.d.s.s = buf;
                 d.d.s.capacity = capacity;
                 d.d.s.length = d.length;

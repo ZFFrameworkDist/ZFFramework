@@ -1,18 +1,36 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIButtonRatio.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFOBJECT_REGISTER(ZFUIButtonRatio)
 ZFSTYLE_DEFAULT_DEFINE(ZFUIButtonRatio)
+
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonRatio, zfbool, buttonCheckable)
+{
+    propertyValue = zftrue;
+}
+
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonRatio, ZFUIAlignFlags, buttonContentAlign)
+{
+    propertyValue = ZFUIAlign::e_LeftInner;
+}
+
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonRatio, ZFUIImageView *, buttonIconStyleNormal)
+{
+    propertyValue.to<ZFUIImageView *>()->image(zfRes("ZFUIWidget/ZFUIButtonRatio_IconNormal.png"));
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonRatio, ZFUIImageView *, buttonIconStyleHighlighted)
+{
+    propertyValue.to<ZFUIImageView *>()->image(zfRes("ZFUIWidget/ZFUIButtonRatio_IconHighlighted.png"));
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonRatio, ZFUIImageView *, buttonIconStyleChecked)
+{
+    propertyValue.to<ZFUIImageView *>()->image(zfRes("ZFUIWidget/ZFUIButtonRatio_IconChecked.png"));
+}
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIButtonRatio, ZFUIImageView *, buttonIconStyleCheckedHighlighted)
+{
+    propertyValue.to<ZFUIImageView *>()->image(zfRes("ZFUIWidget/ZFUIButtonRatio_IconCheckedHighlighted.png"));
+}
 
 ZF_NAMESPACE_GLOBAL_END
 

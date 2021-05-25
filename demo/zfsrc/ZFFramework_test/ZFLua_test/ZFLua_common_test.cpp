@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLua_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -49,8 +40,7 @@ public:
         ret += "(modified)";
         return ret;
     }
-    ZFMETHOD_INLINE_DETAIL_1(public, ZFMethodTypeStatic,
-                             zfstring &, MyMethod, ZFMP_IN(zfstring &, param0))
+    ZFMETHOD_INLINE_STATIC_1(zfstring &, MyMethod, ZFMP_IN(zfstring &, param0))
     {
         zfLogT() << param0;
         param0 += "(modified)";
@@ -65,13 +55,11 @@ public:
     {
         zfLogT() << param0;
     }
-    ZFMETHOD_INLINE_DETAIL_1(public, ZFMethodTypeStatic,
-                             void, MyMethodOverload, ZFMP_IN(const zfchar *, param0))
+    ZFMETHOD_INLINE_STATIC_1(void, MyMethodOverload, ZFMP_IN(const zfchar *, param0))
     {
         zfLogT() << param0;
     }
-    ZFMETHOD_INLINE_DETAIL_1(public, ZFMethodTypeStatic,
-                             void, MyMethodOverload, ZFMP_IN(zfbool, param0))
+    ZFMETHOD_INLINE_STATIC_1(void, MyMethodOverload, ZFMP_IN(zfbool, param0))
     {
         zfLogT() << param0;
     }
@@ -89,7 +77,7 @@ protected:
         zfsuper::testCaseOnStart();
 
         {
-            ZFCoreStatisticInvokeTimeAccurateLoggerOneTime("run lua code");
+            ZFCoreStatisticInvokeTimeLoggerOneTime("run lua code");
             ZFLuaExecute(
                     "local obj = _ZFP_ZFLua_common_test_Object()\n"
                     "print('========================================')\n"
@@ -123,7 +111,7 @@ protected:
         }
 
         {
-            ZFCoreStatisticInvokeTimeAccurateLoggerOneTime("lua gc");
+            ZFCoreStatisticInvokeTimeLoggerOneTime("lua gc");
             ZFLuaGC();
         }
 

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCallbackSerializable.h
  * @brief serialization for ZFCallback
@@ -78,7 +69,7 @@ typedef zfbool (*_ZFP_ZFCallbackSerializeCustomCallback)(ZF_IN_OUT ZFCallback &r
 extern ZF_ENV_EXPORT void _ZFP_ZFCallbackSerializeCustomTypeRegister(ZF_IN const zfchar *customType,
                                                                      ZF_IN _ZFP_ZFCallbackSerializeCustomCallback serializeCallback);
 extern ZF_ENV_EXPORT void _ZFP_ZFCallbackSerializeCustomTypeUnregister(ZF_IN const zfchar *customType);
-extern ZF_ENV_EXPORT _ZFP_ZFCallbackSerializeCustomCallback _ZFP_ZFCallbackSerializeCustomTypeGet(ZF_IN const zfchar *customType);
+extern ZF_ENV_EXPORT _ZFP_ZFCallbackSerializeCustomCallback _ZFP_ZFCallbackSerializeCustomTypeForName(ZF_IN const zfchar *customType);
 
 /**
  * @brief see #ZFTypeId_ZFCallback

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_ZFLua.h"
 #include "ZFImpl_ZFLua_PathInfo.h"
 
@@ -39,10 +30,9 @@ static int _ZFP_ZFImpl_ZFLua_zfLogT(ZF_IN lua_State *L)
     int count = (int)lua_gettop(L);
     if(count != 0)
     {
-        ZFLuaErrorOccurredTrim(
+        return ZFImpl_ZFLua_luaError(L,
             "[zfLogT] takes no param, got %zi param",
             (zfindex)count);
-        return ZFImpl_ZFLua_luaError(L);
     }
 
     zfblockedAlloc(v_ZFCallback, ret);
@@ -56,10 +46,9 @@ static int _ZFP_ZFImpl_ZFLua_zfLogTrimT(ZF_IN lua_State *L)
     int count = (int)lua_gettop(L);
     if(count != 0)
     {
-        ZFLuaErrorOccurredTrim(
+        return ZFImpl_ZFLua_luaError(L,
             "[zfLogTrimT] takes no param, got %zi param",
             (zfindex)count);
-        return ZFImpl_ZFLua_luaError(L);
     }
 
     zfblockedAlloc(v_ZFCallback, ret);

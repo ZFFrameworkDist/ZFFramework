@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFPropertyUserRegister.h"
 #include "ZFObjectImpl.h"
 
@@ -36,6 +27,13 @@ void ZFPropertyUserUnregister(ZF_IN const ZFProperty *zfproperty)
         );
 
     _ZFP_ZFPropertyUnregister(zfproperty);
+}
+
+void ZFPropertyUserRegisterNotifyUpdate(ZF_IN ZFObject *ownerObject,
+                                        ZF_IN const ZFProperty *property,
+                                        ZF_IN const void *propertyValueOld)
+{
+    ownerObject->_ZFP_ZFObject_objectPropertyValueOnUpdate(property, propertyValueOld);
 }
 
 ZF_NAMESPACE_GLOBAL_END

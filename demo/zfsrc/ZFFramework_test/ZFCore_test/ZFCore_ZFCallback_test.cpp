@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -20,8 +11,7 @@ zfclass _ZFP_ZFCore_ZFCallback_test_Class : zfextends ZFObject
         zfLogT();
     }
 
-    ZFMETHOD_INLINE_DETAIL_0(public, ZFMethodTypeStatic,
-                             void, classStaticMember)
+    ZFMETHOD_INLINE_STATIC_0(void, classStaticMember)
     {
         zfLogT();
     }

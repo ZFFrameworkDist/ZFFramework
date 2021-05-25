@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListAdapter.h
  * @brief abstract list adpater to supply cells for list view
@@ -36,7 +27,7 @@ public:
      * called when list adapter's content changed
      * and owner list view needs to be updated,
      * param0 is null to update entire list,
-     * or a #ZFValue::indexValue shows which cell to reload\n
+     * or a #v_zfindex shows which cell to reload\n
      * typically, this event would be fired by #listAdapterNotifyReload
      * which would be called by list adapter impl
      */
@@ -46,7 +37,7 @@ public:
      *
      * called when update list cell,
      * param0 is the #ZFUIListCell,
-     * param1 is the index of the list cell (as #ZFValue::indexValue)
+     * param1 is the index of the list cell (as #v_zfindex)
      */
     ZFOBSERVER_EVENT(ListCellOnUpdate)
     /**
@@ -65,10 +56,7 @@ public:
     /**
      * @brief list's orientation
      */
-    ZFMETHOD_INLINE_0(ZFUIOrientationEnum, listOrientation)
-    {
-        return this->_ZFP_ZFUIListAdapter_listOrientation;
-    }
+    ZFMETHOD_DECLARE_0(ZFUIOrientationEnum, listOrientation)
 
 private:
     ZFUISize _ZFP_ZFUIListAdapter_listContainerSize;
@@ -76,10 +64,7 @@ public:
     /**
      * @brief list container's size
      */
-    ZFMETHOD_INLINE_0(const ZFUISize &, listContainerSize)
-    {
-        return this->_ZFP_ZFUIListAdapter_listContainerSize;
-    }
+    ZFMETHOD_DECLARE_0(const ZFUISize &, listContainerSize)
 
 public:
     /**
@@ -90,11 +75,8 @@ public:
      * setting #cellSizeFill would override this property,
      * and use #listContainerSize to layout each cell
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, cellSizeHint, ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(zfint, cellSizeHint)
-    {
-        this->listAdapterNotifyReload();
-    }
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, cellSizeHint, ZFUIGlobalStyle::DefaultStyle()->itemSizeListCell())
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, cellSizeHint)
 
     /**
      * @brief if #cellSizeHint not set, whether fill cell size to #listContainerSize,
@@ -103,10 +85,7 @@ public:
      * this property is useful when combined with #ZFUIScrollView::scrollAlignToPageHorizontal series
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, cellSizeFill, zffalse)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(zfbool, cellSizeFill)
-    {
-        this->listAdapterNotifyReload();
-    }
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, cellSizeFill)
 
     // ============================================================
     // basic list cell access
@@ -114,11 +93,8 @@ public:
     /**
      * @brief see #EventListAdapterOnReload
      */
-    ZFMETHOD_INLINE_1(void, listAdapterNotifyReload,
-                      ZFMP_IN_OPT(zfindex, atIndexOrMax, zfindexMax()))
-    {
-        this->listAdapterOnReload(atIndexOrMax);
-    }
+    ZFMETHOD_DECLARE_1(void, listAdapterNotifyReload,
+                       ZFMP_IN_OPT(zfindex, atIndexOrMax, zfindexMax()))
     /**
      * @brief cell count
      */
@@ -137,9 +113,9 @@ public:
      * util it's coming to visible\n
      * return a -1 size to measure the cell automatically,
      * otherwise, the cell's size is fixed\n
-     * return #cellSizeHint accorrding to #cellSizeFill by default
+     * return #cellSizeHint according to #cellSizeFill by default
      */
-    ZFMETHOD_DECLARE_2(zfint, cellSizeAtIndex,
+    ZFMETHOD_DECLARE_2(zffloat, cellSizeAtIndex,
                        ZFMP_IN(zfindex, index),
                        ZFMP_IN(ZFUIListCell *, cell))
 
@@ -152,7 +128,7 @@ protected:
     virtual inline void listAdapterOnReload(ZF_IN_OPT zfindex atIndexOrMax = zfindexMax())
     {
         this->toObject()->observerNotify(zfself::EventListAdapterOnReload(),
-            (atIndexOrMax == zfindexMax()) ? zfnull : ZFValue::indexValueCreate(atIndexOrMax).toObject());
+            (atIndexOrMax == zfindexMax()) ? zfnull : zflineAlloc(v_zfindex, atIndexOrMax));
     }
     /**
      * @brief see #EventListCellOnUpdate
@@ -160,7 +136,7 @@ protected:
     virtual inline void cellOnUpdate(ZF_IN zfindex atIndex,
                                      ZF_IN ZFUIListCell *cell)
     {
-        this->toObject()->observerNotify(zfself::EventListCellOnUpdate(), cell, ZFValue::indexValueCreate(atIndex).toObject());
+        this->toObject()->observerNotify(zfself::EventListCellOnUpdate(), cell, zflineAlloc(v_zfindex, atIndex));
     }
 
     // ============================================================
@@ -174,7 +150,7 @@ protected:
      */
     virtual inline zfautoObject cellCacheOnAccess(ZF_IN zfindex index)
     {
-        return zfautoObjectNull();
+        return zfnull;
     }
     zffinal inline void _ZFP_ZFUIListAdapter_cellCacheOnRecycle(ZF_IN ZFUIListCell *cell)
     {
@@ -197,7 +173,7 @@ protected:
 
 public:
     /** @brief see #cellCacheOnRecycle */
-    ZFMETHOD_DECLARE_1(zfautoObject, cellCacheDefaultAccess,
+    ZFMETHOD_DECLARE_1(zfautoObjectT<ZFUIListCell *>, cellCacheDefaultAccess,
                        ZFMP_IN(const zfchar *, key))
     /** @brief see #cellCacheOnRecycle */
     ZFMETHOD_DECLARE_2(void, cellCacheDefaultRecycle,

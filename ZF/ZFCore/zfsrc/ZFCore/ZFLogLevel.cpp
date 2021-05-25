@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLogLevel.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -18,15 +9,16 @@ ZFOBSERVER_EVENT_GLOBAL_REGISTER(LogLevelOnChange)
 ZF_NAMESPACE_END(ZFGlobalEvent)
 
 static ZFLogLevelEnum _ZFP_ZFLogLevelGlobal = ZFLogLevel::EnumDefault();
-void ZFLogLevelSet(ZF_IN ZFLogLevelEnum level)
+ZFMETHOD_FUNC_DEFINE_1(void, ZFLogLevelDefault,
+                       ZFMP_IN(ZFLogLevelEnum, level))
 {
     _ZFP_ZFLogLevelGlobal = level;
     if(ZFFrameworkStateCheck(ZFLevelZFFrameworkEssential) == ZFFrameworkStateAvailable)
     {
-        ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventLogLevelOnChange());
+        ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventLogLevelOnChange());
     }
 }
-ZFLogLevelEnum ZFLogLevelGet(void)
+ZFMETHOD_FUNC_DEFINE_0(ZFLogLevelEnum, ZFLogLevelDefault)
 {
     return _ZFP_ZFLogLevelGlobal;
 }
@@ -38,6 +30,9 @@ ZF_GLOBAL_INITIALIZER_DESTROY(ZFLogLevelReset)
     _ZFP_ZFLogLevelGlobal = ZFLogLevel::EnumDefault();
 }
 ZF_GLOBAL_INITIALIZER_END(ZFLogLevelReset)
+
+ZFMETHOD_FUNC_INLINE_DEFINE_1(zfbool, ZFLogLevelIsActive,
+                              ZFMP_IN(ZFLogLevelEnum, level))
 
 ZF_NAMESPACE_GLOBAL_END
 

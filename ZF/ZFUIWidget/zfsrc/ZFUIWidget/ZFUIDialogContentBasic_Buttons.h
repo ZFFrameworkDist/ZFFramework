@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIDialogContentBasic_Buttons.h
  * @brief buttons for #ZFUIDialogContentBasic
@@ -26,7 +17,7 @@ zfclass ZF_ENV_EXPORT ZFUIDialogContentBasicButtonYes : zfextends ZFUIButtonBasi
 {
     ZFOBJECT_DECLARE(ZFUIDialogContentBasicButtonYes, ZFUIButtonBasic)
     ZFSTYLE_DEFAULT_DECLARE(ZFUIDialogContentBasicButtonYes)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUISize, viewSizeMin)
     {
         propertyValue = ZFUISizeMake(
             ZFUIGlobalStyle::DefaultStyle()->itemSizeButtonWidth(),
@@ -41,7 +32,7 @@ zfclass ZF_ENV_EXPORT ZFUIDialogContentBasicButtonNo : zfextends ZFUIButtonBasic
 {
     ZFOBJECT_DECLARE(ZFUIDialogContentBasicButtonNo, ZFUIButtonBasic)
     ZFSTYLE_DEFAULT_DECLARE(ZFUIDialogContentBasicButtonNo)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUISize, viewSizeMin)
     {
         propertyValue = ZFUISizeMake(
             ZFUIGlobalStyle::DefaultStyle()->itemSizeButtonWidth(),
@@ -56,7 +47,7 @@ zfclass ZF_ENV_EXPORT ZFUIDialogContentBasicButtonCancel : zfextends ZFUIButtonB
 {
     ZFOBJECT_DECLARE(ZFUIDialogContentBasicButtonCancel, ZFUIButtonBasic)
     ZFSTYLE_DEFAULT_DECLARE(ZFUIDialogContentBasicButtonCancel)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUISize, viewSizeMin)
     {
         propertyValue = ZFUISizeMake(
             ZFUIGlobalStyle::DefaultStyle()->itemSizeButtonWidth(),
@@ -71,7 +62,7 @@ zfclass ZF_ENV_EXPORT ZFUIDialogContentBasicButtonDestructive : zfextends ZFUIBu
 {
     ZFOBJECT_DECLARE(ZFUIDialogContentBasicButtonDestructive, ZFUIButtonBasic)
     ZFSTYLE_DEFAULT_DECLARE(ZFUIDialogContentBasicButtonDestructive)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
+    ZFPROPERTY_ON_INIT_INLINE(ZFUISize, viewSizeMin)
     {
         propertyValue = ZFUISizeMake(
             ZFUIGlobalStyle::DefaultStyle()->itemSizeButtonWidth(),

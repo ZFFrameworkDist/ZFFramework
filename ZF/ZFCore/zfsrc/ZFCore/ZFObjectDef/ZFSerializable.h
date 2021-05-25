@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFSerializable.h
  * @brief serializable interface
@@ -32,7 +23,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * you may supply this method to override:
  * -  static zfautoObject serializableNewInstance(void);
  *
- * the method should be supplied as #ZFMethod, and is recommended to register it statically by #ZFMETHOD_REGISTER\n
+ * the method should be supplied as #ZFMethod\n
  * the method should return a newly created object, or retain your existing singleton instance\n
  * typically this method is used to achieve some singleton logic
  */
@@ -63,7 +54,6 @@ typedef enum {
 
 // ============================================================
 zfclassFwd _ZFP_I_ZFSerializablePropertyTypeHolder;
-zfclassFwd _ZFP_ZFSerializablePrivate;
 /**
  * @brief base class of call serializable object
  *
@@ -72,7 +62,7 @@ zfclassFwd _ZFP_ZFSerializablePrivate;
  * a ZFSerializableData can hold these datas:
  * -  serializable class:
  *   ZFObject's class name or other non-ZFObject's type name,
- *   such as "ZFString", "zfstring" and "zfint"
+ *   such as "v_zfstring", "zfstring" and "zfint"
  * -  property name:
  *   used only when the serializable belongs to another serializable,
  *   it's the property name,
@@ -104,7 +94,7 @@ zfclassFwd _ZFP_ZFSerializablePrivate;
  *   // we have a ZFSerializableData like:
  *   <TestClass test="test">
  *       <ZFArray name="testProperty">
- *           <ZFString value="string content" />
+ *           <v_zfstring value="string content" />
  *       </ZFArray>
  *       <SomeType category="CategoryName" />
  *   </TestClass>
@@ -112,7 +102,7 @@ zfclassFwd _ZFP_ZFSerializablePrivate;
  * in this example:
  * -  the "TestClass" in "<TestClass>" is a serializable class
  * -  the "testProperty" in "<ZFArray name="testProperty">" is a property name
- * -  the "string content" in "<ZFString value="string content" />" is a property value
+ * -  the "string content" in "<v_zfstring value="string content" />" is a property value
  * -  the "test="test"" in "<TestClass test="test">" is a attribute
  * -  the "category" in "<SomeType category="CategoryName" />" is a category
  *   that should be resolved by subclass during #serializableOnSerializeFromData
@@ -127,10 +117,6 @@ zfclassFwd _ZFP_ZFSerializablePrivate;
  * -  "category":
  *   if exist this attribute,
  *   ZFSerializable would ignore this node and leave it to subclass to decode
- * -  "editMode":
- *   if exist this attribute,
- *   ZFSerializable would ignore this node and store it as raw data for future process,
- *   see #ZFSerializable::editModeData
  *
  * \n
  * a simplest way to implement ZFSerializable is:
@@ -146,6 +132,7 @@ zfclassFwd _ZFP_ZFSerializablePrivate;
  *   -  #serializableOnSerializeFromData / #serializableOnSerializeToData
  * -  take care of referencedOwnerOrNull while serialize to data,
  *   where you should implement reference logic for your custom serialize step\n
+ *   see #ZFStyleSet for more info\n
  *   by default, serializable property and embeded property's reference logic
  *   would be done by ZFSerializable automatically,
  *   but you should take care of category's reference logic manually
@@ -166,57 +153,9 @@ zfclassFwd _ZFP_ZFSerializablePrivate;
  */
 zfinterface ZF_ENV_EXPORT ZFSerializable : zfextends ZFInterface
 {
-    ZFINTERFACE_DECLARE_WITH_CUSTOM_CTOR(ZFSerializable, ZFInterface)
+    ZFINTERFACE_DECLARE(ZFSerializable, ZFInterface)
 
     // ============================================================
-    // edit mode
-public:
-    /** @brief see #ZFSerializable::editModeData */
-    zfclassLikePOD ZF_ENV_EXPORT EditModeData
-    {
-    public:
-        /** @brief see #ZFSerializable::editModeData */
-        const ZFClass *wrappedClass;
-    };
-    /**
-     * @brief internal use only
-     *
-     * map of <classNameFull, #ZFSerializable::EditModeData>\n
-     * used to store class data that currently not registered,
-     * so that it can be serialized to data without data loss\n
-     * \n
-     * for normal serialize logic, we will reflect class type by #ZFClass::classForName,
-     * so if the class is not registered currently,
-     * we are unable to find it,
-     * such as some plugin designed module,
-     * can't be found until plugin has been loaded\n
-     * to resolve the problem, we introduced this editMode,
-     * which can map unknown type to existing class,
-     * so that unknown type's serialize step can be done normally
-     * with the logic of existing class\n
-     * \n
-     * edit mode data stores unresolved class name and serializable data to
-     * #editModeWrappedClassName and #editModeWrappedElementDatas,
-     * which should be resolved later
-     */
-    static ZFCoreMap &editModeData(void);
-    /** @brief see #ZFSerializable::editModeData */
-    static zfbool &editMode(void);
-public:
-    /** @brief see #ZFSerializable::editModeData */
-    virtual const zfchar *editModeWrappedClassName(void);
-    /** @brief see #ZFSerializable::editModeData */
-    virtual void editModeWrappedClassNameSet(ZF_IN const zfchar *value);
-    /** @brief see #ZFSerializable::editModeData */
-    virtual ZFCoreArray<ZFSerializableData> &editModeWrappedElementDatas(void);
-
-    // ============================================================
-protected:
-    /** @cond ZFPrivateDoc */
-    ZFSerializable(void) : d(zfnull) {}
-    /** @endcond */
-    virtual ~ZFSerializable(void);
-
 public:
     /**
      * @brief true if object is currently serializable, see #ZFSerializable
@@ -231,6 +170,13 @@ public:
      * @brief serialize from data, see #ZFSerializable
      *
      * note that for performance, this method won't check whether serializable before execute
+     * @note for convenient for script,
+     *   you may supply a method named "serializableOnSerializeFromData" / "serializableOnSerializeToData",
+     *   if you do so, the method would be called to perform serialization after default action\n
+     *   the method's proto type should match #serializableOnSerializeFromData,
+     *   and can be registered by ZFMETHOD_USER_REGISTER_N series
+     *   or #ZFMethodDynamicRegister series\n
+     *   typically, this is useful for script language with #ZFDynamic
      */
     zffinal zfbool serializeFromData(ZF_IN const ZFSerializableData &serializableData,
                                      ZF_OUT_OPT zfstring *outErrorHint = zfnull,
@@ -245,25 +191,30 @@ public:
                                    ZF_IN_OPT ZFSerializable *referencedOwnerOrNull = zfnull);
 
     /**
-     * @brief subclass may override this to supply short form serializable data,
+     * @brief serialize from string,
      *   return false by default
+     *
+     * for most case, #serializeFromData would supply serialization logic automatically,
+     * however, the serialization result may be quite verbose for the data structure,
+     * subclass may override #serializableOnSerializeFromString to supply custom
+     * serialization logic as short data structure
+     * @note for convenient for script,
+     *   you may supply a method named "serializableOnSerializeFromString" / "serializableOnSerializeToString",
+     *   if you do so, the method would be called to perform serialization and replace the default action\n
+     *   the method's proto type should match #serializableOnSerializeToData,
+     *   and can be registered by ZFMETHOD_USER_REGISTER_N series
+     *   or #ZFMethodDynamicRegister series\n
+     *   typically, this is useful for script language with #ZFDynamic
      */
-    virtual inline zfbool serializeFromString(ZF_IN const zfchar *src,
-                                              ZF_IN_OPT zfindex srcLen = zfindexMax())
-    {
-        return zffalse;
-    }
+    zffinal zfbool serializeFromString(ZF_IN const zfchar *src);
     /** @brief see #serializeFromString */
-    virtual inline zfbool serializeToString(ZF_IN_OUT zfstring &ret)
-    {
-        return zffalse;
-    }
+    zffinal zfbool serializeToString(ZF_IN_OUT zfstring &ret);
 
 private:
     zffinal _ZFP_I_ZFSerializablePropertyTypeHolder *_ZFP_ZFSerializable_getPropertyTypeHolder(void);
 public:
     /** @brief see #serializableGetAllSerializableProperty */
-    zffinal void serializableGetAllSerializablePropertyT(ZF_OUT ZFCoreArray<const ZFProperty *> &ret);
+    zffinal void serializableGetAllSerializablePropertyT(ZF_IN_OUT ZFCoreArray<const ZFProperty *> &ret);
     /**
      * @brief get all serializable property, usually for debug only, see #serializableOnCheckPropertyType
      */
@@ -274,7 +225,7 @@ public:
         return ret;
     }
     /** @brief see #serializableGetAllSerializableEmbededProperty */
-    zffinal void serializableGetAllSerializableEmbededPropertyT(ZF_OUT ZFCoreArray<const ZFProperty *> &ret);
+    zffinal void serializableGetAllSerializableEmbededPropertyT(ZF_IN_OUT ZFCoreArray<const ZFProperty *> &ret);
     /**
      * @brief get all serializable embeded property, usually for debug only, see #serializableOnCheckPropertyType
      */
@@ -420,32 +371,30 @@ protected:
                                                                 ZF_IN ZFSerializable *referencedOwnerOrNull,
                                                                 ZF_OUT_OPT zfstring *outErrorHint = zfnull);
 
-public:
-    /**
-     * @brief get info as a serializable
-     */
-    virtual void serializableGetInfoT(ZF_IN_OUT zfstring &ret);
-    /** @brief see #serializableGetInfoT */
-    virtual inline zfstring serializableGetInfo(void)
+protected:
+    /** @brief see #serializeFromString */
+    virtual zfbool serializableOnSerializeFromString(ZF_IN const zfchar *src)
     {
-        zfstring ret;
-        this->serializableGetInfoT(ret);
-        return ret;
+        return zffalse;
+    }
+    /** @brief see #serializeFromString */
+    virtual zfbool serializableOnSerializeToString(ZF_IN_OUT zfstring &ret)
+    {
+        return zffalse;
     }
 
 public:
     /**
-     * @brief internal use only
-     *
-     * used to copy serializable info from another serializable,
-     * so that this object can serialize to data with the same behavior
-     * of the source serializable object\n
-     * the anotherSerializable must be same as this object
+     * @brief get info as a serializable
      */
-    virtual void serializableCopyInfoFrom(ZF_IN ZFSerializable *anotherSerializable);
-
-private:
-    _ZFP_ZFSerializablePrivate *d;
+    virtual void serializableInfoT(ZF_IN_OUT zfstring &ret);
+    /** @brief see #serializableInfoT */
+    virtual inline zfstring serializableInfo(void)
+    {
+        zfstring ret;
+        this->serializableInfoT(ret);
+        return ret;
+    }
 };
 
 // ============================================================
@@ -490,12 +439,10 @@ extern ZF_ENV_EXPORT ZFSerializableData ZFObjectToData(ZF_IN ZFObject *obj,
  */
 extern ZF_ENV_EXPORT zfbool ZFSerializeFromString(ZF_OUT zfautoObject &result,
                                                   ZF_IN const ZFClass *cls,
-                                                  ZF_IN const zfchar *src,
-                                                  ZF_IN_OPT zfindex srcLen = zfindexMax());
+                                                  ZF_IN const zfchar *src);
 /** @brief see #ZFSerializeFromString */
 extern ZF_ENV_EXPORT zfautoObject ZFSerializeFromString(ZF_IN const ZFClass *cls,
-                                                        ZF_IN const zfchar *src,
-                                                        ZF_IN_OPT zfindex srcLen = zfindexMax());
+                                                        ZF_IN const zfchar *src);
 /** @brief see #ZFSerializeFromString */
 extern ZF_ENV_EXPORT zfbool ZFSerializeToString(ZF_IN_OUT zfstring &ret,
                                                 ZF_IN ZFObject *obj);

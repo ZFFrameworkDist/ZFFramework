@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -28,19 +19,19 @@ protected:
         ZFUIKit_test_prepareTestWindow(window, container, this);
 
         this->dialog()->dialogApplyAutoHide(this->dialog()->dialogButtonCancel());
-        this->dialog()->dialogButtonCancelTextSet("cancel");
+        this->dialog()->dialogButtonCancelText("cancel");
         this->dialog()->dialogApplyAutoHide(this->dialog()->dialogButtonYes());
-        this->dialog()->dialogButtonYesTextSet("confirm");
+        this->dialog()->dialogButtonYesText("confirm");
         ZFLISTENER_LOCAL(yesOnClick, {
-            zfLogT() << "onConfirm" << listenerData.sender;
+            zfLogT() << "onConfirm" << listenerData.sender();
         })
         this->dialog()->dialogButtonYes()->observerAdd(ZFUIButton::EventButtonOnClick(), yesOnClick);
-        this->dialog()->dialogTitleTextSet("i'm title");
-        this->dialog()->dialogContentTextSet("i'm content");
+        this->dialog()->dialogTitleText("i'm title");
+        this->dialog()->dialogContentText("i'm content");
 
         zfblockedAlloc(ZFUIKit_test_Button, showButton);
         container->childAdd(showButton);
-        showButton->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
+        showButton->layoutParam()->sizeParam(ZFUISizeParamFillFill());
         ZFLISTENER_LOCAL(showButtonOnClick, {
             userData->objectHolded<ZFUIDialog *>()->dialogShow();
         })
@@ -53,7 +44,7 @@ private:
     void prepareSettingButton(ZF_IN ZFUIWindow *window,
                               ZF_IN ZFUIDialog *dialog)
     {
-        zfblockedAlloc(ZFArrayEditable, settings);
+        zfblockedAlloc(ZFArray, settings);
         ZFUIKit_test_prepareSettingForBoolProperty(settings, dialog, ZFPropertyAccess(ZFUIDialog, dialogHideWhenTouchOutside));
         ZFUIKit_test_prepareSettingForBoolProperty(settings, dialog, ZFPropertyAccess(ZFUIDialog, dialogHideWhenClickBack));
 
@@ -69,45 +60,45 @@ ZF_GLOBAL_INITIALIZER_INIT(ZFUIWidget_ZFUIDialog_debug_LogEvent)
     ZFLISTENER_LOCAL(dialogBeforeShow, {
         zfLogTrimT()
             << zfLogCurTimeString()
-            << listenerData.sender
+            << listenerData.sender()
             << "BeforeShow";
     })
     this->dialogBeforeShowListener = dialogBeforeShow;
-    ZFObjectGlobalEventObserver().observerAdd(ZFUIDialog::EventDialogBeforeShow(), this->dialogBeforeShowListener);
+    ZFGlobalObserver().observerAdd(ZFUIDialog::EventDialogBeforeShow(), this->dialogBeforeShowListener);
 
     ZFLISTENER_LOCAL(dialogAfterShow, {
         zfLogTrimT()
             << zfLogCurTimeString()
-            << listenerData.sender
+            << listenerData.sender()
             << "AfterShow";
     })
     this->dialogAfterShowListener = dialogAfterShow;
-    ZFObjectGlobalEventObserver().observerAdd(ZFUIDialog::EventDialogAfterShow(), this->dialogAfterShowListener);
+    ZFGlobalObserver().observerAdd(ZFUIDialog::EventDialogAfterShow(), this->dialogAfterShowListener);
 
     ZFLISTENER_LOCAL(dialogBeforeHide, {
         zfLogTrimT()
             << zfLogCurTimeString()
-            << listenerData.sender
+            << listenerData.sender()
             << "BeforeHide";
     })
     this->dialogBeforeHideListener = dialogBeforeHide;
-    ZFObjectGlobalEventObserver().observerAdd(ZFUIDialog::EventDialogBeforeHide(), this->dialogBeforeHideListener);
+    ZFGlobalObserver().observerAdd(ZFUIDialog::EventDialogBeforeHide(), this->dialogBeforeHideListener);
 
     ZFLISTENER_LOCAL(dialogAfterHide, {
         zfLogTrimT()
             << zfLogCurTimeString()
-            << listenerData.sender
+            << listenerData.sender()
             << "AfterHide";
     })
     this->dialogAfterHideListener = dialogAfterHide;
-    ZFObjectGlobalEventObserver().observerAdd(ZFUIDialog::EventDialogAfterHide(), this->dialogAfterHideListener);
+    ZFGlobalObserver().observerAdd(ZFUIDialog::EventDialogAfterHide(), this->dialogAfterHideListener);
 }
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFUIWidget_ZFUIDialog_debug_LogEvent)
 {
-    ZFObjectGlobalEventObserver().observerRemove(ZFUIDialog::EventDialogBeforeShow(), this->dialogBeforeShowListener);
-    ZFObjectGlobalEventObserver().observerRemove(ZFUIDialog::EventDialogAfterShow(), this->dialogAfterShowListener);
-    ZFObjectGlobalEventObserver().observerRemove(ZFUIDialog::EventDialogBeforeHide(), this->dialogBeforeHideListener);
-    ZFObjectGlobalEventObserver().observerRemove(ZFUIDialog::EventDialogAfterHide(), this->dialogAfterHideListener);
+    ZFGlobalObserver().observerRemove(ZFUIDialog::EventDialogBeforeShow(), this->dialogBeforeShowListener);
+    ZFGlobalObserver().observerRemove(ZFUIDialog::EventDialogAfterShow(), this->dialogAfterShowListener);
+    ZFGlobalObserver().observerRemove(ZFUIDialog::EventDialogBeforeHide(), this->dialogBeforeHideListener);
+    ZFGlobalObserver().observerRemove(ZFUIDialog::EventDialogAfterHide(), this->dialogAfterHideListener);
 }
 private:
     ZFListener dialogBeforeShowListener;

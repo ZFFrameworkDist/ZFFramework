@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListCellUpdaterBasic.h
  * @brief common updater of #ZFUIListCellUpdater
@@ -31,7 +22,7 @@ public:
     /**
      * @brief separator size, 1 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, separatorSize,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, separatorSize,
                                 1)
 
     /**

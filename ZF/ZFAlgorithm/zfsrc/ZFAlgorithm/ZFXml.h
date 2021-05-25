@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFXml.h
  * @brief DOM XML processing
@@ -182,9 +173,9 @@ public:
      *
      * note that the name is used for searching to access xml nodes
      */
-    void xmlNameSet(ZF_IN const zfchar *name);
+    void xmlName(ZF_IN const zfchar *name);
     /**
-     * @brief see #xmlNameSet
+     * @brief see #xmlName
      */
     const zfchar *xmlName(void) const;
 
@@ -201,14 +192,14 @@ public:
      * -  text: the text itself without tags if CDATA
      * -  comment: the comment itself without tags
      */
-    void xmlValueSet(ZF_IN const zfchar *value);
+    void xmlValue(ZF_IN const zfchar *value);
     /**
-     * @brief see #xmlValueSet
+     * @brief see #xmlValue
      */
     const zfchar *xmlValue(void) const;
 
-    zffinal void _ZFP_ZFXml_xmlMemoryPool_xmlNameSet(ZF_IN const zfchar *xmlName, ZF_IN void *token);
-    zffinal void _ZFP_ZFXml_xmlMemoryPool_xmlValueSet(ZF_IN const zfchar *xmlValue, ZF_IN void *token);
+    zffinal void _ZFP_ZFXml_xmlMemoryPool_xmlName(ZF_IN const zfchar *xmlName, ZF_IN void *token);
+    zffinal void _ZFP_ZFXml_xmlMemoryPool_xmlValue(ZF_IN const zfchar *xmlValue, ZF_IN void *token);
 
     // ============================================================
 public:
@@ -362,9 +353,9 @@ public:
     /**
      * @brief CDATA or not
      */
-    void xmlTextCDATASet(ZF_IN zfbool xmlTextCDATA);
+    void xmlTextCDATA(ZF_IN zfbool xmlTextCDATA);
     /**
-     * @brief see #xmlTextCDATASet
+     * @brief see #xmlTextCDATA
      */
     zfbool xmlTextCDATA(void) const;
 
@@ -375,6 +366,23 @@ private:
 };
 ZFTYPEID_DECLARE(ZFXmlItem, ZFXmlItem)
 ZFOUTPUT_TYPE(ZFXmlItem, {output << v.objectInfo();})
+
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlElement)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlAttribute)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlText)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlComment)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlDocument)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlDeclaration)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlDocType)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFXmlItem, ZFXmlPI)
 
 // ============================================================
 // ZFXmlVisitData

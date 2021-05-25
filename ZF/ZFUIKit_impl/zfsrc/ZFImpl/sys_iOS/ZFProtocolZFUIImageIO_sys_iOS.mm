@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIImageIO.h"
 
@@ -34,15 +25,25 @@ public:
             ninePatch);
         return (__bridge_retained void *)ret;
     }
+    virtual void *imageLoadInFrame(ZF_IN zffloat imageScale,
+                                   ZF_IN void *nativeImage,
+                                   ZF_IN const ZFUIRect &frameInImage)
+    {
+        UIImage *src = (__bridge UIImage *)nativeImage;
+        UIImage *ret = [UIImage imageWithCGImage:CGImageCreateWithImageInRect(
+            src.CGImage,
+            ZFImpl_sys_iOS_ZFUIRectToCGRect(frameInImage))];
+        return (__bridge_retained void *)ret;
+    }
     virtual void *imageLoadFromColor(ZF_IN zffloat imageScale,
                                      ZF_IN const ZFUIColor &color,
                                      ZF_IN const ZFUISize &size)
     {
-        CGSize tmpSize = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeToCGSize(size);
+        CGSize tmpSize = ZFImpl_sys_iOS_ZFUISizeToCGSize(size);
         CGRect rect = CGRectMake(0.0f, 0.0f, tmpSize.width, tmpSize.height);
         UIGraphicsBeginImageContext(rect.size);
         CGContextRef context = UIGraphicsGetCurrentContext();
-        CGContextSetFillColorWithColor(context, [ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIColorToUIColor(color) CGColor]);
+        CGContextSetFillColorWithColor(context, [ZFImpl_sys_iOS_ZFUIColorToUIColor(color) CGColor]);
         CGContextFillRect(context, rect);
         UIImage *ret = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
@@ -132,11 +133,11 @@ private:
         zfmemset(drawDatas, 0, sizeof(drawDatas));
         zfindex drawDatasCount = ZFUIImageImplNinePatchCalc(
             drawDatas,
-            ZFUISizeApplyScale(ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeFromCGSize(image.size), image.scale),
+            ZFUISizeApplyScale(ZFImpl_sys_iOS_ZFUISizeFromCGSize(image.size), image.scale),
             scaleUseNinePatch,
             scaleToSize);
 
-        CGSize tmpSize = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUISizeToCGSize(scaleToSize);
+        CGSize tmpSize = ZFImpl_sys_iOS_ZFUISizeToCGSize(scaleToSize);
         UIGraphicsBeginImageContext(tmpSize);
         CGContextRef ctx = UIGraphicsGetCurrentContext();
 
@@ -146,8 +147,8 @@ private:
         {
             const ZFUIImageImplNinePatchDrawData &drawData = drawDatas[i];
 
-            tmp = CGImageCreateWithImageInRect(src, ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(drawData.src));
-            this->_drawCGImage(imageScale, ctx, ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(drawData.dst), tmp);
+            tmp = CGImageCreateWithImageInRect(src, ZFImpl_sys_iOS_ZFUIRectToCGRect(drawData.src));
+            this->_drawCGImage(imageScale, ctx, ZFImpl_sys_iOS_ZFUIRectToCGRect(drawData.dst), tmp);
             CGImageRelease(tmp);
         }
 

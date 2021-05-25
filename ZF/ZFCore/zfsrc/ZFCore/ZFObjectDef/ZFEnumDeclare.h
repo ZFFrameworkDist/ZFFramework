@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFEnumDeclare.h
  * @brief ZFEnum declare impl
@@ -69,7 +60,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * -  use EnumName to store the enum value as a ZFObject
  *   @code
  *     EnumName *e = zfAlloc(EnumName());
- *     e->enumValueSet(EnumName::e_Value1);
+ *     e->enumValue(EnumName::e_Value1);
  *     zfuint value = e->enumValue();
  *     const zfchar *name = e->enumName();
  *     zfRelease(e);
@@ -195,7 +186,6 @@ public:
     zfclass ZF_ENV_EXPORT EnumName : zfextends ZFEnum \
     { \
         ZFOBJECT_DECLARE(EnumName, ZFEnum) \
-        ZFALLOC_CACHE_RELEASE({zfsuper::zfAllocCacheRelease(cache);}) \
     public: \
         /** @brief see @ref EnumName */ \
         typedef enum \
@@ -365,9 +355,9 @@ public:
     public: \
         /** @cond ZFPrivateDoc */ \
         zfoverride \
-        virtual void enumValueSet(ZF_IN zfuint value) \
+        virtual void enumValue(ZF_IN zfuint value) \
         { \
-            zfsuper::enumValueSet(value); \
+            zfsuper::enumValue(value); \
         } \
         /** @endcond */ \
     }; \
@@ -389,8 +379,9 @@ extern ZF_ENV_EXPORT void _ZFP_ZFEnumMethodReg(ZF_IN_OUT ZFCoreArrayPOD<const ZF
     { \
         for(zfindex i = 0; i < EnumName::EnumCount(); ++i) \
         { \
-            ZFMethodUserRegisterDetail_0(resultMethod, &ivk_e, EnumName::ClassData(), \
-                public, ZFMethodTypeStatic, \
+            ZFMethodUserRegisterDetail_0(resultMethod, { \
+                    return (EnumName##Enum)EnumName::EnumValueForName(invokerMethod->methodName() + 2); \
+                }, EnumName::ClassData(), public, ZFMethodTypeStatic, \
                 EnumName##Enum, zfstringWithFormat("e_%s", EnumName::EnumNameAtIndex(i))); \
             _m.add(resultMethod); \
         } \
@@ -404,8 +395,6 @@ extern ZF_ENV_EXPORT void _ZFP_ZFEnumMethodReg(ZF_IN_OUT ZFCoreArrayPOD<const ZF
         } \
     } \
     ZFCoreArrayPOD<const ZFMethod *> _m; \
-    static EnumName##Enum ivk_e(ZF_IN const ZFMethod *invokerMethod, ZF_IN ZFObject *invokerObject) \
-    {return (EnumName##Enum)EnumName::EnumValueForName(invokerMethod->methodName() + 2);} \
     ZF_STATIC_REGISTER_END(EnumReg_##EnumName)
 
 #define _ZFP_ZFENUM_DEFINE_FLAGS(EnumName, EnumFlagsName) \
@@ -476,8 +465,8 @@ extern ZF_ENV_EXPORT void _ZFP_ZFEnumMethodReg(ZF_IN_OUT ZFCoreArrayPOD<const ZF
         EnumFlagsName(ZF_IN EnumFlagsName const &ref) : flags(ref.flags) {} \
     public: \
         zfuint const &enumValue(void) const {return this->flags;} \
-        void enumValueSet(ZF_IN zfuint const &flags) {this->flags = flags;} \
-        void enumValueSet(ZF_IN EnumName##Enum const &flags) {this->flags = (zfuint)flags;} \
+        void enumValue(ZF_IN zfuint const &flags) {this->flags = flags;} \
+        void enumValue(ZF_IN EnumName##Enum const &flags) {this->flags = (zfuint)flags;} \
     public: \
         operator zfuint const & (void) const {return this->flags;} \
         EnumFlagsName &operator = (ZF_IN zfuint const &flags) {this->flags = flags; return *this;} \

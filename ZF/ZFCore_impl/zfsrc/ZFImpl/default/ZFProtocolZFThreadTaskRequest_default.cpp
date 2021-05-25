@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_default_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFThreadTaskRequest.h"
 #include "ZFCore/ZFThread.h"
@@ -27,10 +18,10 @@ public:
                 ZFListenerHolder *listenerHolder = ZFCastZFObjectUnchecked(ZFListenerHolder *, userData);
                 listenerHolder->runnableExecute();
             })
-            ZFThreadExecuteInMainThread(mainThreadCallback, userData);
+            ZFExecuteInMainThread(mainThreadCallback, userData);
         })
-        ZFThreadExecuteInNewThread(threadCallback,
-            zflineAlloc(ZFListenerHolder, task, ZFListenerData().param0Set(param0).param1Set(param1)));
+        ZFExecuteInNewThread(threadCallback,
+            zflineAlloc(ZFListenerHolder, task, ZFListenerData().param0(param0).param1(param1)));
     }
 ZFPROTOCOL_IMPLEMENTATION_END(ZFThreadTaskRequestImpl_default)
 ZFPROTOCOL_IMPLEMENTATION_REGISTER(ZFThreadTaskRequestImpl_default)

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFIdentityUtil.h"
 #include "ZFCoreArray.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -86,7 +77,7 @@ zfbool ZFIdentityGenerator::idUsed(ZF_IN zfidentity identity) const
 }
 void ZFIdentityGenerator::idUsedGetAll(ZF_IN_OUT ZFCoreArray<zfidentity> &ret) const
 {
-    ret.capacitySet(ret.capacity() + (zfindex)d->used.size());
+    ret.capacity(ret.capacity() + (zfindex)d->used.size());
     for(zfstlmap<zfidentity, zfbool>::iterator it = d->used.begin(); it != d->used.end(); ++it)
     {
         ret.add(it->first);

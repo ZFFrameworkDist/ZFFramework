@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFMethodGenericInvoker.h"
 #include "ZFObjectImpl.h"
 
@@ -46,9 +37,10 @@ zfbool _ZFP_MtdGIParamCheck(ZF_OUT_OPT zfstring *errorHint,
         || (param == ZFMethodGenericInvokerDefaultParam() && paramIndex < invokerMethod->methodParamDefaultBeginIndex()))
     {
         zfstringAppend(errorHint,
-                "[ZFMethodGenericInvoker] unable to access param%zi as type (%s): %s",
+                "unable to access param%zi as type (%s): (%s)%s",
                 paramIndex,
                 paramType,
+                param != zfnull ? param->classData()->className() : ZFTOKEN_zfnull,
                 ZFObjectInfo(param).cString()
             );
         return zffalse;
@@ -63,7 +55,7 @@ void _ZFP_MtdGIRetError(ZF_OUT_OPT zfstring *errorHint,
                         ZF_IN const zfchar *returnValueInfo)
 {
     zfstringAppend(errorHint,
-        "[ZFMethodGenericInvoker] unable to convert return value as type %s: %s",
+        "unable to convert return value as type %s: %s",
         returnTypeId,
         returnValueInfo);
 }

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFFile_util.h
  * @brief file utility
@@ -112,7 +103,7 @@ ZFMETHOD_FUNC_DECLARE_1(zfstring, ZFFilePathParentOf,
  * @note path must be well formed, use #ZFFilePathFormat if necessary
  */
 ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFFilePathComponentsOf,
-                        ZFMP_OUT(ZFCoreArray<zfstring> &, ret),
+                        ZFMP_IN_OUT(ZFCoreArray<zfstring> &, ret),
                         ZFMP_IN(const zfchar *, src))
 /** @brief see #ZFFilePathComponentsOf */
 ZFMETHOD_FUNC_DECLARE_1(ZFCoreArray<zfstring>, ZFFilePathComponentsOf,
@@ -122,16 +113,16 @@ ZFMETHOD_FUNC_DECLARE_1(ZFCoreArray<zfstring>, ZFFilePathComponentsOf,
 zfclassLikePOD ZF_ENV_EXPORT _ZFP_ZFFileFileCloseHolder
 {
 public:
-    _ZFP_ZFFileFileCloseHolder(ZF_IN ZFToken token) : token(token) {}
+    _ZFP_ZFFileFileCloseHolder(ZF_IN void *token) : token(token) {}
     ~_ZFP_ZFFileFileCloseHolder(void)
     {
-        if(this->token != ZFTokenInvalid())
+        if(this->token != zfnull)
         {
             ZFFileFileClose(this->token);
         }
     }
 private:
-    ZFToken token;
+    void *token;
 };
 /**
  * @brief util method to call #ZFFileFileClose after code block
@@ -142,16 +133,16 @@ private:
 zfclassLikePOD ZF_ENV_EXPORT _ZFP_ZFFileResCloseHolder
 {
 public:
-    _ZFP_ZFFileResCloseHolder(ZF_IN ZFToken token) : token(token) {}
+    _ZFP_ZFFileResCloseHolder(ZF_IN void *token) : token(token) {}
     ~_ZFP_ZFFileResCloseHolder(void)
     {
-        if(this->token != ZFTokenInvalid())
+        if(this->token != zfnull)
         {
             ZFFileResClose(this->token);
         }
     }
 private:
-    ZFToken token;
+    void *token;
 };
 /**
  * @brief util method to call #ZFFileResClose after code block
@@ -162,17 +153,17 @@ private:
 zfclassLikePOD ZF_ENV_EXPORT _ZFP_ZFFilePathInfoCloseHolder
 {
 public:
-    _ZFP_ZFFilePathInfoCloseHolder(ZF_IN const ZFPathInfo &pathInfo, ZF_IN ZFToken token) : pathInfo(pathInfo), token(token) {}
+    _ZFP_ZFFilePathInfoCloseHolder(ZF_IN const ZFPathInfo &pathInfo, ZF_IN void *token) : pathInfo(pathInfo), token(token) {}
     ~_ZFP_ZFFilePathInfoCloseHolder(void)
     {
-        if(this->token != ZFTokenInvalid())
+        if(this->token != zfnull)
         {
             ZFFilePathInfoClose(this->pathInfo, this->token);
         }
     }
 private:
     const ZFPathInfo &pathInfo;
-    ZFToken token;
+    void *token;
 };
 /**
  * @brief util method to call #ZFFilePathInfoClose after code block
@@ -196,8 +187,8 @@ ZFMETHOD_FUNC_DECLARE_4(void, ZFFilePathInfoTreePrint,
  * usage:
  * @code
  *   ZFLISTENER_LOCAL(fileCallback, {
- *       const ZFPathInfo &pathInfo = listenerData.param0->to<v_ZFPathInfo *>()->zfv;
- *       const ZFFileFindData &fd = listenerData.param1->to<v_ZFFileFindData *>()->zfv;
+ *       const ZFPathInfo &pathInfo = listenerData.param0<v_ZFPathInfo *>()->zfv;
+ *       const ZFFileFindData &fd = listenerData.param1<v_ZFFileFindData *>()->zfv;
  *       // do your things with the file
  *   })
  *   ZFFilePathInfoForEach(pathInfo, fileCallback);
@@ -210,41 +201,6 @@ ZFMETHOD_FUNC_DECLARE_3(zfbool, ZFFilePathInfoForEach,
                         ZFMP_IN(const ZFPathInfo &, pathInfo),
                         ZFMP_IN(const ZFListener &, fileCallback),
                         ZFMP_IN_OPT(ZFObject *, userData, zfnull))
-
-// ============================================================
-// ZFIOBufferedCallbackUsingTmpFile
-zfclassFwd _ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate;
-/**
- * @brief see #ZFIOBufferedCallback
- *
- * note, use this class only for large IO cache,
- * otherwise, #ZFIOBufferedCallbackUsingBuffer would be better
- */
-zfclassLikePOD ZF_ENV_EXPORT ZFIOBufferedCallbackUsingTmpFile : zfextendsLikePOD ZFIOBufferedCallback
-{
-public:
-    /** @cond ZFPrivateDoc */
-    ZFIOBufferedCallbackUsingTmpFile(void);
-    ZFIOBufferedCallbackUsingTmpFile(ZF_IN const ZFIOBufferedCallbackUsingTmpFile &ref);
-    ZFIOBufferedCallbackUsingTmpFile &operator = (ZF_IN const ZFIOBufferedCallbackUsingTmpFile &ref);
-    /** @endcond */
-    virtual ~ZFIOBufferedCallbackUsingTmpFile(void);
-
-public:
-    zfoverride
-    virtual ZFInput inputCallback(void);
-    zfoverride
-    virtual ZFOutput outputCallback(void);
-
-public:
-    zfoverride
-    virtual void resetInput(void);
-    zfoverride
-    virtual void resetOutput(void);
-
-private:
-    _ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate *d;
-};
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFFile_util_h_

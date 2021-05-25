@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import com.ZFFramework.Android.NativeUtil.ZFAndroidLog;
@@ -30,11 +21,11 @@ public final class ZFUITextView extends TextView {
         ((ZFUITextView)nativeTextView).setText(null);
     }
 
-    public static void native_textSet(Object nativeTextView,
+    public static void native_text(Object nativeTextView,
                                       Object nativeText) {
         ((ZFUITextView)nativeTextView).setText((String)nativeText);
     }
-    public static void native_textAppearanceSet(Object nativeTextView,
+    public static void native_textAppearance(Object nativeTextView,
                                                 int textAppearance) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         if(textAppearance == ZFUITextAppearance.e_Normal) {
@@ -54,7 +45,7 @@ public final class ZFUITextView extends TextView {
             nativeTextViewTmp.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
         }
     }
-    public static void native_textAlignSet(Object nativeTextView,
+    public static void native_textAlign(Object nativeTextView,
                                            int textAlign) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         if((textAlign & ZFUIAlign.e_LeftInner) == ZFUIAlign.e_LeftInner) {
@@ -70,12 +61,12 @@ public final class ZFUITextView extends TextView {
             nativeTextViewTmp.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
     }
-    public static void native_textColorSet(Object nativeTextView,
+    public static void native_textColor(Object nativeTextView,
                                            int textColor) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         nativeTextViewTmp.setTextColor(textColor);
     }
-    public static void native_textShadowColorSet(Object nativeTextView,
+    public static void native_textShadowColor(Object nativeTextView,
                                                  int textShadowColor) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         nativeTextViewTmp._textShadowColor = textShadowColor;
@@ -85,7 +76,7 @@ public final class ZFUITextView extends TextView {
             nativeTextViewTmp._textShadowOffsetY,
             nativeTextViewTmp._textShadowColor);
     }
-    public static void native_textShadowOffsetSet(Object nativeTextView,
+    public static void native_textShadowOffset(Object nativeTextView,
                                                   int textShadowOffsetX,
                                                   int textShadowOffsetY) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
@@ -97,12 +88,12 @@ public final class ZFUITextView extends TextView {
             nativeTextViewTmp._textShadowOffsetY,
             nativeTextViewTmp._textShadowColor);
     }
-    public static void native_textSingleLineSet(Object nativeTextView,
+    public static void native_textSingleLine(Object nativeTextView,
                                                 boolean textSingleLine) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         nativeTextViewTmp.setSingleLine(textSingleLine);
     }
-    public static void native_textTruncateModeSet(Object nativeTextView,
+    public static void native_textTruncateMode(Object nativeTextView,
                                                   int textTruncateMode) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         if(textTruncateMode == ZFUITextTruncateMode.e_Disable) {
@@ -159,7 +150,7 @@ public final class ZFUITextView extends TextView {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         return (int)(nativeTextViewTmp.getTextSize());
     }
-    public static void native_textSizeAutoChangeCurrentValueSet(Object nativeTextView,
+    public static void native_textSizeAutoChangeCurrentValue(Object nativeTextView,
                                                                 int textSizeCurrent) {
         ZFUITextView nativeTextViewTmp = (ZFUITextView)nativeTextView;
         nativeTextViewTmp.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSizeCurrent);

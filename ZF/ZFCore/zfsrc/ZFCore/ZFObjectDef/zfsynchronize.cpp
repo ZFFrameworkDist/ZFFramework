@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "zfsynchronize.h"
 #include "ZFObjectImpl.h"
 
@@ -23,7 +14,7 @@ static void _ZFP_zfsynchronizeLog(ZF_IN const ZFCallerInfo &callerInfo,
     zfstring text;
     zfstringAppendV(text, fmt, vaList);
     va_end(vaList);
-    printf("%s %s\n", callerInfo.callerInfoA().cString(), text.cString());
+    printf("%s %s\n", callerInfo.callerInfo().cString(), text.cString());
 }
 
 _ZFP_zfsynchronizeContainerWithLog::_ZFP_zfsynchronizeContainerWithLog(ZF_IN ZFObject *obj,
@@ -77,7 +68,7 @@ void _ZFP_zfsynchronizeLockWithLog(ZF_IN ZFObject *obj,
     obj->_ZFP_ZFObjectLock();
     _ZFP_zfsynchronizeLog(callerInfo,
         "lock object %s success",
-        callerInfo.callerInfoA().cString(),
+        callerInfo.callerInfo().cString(),
         obj->objectInfoOfInstance().cString());
 }
 void _ZFP_zfsynchronizeUnlockWithLog(ZF_IN ZFObject *obj,

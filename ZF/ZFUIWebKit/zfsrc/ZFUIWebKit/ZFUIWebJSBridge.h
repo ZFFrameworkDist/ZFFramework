@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIWebJSBridge.h
  * @brief web JS bridge
@@ -104,8 +95,7 @@ public:
      * return old one if exist or create new one if not exist\n
      * the bridge object would be stored as an object tag to it's owner webView
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              ZFUIWebJSBridge *, instanceForWebView,
+    ZFMETHOD_DECLARE_STATIC_1(ZFUIWebJSBridge *, instanceForWebView,
                               ZFMP_IN(ZFUIWebView *, webView))
 
 public:

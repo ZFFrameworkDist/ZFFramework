@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreSPrintf.h
  * @brief string utilities for ZFFramework
@@ -60,9 +51,7 @@ inline void zfstringAppendV(ZF_OUT_OPT zfstring *s, ZF_IN const zfchar *fmt, va_
  * -  "+": print plus if positive number
  * -  " ": print space if positive number
  * -  "m": minimum width
- * -  "*": same as "m" but scaned from vaList as a zfindex
  * -  ".n": decimal width for float types or max width for string types
- * -  ".*": same as ".n" but scaned from vaList as a zfindex
  *
  * note:
  * -  for special types such as zfflags or zftimet,

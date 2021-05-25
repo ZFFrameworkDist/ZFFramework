@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_Qt_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIViewCapture.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
@@ -14,29 +5,31 @@
 
 #if ZF_ENV_sys_Qt
 
-#include <QWidget>
+#include <QGraphicsScene>
+#include <QGraphicsWidget>
 #include <QImage>
+#include <QPainter>
 #include <QPixmap>
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFPROTOCOL_IMPLEMENTATION_BEGIN(ZFUIViewCaptureImpl_sys_Qt, ZFUIViewCapture, ZFProtocolLevel::e_SystemHigh)
-    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("Qt:QWidget")
+    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("Qt:QGraphicsWidget")
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_BEGIN()
-    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_ITEM(ZFUIView, "Qt:QWidget")
+    ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_ITEM(ZFUIView, "Qt:QGraphicsWidget")
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_ITEM(ZFUIImage, "Qt:QImage")
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_DEPENDENCY_END()
 public:
     virtual zfbool viewCapture(ZF_IN ZFUIView *view,
                                ZF_IN_OUT ZFUIImage *image)
     {
-        QWidget *nativeView = ZFCastStatic(QWidget *, view->nativeView());
+        QGraphicsWidget *nativeView = ZFCastStatic(QGraphicsWidget *, view->nativeView());
 
-        QPixmap t(nativeView->size());
-        t.fill(QColor(0, 0, 0, 0));
-        nativeView->render(&t);
-        QImage nativeImage = t.toImage();
-        image->nativeImageSet(&nativeImage);
+        QImage nativeImage(nativeView->geometry().width(), nativeView->geometry().height(), QImage::Format_ARGB32);
+        nativeImage.fill(QColorConstants::Transparent);
+        QPainter painter(&nativeImage);
+        nativeView->scene()->render(&painter);
+        image->nativeImage(&nativeImage);
 
         return zftrue;
     }

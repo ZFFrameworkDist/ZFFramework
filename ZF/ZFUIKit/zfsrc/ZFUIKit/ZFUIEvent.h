@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIEvent.h
  * @brief base class of all ui event
@@ -26,23 +17,23 @@ zfclass ZF_ENV_EXPORT ZFUIEvent : zfextends ZFObject
     ZFOBJECT_DECLARE_WITH_CUSTOM_CTOR(ZFUIEvent, ZFObject)
 
     ZFALLOC_CACHE_RELEASE({
-        cache->eventResolvedSet(zffalse);
+        cache->eventResolved(zffalse);
     })
 
 public:
     /**
      * @brief whether the event has been resolved
      */
-    ZFMETHOD_DECLARE_1(void, eventResolvedSet,
+    ZFMETHOD_DECLARE_1(void, eventResolved,
                        ZFMP_IN(zfbool const &, value))
     /**
-     * @brief see #eventResolvedSet
+     * @brief see #eventResolved
      */
     ZFMETHOD_DECLARE_0(zfbool, eventResolved)
 
 protected:
     /**
-     * @brief see #ZFUIView::scaleOnChange, usually internal use only
+     * @brief see #ZFUIView::UIScaleOnChange, usually internal use only
      */
     virtual void eventOnApplyScale(ZF_IN zffloat scale)
     {

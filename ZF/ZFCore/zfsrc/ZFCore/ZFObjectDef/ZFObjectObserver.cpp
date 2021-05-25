@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFObjectCore.h"
 #include "ZFObjectImpl.h"
 
@@ -18,178 +9,37 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
 // ZFListenerData
-typedef zfstlmap<zfstlstringZ, zfbool> _ZFP_ZFListenerForwardMapType;
-
-ZFListenerData::ZFListenerData(ZF_IN const ZFListenerData &ref)
-: eventId(ref.eventId)
-, sender(ref.sender)
-, param0(ref.param0)
-, param1(ref.param1)
-, eventFiltered(ref.eventFiltered)
-, eventForwardMap(zfnull)
-{
-    if(ref.eventForwardMap != zfnull && !((_ZFP_ZFListenerForwardMapType *)ref.eventForwardMap)->empty())
-    {
-        *((_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)
-            = *((_ZFP_ZFListenerForwardMapType *)ref.eventForwardMap);
-    }
-}
-
-ZFListenerData &ZFListenerData::operator = (ZF_IN const ZFListenerData &ref)
-{
-    this->eventId = ref.eventId;
-    this->sender = ref.sender;
-    this->param0 = ref.param0;
-    this->param1 = ref.param1;
-    this->eventFiltered = ref.eventFiltered;
-    if(ref.eventForwardMap != zfnull && !((_ZFP_ZFListenerForwardMapType *)ref.eventForwardMap)->empty())
-    {
-        if(this->eventForwardMap == zfnull)
-        {
-            this->eventForwardMap = zfnew(_ZFP_ZFListenerForwardMapType);
-        }
-        *((_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)
-            = *((_ZFP_ZFListenerForwardMapType *)ref.eventForwardMap);
-    }
-    else
-    {
-        if(this->eventForwardMap != zfnull)
-        {
-            ((_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)->clear();
-        }
-    }
-    return *this;
-}
-zfbool ZFListenerData::operator == (ZF_IN const ZFListenerData &ref) const
-{
-    if(zffalse
-            || this->eventId != ref.eventId
-            || this->sender != ref.sender
-            || this->param0 != ref.param0
-            || this->param1 != ref.param1
-            || this->eventFiltered != ref.eventFiltered
-        )
-    {
-        return zffalse;
-    }
-    if(ref.eventForwardMap == zfnull)
-    {
-        return (this->eventForwardMap == zfnull || ((_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)->empty());
-    }
-    else
-    {
-        if(this->eventForwardMap == zfnull)
-        {
-            return (((_ZFP_ZFListenerForwardMapType *)ref.eventForwardMap)->empty());
-        }
-        else
-        {
-            _ZFP_ZFListenerForwardMapType &m0 = *(_ZFP_ZFListenerForwardMapType *)this->eventForwardMap;
-            _ZFP_ZFListenerForwardMapType &m1 = *(_ZFP_ZFListenerForwardMapType *)ref.eventForwardMap;
-            if(m0.size() != m1.size())
-            {
-                return zffalse;
-            }
-            for(_ZFP_ZFListenerForwardMapType::iterator it0 = m0.begin(), it1 = m1.begin();
-                it0 != m0.begin();
-                ++it0, ++it1)
-            {
-                if(it0->first != it1->first)
-                {
-                    return zffalse;
-                }
-            }
-            return zftrue;
-        }
-    }
-}
-
 void ZFListenerData::objectInfoT(ZF_IN_OUT zfstring &ret) const
 {
     ret += ZFTOKEN_ZFObjectInfoLeft;
     zfstringAppend(ret, "ZFListenerData(%p)", this);
-    const zfchar *eventName = ZFIdMapGetName(this->eventId);
+    const zfchar *eventName = ZFIdMapNameForId(this->eventId());
     if(eventName != zfnull)
     {
         ret += ", event: ";
         ret += eventName;
     }
-    if(this->sender != zfnull)
+    if(this->sender() != zfnull)
     {
         ret += ", sender: ";
-        ZFObjectInfoT(ret, this->sender);
+        ZFObjectInfoT(ret, this->sender());
     }
-    if(this->param0 != zfnull)
+    if(this->param0() != zfnull)
     {
         ret += ", param0: ";
-        ZFObjectInfoT(ret, this->param0);
+        ZFObjectInfoT(ret, this->param0());
     }
-    if(this->param1 != zfnull)
+    if(this->param1() != zfnull)
     {
         ret += ", param1: ";
-        ZFObjectInfoT(ret, this->param1);
+        ZFObjectInfoT(ret, this->param1());
     }
-    if(this->eventFiltered)
+    if(this->eventFiltered())
     {
         ret += ", filtered: ";
         ret += ZFTOKEN_zfbool_zftrue;
     }
-    if(this->eventForwardMap != zfnull)
-    {
-        _ZFP_ZFListenerForwardMapType &m = *(_ZFP_ZFListenerForwardMapType *)this->eventForwardMap;
-        if(!m.empty())
-        {
-            ret += " (";
-            for(_ZFP_ZFListenerForwardMapType::iterator it = m.begin(); it != m.end(); ++it)
-            {
-                if(it != m.begin())
-                {
-                    ret += ", ";
-                }
-                ret += it->first.c_str();
-            }
-            ret += ")";
-        }
-    }
     ret += ZFTOKEN_ZFObjectInfoRight;
-}
-
-void ZFListenerData::eventForwardSet(ZF_IN const zfchar *forwardFlag)
-{
-    if(forwardFlag != zfnull)
-    {
-        if(this->eventForwardMap == zfnull)
-        {
-            this->eventForwardMap = zfnew(_ZFP_ZFListenerForwardMapType);
-        }
-        (*(_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)[forwardFlag] = zftrue;
-    }
-}
-void ZFListenerData::eventForwardRemove(ZF_IN const zfchar *forwardFlag)
-{
-    if(forwardFlag != zfnull && this->eventForwardMap != zfnull)
-    {
-        ((_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)->erase(forwardFlag);
-    }
-}
-void ZFListenerData::eventForwardRemoveAll(void)
-{
-    if(this->eventForwardMap != zfnull)
-    {
-        ((_ZFP_ZFListenerForwardMapType *)this->eventForwardMap)->clear();
-    }
-}
-zfbool ZFListenerData::eventForward(ZF_IN const zfchar *forwardFlag) const
-{
-    if(this->eventForwardMap != zfnull && forwardFlag != zfnull)
-    {
-        _ZFP_ZFListenerForwardMapType &m = *(_ZFP_ZFListenerForwardMapType *)this->eventForwardMap;
-        return (m.find(forwardFlag) != m.end());
-    }
-    else
-    {
-        return zffalse;
-    }
 }
 
 // ============================================================
@@ -418,7 +268,7 @@ zfidentity ZFObserverHolder::observerAdd(ZF_IN zfidentity eventId,
     {
         zfCoreCriticalMessageTrim("[ZFObject] you must not add observer while object is deallocating, class: %s, event: %s",
             this->observerOwner()->classData()->classNameFull(),
-            ZFIdMapGetName(eventId));
+            ZFIdMapNameForId(eventId));
         return zfidentityInvalid();
     }
 
@@ -688,7 +538,7 @@ zfbool ZFObserverHolder::observerHasAdd(void) const
     if(this->observerOwner() != zfnull)
     {
         return !d->observerMap.empty()
-            || !ZFObjectGlobalEventObserver().d->observerMap.empty();
+            || !ZFGlobalObserver().d->observerMap.empty();
     }
     else
     {
@@ -699,7 +549,7 @@ zfbool ZFObserverHolder::observerHasAdd(ZF_IN zfidentity eventId) const
 {
     if(this->observerOwner() != zfnull)
     {
-        zfstlmap<zfidentity, _ZFP_ZFObserverData *> &g = ZFObjectGlobalEventObserver().d->observerMap;
+        zfstlmap<zfidentity, _ZFP_ZFObserverData *> &g = ZFGlobalObserver().d->observerMap;
         return (d->observerMap.find(eventId) != d->observerMap.end())
             || (g.find(eventId) != g.end());
     }
@@ -728,13 +578,13 @@ void ZFObserverHolder::observerNotifyWithCustomSender(ZF_IN ZFObject *customSend
     if(this->observerOwner() != zfnull)
     {
         this->observerOwner()->observerOnEvent(listenerData);
-        ZFObjectGlobalEventObserver().d->observerNotifyPrepare(toNotify, toDelete, eventId, this->observerOwner());
+        ZFGlobalObserver().d->observerNotifyPrepare(toNotify, toDelete, eventId, this->observerOwner());
     }
     zfCoreMutexUnlock();
 
     if(!toNotify.empty())
     {
-        for(zfstlsize i = 0; i < toNotify.size() && !listenerData.eventFiltered; ++i)
+        for(zfstlsize i = 0; i < toNotify.size() && !listenerData.eventFiltered(); ++i)
         {
             const _ZFP_ZFObserverData &observerData = *(toNotify[i]);
             observerData.observer.execute(listenerData, observerData.userData);
@@ -804,7 +654,7 @@ void ZFObserverHolder::objectInfoT(ZF_OUT zfstring &ret) const
             ++it)
         {
             ret += "\n  ";
-            ret += ZFIdMapGetName(it->first);
+            ret += ZFIdMapNameForId(it->first);
             ret += ":";
 
             _ZFP_ZFObserverData *p = it->second;
@@ -820,19 +670,19 @@ void ZFObserverHolder::objectInfoT(ZF_OUT zfstring &ret) const
     }
 }
 
-void ZFObserverHolder::_ZFP_ZFObserverHolder_observerOwnerSet(ZF_IN ZFObject *obj) const
+void ZFObserverHolder::_ZFP_ZFObserverHolder_observerOwner(ZF_IN ZFObject *obj) const
 {
     /*
      * if observerOwner is not null,
      * means it belongs to a ZFObject, which would:
-     * * also send all events to ZFObjectGlobalEventObserver
+     * * also send all events to ZFGlobalObserver
      * * notify events to owner ZFObject, such as observerOnEvent
      */
     const_cast<ZFObserverHolder *>(this)->_observerOwner = obj;
 }
 
 // ============================================================
-ZFObserverHolder &_ZFP_ZFObjectGlobalEventObserverRef(void)
+ZFObserverHolder &ZFGlobalObserver(void)
 {
     static ZFObserverHolder d;
     return d;
@@ -846,48 +696,7 @@ ZF_NAMESPACE_GLOBAL_END
 #include "../ZFObject.h"
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFListenerData, zfidentity, eventId)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFListenerData, ZFObject *, sender)
-ZFMETHOD_USER_REGISTER_0({return invokerObject->to<v_ZFListenerData *>()->zfv.param0;}, v_ZFListenerData, ZFObject *, param0)
-ZFMETHOD_USER_REGISTER_0({return invokerObject->to<v_ZFListenerData *>()->zfv.param1;}, v_ZFListenerData, ZFObject *, param1)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFListenerData, zfbool, eventFiltered)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFListenerData, void, eventForwardSet, ZFMP_IN(const zfchar *, forwardFlag))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFListenerData, void, eventForwardRemove, ZFMP_IN(const zfchar *, forwardFlag))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFListenerData, void, eventForwardRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFListenerData, zfbool, eventForward, ZFMP_IN(const zfchar *, forwardFlag))
-
-ZFMETHOD_USER_REGISTER_0({ZFListenerData listenerData; return ZFListener(invokerObject->to<v_ZFCallback *>()->zfv).execute(listenerData, zfnull);}, v_ZFCallback, void, execute)
-ZFMETHOD_USER_REGISTER_2({return ZFListener(invokerObject->to<v_ZFCallback *>()->zfv).execute(listenerData, userData);}, v_ZFCallback, void, execute, ZFMP_IN_OUT(ZFListenerData &, listenerData), ZFMP_IN_OPT(ZFObject *, userData, zfnull))
-
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverAddParam, zfidentity const &, eventId)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverAddParam, void, eventIdSet, ZFMP_IN(zfidentity const &, v))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverAddParam, ZFListener const &, observer)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverAddParam, void, observerSet, ZFMP_IN(ZFListener const &, v))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverAddParam, ZFObject * const &, userData)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverAddParam, void, userDataSet, ZFMP_IN(ZFObject * const &, v))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverAddParam, ZFObject * const &, owner)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverAddParam, void, ownerSet, ZFMP_IN(ZFObject * const &, v))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverAddParam, zfbool const &, autoRemoveAfterActivate)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverAddParam, void, autoRemoveAfterActivateSet, ZFMP_IN(zfbool const &, v))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverAddParam, ZFLevel const &, observerLevel)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverAddParam, void, observerLevelSet, ZFMP_IN(ZFLevel const &, v))
-
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_6(v_ZFObserverHolder, zfidentity, observerAdd, ZFMP_IN(zfidentity, eventId), ZFMP_IN(const ZFListener &, observer), ZFMP_IN_OPT(ZFObject *, userData, zfnull), ZFMP_IN_OPT(ZFObject *, owner, zfnull), ZFMP_IN_OPT(zfbool, autoRemoveAfterActivate, zffalse), ZFMP_IN_OPT(ZFLevel, observerLevel, ZFLevelAppNormal))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverHolder, zfidentity, observerAdd, ZFMP_IN(const ZFObserverAddParam &, param))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverHolder, void, observerMoveToFirst, ZFMP_IN(zfidentity, taskId))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_2(v_ZFObserverHolder, void, observerRemove, ZFMP_IN(zfidentity, eventId), ZFMP_IN(const ZFListener &, callback))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_4(v_ZFObserverHolder, void, observerRemove, ZFMP_IN(zfidentity, eventId), ZFMP_IN(const ZFListener &, callback), ZFMP_IN(ZFObject *, userData), ZFMP_IN_OPT(ZFComparer<ZFObject *>::Comparer, userDataComparer, ZFComparerCheckEqual))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverHolder, void, observerRemoveByTaskId, ZFMP_IN(zfidentity, taskId))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverHolder, void, observerRemoveByOwner, ZFMP_IN(ZFObject *, owner))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverHolder, void, observerRemoveAll, ZFMP_IN(zfidentity, eventId))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverHolder, void, observerRemoveAll)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverHolder, zfbool, observerHasAdd)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFObserverHolder, zfbool, observerHasAdd, ZFMP_IN(zfidentity, eventId))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_3(v_ZFObserverHolder, void, observerNotify, ZFMP_IN(zfidentity, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_4(v_ZFObserverHolder, void, observerNotifyWithCustomSender, ZFMP_IN(ZFObject *, customSender), ZFMP_IN(zfidentity, eventId), ZFMP_IN_OPT(ZFObject *, param0, zfnull), ZFMP_IN_OPT(ZFObject *, param1, zfnull))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFObserverHolder, ZFObject *, observerOwner)
-
-ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFObserverHolder &, ZFObjectGlobalEventObserver)
+ZFMETHOD_FUNC_USER_REGISTER_FOR_FUNC_0(ZFObserverHolder &, ZFGlobalObserver)
 
 ZF_NAMESPACE_GLOBAL_END
 #endif

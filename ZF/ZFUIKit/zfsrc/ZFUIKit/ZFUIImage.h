@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIImage.h
  * @brief image
@@ -72,7 +63,7 @@ extern ZF_ENV_EXPORT void _ZFP_ZFUIImageSerializeTypeUnregister(ZF_IN const zfch
                                                                     ZF_OUT_OPT ZFSerializableData *outErrorPos /* = zfnull */)
 
 /** @brief see #ZFUIImageSerializeTypeGetAll */
-extern ZF_ENV_EXPORT void ZFUIImageSerializeTypeGetAllT(ZF_OUT ZFCoreArray<const zfchar *> &ret);
+extern ZF_ENV_EXPORT void ZFUIImageSerializeTypeGetAllT(ZF_IN_OUT ZFCoreArray<const zfchar *> &ret);
 /**
  * @brief usually for debug use only
  */
@@ -132,12 +123,6 @@ protected:
 protected:
     zfoverride
     virtual void styleableOnCopyFrom(ZF_IN ZFStyleable *anotherStyleable);
-    zfoverride
-    virtual zfbool styleKeyOnCheckValid(void)
-    {
-        return zfsuperI(ZFStyleable)::styleKeyOnCheckValid()
-            && this->nativeImage() != zfnull;
-    }
 
     // ============================================================
     // property
@@ -153,7 +138,7 @@ public:
      * to access pixel size, use #imageSizeFixed instead
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, imageScale, 1)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zffloat, imageScale)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, imageScale)
     /**
      * @brief nine patch described by a margin value, disabled if zero margin or margin exceeds image size
      * @note #ZFUIImage always use custom scale value, see #ZFUIImage::imageScale
@@ -165,10 +150,8 @@ public:
      *
      * ensured to be (#imageScale * #ZFUIGlobalStyle::imageScale)
      */
-    ZFMETHOD_INLINE_0(zffloat, imageScaleFixed)
-    {
-        return (this->imageScale() * ZFUIGlobalStyle::DefaultStyle()->imageScale());
-    }
+    ZFMETHOD_DECLARE_0(zffloat const &, imageScaleFixed)
+
     /**
      * @brief get size of the image
      * @note #ZFUIImage always use custom scale value, see #ZFUIImage::imageScale
@@ -226,74 +209,29 @@ public:
      *
      * the image would be retained, actual retain logic is depending on the implementation
      */
-    virtual void nativeImageSet(ZF_IN void *nativeImage);
+    virtual void nativeImage(ZF_IN void *nativeImage,
+                             ZF_IN_OPT zfbool retainNativeImage = zftrue);
 
     /**
      * @brief see #ZFUIIMAGE_SERIALIZE_TYPE_DEFINE
      */
-    virtual void imageSerializableTypeSet(ZF_IN const zfchar *typeName);
+    virtual void imageSerializableType(ZF_IN const zfchar *typeName);
     /**
-     * @brief see #imageSerializableTypeSet
+     * @brief see #imageSerializableType
      */
     virtual const zfchar *imageSerializableType(void);
     /**
      * @brief see #ZFUIIMAGE_SERIALIZE_TYPE_DEFINE
      */
-    virtual void imageSerializableDataSet(ZF_IN const ZFSerializableData *serializableData);
+    virtual void imageSerializableData(ZF_IN const ZFSerializableData *serializableData);
     /**
-     * @brief see #imageSerializableDataSet
+     * @brief see #imageSerializableData
      */
     virtual const ZFSerializableData *imageSerializableData(void);
 
 private:
     _ZFP_ZFUIImagePrivate *d;
 };
-
-// ============================================================
-// image's binary load
-/**
- * @brief load image from binary data (base64 encoded)
- * @note this method have no serialize logic,
- *   result image would be serialized by base64 value while serializing to data
- */
-ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFUIImageEncodeFromBase64,
-                        ZFMP_IN_OUT(ZFUIImage *, image),
-                        ZFMP_IN(const ZFInput &, inputCallback))
-/**
- * @brief see #ZFUIImageEncodeFromBase64
- */
-ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIImageEncodeFromBase64,
-                        ZFMP_IN(const ZFInput &, inputCallback))
-/**
- * @brief save image as binary data (base64 encoded)
- * @note this method have no serialize logic,
- *   result image would be serialized by base64 value while serializing to data
- */
-ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFUIImageEncodeToBase64,
-                        ZFMP_OUT(const ZFOutput &, outputCallback),
-                        ZFMP_IN(ZFUIImage *, image))
-
-/**
- * @brief load image from binary data
- * @note this method have no serialize logic,
- *   result image would be serialized by base64 value while serializing to data
- */
-ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFUIImageEncodeFromFile,
-                        ZFMP_IN_OUT(ZFUIImage *, image),
-                        ZFMP_IN(const ZFInput &, inputCallback))
-/**
- * @brief see #ZFUIImageEncodeFromFile
- */
-ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIImageEncodeFromFile,
-                        ZFMP_IN(const ZFInput &, inputCallback))
-/**
- * @brief save image as binary data
- * @note this method have no serialize logic,
- *   result image would be serialized by base64 value while serializing to data
- */
-ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFUIImageEncodeToFile,
-                        ZFMP_OUT(const ZFOutput &, outputCallback),
-                        ZFMP_IN(ZFUIImage *, image))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFUIImage_h_

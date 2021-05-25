@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFFile_path.h
  * @brief file utility
@@ -65,7 +56,7 @@ ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
  *
  * notified after change, param0 is the old path value
  * (as #v_zfstring)\n
- * notified to #ZFGlobalEventCenter only
+ * notified to #ZFGlobalObserver only
  */
 ZFOBSERVER_EVENT_GLOBAL(ZFFilePathForSettingOnChange)
 ZF_NAMESPACE_END(ZFGlobalEvent)
@@ -80,8 +71,8 @@ ZFMETHOD_FUNC_DECLARE_0(const zfchar *, ZFFilePathForSetting)
 /**
  * @brief change the data path, null to use defalut path
  */
-ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForSettingSet,
-                        ZFMP_IN_OPT(const zfchar *, path, zfnull))
+ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForSetting,
+                        ZFMP_IN(const zfchar *, path))
 
 // ============================================================
 // storage
@@ -91,7 +82,7 @@ ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
  *
  * notified after change, param0 is the old path value
  * (as #v_zfstring)\n
- * notified to #ZFGlobalEventCenter only
+ * notified to #ZFGlobalObserver only
  */
 ZFOBSERVER_EVENT_GLOBAL(ZFFilePathForStorageOnChange)
 ZF_NAMESPACE_END(ZFGlobalEvent)
@@ -106,8 +97,8 @@ ZFMETHOD_FUNC_DECLARE_0(const zfchar *, ZFFilePathForStorage)
 /**
  * @brief change the storage path, null to use defalut path
  */
-ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForStorageSet,
-                        ZFMP_IN_OPT(const zfchar *, path, zfnull))
+ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForStorage,
+                        ZFMP_IN(const zfchar *, path))
 
 // ============================================================
 // storage shared
@@ -117,7 +108,7 @@ ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
  *
  * notified after change, param0 is the old path value
  * (as #v_zfstring)\n
- * notified to #ZFGlobalEventCenter only
+ * notified to #ZFGlobalObserver only
  */
 ZFOBSERVER_EVENT_GLOBAL(ZFFilePathForStorageSharedOnChange)
 ZF_NAMESPACE_END(ZFGlobalEvent)
@@ -136,8 +127,8 @@ ZFMETHOD_FUNC_DECLARE_0(const zfchar *, ZFFilePathForStorageShared)
 /**
  * @brief change the storage path, null to use defalut path
  */
-ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForStorageSharedSet,
-                        ZFMP_IN_OPT(const zfchar *, path, zfnull))
+ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForStorageShared,
+                        ZFMP_IN(const zfchar *, path))
 
 // ============================================================
 // cache
@@ -147,19 +138,19 @@ ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
  *
  * notified after change, param0 is the old path value
  * (as #v_zfstring)\n
- * notified to #ZFGlobalEventCenter only
+ * notified to #ZFGlobalObserver only
  */
 ZFOBSERVER_EVENT_GLOBAL(ZFFilePathForCacheOnChange)
 /**
  * @brief see #ZFObject::observerNotify
  *
- * notified to #ZFGlobalEventCenter only
+ * notified to #ZFGlobalObserver only
  */
 ZFOBSERVER_EVENT_GLOBAL(ZFFilePathForCacheBeforeClear)
 /**
  * @brief see #ZFObject::observerNotify
  *
- * notified to #ZFGlobalEventCenter only
+ * notified to #ZFGlobalObserver only
  */
 ZFOBSERVER_EVENT_GLOBAL(ZFFilePathForCacheAfterClear)
 ZF_NAMESPACE_END(ZFGlobalEvent)
@@ -176,8 +167,8 @@ ZFMETHOD_FUNC_DECLARE_0(const zfchar *, ZFFilePathForCache)
 /**
  * @brief change the cache path, null to use defalut path
  */
-ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForCacheSet,
-                        ZFMP_IN_OPT(const zfchar *, path, zfnull))
+ZFMETHOD_FUNC_DECLARE_1(void, ZFFilePathForCache,
+                        ZFMP_IN(const zfchar *, path))
 /**
  * @brief clear all caches under #ZFFilePathForCache
  *

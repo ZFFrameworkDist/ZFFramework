@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFTime.h
  * @brief time utility
@@ -53,7 +44,7 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFTimeValue, ZFTimeValueZero)
 /**
  * @brief make a time value
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueMake,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFTimeValue, ZFTimeValueMake,
                                ZFMP_IN(zftimet, sec),
                                ZFMP_IN(zftimet, usec))
 {
@@ -66,7 +57,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueMake,
  *
  * note, convert from #ZFTimeValue to #zftimet would lose accuracy
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFTimeValue, ZFTimeValueFromMiliSeconds,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFTimeValue, ZFTimeValueFromMiliSeconds,
                                ZFMP_IN(zftimet, t))
 {
     ZFTimeValue ret = {(zftimet)(t / 1000), (zftimet)((t % 1000) * 1000)};
@@ -77,7 +68,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFTimeValue, ZFTimeValueFromMiliSeconds,
  *
  * note, convert from #ZFTimeValue to #zftimet would lose accuracy
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zftimet, ZFTimeValueToMiliSeconds,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zftimet, ZFTimeValueToMiliSeconds,
                                ZFMP_IN(const ZFTimeValue &, v))
 {
     return (zftimet)(v.sec * 1000 + v.usec / 1000);
@@ -92,7 +83,7 @@ ZFMETHOD_FUNC_DECLARE_1(void, ZFTimeValueNormalize,
 /**
  * @brief return tv1 - tv2
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFTimeValueDec,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFTimeValueDec,
                                ZFMP_OUT(ZFTimeValue &, result),
                                ZFMP_IN(const ZFTimeValue &, tv1),
                                ZFMP_IN(const ZFTimeValue &, tv2))
@@ -104,7 +95,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFTimeValueDec,
 /**
  * @brief return tv1 - tv2
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueDec,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFTimeValue, ZFTimeValueDec,
                                ZFMP_IN(const ZFTimeValue &, tv1),
                                ZFMP_IN(const ZFTimeValue &, tv2))
 {
@@ -116,7 +107,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueDec,
 /**
  * @brief return tv1 + tv2
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFTimeValueInc,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFTimeValueInc,
                                ZFMP_OUT(ZFTimeValue &, result),
                                ZFMP_IN(const ZFTimeValue &, tv1),
                                ZFMP_IN(const ZFTimeValue &, tv2))
@@ -128,7 +119,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFTimeValueInc,
 /**
  * @brief return tv1 + tv2
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueInc,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFTimeValue, ZFTimeValueInc,
                                ZFMP_IN(const ZFTimeValue &, tv1),
                                ZFMP_IN(const ZFTimeValue &, tv2))
 {
@@ -140,7 +131,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueInc,
 /**
  * @brief return tv * v
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFTimeValueMul,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFTimeValueMul,
                                ZFMP_OUT(ZFTimeValue &, result),
                                ZFMP_IN(const ZFTimeValue &, tv),
                                ZFMP_IN(zfindex, v))
@@ -152,7 +143,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFTimeValueMul,
 /**
  * @brief return tv * v
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueMul,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFTimeValue, ZFTimeValueMul,
                                ZFMP_IN(const ZFTimeValue &, tv),
                                ZFMP_IN(zfindex, v))
 {
@@ -171,7 +162,7 @@ ZFMETHOD_FUNC_DECLARE_3(void, ZFTimeValueDiv,
 /**
  * @brief return tv / v, assert fail if v is 0
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFTimeValue, ZFTimeValueDiv,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFTimeValue, ZFTimeValueDiv,
                                ZFMP_IN(const ZFTimeValue &, tv),
                                ZFMP_IN(zfindex, v))
 {
@@ -197,7 +188,7 @@ ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFTimeValueToStringFriendly,
                         ZFMP_IN_OUT(zfstring &, s),
                         ZFMP_IN(ZFTimeValue const &, v))
 /** @brief see #ZFTimeValueToStringFriendly */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfstring, ZFTimeValueToStringFriendly,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zfstring, ZFTimeValueToStringFriendly,
                                ZFMP_IN(ZFTimeValue const &, v))
 {
     zfstring s;
@@ -230,13 +221,6 @@ extern ZF_ENV_EXPORT void operator *= (ZF_IN_OUT ZFTimeValue &v0, ZF_IN zfindex 
 /** @brief overrided operator for ZFTimeValue calculate */
 extern ZF_ENV_EXPORT void operator /= (ZF_IN_OUT ZFTimeValue &v0, ZF_IN zfindex v1);
 
-ZFTYPEID_PROGRESS_DECLARE(ZFTimeValue, {
-        ret.sec = from.sec + (zft_zftimet)((to.sec - from.sec) * progress);
-        zfdouble usec = (to.sec - from.sec) * (zfdouble)progress;
-        ret.usec = from.usec + (zft_zftimet)((usec - (zfint)usec) * 1000000LL);
-        ZFTimeValueNormalize(ret);
-    })
-
 // ============================================================
 // ZFTimeInfo
 /**
@@ -264,7 +248,7 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFTimeInfo, ZFTimeInfoZero)
 /**
  * @brief make a time info, you should make sure value is valid
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_8(ZFTimeInfo, ZFTimeInfoMake,
+ZFMETHOD_FUNC_INLINE_DECLARE_8(ZFTimeInfo, ZFTimeInfoMake,
                                ZFMP_IN(zfint const &, year),
                                ZFMP_IN(zfuint const &, month),
                                ZFMP_IN(zfuint const &, day),
@@ -287,7 +271,7 @@ ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFTimeInfoToString,
                         ZFMP_IN_OUT(zfstring &, s),
                         ZFMP_IN(ZFTimeInfo const &, v))
 /** @brief see #ZFTimeInfoToString */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfstring, ZFTimeInfoToString,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zfstring, ZFTimeInfoToString,
                                ZFMP_IN(ZFTimeInfo const &, v))
 {
     zfstring s;
@@ -321,8 +305,8 @@ zfclassFwd _ZFP_ZFTimePrivate;
  * serializable data:
  * @code
  *   <ZFTime
- *       timeValue="timeValueString" // ZFTime::timeValueSet, optional, ZFTimeValueZero by default
- *       timeZone="timeZoneString" // ZFTime::timeZoneSet, optional, ZFTimeValueZero by default
+ *       timeValue="timeValueString" // ZFTime::timeValue, optional, ZFTimeValueZero by default
+ *       timeZone="timeZoneString" // ZFTime::timeZone, optional, ZFTimeValueZero by default
  *   />
  * @endcode
  */
@@ -346,23 +330,21 @@ protected:
     virtual void copyableOnCopyFrom(ZF_IN ZFObject *anotherObj)
     {
         zfsuperI(ZFCopyable)::copyableOnCopyFrom(anotherObj);
-        this->timeValueSet(ZFCastZFObjectUnchecked(zfself *, anotherObj)->timeValue());
-        this->timeZoneSet(ZFCastZFObjectUnchecked(zfself *, anotherObj)->timeZone());
+        this->timeValue(ZFCastZFObjectUnchecked(zfself *, anotherObj)->timeValue());
+        this->timeZone(ZFCastZFObjectUnchecked(zfself *, anotherObj)->timeZone());
     }
 
 public:
     /**
      * @brief return true if year is leap year
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              zfbool, leapYear,
+    ZFMETHOD_DECLARE_STATIC_1(zfbool, leapYear,
                               ZFMP_IN(zfint, year))
     /**
      * @brief return leap year num in range [year1, year2],
      *   may return negative value if (year1 > year2)
      */
-    ZFMETHOD_DECLARE_DETAIL_2(public, ZFMethodTypeStatic,
-                              zfint, leapYearBetween,
+    ZFMETHOD_DECLARE_STATIC_2(zfint, leapYearBetween,
                               ZFMP_IN(zfint, year1),
                               ZFMP_IN(zfint, year2))
 
@@ -374,40 +356,31 @@ public:
      * \n
      * typically, this method would have better performance and accuracy than #currentTimeValue
      */
-    ZFMETHOD_DECLARE_DETAIL_0(public, ZFMethodTypeStatic,
-                              zftimet, timestamp)
+    ZFMETHOD_DECLARE_STATIC_0(zftimet, timestamp)
 
     /**
      * @brief return time since #ZFTimeInfoZero, negative if before #ZFTimeInfoZero
      */
-    ZFMETHOD_DECLARE_DETAIL_0(public, ZFMethodTypeStatic,
-                              ZFTimeValue, currentTimeValue)
+    ZFMETHOD_DECLARE_STATIC_0(ZFTimeValue, currentTimeValue)
     /**
      * @brief equal to ZFTimeValueToMiliSeconds(currentTimeValue())
      */
-    ZFMETHOD_INLINE_DETAIL_0(public, ZFMethodTypeStatic,
-                             zftimet, currentTimeMiliSeconds)
-    {
-        return ZFTimeValueToMiliSeconds(ZFTime::currentTimeValue());
-    }
+    ZFMETHOD_DECLARE_STATIC_0(zftimet, currentTimeMiliSeconds)
     /**
      * @brief return current time info, util method to #currentTimeValue
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              ZFTimeInfo, currentTimeInfo,
+    ZFMETHOD_DECLARE_STATIC_1(ZFTimeInfo, currentTimeInfo,
                               ZFMP_IN_OPT(const ZFTimeValue &, localTimeZone, ZFTime::timeZoneLocal()))
     /**
      * @brief convert time value to time info
      */
-    ZFMETHOD_DECLARE_DETAIL_2(public, ZFMethodTypeStatic,
-                              zfbool, timeInfoFromTimeValue,
+    ZFMETHOD_DECLARE_STATIC_2(zfbool, timeInfoFromTimeValue,
                               ZFMP_OUT(ZFTimeInfo &, ti),
                               ZFMP_IN(const ZFTimeValue &, tv))
     /**
      * @brief convert time info to time value
      */
-    ZFMETHOD_DECLARE_DETAIL_2(public, ZFMethodTypeStatic,
-                              zfbool, timeInfoToTimeValue,
+    ZFMETHOD_DECLARE_STATIC_2(zfbool, timeInfoToTimeValue,
                               ZFMP_OUT(ZFTimeValue &, tv),
                               ZFMP_IN(const ZFTimeInfo &, ti))
     /**
@@ -430,8 +403,7 @@ public:
      * time zone would be applied,
      * simply by #ZFTimeValueInc to the time value of ZFTime object
      */
-    ZFMETHOD_DECLARE_DETAIL_0(public, ZFMethodTypeStatic,
-                              const ZFTimeValue &, timeZoneLocal)
+    ZFMETHOD_DECLARE_STATIC_0(const ZFTimeValue &, timeZoneLocal)
 
 protected:
     /**
@@ -441,22 +413,13 @@ protected:
     /**
      * @brief init from time value
      */
-    ZFOBJECT_ON_INIT_INLINE_2(ZFMP_IN(const ZFTimeValue &, tv),
+    ZFOBJECT_ON_INIT_DECLARE_2(ZFMP_IN(const ZFTimeValue &, tv),
                               ZFMP_IN_OPT(const ZFTimeValue &, timeZone, ZFTime::timeZoneLocal)())
-    {
-        this->objectOnInit();
-        zfself::timeZoneSet(timeZone);
-        zfself::timeValueSet(tv);
-    }
     /**
      * @brief init from time info, or zero time if invalid
      */
-    ZFOBJECT_ON_INIT_INLINE_2(ZFMP_IN(const ZFTimeInfo &, ti),
+    ZFOBJECT_ON_INIT_DECLARE_2(ZFMP_IN(const ZFTimeInfo &, ti),
                               ZFMP_IN_OPT(const ZFTimeValue &, timeZone, ZFTime::timeZoneLocal)())
-    {
-        this->objectOnInit();
-        zfself::timeInfoSet(ti, timeZone);
-    }
 
     zfoverride
     virtual void objectOnInit(void);
@@ -481,7 +444,7 @@ public:
     /**
      * @brief set time according to time value
      */
-    ZFMETHOD_DECLARE_1(zfbool, timeValueSet,
+    ZFMETHOD_DECLARE_1(zfbool, timeValue,
                        ZFMP_IN(const ZFTimeValue &, tv))
     /**
      * @brief access time value
@@ -492,8 +455,8 @@ public:
      * @brief set time zone attched to this ZFTime object
      * @see timeZoneLocal
      */
-    ZFMETHOD_DECLARE_1(zfbool, timeZoneSet,
-                       ZFMP_IN_OPT(const ZFTimeValue &, timeZone, ZFTime::timeZoneLocal()))
+    ZFMETHOD_DECLARE_1(zfbool, timeZone,
+                       ZFMP_IN(const ZFTimeValue &, timeZone))
     /**
      * @brief get time zone attched to this ZFTime object
      */
@@ -509,21 +472,21 @@ public:
      *
      * set time to #ZFTimeInfoZero if input is invalid
      */
-    virtual zfbool timeInfoSet(ZF_IN zfint year,
-                               ZF_IN zfuint month,
-                               ZF_IN zfuint day,
-                               ZF_IN zfuint hour,
-                               ZF_IN zfuint minute,
-                               ZF_IN zfuint second,
-                               ZF_IN zfuint miliSecond,
-                               ZF_IN zfuint microSecond,
-                               ZF_IN_OPT const ZFTimeValue &tz = ZFTime::timeZoneLocal());
+    virtual zfbool timeInfo(ZF_IN zfint year,
+                            ZF_IN zfuint month,
+                            ZF_IN zfuint day,
+                            ZF_IN zfuint hour,
+                            ZF_IN zfuint minute,
+                            ZF_IN zfuint second,
+                            ZF_IN zfuint miliSecond,
+                            ZF_IN zfuint microSecond,
+                            ZF_IN_OPT const ZFTimeValue &tz = ZFTime::timeZoneLocal());
     /**
      * @brief set time according to time info
      *
      * set time to #ZFTimeInfoZero if input is invalid
      */
-    ZFMETHOD_DECLARE_2(zfbool, timeInfoSet,
+    ZFMETHOD_DECLARE_2(zfbool, timeInfo,
                        ZFMP_IN(const ZFTimeInfo &, ti),
                        ZFMP_IN_OPT(const ZFTimeValue &, tz, ZFTime::timeZoneLocal()))
     /**

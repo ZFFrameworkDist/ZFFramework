@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -55,7 +46,7 @@ protected:
         zfLogTrimT() << ZFTypeId<zfstring>::Value<const zfstring * const &>::zfvAccess(v);
 
         // zfautoObject processed as normal raw type
-        zfblockedAlloc(ZFString, test_String, "zfautoObject");
+        zfblockedAlloc(v_zfstring, test_String, "zfautoObject");
         v = test_String;
         zfLogTrimT() << "============================================================";
         zfLogTrimT() << "zfautoObject";
@@ -70,7 +61,7 @@ protected:
         zfLogTrimT() << ZFTypeId<zfautoObject>::Value<const zfautoObject * const &>::zfvAccess(v);
 
         // ZFAny processed as aligned type
-        zfblockedAlloc(ZFString, test_ZFAny, "ZFAny");
+        zfblockedAlloc(v_zfstring, test_ZFAny, "ZFAny");
         v = test_ZFAny;
         zfLogTrimT() << "============================================================";
         zfLogTrimT() << "ZFAny";

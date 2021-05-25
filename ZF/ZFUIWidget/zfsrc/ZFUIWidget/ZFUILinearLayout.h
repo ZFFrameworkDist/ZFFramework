@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUILinearLayout.h
  * @brief linear container view
@@ -24,13 +15,13 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * @brief layout param for #ZFUILinearLayout
  *
  * for #ZFUILinearLayout,
- * #ZFUIViewLayoutParam::layoutAlign and #ZFUIViewLayoutParam::layoutMargin
+ * #ZFUILayoutParam::layoutAlign and #ZFUILayoutParam::layoutMargin
  * would be relative to sibling child,
  * instead of the container view
  */
-zfclass ZF_ENV_EXPORT ZFUILinearLayoutParam : zfextends ZFUIViewLayoutParam
+zfclass ZF_ENV_EXPORT ZFUILinearLayoutParam : zfextends ZFUILayoutParam
 {
-    ZFOBJECT_DECLARE(ZFUILinearLayoutParam, ZFUIViewLayoutParam)
+    ZFOBJECT_DECLARE(ZFUILinearLayoutParam, ZFUILayoutParam)
 
     /**
      * @brief weight for the view, 0 by default
@@ -48,17 +39,14 @@ zfclass ZF_ENV_EXPORT ZFUILinearLayoutParam : zfextends ZFUIViewLayoutParam
      * -  child1 = parentSize * 4 / 9
      * -  child2 = parentSize * 3 / 9
      */
-    ZFPROPERTY_ASSIGN(zfint, layoutWeight)
+    ZFPROPERTY_ASSIGN(zffloat, layoutWeight)
 
     /**
      * @brief whether reserve space if child is not visible, false by default
      */
     ZFPROPERTY_ASSIGN(zfbool, layoutReserveSpaceWhenNotVisible)
 
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUIAlignFlags, layoutAlign)
-    {
-        propertyValue = ZFUIAlign::e_Center;
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUIAlignFlags, layoutAlign)
 };
 
 // ============================================================
@@ -82,19 +70,19 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIOrientationEnum, layoutOrientation,
                                 ZFUIOrientation::e_Left)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIOrientationEnum, layoutOrientation)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIOrientationEnum, layoutOrientation)
 
     /**
      * @brief extra margin independent from children's layout param's margin, #ZFUIMarginZero by default
      */
     ZFPROPERTY_ASSIGN(ZFUIMargin, layoutChildMargin)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIMargin, layoutChildMargin)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIMargin, layoutChildMargin)
 
     /**
      * @brief extra space between each child independent from children's layout param, 0 by default
      */
-    ZFPROPERTY_ASSIGN(zfint, layoutChildSpace)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfint, layoutChildSpace)
+    ZFPROPERTY_ASSIGN(zffloat, layoutChildSpace)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zffloat, layoutChildSpace)
 
     // ============================================================
     // override ZFUIView

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -42,7 +33,7 @@ protected:
             }
             zfLogTrim("async thread end");
         })
-        taskId = ZFThreadExecuteInNewThread(asyncFunc);
+        taskId = ZFExecuteInNewThread(asyncFunc);
         for(zfindex i = 0; i < 5; ++i)
         {
             for(zfindex j = 0; j < 10; ++j)
@@ -53,7 +44,7 @@ protected:
             ZFThread::sleep((zftimet)190);
         }
         zfLogTrim("main thread wait async thread begin");
-        ZFThreadExecuteWait(taskId);
+        ZFExecuteWait(taskId);
         zfLogTrim("main thread wait async thread complete");
 #endif
 
@@ -75,7 +66,7 @@ protected:
             }
             zfLogTrim("sync thread end");
         })
-        taskId = ZFThreadExecuteInNewThread(syncFunc);
+        taskId = ZFExecuteInNewThread(syncFunc);
         for(zfindex i = 0; i < 5; ++i)
         {
             zfCoreMutexLock();
@@ -88,7 +79,7 @@ protected:
             ZFThread::sleep((zftimet)190);
         }
         zfLogTrim("main thread wait sync thread begin");
-        ZFThreadExecuteWait(taskId);
+        ZFExecuteWait(taskId);
         zfLogTrim("main thread wait sync thread complete");
 #endif
 

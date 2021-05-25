@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFImpl_ZFLua.h
  * @brief global header for lua impl
@@ -150,6 +141,10 @@ extern ZF_ENV_EXPORT void ZFImpl_ZFLua_implSetupObject(ZF_IN_OUT lua_State *L, Z
 // ============================================================
 /**
  * @brief run lua code, L must be first initialized by #ZFImpl_ZFLua_luaStateAttach
+ *
+ * NOTE: the lua code can return any number of values (any type that #ZFImpl_ZFLua_toGeneric supports),
+ * when more than one value returned,
+ * the luaResult would holds a #v_ZFCoreArray
  */
 extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_execute(ZF_IN lua_State *L,
                                                  ZF_IN const zfchar *buf,
@@ -158,6 +153,13 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_execute(ZF_IN lua_State *L,
                                                  ZF_IN_OPT const ZFCoreArray<zfautoObject> *luaParams = zfnull,
                                                  ZF_OUT_OPT zfstring *errHint = zfnull,
                                                  ZF_IN_OPT const zfchar *chunkInfo = zfnull);
+/**
+ * @brief error handler for #ZFImpl_ZFLua_execute, lua_pcall, etc
+ */
+extern ZF_ENV_EXPORT void ZFImpl_ZFLua_execute_errorHandle(ZF_IN lua_State *L,
+                                                           ZF_IN int error,
+                                                           ZF_OUT_OPT zfstring *errHint = zfnull,
+                                                           ZF_IN_OPT const zfchar *chunkInfo = zfnull);
 
 // ============================================================
 // utils
@@ -215,7 +217,6 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toCallback(ZF_OUT zfautoObject &param,
  *
  * support types:
  * -  normal lua string
- * -  #ZFString
  * -  #v_zfstring
  */
 extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toString(ZF_IN_OUT zfstring &s,
@@ -252,7 +253,6 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toNumberT(ZF_OUT zfautoObject &ret,
  *
  * support types:
  * -  normal lua number
- * -  #ZFValue
  * -  #v_zfbool
  * -  #v_zfindex
  * -  #v_zfint
@@ -266,8 +266,7 @@ extern ZF_ENV_EXPORT zfbool ZFImpl_ZFLua_toNumberT(ZF_OUT zfautoObject &ret,
  * -  #v_zfidentity
  * -  all #ZFEnum types
  *
- * return proper #ZFValue if success, or empty if fail\n
- * if allowEmpty, a #ZFValue::intValueCreate would be returned
+ * return proper #v_zflongdouble if success, or empty if fail
  */
 inline zfautoObject ZFImpl_ZFLua_toNumber(ZF_IN lua_State *L,
                                           ZF_IN int luaStackOffset,
@@ -339,6 +338,12 @@ inline void ZFImpl_ZFLua_luaCFunctionRegister(ZF_IN lua_State *L, ZF_IN const zf
 /** @brief util for impl */
 inline void ZFImpl_ZFLua_luaPush(ZF_IN lua_State *L, ZF_IN zfautoObject &v)
 {
+    v_zfbool *t = v;
+    if(t != zfnull)
+    {
+        lua_pushboolean(L, t->zfv);
+        return;
+    }
     ELuna::convert2LuaType<zfautoObject>::convertType(L, v);
     ZFImpl_ZFLua_implSetupObject(L);
 }
@@ -353,11 +358,16 @@ inline zfautoObject &ZFImpl_ZFLua_luaGet(ZF_IN lua_State *L, ZF_IN int luaStackO
 {
     return ELuna::convert2CppType<zfautoObject &>::convertType(L, luaStackOffset);
 }
-/** @cond ZFPrivateDoc */
-#define ZFImpl_ZFLua_dummyError "ZFImpl_ZFLua_dummyError"
-/** @endcond */
 /** @brief util for impl */
-extern ZF_ENV_EXPORT int ZFImpl_ZFLua_luaError(ZF_IN lua_State *L);
+inline int ZFImpl_ZFLua_luaError(ZF_IN lua_State *L, ZF_IN const zfchar *fmt, ...)
+{
+    zfstring errHint;
+    va_list vaList;
+    va_start(vaList, fmt);
+    zfstringAppendV(errHint, fmt, vaList);
+    va_end(vaList);
+    return luaL_error(L, "%s", errHint.cString());
+}
 
 ZF_NAMESPACE_GLOBAL_END
 

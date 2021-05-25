@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLua_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -20,7 +11,7 @@ zfclass _ZFP_ZFLua_ZFCallbackForLua_test_Object : zfextends ZFObject
 public:
     ZFMETHOD_INLINE_0(void, notifyTest)
     {
-        this->observerNotify(zfself::EventTest(), ZFValue::intValueCreate(1111), ZFValue::intValueCreate(2222));
+        this->observerNotify(zfself::EventTest(), zflineAlloc(v_zfint, 1111), zflineAlloc(v_zfint, 2222));
     }
 
 protected:
@@ -63,7 +54,7 @@ protected:
         zfsuper::testCaseOnStart();
 
         {
-            ZFCoreStatisticInvokeTimeAccurateLoggerOneTime("run lua code");
+            ZFCoreStatisticInvokeTimeLoggerOneTime("run lua code");
             ZFLuaExecute(
                     "local obj = zfAlloc('_ZFP_ZFLua_ZFCallbackForLua_test_Object')\n"
                     "local callback = function(listenerData, userData)"
@@ -76,7 +67,7 @@ protected:
         }
 
         {
-            ZFCoreStatisticInvokeTimeAccurateLoggerOneTime("lua gc");
+            ZFCoreStatisticInvokeTimeLoggerOneTime("lua gc");
             ZFLuaGC();
         }
 

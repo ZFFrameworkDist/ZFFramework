@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFIOCallback_fwd.h
  * @brief common callback defines
@@ -25,7 +16,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * for #ZFOutput and #ZFInput to achieve some additional operation\n
  * \n
  * usage:\n
- * set an auto released data by #ZFCallback::callbackTagSet,
+ * set an auto released data by #ZFCallback::callbackTag,
  * whose key is #ZFCallbackTagKeyword_ioOwner and value is a ZFObject
  * that optionally implements those method (as #ZFMethod):
  * -  ioSeek, similar to FILE's #ZFFileFileSeek, proto type:\n

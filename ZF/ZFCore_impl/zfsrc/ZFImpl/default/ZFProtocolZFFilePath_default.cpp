@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_default_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFFilePath.h"
 #include "ZFCore/ZFString.h"
@@ -29,7 +20,7 @@ public:
             (void)this->pathForModuleFile();
             zfindex pos = zfstringFindReversely(this->_pathForModuleFile, ZFFileSeparator());
             zfCoreAssert(pos != zfindexMax());
-            this->_pathForModule.assign(this->_pathForModuleFile, 0, pos);
+            this->_pathForModule.assign(this->_pathForModuleFile, pos);
         }
         return this->_pathForModule;
     }
@@ -41,7 +32,7 @@ public:
                 zfstring tmp;
                 zfcharW buf[1024] = {0};
                 GetModuleFileNameW(zfnull, buf, 1024);
-                ZFString::toUTF8(tmp, buf, ZFStringEncoding::e_UTF16);
+                zfstringToUTF8(tmp, buf, ZFStringEncoding::e_UTF16);
             #elif ZF_ENV_sys_Posix || ZF_ENV_sys_unknown // #if ZF_ENV_sys_Windows
                 zfchar tmp[1024] = {0};
                 zfint len = (zfint)readlink("/proc/self/exe", tmp, 1024);
@@ -70,7 +61,7 @@ public:
         }
         return this->_pathForSetting;
     }
-    virtual void pathForSettingSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForSetting(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForSetting = path;
     }
@@ -85,7 +76,7 @@ public:
         }
         return this->_pathForStorage;
     }
-    virtual void pathForStorageSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForStorage(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForStorage = path;
     }
@@ -100,7 +91,7 @@ public:
         }
         return this->_pathForStorageShared;
     }
-    virtual void pathForStorageSharedSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForStorageShared(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForStorageShared = path;
     }
@@ -115,7 +106,7 @@ public:
         }
         return this->_pathForCache;
     }
-    virtual void pathForCacheSet(ZF_IN const zfchar *path = zfnull)
+    virtual void pathForCache(ZF_IN const zfchar *path = zfnull)
     {
         this->_pathForCache = path;
     }

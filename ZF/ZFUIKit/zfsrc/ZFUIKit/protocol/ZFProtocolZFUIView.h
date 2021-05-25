@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFProtocolZFUIView.h
  * @brief protocol for ZFUIView
@@ -76,49 +67,49 @@ public:
      * -  used to store native view for different view's implementation
      *   such as EditText
      */
-    virtual void nativeImplViewSet(ZF_IN ZFUIView *view,
-                                   ZF_IN void *nativeImplViewOld,
-                                   ZF_IN void *nativeImplView,
-                                   ZF_IN zfindex virtualIndex) zfpurevirtual;
+    virtual void nativeImplView(ZF_IN ZFUIView *view,
+                                ZF_IN void *nativeImplViewOld,
+                                ZF_IN void *nativeImplView,
+                                ZF_IN zfindex virtualIndex) zfpurevirtual;
     /**
      * @brief see #ZFUIView::nativeImplViewMarginUpdate
      */
-    virtual void nativeImplViewFrameSet(ZF_IN ZFUIView *view,
-                                        ZF_IN const ZFUIRect &rect) zfpurevirtual;
+    virtual void nativeImplViewFrame(ZF_IN ZFUIView *view,
+                                     ZF_IN const ZFUIRect &rect) zfpurevirtual;
 
     /**
      * @brief get proper scale for the view
      */
-    virtual zffloat nativeViewScaleForImpl(ZF_IN void *nativeView) zfpurevirtual;
+    virtual zffloat UIScaleForImpl(ZF_IN void *nativeView) zfpurevirtual;
     /**
      * @brief get proper scale for physical pixel
      */
-    virtual zffloat nativeViewScaleForPhysicalPixel(ZF_IN void *nativeView) zfpurevirtual;
+    virtual zffloat UIScaleForPixel(ZF_IN void *nativeView) zfpurevirtual;
 
     // ============================================================
     // properties
 public:
     /** @brief see #ZFUIView */
-    virtual void viewVisibleSet(ZF_IN ZFUIView *view,
-                                ZF_IN zfbool viewVisible) zfpurevirtual;
+    virtual void viewVisible(ZF_IN ZFUIView *view,
+                             ZF_IN zfbool viewVisible) zfpurevirtual;
     /** @brief see #ZFUIView */
-    virtual void viewAlphaSet(ZF_IN ZFUIView *view,
-                              ZF_IN zffloat viewAlpha) zfpurevirtual;
+    virtual void viewAlpha(ZF_IN ZFUIView *view,
+                           ZF_IN zffloat viewAlpha) zfpurevirtual;
     /** @brief see #ZFUIView */
-    virtual void viewUIEnableSet(ZF_IN ZFUIView *view,
-                                 ZF_IN zfbool viewUIEnable) zfpurevirtual;
+    virtual void viewUIEnable(ZF_IN ZFUIView *view,
+                              ZF_IN zfbool viewUIEnable) zfpurevirtual;
     /** @brief see #ZFUIView */
-    virtual void viewUIEnableTreeSet(ZF_IN ZFUIView *view,
-                                     ZF_IN zfbool viewUIEnableTree) zfpurevirtual;
+    virtual void viewUIEnableTree(ZF_IN ZFUIView *view,
+                                  ZF_IN zfbool viewUIEnableTree) zfpurevirtual;
     /** @brief see #ZFUIView */
-    virtual void viewMouseHoverEventEnableSet(ZF_IN ZFUIView *view,
-                                              ZF_IN zfbool viewMouseHoverEventEnable)
+    virtual void viewMouseHoverEventEnable(ZF_IN ZFUIView *view,
+                                           ZF_IN zfbool viewMouseHoverEventEnable)
     {
         // no hover event support by default
     }
     /** @brief see #ZFUIView */
-    virtual void viewBackgroundColorSet(ZF_IN ZFUIView *view,
-                                        ZF_IN const ZFUIColor &viewBackgroundColor) zfpurevirtual;
+    virtual void viewBackgroundColor(ZF_IN ZFUIView *view,
+                                     ZF_IN const ZFUIColor &viewBackgroundColor) zfpurevirtual;
 
     // ============================================================
     // children
@@ -161,17 +152,15 @@ public:
     /**
      * @brief set view's frame, no need to worry about layout param or auto resizing
      */
-    virtual void viewFrameSet(ZF_IN ZFUIView *view,
-                              ZF_IN const ZFUIRect &rect) zfpurevirtual;
+    virtual void viewFrame(ZF_IN ZFUIView *view,
+                           ZF_IN const ZFUIRect &rect) zfpurevirtual;
     /**
      * @brief called by ZFUIView to notify the implementation that the view needs layout
      *
-     * implementations should ensure next layout step would layout all views from root to children,
-     * otherwise, you should request layout recursively from child to all of its parent\n
-     * \n
-     * this method is called by ZFUIView to notify implementations,
-     * and #notifyNeedLayout is called by implementations to notify ZFUIView,
-     * take good care of them
+     * implementations should ensure next layout step would layout
+     * the view by calling #notifyLayoutView\n
+     * you have no need worry about parent,
+     * parent's #layoutRequest would be called by ZFUIView if necessary
      */
     virtual void layoutRequest(ZF_IN ZFUIView *view) zfpurevirtual;
 
@@ -186,24 +175,14 @@ public:
     // callbacks that implementations must notify
 public:
     /**
-     * @brief implementations must notify when native view needs layout
-     *   if view's parent isn't ZFUIView
-     *
-     * typically, you should call this method only if the view's parent is not type of ZFUIView
-     */
-    zffinal void notifyNeedLayout(ZF_IN ZFUIView *view)
-    {
-        view->layoutRequest();
-    }
-    /**
      * @brief implementations must notify when need layout if view's parent isn't ZFUIView
      *
      * typically, you should call this method only if the view's parent is not type of ZFUIView
      */
-    zffinal void notifyLayoutRootView(ZF_IN ZFUIView *view,
-                                      ZF_IN const ZFUIRect &rect)
+    zffinal void notifyLayoutView(ZF_IN ZFUIView *view,
+                                  ZF_IN const ZFUIRect &rect)
     {
-        view->_ZFP_ZFUIView_notifyLayoutRootView(ZFUIRectApplyScaleReversely(rect, view->scaleFixed()));
+        view->_ZFP_ZFUIView_notifyLayoutView(ZFUIRectApplyScaleReversely(rect, view->UIScaleFixed()));
     }
     /**
      * @brief implementation must notify when UI event occurred
@@ -215,7 +194,7 @@ public:
     zffinal void notifyUIEvent(ZF_IN ZFUIView *view,
                                ZF_IN ZFUIEvent *uiEvent)
     {
-        uiEvent->_ZFP_ZFUIEvent_eventOnApplyScaleReversely(view->scaleFixed());
+        uiEvent->_ZFP_ZFUIEvent_eventOnApplyScaleReversely(view->UIScaleFixed());
         view->viewEventSend(uiEvent);
     }
 ZFPROTOCOL_INTERFACE_END(ZFUIView)

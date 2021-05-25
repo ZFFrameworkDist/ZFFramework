@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIImageIO.h
  * @brief common image load logic
@@ -19,30 +10,32 @@
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
-// ZFUIImageScale
+// raw image io
 /**
- * @brief scale and return the newly created scaled image
- *
- * if the source image have nine patch,
- * scale would use the nine patch setting\n
- * return null if source image or newSize invalid\n
- * newSize would always used as pixel unit\n
- * this method would create a new image even if size not changed
+ * @brief load image from base64 data
+ * @note this method has no cache logic
  */
-ZFMETHOD_FUNC_DECLARE_2(zfautoObject, ZFUIImageScale,
-                        ZFMP_IN(ZFUIImage *, image),
-                        ZFMP_IN(const ZFUISize &, newSize))
-
-// ============================================================
-// ZFUIImageLoadFromNativeImage
+ZFMETHOD_FUNC_DECLARE_1(zfautoObjectT<ZFUIImage *>, ZFUIImageLoadFromBase64,
+                        ZFMP_IN(const ZFInput &, inputCallback))
 /**
- * @brief create image from native image
+ * @brief save image to base64 data
  */
-ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIImageLoadFromNativeImage,
-                        ZFMP_IN(void *, nativeImage))
+ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFUIImageSaveToBase64,
+                        ZFMP_OUT(const ZFOutput &, outputCallback),
+                        ZFMP_IN(ZFUIImage *, image))
+/**
+ * @brief load image from file
+ * @note this method has no cache logic
+ */
+ZFMETHOD_FUNC_DECLARE_1(zfautoObjectT<ZFUIImage *>, ZFUIImageLoadFromFile,
+                        ZFMP_IN(const ZFInput &, inputCallback))
+/**
+ * @brief save image to file
+ */
+ZFMETHOD_FUNC_DECLARE_2(zfbool, ZFUIImageSaveToFile,
+                        ZFMP_OUT(const ZFOutput &, outputCallback),
+                        ZFMP_IN(ZFUIImage *, image))
 
-// ============================================================
-// input
 /**
  * @brief see #ZFUIIMAGE_SERIALIZE_TYPE_DEFINE
  *
@@ -53,15 +46,58 @@ ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIImageLoadFromNativeImage,
  */
 #define ZFUIImageSerializeType_input "input"
 
+// ============================================================
+// ZFUIImageScale
+/**
+ * @brief scale and return the newly created scaled image
+ *
+ * if the source image have nine patch,
+ * scale would use the nine patch setting\n
+ * return null if source image or newSize invalid\n
+ * this method would create a new image even if size not changed
+ */
+ZFMETHOD_FUNC_DECLARE_2(zfautoObjectT<ZFUIImage *>, ZFUIImageScale,
+                        ZFMP_IN(ZFUIImage *, image),
+                        ZFMP_IN(const ZFUISize &, newSize))
+
+// ============================================================
+// ZFUIImageLoadInFrame
+/**
+ * @brief see #ZFUIIMAGE_SERIALIZE_TYPE_DEFINE
+ *
+ * serializable data:
+ * @code
+ *   <node ...>
+ *       <ZFUIImage category="ref" ... />
+ *       <ZFUIRect category="frame" ... />
+ *   </node>
+ * @endcode
+ */
+#define ZFUIImageSerializeType_ref "ref"
+
 /** @brief keyword for serialize */
-#define ZFSerializableKeyword_ZFUIImageIO_input "input"
+#define ZFSerializableKeyword_ZFUIImageIO_ref "ref"
+/** @brief keyword for serialize */
+#define ZFSerializableKeyword_ZFUIImageIO_ref_frame "frame"
 
 /**
- * @brief load image from input, input should contain the image's binary data
+ * @brief clip an exist image and sharing low level data if possible
  * @note this method has no cache logic
+ * @note frame is ensured in pixel for this method,
+ *   see #ZFUIImage::imageScale for more info
  */
-ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIImageLoadFromInput,
-                        ZFMP_IN(const ZFInput &, input))
+ZFMETHOD_FUNC_DECLARE_2(zfautoObjectT<ZFUIImage *>, ZFUIImageLoadInFrame,
+                        ZFMP_IN(ZFUIImage *, image),
+                        ZFMP_IN(const ZFUIRect &, framePixel))
+
+// ============================================================
+// ZFUIImageLoadFromNativeImage
+/**
+ * @brief create image from native image
+ */
+ZFMETHOD_FUNC_DECLARE_2(zfautoObjectT<ZFUIImage *>, ZFUIImageLoadFromNativeImage,
+                        ZFMP_IN(void *, nativeImage),
+                        ZFMP_IN_OPT(zfbool, retainNativeImage, zftrue))
 
 // ============================================================
 // color
@@ -86,12 +122,13 @@ ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFUIImageLoadFromInput,
 /**
  * @brief load image from color
  *
- * size is applied with #ZFUIGlobalStyle::imageScale
+ * size is in pixel,
+ * invalid size is automatically convert to 1 pixel
  * @note this method has no cache logic
  */
-ZFMETHOD_FUNC_DECLARE_2(zfautoObject, ZFUIImageLoadFromColor,
+ZFMETHOD_FUNC_DECLARE_2(zfautoObjectT<ZFUIImage *>, ZFUIImageLoadFromColor,
                         ZFMP_IN(const ZFUIColor &, color),
-                        ZFMP_IN_OPT(const ZFUISize &, size, ZFUISizeZero()))
+                        ZFMP_IN_OPT(const ZFUISize &, sizePixel, ZFUISizeZero()))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFUIImageIO_h_

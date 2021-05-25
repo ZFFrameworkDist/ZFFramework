@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFListenerHolder.h
  * @brief utilities for ZFObject
@@ -40,13 +31,13 @@ public:
 protected:
     /** @brief see #ZFObject::objectOnInit */
     virtual void objectOnInit(ZF_IN const ZFListener &runnable,
-                              ZF_IN_OUT ZFListenerData &listenerData,
+                              ZF_IN const ZFListenerData &listenerData,
                               ZF_IN_OPT ZFObject *userData = zfnull)
     {
         this->objectOnInit();
         this->runnable = runnable;
         this->listenerData = listenerData;
-        this->userDataSet(userData);
+        this->userData(userData);
     }
 
     zfoverride

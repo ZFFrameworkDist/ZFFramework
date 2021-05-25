@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIScrollThumb.h"
 #include "ZFUIScrollThumbDefault.h"
 
@@ -16,15 +7,15 @@ ZFOBJECT_REGISTER(ZFUIScrollThumb)
 
 ZFOBSERVER_EVENT_REGISTER(ZFUIScrollThumb, ScrollThumbOnUpdate)
 
-void ZFUIScrollThumb::scrollThumbPosFromViewPos(ZF_OUT zfint &scrollThumbResultPos,
-                                                ZF_OUT zfint &scrollThumbResultSize,
-                                                ZF_IN zfint scrollThumbRange,
-                                                ZF_IN zfint scrollViewSize,
-                                                ZF_IN zfint scrollContentOffset,
-                                                ZF_IN zfint scrollContentSize,
-                                                ZF_IN zfint scrollThumbMinSize,
-                                                ZF_IN_OPT zfint headMargin /* = 0 */,
-                                                ZF_IN_OPT zfint tailMargin /* = 0 */)
+void ZFUIScrollThumb::scrollThumbPosFromViewPos(ZF_OUT zffloat &scrollThumbResultPos,
+                                                ZF_OUT zffloat &scrollThumbResultSize,
+                                                ZF_IN zffloat scrollThumbRange,
+                                                ZF_IN zffloat scrollViewSize,
+                                                ZF_IN zffloat scrollContentOffset,
+                                                ZF_IN zffloat scrollContentSize,
+                                                ZF_IN zffloat scrollThumbMinSize,
+                                                ZF_IN_OPT zffloat headMargin /* = 0 */,
+                                                ZF_IN_OPT zffloat tailMargin /* = 0 */)
 {
     if(scrollThumbRange <= 0
         || scrollViewSize <= 0
@@ -34,10 +25,10 @@ void ZFUIScrollThumb::scrollThumbPosFromViewPos(ZF_OUT zfint &scrollThumbResultP
         return ;
     }
 
-    zfint pos = 0;
-    zfint size = 0;
-    zfint fixedContentSize = zfmMax(scrollViewSize, scrollContentSize);
-    zfint virtualContentSize = scrollThumbRange - headMargin - tailMargin;
+    zffloat pos = 0;
+    zffloat size = 0;
+    zffloat fixedContentSize = zfmMax(scrollViewSize, scrollContentSize);
+    zffloat virtualContentSize = scrollThumbRange - headMargin - tailMargin;
 
     if(scrollContentOffset > 0)
     { // bounce at head
@@ -83,14 +74,14 @@ void ZFUIScrollThumb::scrollThumbPosFromViewPos(ZF_OUT zfint &scrollThumbResultP
         scrollThumbResultPos = headMargin;
     }
 }
-void ZFUIScrollThumb::scrollThumbPosToViewPos(ZF_OUT zfint &scrollContentOffset,
-                                              ZF_IN zfint scrollViewSize,
-                                              ZF_IN zfint scrollContentSize,
-                                              ZF_IN zfint scrollThumbPos,
-                                              ZF_IN zfint scrollThumbSize,
-                                              ZF_IN zfint scrollThumbRange,
-                                              ZF_IN_OPT zfint headMargin /* = 0 */,
-                                              ZF_IN_OPT zfint tailMargin /* = 0 */)
+void ZFUIScrollThumb::scrollThumbPosToViewPos(ZF_OUT zffloat &scrollContentOffset,
+                                              ZF_IN zffloat scrollViewSize,
+                                              ZF_IN zffloat scrollContentSize,
+                                              ZF_IN zffloat scrollThumbPos,
+                                              ZF_IN zffloat scrollThumbSize,
+                                              ZF_IN zffloat scrollThumbRange,
+                                              ZF_IN_OPT zffloat headMargin /* = 0 */,
+                                              ZF_IN_OPT zffloat tailMargin /* = 0 */)
 {
     if(scrollThumbRange <= 0
         || scrollContentSize <= scrollViewSize
@@ -121,7 +112,7 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIScrollThumbRegister, ZFLevelZFFramewor
 }
 ZF_GLOBAL_INITIALIZER_END(ZFUIScrollThumbRegister)
 
-ZFMETHOD_FUNC_DEFINE_1(void, ZFUIScrollThumbHorizontalClassSet,
+ZFMETHOD_FUNC_DEFINE_1(void, ZFUIScrollThumbHorizontalClass,
                        ZFMP_IN(const ZFClass *, cls))
 {
     if(cls != zfnull && !cls->classIsTypeOf(ZFUIScrollThumb::ClassData()))
@@ -143,7 +134,7 @@ ZFMETHOD_FUNC_DEFINE_0(const ZFClass *, ZFUIScrollThumbHorizontalClass)
     return _ZFP_ZFUIScrollThumbHorizontal_cls;
 }
 
-ZFMETHOD_FUNC_DEFINE_1(void, ZFUIScrollThumbVerticalClassSet,
+ZFMETHOD_FUNC_DEFINE_1(void, ZFUIScrollThumbVerticalClass,
                        ZFMP_IN(const ZFClass *, cls))
 {
     if(cls != zfnull && !cls->classIsTypeOf(ZFUIScrollThumb::ClassData()))

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFUIKit_impl.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUISysWindow.h"
 #include "ZFUIKit/protocol/ZFProtocolZFUIView.h"
@@ -101,9 +92,9 @@
         }
 
         UIView *nativeRootView = (__bridge UIView *)self.ownerZFUISysWindow->rootView()->nativeView();
-        nativeRootView.frame = ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectToCGRect(self.impl->notifyMeasureWindow(
+        nativeRootView.frame = ZFImpl_sys_iOS_ZFUIRectToCGRect(self.impl->notifyMeasureWindow(
             self.ownerZFUISysWindow,
-            ZFImpl_sys_iOS_ZFUIKit_impl_ZFUIRectFromCGRect(self.view.bounds),
+            ZFImpl_sys_iOS_ZFUIRectFromCGRect(self.view.bounds),
             sysWindowMargin));
     }
 }
@@ -336,8 +327,8 @@ public:
     {
         return ((__bridge _ZFP_ZFUISysWindowImpl_sys_iOS_NativeWindow *)sysWindow->nativeWindow()).sysWindowOrientation;
     }
-    virtual void sysWindowOrientationFlagsSet(ZF_IN ZFUISysWindow *sysWindow,
-                                              ZF_IN const ZFUIOrientationFlags &flags)
+    virtual void sysWindowOrientationFlags(ZF_IN ZFUISysWindow *sysWindow,
+                                           ZF_IN const ZFUIOrientationFlags &flags)
     {
         ((__bridge _ZFP_ZFUISysWindowImpl_sys_iOS_NativeWindow *)sysWindow->nativeWindow()).sysWindowOrientationFlags = flags;
     }

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import java.lang.ref.WeakReference;
@@ -37,12 +28,12 @@ public class ZFUIScrollView extends ZFUIView {
         return ret;
     }
 
-    public static void native_scrollViewScrollEnableSet(Object nativeView,
+    public static void native_scrollEnable(Object nativeView,
                                                         boolean scrollEnable) {
         ZFUIScrollView nativeViewTmp = (ZFUIScrollView)nativeView;
         nativeViewTmp.scrollEnable = scrollEnable;
     }
-    public static void native_scrollViewScrollBounceSet(Object nativeView,
+    public static void native_scrollBounce(Object nativeView,
                                                         boolean scrollBounceHorizontal,
                                                         boolean scrollBounceVertical,
                                                         boolean scrollBounceHorizontalAlways,
@@ -53,18 +44,16 @@ public class ZFUIScrollView extends ZFUIView {
         nativeViewTmp.scrollBounceHorizontalAlways = scrollBounceHorizontalAlways;
         nativeViewTmp.scrollBounceVerticalAlways = scrollBounceVerticalAlways;
     }
-    public static void native_scrollViewScrollContentFrameSet(Object nativeView,
+    public static void native_scrollContentFrame(Object nativeView,
                                                               int contentFrame_x,
                                                               int contentFrame_y,
                                                               int contentFrame_width,
                                                               int contentFrame_height)
     {
         ZFUIScrollView nativeViewTmp = (ZFUIScrollView)nativeView;
-        ZFUIView.native_viewFrameSet(nativeViewTmp._contentLayout,
+        ZFUIView.native_viewFrame(nativeViewTmp._contentLayout,
             contentFrame_x, contentFrame_y, contentFrame_width, contentFrame_height);
-        ZFUIView.requestLayoutOverride = true;
         nativeViewTmp.requestLayout();
-        ZFUIView.requestLayoutOverride = false;
     }
 
     private boolean _scrollAnimating = false;
@@ -83,7 +72,7 @@ public class ZFUIScrollView extends ZFUIView {
             }
         }
     };
-    public static long native_scrollViewScrollAnimationStart(Object nativeView, int recommendTimerInterval) {
+    public static long native_scrollAnimationStart(Object nativeView, int recommendTimerInterval) {
         ZFUIScrollView nativeViewTmp = (ZFUIScrollView)nativeView;
         ++nativeViewTmp._scrollAniTaskId;
         nativeViewTmp._scrollAnimating = true;
@@ -91,7 +80,7 @@ public class ZFUIScrollView extends ZFUIView {
         _scrollAniTimerHandler.sendMessage(Message.obtain(_scrollAniTimerHandler, nativeViewTmp._scrollAniTaskId, nativeViewTmp));
         return System.currentTimeMillis();
     }
-    public static void native_scrollViewScrollAnimationStop(Object nativeView) {
+    public static void native_scrollAnimationStop(Object nativeView) {
         ZFUIScrollView nativeViewTmp = (ZFUIScrollView)nativeView;
         if(nativeViewTmp._scrollAnimating) {
             _scrollAniTimerHandler.removeMessages(nativeViewTmp._scrollAniTaskId, nativeViewTmp);

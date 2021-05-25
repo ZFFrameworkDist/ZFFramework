@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFAnimationNativeView.h"
 #include "protocol/ZFProtocolZFAnimationNativeView.h"
 
@@ -19,14 +10,12 @@ zfclassNotPOD _ZFP_ZFAnimationNativeViewPrivate
 {
 public:
     void *nativeAni;
-    zfbool aniTargetAutoDisableCached;
-    zfbool aniTargetEnableSaved;
+    zfbool aniTargetAutoDisableFlag;
 
 public:
     _ZFP_ZFAnimationNativeViewPrivate(void)
     : nativeAni(zfnull)
-    , aniTargetAutoDisableCached(zffalse)
-    , aniTargetEnableSaved(zffalse)
+    , aniTargetAutoDisableFlag(zffalse)
     {
     }
 };
@@ -128,26 +117,22 @@ void ZFAnimationNativeView::aniOnStart(void)
 {
     zfsuper::aniOnStart();
     ZFUIView *aniTarget = ZFAny(this->aniTarget());
-    if(aniTarget == zfnull)
+    if(aniTarget == zfnull || !this->aniTargetAutoDisable())
     {
-        d->aniTargetAutoDisableCached = zffalse;
+        d->aniTargetAutoDisableFlag = zffalse;
     }
     else
     {
-        d->aniTargetAutoDisableCached = this->aniTargetAutoDisable();
-        if(d->aniTargetAutoDisableCached)
-        {
-            d->aniTargetEnableSaved = aniTarget->viewUIEnableTree();
-            aniTarget->viewUIEnableTreeSet(zffalse);
-        }
+        d->aniTargetAutoDisableFlag = zftrue;
+        aniTarget->viewUIEnableTree(zffalse);
     }
 }
 void ZFAnimationNativeView::aniOnStop(void)
 {
     ZFUIView *aniTarget = ZFAny(this->aniTarget());
-    if(aniTarget != zfnull && d->aniTargetAutoDisableCached)
+    if(aniTarget != zfnull && d->aniTargetAutoDisableFlag)
     {
-        aniTarget->viewUIEnableTreeSet(d->aniTargetAutoDisableCached);
+        aniTarget->viewUIEnableTree(zftrue);
     }
     zfsuper::aniOnStop();
 }
@@ -156,6 +141,8 @@ void ZFAnimationNativeView::aniImplStart(void)
 {
     zfsuper::aniImplStart();
     ZFUIView *aniTarget = ZFAny(this->aniTarget());
+    ZFPROTOCOL_ACCESS(ZFAnimationNativeView)->nativeAniStart(this,
+        aniTarget != zfnull ? aniTarget->UIScaleFixed() : 1.0f);
     {
         ZFUIView *parent = aniTarget;
         while(parent->viewParent() != zfnull)
@@ -164,8 +151,6 @@ void ZFAnimationNativeView::aniImplStart(void)
         }
         parent->layoutIfNeed();
     }
-    ZFPROTOCOL_ACCESS(ZFAnimationNativeView)->nativeAniStart(this,
-        aniTarget != zfnull ? aniTarget->scaleFixed() : 1.0f);
 }
 void ZFAnimationNativeView::aniImplStop(void)
 {

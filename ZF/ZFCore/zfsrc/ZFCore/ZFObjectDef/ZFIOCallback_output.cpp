@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFIOCallback_output.h"
 #include "ZFObjectImpl.h"
 
@@ -21,8 +12,8 @@ static zfindex _ZFP_ZFOutputDummy(ZF_IN const void *s, ZF_IN zfindex count)
 ZFOutput ZFOutputDummy(void)
 {
     ZFOutput ret = ZFCallbackForFunc(_ZFP_ZFOutputDummy);
-    ret.callbackSerializeCustomTypeSet(ZFCallbackSerializeCustomType_ZFOutputDummy);
-    ret.callbackSerializeCustomDataSet(ZFSerializableData());
+    ret.callbackSerializeCustomType(ZFCallbackSerializeCustomType_ZFOutputDummy);
+    ret.callbackSerializeCustomData(ZFSerializableData());
     return ret;
 }
 
@@ -39,38 +30,46 @@ public:
     zfstring *pString;
     zfindex savedLength;
     zfindex curPos;
-    ZFMETHOD_INLINE_2(zfindex, onOutput,
+    ZFMETHOD_DECLARE_2(zfindex, onOutput,
                       ZFMP_IN(const void *, s),
                       ZFMP_IN(zfindex, count))
-    {
-        if(count == zfindexMax())
-        {
-            count = zfslen((const zfchar *)s);
-        }
-        else
-        {
-            count /= sizeof(zfchar);
-        }
-        this->pString->replace(this->curPos, zfmMin(this->pString->length() - curPos, count), (const zfchar *)s, count);
-        this->curPos += count;
-        return count * sizeof(zfchar);
-    }
-    ZFMETHOD_INLINE_2(zfbool, ioSeek,
+    ZFMETHOD_DECLARE_2(zfbool, ioSeek,
                       ZFMP_IN(zfindex, byteSize),
                       ZFMP_IN(ZFSeekPos, pos))
-    {
-        this->curPos = ZFIOCallbackCalcFSeek(this->savedLength, this->pString->length(), this->curPos, byteSize, pos);
-        return zftrue;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioTell)
-    {
-        return ((this->pString->length() >= this->savedLength) ? (this->pString->length() - this->savedLength) : zfindexMax());
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioSize)
-    {
-        return this->pString->length() - this->curPos;
-    }
+    ZFMETHOD_DECLARE_0(zfindex, ioTell)
+    ZFMETHOD_DECLARE_0(zfindex, ioSize)
 };
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFOutputForStringOwner, zfindex, onOutput,
+                  ZFMP_IN(const void *, s),
+                  ZFMP_IN(zfindex, count))
+{
+    if(count == zfindexMax())
+    {
+        count = zfslen((const zfchar *)s);
+    }
+    else
+    {
+        count /= sizeof(zfchar);
+    }
+    this->pString->replace(this->curPos, zfmMin(this->pString->length() - curPos, count), (const zfchar *)s, count);
+    this->curPos += count;
+    return count * sizeof(zfchar);
+}
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFOutputForStringOwner, zfbool, ioSeek,
+                  ZFMP_IN(zfindex, byteSize),
+                  ZFMP_IN(ZFSeekPos, pos))
+{
+    this->curPos = ZFIOCallbackCalcFSeek(this->savedLength, this->pString->length(), this->curPos, byteSize, pos);
+    return zftrue;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFOutputForStringOwner, zfindex, ioTell)
+{
+    return ((this->pString->length() >= this->savedLength) ? (this->pString->length() - this->savedLength) : zfindexMax());
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFOutputForStringOwner, zfindex, ioSize)
+{
+    return this->pString->length() - this->curPos;
+}
 ZFOutput ZFOutputForString(ZF_IN zfstring &s)
 {
     _ZFP_I_ZFOutputForStringOwner *owner = zfAllocWithCache(_ZFP_I_ZFOutputForStringOwner);
@@ -79,7 +78,7 @@ ZFOutput ZFOutputForString(ZF_IN zfstring &s)
     owner->curPos = s.length();
     ZFOutput ret = ZFCallbackForMemberMethod(
         owner, ZFMethodAccess(_ZFP_I_ZFOutputForStringOwner, onOutput));
-    ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, owner);
+    ret.callbackTag(ZFCallbackTagKeyword_ioOwner, owner);
     zfRelease(owner);
     return ret;
 }
@@ -100,57 +99,65 @@ public:
     zfbyte *p;
 
 public:
-    ZFMETHOD_INLINE_2(zfindex, onOutput,
+    ZFMETHOD_DECLARE_2(zfindex, onOutput,
                       ZFMP_IN(const void *, s),
                       ZFMP_IN(zfindex, count))
-    {
-        const zfbyte *pSrc = (const zfbyte *)s;
-        if(count == zfindexMax())
-        {
-            while(*pSrc && p < pEnd)
-            {
-                *p = *pSrc;
-                ++p;
-                ++pSrc;
-            }
-            if(autoAppendNullToken)
-            {
-                *p = '\0';
-            }
-            return p - (const zfbyte *)s;
-        }
-        else
-        {
-            const zfbyte *pSrcEnd = (const zfbyte *)s + count;
-            while(*pSrc && pSrc < pSrcEnd && p < pEnd)
-            {
-                *p = *pSrc;
-                ++p;
-                ++pSrc;
-            }
-            if(autoAppendNullToken)
-            {
-                *p = '\0';
-            }
-            return p - (const zfbyte *)s;
-        }
-    }
-    ZFMETHOD_INLINE_2(zfbool, ioSeek,
+    ZFMETHOD_DECLARE_2(zfbool, ioSeek,
                       ZFMP_IN(zfindex, byteSize),
                       ZFMP_IN(ZFSeekPos, pos))
-    {
-        p = pStart + ZFIOCallbackCalcFSeek(0, pEnd - pStart, p - pStart, byteSize, pos);
-        return zftrue;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioTell)
-    {
-        return p - pStart;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioSize)
-    {
-        return pEnd - pStart;
-    }
+    ZFMETHOD_DECLARE_0(zfindex, ioTell)
+    ZFMETHOD_DECLARE_0(zfindex, ioSize)
 };
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFOutputForBufferUnsafeOwner, zfindex, onOutput,
+                  ZFMP_IN(const void *, s),
+                  ZFMP_IN(zfindex, count))
+{
+    const zfbyte *pSrc = (const zfbyte *)s;
+    if(count == zfindexMax())
+    {
+        while(*pSrc && p < pEnd)
+        {
+            *p = *pSrc;
+            ++p;
+            ++pSrc;
+        }
+        if(autoAppendNullToken)
+        {
+            *p = '\0';
+        }
+        return p - (const zfbyte *)s;
+    }
+    else
+    {
+        const zfbyte *pSrcEnd = (const zfbyte *)s + count;
+        while(*pSrc && pSrc < pSrcEnd && p < pEnd)
+        {
+            *p = *pSrc;
+            ++p;
+            ++pSrc;
+        }
+        if(autoAppendNullToken)
+        {
+            *p = '\0';
+        }
+        return p - (const zfbyte *)s;
+    }
+}
+ZFMETHOD_DEFINE_2(_ZFP_I_ZFOutputForBufferUnsafeOwner, zfbool, ioSeek,
+                  ZFMP_IN(zfindex, byteSize),
+                  ZFMP_IN(ZFSeekPos, pos))
+{
+    p = pStart + ZFIOCallbackCalcFSeek(0, pEnd - pStart, p - pStart, byteSize, pos);
+    return zftrue;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFOutputForBufferUnsafeOwner, zfindex, ioTell)
+{
+    return p - pStart;
+}
+ZFMETHOD_DEFINE_0(_ZFP_I_ZFOutputForBufferUnsafeOwner, zfindex, ioSize)
+{
+    return pEnd - pStart;
+}
 ZFOutput ZFOutputForBufferUnsafe(ZF_IN void *buf,
                                  ZF_IN_OPT zfindex maxCount /* = zfindexMax() */,
                                  ZF_IN_OPT zfbool autoAppendNullToken /* = zftrue */)
@@ -178,7 +185,7 @@ ZFOutput ZFOutputForBufferUnsafe(ZF_IN void *buf,
     owner->p = owner->pStart;
     ZFOutput ret = ZFCallbackForMemberMethod(
         owner, ZFMethodAccess(_ZFP_I_ZFOutputForBufferUnsafeOwner, onOutput));
-    ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, owner);
+    ret.callbackTag(ZFCallbackTagKeyword_ioOwner, owner);
     zfRelease(owner);
     return ret;
 }

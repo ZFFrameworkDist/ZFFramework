@@ -1,9 +1,12 @@
 # common
+**/.classpath
+**/.project
+**/.settings
 **/.svn
+**/_impl
 **/_release
 **/_repo
 **/_tmp
-**/_impl
 **/zfgensrc_*
 
 # Android

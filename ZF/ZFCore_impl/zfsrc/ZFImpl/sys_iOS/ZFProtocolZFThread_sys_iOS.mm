@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_sys_iOS_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFThread.h"
 #include "ZFCore/ZFSTLWrapper/zfstl_map.h"
@@ -35,7 +26,7 @@
             self._nativeThreadRegisterToken = ZFPROTOCOL_ACCESS(ZFThread)->nativeThreadRegister(self.ownerZFThread);
         }
 
-        self.runnable.execute(ZFListenerData().param0Set(self.param0).param1Set(self.param1));
+        self.runnable.execute(ZFListenerData().param0(self.param0).param1(self.param1));
 
         if(self.ownerZFThread != zfnull)
         {
@@ -96,7 +87,7 @@
     if(self._running)
     {
         self._running = zffalse;
-        self._runnable.execute(ZFListenerData().param0Set(self._param0).param1Set(self._param1));
+        self._runnable.execute(ZFListenerData().param0(self._param0).param1(self._param1));
         self._selfHolder = nil;
     }
 }

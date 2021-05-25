@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLuaExecute.h"
 #include "ZFLuaState.h"
 #include "ZFLuaGC.h"
@@ -21,6 +12,11 @@ static zfbool _ZFP_ZFLuaExecute(ZF_IN const ZFPathInfo *pathInfoOrNull,
                                 ZF_IN const ZFCoreArray<zfautoObject> *luaParams,
                                 ZF_IN void *L)
 {
+    if(ZFLogLevelIsActive(ZFLogLevel::e_Debug))
+    {
+        zfCoreAssertWithMessageTrim(ZFThread::currentThread()->isMainThread(),
+            "[ZFLua] ZFLuaExecute can only called in main thread");
+    }
     if(!input.callbackIsValid())
     {
         return zffalse;

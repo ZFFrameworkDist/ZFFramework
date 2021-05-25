@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreUtilMacro.h
  * @brief macro utils
@@ -260,9 +251,9 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *   zfindex n = 0;
  *   n = ZFM_PARAM_NUM(a, b, c); // n would be 3
  *   n = ZFM_PARAM_NUM(_EMPTY); // n would be 1
- *   n = ZFM_PARAM_NUM(); // result not ensured
+ *   n = ZFM_PARAM_NUM(); // result not ensured, may be 0 or 1
  * @endcode
- * this macro could calculate 0 ~ 32 param num
+ * this macro could calculate 1 ~ 32 param num
  */
 #define ZFM_PARAM_NUM(...) \
     _ZFP_ZFM_PARAM_EXPAND(_ZFP_ZFM_PARAM_NUM_TMP0(__VA_ARGS__, _ZFP_ZFM_PARAM_NUM_TMP2()))
@@ -523,7 +514,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * once declared, you can access your param by the generated getter and setter
  * @code
  *   YourType v;
- *   v.paramNameSet(someValue);
+ *   v.paramName(someValue);
  *   YourParamType paramValue = v.paramName();
  * @endcode
  */
@@ -568,7 +559,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
         /** @endcond */ \
     public: \
         /** @brief see @ref paramName */ \
-        inline _ZFP_ZFCoreParam_self &paramName##Set(ZF_IN T_ParamType const &value) \
+        inline _ZFP_ZFCoreParam_self &paramName(ZF_IN T_ParamType const &value) \
         { \
             this->_ZFP_##paramName.value = value; \
             return *this; \

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFAnimationNativeView.h
  * @brief native animation
@@ -37,6 +28,10 @@ ZFENUM_END(ZFAnimationNativeViewCurve)
 zfclassFwd _ZFP_ZFAnimationNativeViewPrivate;
 /**
  * @brief animation using native implementation
+ *
+ * native animation usually has better performance,
+ * but may work incorrectly with local transform
+ * (such as #ZFUIView::viewRotate)
  */
 zfclass ZF_ENV_EXPORT ZFAnimationNativeView : zfextends ZFAnimation
 {
@@ -169,73 +164,73 @@ public:
      *
      * this value is absolute pixel size
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniTranslatePixelXFrom,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniTranslatePixelXFrom,
                                 0)
     /**
      * @brief translate x to, 0 by default
      *
      * this value is absolute pixel size
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniTranslatePixelXTo,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniTranslatePixelXTo,
                                 0)
     /**
      * @brief translate y from, 0 by default
      *
      * this value is absolute pixel size
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniTranslatePixelYFrom,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniTranslatePixelYFrom,
                                 0)
     /**
      * @brief translate y to, 0 by default
      *
      * this value is absolute pixel size
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniTranslatePixelYTo,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniTranslatePixelYTo,
                                 0)
     /**
      * @brief translate y from, 0 by default
      *
      * this value is absolute pixel size
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniTranslatePixelZFrom,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniTranslatePixelZFrom,
                                 0)
     /**
      * @brief translate y to, 0 by default
      *
      * this value is absolute pixel size
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniTranslatePixelZTo,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniTranslatePixelZTo,
                                 0)
 
     /**
      * @brief rotate x from, 0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniRotateXFrom,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniRotateXFrom,
                                 0)
     /**
      * @brief rotate x to, 0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniRotateXTo,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniRotateXTo,
                                 0)
     /**
      * @brief rotate y from, 0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniRotateYFrom,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniRotateYFrom,
                                 0)
     /**
      * @brief rotate y to, 0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniRotateYTo,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniRotateYTo,
                                 0)
     /**
      * @brief rotate z from, 0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniRotateZFrom,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniRotateZFrom,
                                 0)
     /**
      * @brief rotate z to, 0 by default
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfint, aniRotateZTo,
+    ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, aniRotateZTo,
                                 0)
 
     // ============================================================

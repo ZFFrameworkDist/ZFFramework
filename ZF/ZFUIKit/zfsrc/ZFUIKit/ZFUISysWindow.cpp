@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUISysWindow.h"
 #include "protocol/ZFProtocolZFUISysWindow.h"
 #include "ZFUIRootView.h"
@@ -28,10 +19,11 @@ public:
     ZFUIOrientationFlags sysWindowOrientationFlags;
     ZFUISysWindow *modalWindowOwner;
     ZFUISysWindow *modalWindowShowing; // manually retain
-    ZFUIViewLayoutParam *sysWindowLayoutParam;
+    ZFUILayoutParam *sysWindowLayoutParam;
     ZFListener sysWindowLayoutParamOnChangeListener;
     zfbool nativeWindowCreated;
     zfbool nativeWindowResumed;
+    ZFUISize sysWindowSize;
     ZFUIMargin sysWindowMargin;
 
 public:
@@ -46,6 +38,7 @@ public:
     , sysWindowLayoutParamOnChangeListener(ZFCallbackForFunc(_ZFP_ZFUISysWindowPrivate::sysWindowLayoutParamOnChange))
     , nativeWindowCreated(zffalse)
     , nativeWindowResumed(zffalse)
+    , sysWindowSize()
     , sysWindowMargin()
     {
     }
@@ -55,17 +48,10 @@ public:
     }
 
 public:
-    static ZFLISTENER_PROTOTYPE_EXPAND(sysWindowLayoutParamOnChange)
+    static void sysWindowLayoutParamOnChange(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
         ZFUISysWindow *sysWindow = userData->objectHolded();
-        if(sysWindow->nativeWindowEmbedImpl() != zfnull)
-        {
-            sysWindow->nativeWindowEmbedImpl()->sysWindowLayoutParamOnChange(sysWindow);
-        }
-        else
-        {
-            ZFPROTOCOL_ACCESS(ZFUISysWindow)->sysWindowLayoutParamOnChange(sysWindow);
-        }
+        sysWindow->_ZFP_ZFUISysWindow_sysWindowLayoutUpdate();
     }
 };
 
@@ -78,9 +64,9 @@ ZFOBSERVER_EVENT_REGISTER(ZFUISysWindow, SysWindowOnPause)
 ZFOBSERVER_EVENT_REGISTER(ZFUISysWindow, SysWindowOnRotate)
 ZFOBSERVER_EVENT_REGISTER(ZFUISysWindow, SysWindowMarginOnUpdate)
 
-zfautoObject ZFUISysWindow::nativeWindowEmbed(ZF_IN ZFUISysWindowEmbedImpl *embedImpl)
+zfautoObjectT<ZFUISysWindow *> ZFUISysWindow::nativeWindowEmbed(ZF_IN ZFUISysWindowEmbedImpl *embedImpl)
 {
-    zfautoObject tmp = ZFUISysWindow::ClassData()->newInstance();
+    zfautoObjectT<ZFUISysWindow *> tmp = ZFUISysWindow::ClassData()->newInstance();
     ZFUISysWindow *ret = tmp.to<ZFUISysWindow *>();
     ret->d->embedImpl = zfRetain(embedImpl);
     embedImpl->_ZFP_ownerZFUISysWindow = ret;
@@ -143,7 +129,7 @@ void ZFUISysWindow::mainWindowRegister(ZF_IN ZFUISysWindow *window)
     _ZFP_ZFUISysWindow_mainWindowRegistered = zfRetain(window);
     _ZFP_ZFUISysWindow_mainWindow = _ZFP_ZFUISysWindow_mainWindowRegistered;
 
-    ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventSysWindowMainWindowOnAttach());
+    ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventSysWindowMainWindowOnAttach());
 }
 
 ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, mainWindow)
@@ -152,7 +138,7 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, mainWindow)
     {
         _ZFP_ZFUISysWindow_mainWindowBuiltin = ZFPROTOCOL_ACCESS(ZFUISysWindow)->mainWindow();
         _ZFP_ZFUISysWindow_mainWindow = _ZFP_ZFUISysWindow_mainWindowBuiltin;
-        ZFGlobalEventCenter::instance()->observerNotify(ZFGlobalEvent::EventSysWindowMainWindowOnAttach());
+        ZFGlobalObserver().observerNotify(ZFGlobalEvent::EventSysWindowMainWindowOnAttach());
     }
     return _ZFP_ZFUISysWindow_mainWindow;
 }
@@ -162,7 +148,7 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, zfbool, mainWindowAttached)
     return (_ZFP_ZFUISysWindow_mainWindow != zfnull);
 }
 
-ZFMETHOD_DEFINE_1(ZFUISysWindow, void, keyWindowSet,
+ZFMETHOD_DEFINE_1(ZFUISysWindow, void, keyWindow,
                   ZFMP_IN(ZFUISysWindow *, window))
 {
     if(window == zfnull)
@@ -192,14 +178,20 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, keyWindow)
 }
 
 // ============================================================
+ZFMETHOD_DEFINE_0(ZFUISysWindow, const ZFUISize &, sysWindowSize)
+{
+    return d->sysWindowSize;
+}
+
+// ============================================================
 ZFMETHOD_DEFINE_0(ZFUISysWindow, const ZFUIMargin &, sysWindowMargin)
 {
     return d->sysWindowMargin;
 }
-void ZFUISysWindow::_ZFP_ZFUISysWindow_sysWindowMarginSet(ZF_IN const ZFUIMargin &sysWindowMargin)
+void ZFUISysWindow::_ZFP_ZFUISysWindow_sysWindowMargin(ZF_IN const ZFUIMargin &sysWindowMargin)
 {
     ZFUIMargin sysWindowMarginOld = d->sysWindowMargin;
-    d->sysWindowMargin = ZFUIMarginApplyScaleReversely(sysWindowMargin, this->rootView()->scaleFixed());
+    d->sysWindowMargin = ZFUIMarginApplyScaleReversely(sysWindowMargin, this->rootView()->UIScaleFixed());
     if(d->sysWindowMargin != sysWindowMarginOld)
     {
         this->sysWindowMarginOnUpdate(sysWindowMarginOld);
@@ -218,8 +210,9 @@ void ZFUISysWindow::objectOnInit(void)
     zfsuper::objectOnInit();
     d = zfpoolNew(_ZFP_ZFUISysWindowPrivate);
     d->windowRootView = zfRetain(ZFUIRootView::ClassData()->newInstance().to<ZFUIRootView *>());
-    d->sysWindowLayoutParam = zfAlloc(ZFUIViewLayoutParam);
-    d->sysWindowLayoutParam->sizeParamSet(ZFUISizeParamFillFill());
+    d->windowRootView->_ZFP_ZFUIRootView_rootViewOwnerSysWindow = this;
+    d->sysWindowLayoutParam = zfAlloc(ZFUILayoutParam);
+    d->sysWindowLayoutParam->sizeParam(ZFUISizeParamFillFill());
 }
 void ZFUISysWindow::objectOnInitFinish(void)
 {
@@ -303,7 +296,7 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUIOrientationEnum, sysWindowOrientation)
         return ZFUIOrientation::e_Top;
     }
 }
-ZFMETHOD_DEFINE_1(ZFUISysWindow, void, sysWindowOrientationFlagsSet,
+ZFMETHOD_DEFINE_1(ZFUISysWindow, void, sysWindowOrientationFlags,
                   ZFMP_IN(const ZFUIOrientationFlags &, sysWindowOrientationFlags))
 {
     zfuint tmp = 0;
@@ -328,13 +321,13 @@ ZFMETHOD_DEFINE_1(ZFUISysWindow, void, sysWindowOrientationFlagsSet,
         d->sysWindowOrientationFlags = tmp;
         if(d->embedImpl != zfnull)
         {
-            d->embedImpl->sysWindowOrientationFlagsSet(this, tmp);
+            d->embedImpl->sysWindowOrientationFlags(this, tmp);
         }
         else
         {
             if(this->nativeWindow() != zfnull)
             {
-                ZFPROTOCOL_ACCESS(ZFUISysWindow)->sysWindowOrientationFlagsSet(this, tmp);
+                ZFPROTOCOL_ACCESS(ZFUISysWindow)->sysWindowOrientationFlags(this, tmp);
             }
         }
     }
@@ -348,7 +341,7 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, modalWindowShow)
 {
     zfCoreAssertWithMessage(d->modalWindowShowing == zfnull, "already has a showing modal window, you must finish it first");
 
-    zfautoObject modalWindow;
+    zfautoObjectT<ZFUISysWindow *> modalWindow;
     if(d->embedImpl != zfnull)
     {
         modalWindow = d->embedImpl->modalWindowShow(this);
@@ -383,16 +376,16 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, void, modalWindowFinish)
 
     zfRelease(this);
 }
-ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, modalWindowGetShowing)
+ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, modalWindowShowingWindow)
 {
     return d->modalWindowShowing;
 }
-ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, modalWindowGetOwner)
+ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUISysWindow *, modalWindowOwner)
 {
     return d->modalWindowOwner;
 }
 
-ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUIViewLayoutParam *, sysWindowLayoutParam)
+ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUILayoutParam *, sysWindowLayoutParam)
 {
     return d->sysWindowLayoutParam;
 }
@@ -403,11 +396,14 @@ ZFMETHOD_DEFINE_0(ZFUISysWindow, ZFUIRootView *, rootView)
 
 ZFUIRect ZFUISysWindow::_ZFP_ZFUISysWindow_measureWindow(ZF_IN const ZFUIRect &rootRefRect)
 {
-    return ZFUIRectApplyScale(ZFUIViewLayoutParam::layoutParamApply(
-            ZFUIRectApplyScaleReversely(rootRefRect, this->rootView()->scaleFixed()),
-            this->rootView(),
-            this->sysWindowLayoutParam()),
-        this->rootView()->scaleFixed());
+    // use UIScaleForImpl instead of UIScaleFixed, to ensure native window's size unit
+    ZFUIRect ret = ZFUILayoutParam::layoutParamApply(
+        ZFUIRectApplyScaleReversely(rootRefRect, this->rootView()->UIScaleForImpl()),
+        this->rootView(),
+        this->sysWindowLayoutParam());
+    d->sysWindowSize.width = ret.width;
+    d->sysWindowSize.height = ret.height;
+    return ZFUIRectApplyScale(ret, this->rootView()->UIScaleForImpl());
 }
 void ZFUISysWindow::_ZFP_ZFUISysWindow_onCreate(ZF_IN void *nativeWindow)
 {
@@ -419,12 +415,12 @@ void ZFUISysWindow::_ZFP_ZFUISysWindow_onCreate(ZF_IN void *nativeWindow)
     void *nativeParentView = zfnull;
     if(d->embedImpl != zfnull)
     {
-        d->embedImpl->sysWindowOrientationFlagsSet(this, d->sysWindowOrientationFlags);
+        d->embedImpl->sysWindowOrientationFlags(this, d->sysWindowOrientationFlags);
         d->embedImpl->nativeWindowRootViewOnAdd(this, nativeParentView);
     }
     else
     {
-        ZFPROTOCOL_ACCESS(ZFUISysWindow)->sysWindowOrientationFlagsSet(this, d->sysWindowOrientationFlags);
+        ZFPROTOCOL_ACCESS(ZFUISysWindow)->sysWindowOrientationFlags(this, d->sysWindowOrientationFlags);
         ZFPROTOCOL_ACCESS(ZFUISysWindow)->nativeWindowRootViewOnAdd(this, nativeParentView);
     }
     ZFUIView::_ZFP_ZFUIView_nativeViewNotifyAdd(this->rootView(), nativeParentView);
@@ -512,6 +508,17 @@ void ZFUISysWindow::_ZFP_ZFUISysWindow_onRotate(void)
         }
     }
 }
+void ZFUISysWindow::_ZFP_ZFUISysWindow_sysWindowLayoutUpdate(void)
+{
+    if(this->nativeWindowEmbedImpl() != zfnull)
+    {
+        this->nativeWindowEmbedImpl()->sysWindowLayoutParamOnChange(this);
+    }
+    else
+    {
+        ZFPROTOCOL_ACCESS(ZFUISysWindow)->sysWindowLayoutParamOnChange(this);
+    }
+}
 
 // ============================================================
 ZFOBJECT_REGISTER(ZFUISysWindowEmbedImpl)
@@ -524,7 +531,7 @@ void ZFUISysWindowEmbedImpl::nativeWindowRootViewOnRemove(ZF_IN ZFUISysWindow *s
 {
 }
 
-zfautoObject ZFUISysWindowEmbedImpl::modalWindowShow(ZF_IN ZFUISysWindow *sysWindowOwner)
+zfautoObjectT<ZFUISysWindow *> ZFUISysWindowEmbedImpl::modalWindowShow(ZF_IN ZFUISysWindow *sysWindowOwner)
 {
     return ZFPROTOCOL_ACCESS(ZFUISysWindow)->modalWindowShow(sysWindowOwner);
 }

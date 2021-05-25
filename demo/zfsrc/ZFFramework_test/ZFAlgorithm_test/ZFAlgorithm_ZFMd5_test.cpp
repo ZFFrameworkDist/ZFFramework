@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFAlgorithm_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -30,12 +21,12 @@ protected:
         ZFTestCaseAssert(value == testValue);
 
         zfstring tmpFilePath = this->testCaseUseTmpFile("ZFMd5_Md5.txt");
-        ZFToken fp = ZFFileFileOpen(tmpFilePath, ZFFileOpenOption::e_Write);
-        if(fp != ZFTokenInvalid())
+        void *fp = ZFFileFileOpen(tmpFilePath, ZFFileOpenOption::e_Write);
+        if(fp != zfnull)
         {
             ZFFileFileWrite(fp, testString);
             ZFFileFileClose(fp);
-            fp = ZFTokenInvalid();
+            fp = zfnull;
         }
         this->testCaseOutput("write it to file %s, file's MD5: %s",
                 tmpFilePath.cString(),

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFClass.h
  * @brief meta data for ZFObject
@@ -91,7 +82,7 @@ public:
      * typical usage:
      * @code
      *   const ZFClass *cls = ZFClass::classForName("MyObject");
-     *   zfautoObject objTmp = ((cls != zfnull) ? cls->newInstance() : zfautoObjectNull());
+     *   zfautoObject objTmp = ((cls != zfnull) ? cls->newInstance() : zfautoObject());
      *   MyObject *obj = objTmp.to<MyObject *>();
      * @endcode
      * @note the class to find must:
@@ -157,8 +148,8 @@ public:
      * -  property register or unregistered
      *
      *
-     * this method is useful if you cached some data by #classTagSet
-     * accorrding to class's method or property list,
+     * this method is useful if you cached some data by #classTag
+     * according to class's method or property list,
      * and want to update it again if meta data changed\n
      * see also #ZFClassDataChangeObserver
      */
@@ -223,7 +214,7 @@ public:
     /**
      * @brief class's parent, zfnull if none
      */
-    inline const ZFClass *parentClass(void) const
+    inline const ZFClass *classParent(void) const
     {
         return this->classParentCache;
     }
@@ -287,7 +278,7 @@ public:
      * create object by specified params,
      * the object must have proper #ZFObject::objectOnInit
      * declared as #ZFOBJECT_ON_INIT_DECLARE_1 series,
-     * and params are passed accorrding to #ZFMethodGenericInvoker
+     * and params are passed according to #ZFMethodGenericInvoker
      * @note this method do much reflection steps to find proper objectOnInit,
      *   which may cause performance issue,
      *   use with caution,
@@ -297,7 +288,7 @@ public:
      *     ZFCoreArrayPOD<const ZFMethod *> objectOnInitMethodList;
      *     cls->methodForNameGetAllT(objectOnInitMethodList, "objectOnInit");
      *     // you may do your extra method filters before actual alloc the object
-     *     ZFToken token = cls->newInstanceGenericBegin();
+     *     void *token = cls->newInstanceGenericBegin();
      *     if(token != zfnull)
      *     {
      *         for(zfindex i = 0; i < objectOnInitMethodList.count(); ++i)
@@ -314,8 +305,15 @@ public:
      *         }
      *     }
      *   @endcode
+     * @note if the objectOnInit is declared by #ZFOBJECT_ON_INIT_DECLARE_1 series,
+     *   it's called as is,
+     *   if it's user registered (#ZFMETHOD_USER_REGISTER_1 series),
+     *   #ZFObject::objectOnInit would be called before invoke the method
+     *   to prevent logic error
      * @note if all params are #ZFMethodGenericInvokerDefaultParam, this method would call
      *   original #ZFObject::objectOnInit instead (same as #newInstance)
+     *
+     * see also #ZFObjectTagKeyword_newInstanceGenericFailed
      */
     zfautoObject newInstanceGeneric(
                                       ZF_IN_OPT ZFObject *param0 = ZFMethodGenericInvokerDefaultParam()
@@ -328,14 +326,14 @@ public:
                                     , ZF_IN_OPT ZFObject *param7 = ZFMethodGenericInvokerDefaultParam()
                                     ) const; /* ZFMETHOD_MAX_PARAM */
     /** @brief see #newInstanceGeneric */
-    ZFToken newInstanceGenericBegin(void) const;
+    void *newInstanceGenericBegin(void) const;
     /** @brief see #newInstanceGeneric */
-    zfbool newInstanceGenericCheck(ZF_IN ZFToken token
+    zfbool newInstanceGenericCheck(ZF_IN void *&token
                                    , ZF_IN const ZFMethod *objectOnInitMethod
                                    , ZF_IN_OUT zfautoObject (&paramList)[ZFMETHOD_MAX_PARAM]
-                                   ) const; /* ZFMETHOD_MAX_PARAM */
+                                   , ZF_OUT_OPT zfstring *errorHint = zfnull) const; /* ZFMETHOD_MAX_PARAM */
     /** @brief see #newInstanceGeneric */
-    zfautoObject newInstanceGenericEnd(ZF_IN ZFToken token,
+    zfautoObject newInstanceGenericEnd(ZF_IN void *&token,
                                        ZF_IN zfbool objectOnInitMethodInvokeSuccess) const;
 
     /**
@@ -356,7 +354,7 @@ public:
      * note that parent class's method won't be included\n
      * the order is ensured to be the same as ZFMethod declared
      * @see methodAtIndex
-     * @note can be found only if it matches the condition described in #ZFMETHOD_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      */
     zfindex methodCount(void) const;
     /**
@@ -365,9 +363,22 @@ public:
      * note that parent class's method won't be included\n
      * the order is ensured to be the same as ZFMethod declared
      * @see methodForNameIgnoreParent, methodForName
-     * @note can be found only if it matches the condition described in #ZFMETHOD_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      */
     const ZFMethod *methodAtIndex(ZF_IN zfindex index) const;
+
+    /** @brief see #methodGetAll */
+    void methodGetAllT(ZF_IN_OUT ZFCoreArray<const ZFMethod *> &ret) const;
+    /**
+     * @brief get all method, including methods inherited from parent
+     */
+    ZFCoreArrayPOD<const ZFMethod *> methodGetAll(void) const
+    {
+        ZFCoreArrayPOD<const ZFMethod *> ret;
+        this->methodGetAllT(ret);
+        return ret;
+    }
+
     /* ZFMETHOD_MAX_PARAM */
     /**
      * @brief get the method by name within this class only, or zfnull if not exists
@@ -378,7 +389,7 @@ public:
      * the first one would be returned
      *
      * @see methodAtIndex, methodForName
-     * @note can be found only if it matches the condition described in #ZFMETHOD_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      */
     const ZFMethod *methodForNameIgnoreParent(ZF_IN const zfchar *methodName
                                               , ZF_IN const zfchar *methodParamTypeId0
@@ -397,7 +408,7 @@ public:
      *
      * searching from subclass to parent class, return the first matched
      * @see methodAtIndex, methodForNameIgnoreParent
-     * @note can be found only if it matches the condition described in #ZFMETHOD_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      * @note ensured breadth-first
      */
     const ZFMethod *methodForName(ZF_IN const zfchar *methodName
@@ -434,7 +445,7 @@ public:
      * note that parent class's property won't be included\n
      * the order is ensured to be the same as property declared
      * @see propertyAtIndex
-     * @note can be found only if it matches the condition described in #ZFPROPERTY_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      */
     zfindex propertyCount(void) const;
     /**
@@ -443,9 +454,21 @@ public:
      * note that parent class's property won't be included\n
      * the order is ensured to be the same as property declared
      * @see propertyForName
-     * @note can be found only if it matches the condition described in #ZFPROPERTY_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      */
     const ZFProperty *propertyAtIndex(ZF_IN zfindex index) const;
+
+    /** @brief see #propertyGetAll */
+    void propertyGetAllT(ZF_IN_OUT ZFCoreArray<const ZFProperty *> &ret) const;
+    /**
+     * @brief get all property, including properties inherited from parent
+     */
+    ZFCoreArrayPOD<const ZFProperty *> propertyGetAll(void) const
+    {
+        ZFCoreArrayPOD<const ZFProperty *> ret;
+        this->propertyGetAllT(ret);
+        return ret;
+    }
 
     /**
      * @brief get the property by name within this class only, or zfnull if not exists
@@ -453,7 +476,7 @@ public:
      * propertyName should be "Property" without "set" or "get"\n
      * note that parent class's property won't be included
      * @see propertyAtIndex, propertyForName
-     * @note can be found only if it matches the condition described in #ZFPROPERTY_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      */
     const ZFProperty *propertyForNameIgnoreParent(const zfchar *propertyName) const;
     /**
@@ -462,16 +485,46 @@ public:
      * propertyName should be "Property" without "set" or "get"\n
      * searching from subclass to parent class, return the first matched
      * @see propertyAtIndex, propertyForName
-     * @note can be found only if it matches the condition described in #ZFPROPERTY_REGISTER
+     * @note can be found only if it matches the condition described in #ZFOBJECT_REGISTER
      * @note ensured breadth-first
      */
     const ZFProperty *propertyForName(const zfchar *propertyName) const;
+
     /**
-     * @brief whether the property has #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE
+     * @brief try to get property setter method within this class only
+     *
+     * note, the property has no need to exist,
+     * we only search method with proper name and param and return type
+     */
+    const ZFMethod *propertySetterForNameIgnoreParent(const zfchar *propertyName) const;
+    /**
+     * @brief try to get property setter method
+     *
+     * note, the property has no need to exist,
+     * we only search method with proper name and param and return type
+     */
+    const ZFMethod *propertySetterForName(const zfchar *propertyName) const;
+    /**
+     * @brief try to get property getter method within this class only
+     *
+     * note, the property has no need to exist,
+     * we only search method with proper name and param and return type
+     */
+    const ZFMethod *propertyGetterForNameIgnoreParent(const zfchar *propertyName) const;
+    /**
+     * @brief try to get property getter method
+     *
+     * note, the property has no need to exist,
+     * we only search method with proper name and param and return type
+     */
+    const ZFMethod *propertyGetterForName(const zfchar *propertyName) const;
+
+    /**
+     * @brief whether the property has #ZFPROPERTY_ON_INIT_DECLARE
      */
     zfbool propertyHasOverrideInitStep(void) const;
     /**
-     * @brief whether the property has #ZFPROPERTY_OVERRIDE_ON_INIT_DECLARE
+     * @brief whether the property has #ZFPROPERTY_ON_INIT_DECLARE
      */
     zfbool propertyHasOverrideInitStep(ZF_IN const ZFProperty *property) const;
 
@@ -487,21 +540,21 @@ public:
      *   you must ensure the classTag is safe to be deleted at this time
      * @note usually used to store meta-data for performance use only
      */
-    void classTagSet(ZF_IN const zfchar *key,
-                     ZF_IN ZFObject *tag) const;
+    void classTag(ZF_IN const zfchar *key,
+                  ZF_IN ZFObject *tag) const;
     /**
-     * @brief see #classTagSet
+     * @brief see #classTag
      */
-    ZFObject *classTagGet(ZF_IN const zfchar *key) const;
+    ZFObject *classTag(ZF_IN const zfchar *key) const;
     /**
-     * @brief see #classTagGet
+     * @brief see #classTag
      */
     template<typename T_ZFObject>
-    T_ZFObject classTagGet(ZF_IN const zfchar *key) const
+    T_ZFObject classTag(ZF_IN const zfchar *key) const
     {
-        return ZFCastZFObjectUnchecked(T_ZFObject, this->classTagGet(key));
+        return ZFCastZFObjectUnchecked(T_ZFObject, this->classTag(key));
     }
-    /** @brief see #classTagSet */
+    /** @brief see #classTag */
     zffinal void classTagGetAllKeyValue(ZF_IN_OUT ZFCoreArray<const zfchar *> &allKey,
                                         ZF_IN_OUT ZFCoreArray<ZFObject *> &allValue) const;
     /**
@@ -509,14 +562,14 @@ public:
      */
     inline void classTagRemove(ZF_IN const zfchar *key) const
     {
-        this->classTagSet(key, zfnull);
+        this->classTag(key, zfnull);
     }
     /**
-     * @brief remove tag, return removed tag or #zfautoObjectNull if not exist
+     * @brief remove tag, return removed tag or null if not exist
      */
     zffinal zfautoObject classTagRemoveAndGet(ZF_IN const zfchar *key) const;
     /**
-     * @brief see #classTagSet
+     * @brief see #classTag
      *
      * @note it's unsafe to remove all tag manually,
      *   which may break unrelated modules' additional logic,
@@ -570,7 +623,6 @@ public:
     void _ZFP_ZFClass_methodAndPropertyAutoRegister(void) const;
     void _ZFP_ZFClass_methodRegister(ZF_IN const ZFMethod *method) const;
     void _ZFP_ZFClass_methodUnregister(ZF_IN const ZFMethod *method) const;
-    void _ZFP_ZFClass_methodMapCacheUpdate(void) const;
     void _ZFP_ZFClass_propertyRegister(ZF_IN const ZFProperty *zfproperty) const;
     void _ZFP_ZFClass_propertyUnregister(ZF_IN const ZFProperty *zfproperty) const;
     void _ZFP_ZFClass_propertyAutoInitRegister(ZF_IN const ZFProperty *property) const;
@@ -581,6 +633,7 @@ public:
     _ZFP_zfAllocWithCacheCallback _ZFP_objectAllocWithCacheCallback(void) const;
     _ZFP_ZFObjectConstructor _ZFP_objectConstructor(void) const;
     _ZFP_ZFObjectDestructor _ZFP_objectDestructor(void) const;
+    void _ZFP_classDynamicRegisterObjectInstanceDetach(ZF_IN ZFObject *obj) const;
 
 public:
     zfbool _ZFP_ZFClassNeedInitImplementationList;
@@ -592,6 +645,17 @@ private:
     const zfchar *classNameFullCache;
     const ZFClass *classParentCache;
 };
+
+/**
+ * @brief used to mark object allocation failed for #ZFClass::newInstanceGenericCheck
+ *
+ * when object created by #ZFClass::newInstanceGeneric,
+ * it's possible to have mismatch param for generic invoke of `objectOnInit`,
+ * you may set an error message to the allocated object by #ZFObject::objectTag
+ * with this as key and the error message (#v_zfstring) as value,
+ * to tell #ZFClass::newInstanceGenericCheck that the allocation failed
+ */
+#define ZFObjectTagKeyword_newInstanceGenericFailed "_ZFP_NIGFail"
 
 // ============================================================
 zfclassLikePOD ZF_ENV_EXPORT _ZFP_ZFClassRegisterHolder
@@ -616,7 +680,7 @@ public:
 // ============================================================
 zfclassFwd ZFFilterForZFClass;
 /** @brief see #ZFClassGetAll */
-extern ZF_ENV_EXPORT void ZFClassGetAllT(ZF_OUT ZFCoreArray<const ZFClass *> &ret,
+extern ZF_ENV_EXPORT void ZFClassGetAllT(ZF_IN_OUT ZFCoreArray<const ZFClass *> &ret,
                                          ZF_IN_OPT const ZFFilterForZFClass *classFilter = zfnull);
 /**
  * @brief get all class currently registered, for debug use only

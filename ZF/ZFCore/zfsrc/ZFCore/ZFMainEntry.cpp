@@ -1,52 +1,41 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFMainEntry.h"
-#include "ZFString.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-static _ZFP_ZFMainFuncType &_ZFP_ZFMainFunc_(void)
+ZF_NAMESPACE_BEGIN(ZFApp)
+
+ZFMETHOD_FUNC_DEFINE_0(const ZFCoreArray<zfstring> &, appParams)
+{
+    return _ZFP_ZFApp_appParams();
+}
+
+ZFMETHOD_FUNC_DEFINE_1(void, appExitCode, ZFMP_IN(zfint, exitCode))
+{
+    _ZFP_ZFApp_appExitCode() = exitCode;
+}
+ZFMETHOD_FUNC_DEFINE_0(zfint, appExitCode)
+{
+    return _ZFP_ZFApp_appExitCode();
+}
+
+ZF_NAMESPACE_END(ZFApp)
+
+// ============================================================
+_ZFP_ZFMainFuncType &_ZFP_ZFMainFunc(void)
 {
     static _ZFP_ZFMainFuncType _func = zfnull;
     return _func;
 }
-#define _ZFP_ZFMainFunc (_ZFP_ZFMainFunc_())
-void _ZFP_ZFMainRegister(ZF_IN _ZFP_ZFMainFuncType func)
-{
-    _ZFP_ZFMainFunc = func;
-}
-zfint ZFMainExecute(ZF_IN_OPT ZFCoreArray<zfstring> const &params)
-{
-    _ZFP_ZFMainFuncType &func = _ZFP_ZFMainFunc;
-    if(func != zfnull)
-    {
-        return func(params);
-    }
-    else
-    {
-        zfCoreLog("ZFMAIN_ENTRY not set");
-        return -1;
-    }
-}
 
-int ZFMainCommonEntry(ZF_IN int argc /* = 0 */, char **argv /* = zfnull */)
+ZFCoreArray<zfstring> &_ZFP_ZFApp_appParams(void)
 {
-    ZFFrameworkInit();
-    ZFCoreArray<zfstring> params;
-    for(int i = 0; i < argc; ++i)
-    {
-        params.add(argv[i]);
-    }
-    zfint ret = ZFMainExecute(params);
-    ZFFrameworkCleanup();
-    return ret;
+    static ZFCoreArray<zfstring> d;
+    return d;
+}
+zfint &_ZFP_ZFApp_appExitCode(void)
+{
+    static zfint d = 0;
+    return d;
 }
 
 ZF_NAMESPACE_GLOBAL_END

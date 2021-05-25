@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFProtocolZFUIKeyboardState.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -30,9 +21,9 @@ public:
     ZFCoreArrayPOD<ZFUIKeyCodeEnum> keyPressed;
     ZFCoreArrayPOD<zfflags> keyPressedRaw;
     ZFListener viewOnEventListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(viewOnEvent)
+    static void viewOnEvent(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        ZFUIKeyEvent *event = ZFCastZFObject(ZFUIKeyEvent *, listenerData.param0);
+        ZFUIKeyEvent *event = listenerData.param0<ZFUIKeyEvent *>();
         if(event != zfnull)
         {
             ZFUIKeyboardStateBuiltinImplNotifyKeyEvent(event);
@@ -48,10 +39,10 @@ public:
         }
         this->implRegisterFlag = zftrue;
 
-        ZFObjectGlobalEventObserver().observerAdd(ZFObserverAddParam()
-                .eventIdSet(ZFUIView::EventViewOnEvent())
-                .observerSet(this->viewOnEventListener)
-                .observerLevelSet(ZFLevelZFFrameworkEssential)
+        ZFGlobalObserver().observerAdd(ZFObserverAddParam()
+                .eventId(ZFUIView::EventViewOnEvent())
+                .observer(this->viewOnEventListener)
+                .observerLevel(ZFLevelZFFrameworkEssential)
             );
     }
     void implUnregister(void)
@@ -62,7 +53,7 @@ public:
         }
         this->implRegisterFlag = zffalse;
 
-        ZFObjectGlobalEventObserver().observerRemove(
+        ZFGlobalObserver().observerRemove(
             ZFUIView::EventViewOnEvent(),
             this->viewOnEventListener);
     }

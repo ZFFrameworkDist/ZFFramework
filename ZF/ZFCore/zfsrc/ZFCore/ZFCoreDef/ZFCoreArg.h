@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreArg.h
  * @brief arg utilities for ZFFramework
@@ -24,7 +15,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *
  * result would be appended to result instead of clear and set
  */
-extern ZF_ENV_EXPORT void zfCoreArgSplit(ZF_OUT ZFCoreArray<zfstring> &result,
+extern ZF_ENV_EXPORT void zfCoreArgSplit(ZF_IN_OUT ZFCoreArray<zfstring> &result,
                                          ZF_IN const zfchar *cmdLine);
 /**
  * @brief split cmd line to separate item

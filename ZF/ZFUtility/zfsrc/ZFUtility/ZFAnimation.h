@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFAnimation.h
  * @brief base class of all animation
@@ -67,17 +58,9 @@ public:
      *
      * called when animation stopped or invalid,
      * designed for convenient,
-     * param0 is a #ZFValue containing a bool value to show whether the animation is valid
+     * param0 is a #v_zfbool to show whether the animation is valid
      */
-    ZFOBSERVER_EVENT(AniOnStopOrOnInvalid)
-
-protected:
-    zfoverride
-    virtual void objectOnInit(void);
-    zfoverride
-    virtual void objectOnDealloc(void);
-    zfoverride
-    virtual void objectOnDeallocPrepare(void);
+    ZFOBSERVER_EVENT(AniOnStopOrInvalid)
 
     // ============================================================
     // property
@@ -93,10 +76,7 @@ public:
     /**
      * @brief util method to #aniDuration
      */
-    ZFMETHOD_INLINE_0(zftimet, aniDurationFixed)
-    {
-        return (this->aniDuration() > 0 ? this->aniDuration() : ZFAnimationDurationDefault());
-    }
+    ZFMETHOD_DECLARE_0(zftimet, aniDurationFixed)
     /**
      * @brief whether automatically stop previous animation attached to #aniTarget,
      *   false by default
@@ -111,7 +91,7 @@ public:
      * this is not necessary to be set during animation's running
      * (although most animation subclass need a target)
      */
-    ZFMETHOD_DECLARE_1(void, aniTargetSet,
+    ZFMETHOD_DECLARE_1(void, aniTarget,
                        ZFMP_IN(ZFObject *, aniTarget))
     /**
      * @brief animation's target
@@ -162,6 +142,8 @@ public:
     ZFMETHOD_DECLARE_0(zfbool, aniValid)
 
 protected:
+    /** @brief called when #aniTarget changed */
+    virtual void aniImplTargetOnChange(ZF_IN ZFObject *aniTargetOld) {}
     /**
      * @brief called to check whether the animation is currently valid,
      *   an invalid animation is ensured can't be started
@@ -169,7 +151,11 @@ protected:
      * by default, this method would only check animation's duration,
      * for common case, you should check whether the target is valid
      */
-    virtual zfbool aniImplCheckValid(void);
+    virtual zfbool aniImplCheckValid(void)
+    {
+        return (this->aniDurationFixed() > 0);
+    }
+
 public:
     zffinal void _ZFP_ZFAnimation_aniImplDelayNotifyFinish(ZF_IN zfidentity taskId);
     zffinal void _ZFP_ZFAnimation_aniReadyStart(void);
@@ -179,7 +165,7 @@ protected:
     /**
      * @brief for subclass to achieve delay logic
      *
-     * by default, this method would implement delay by #ZFThreadExecuteInMainThreadAfterDelay,
+     * by default, this method would implement delay by #ZFExecuteAfterDelay,
      * you may override and supply your own implementation without call super,
      * if you do, you must override or call all of these methods:
      * -  aniImplDelay: to achieve delay
@@ -223,15 +209,23 @@ protected:
     {
         this->observerNotify(ZFAnimation::EventAniOnStop());
     }
-    /** @brief see #EventAniOnStopOrOnInvalid */
-    virtual inline void aniOnStopOrOnInvalid(ZF_IN zfbool aniValid)
+    /** @brief see #EventAniOnStopOrInvalid */
+    virtual inline void aniOnStopOrInvalid(ZF_IN zfbool aniValid)
     {
-        this->observerNotify(ZFAnimation::EventAniOnStopOrOnInvalid(), ZFValue::boolValueCreate(aniValid).toObject());
+        this->observerNotify(ZFAnimation::EventAniOnStopOrInvalid(), zflineAlloc(v_zfbool, aniValid));
     }
     /**
      * @brief subclass must notify after the animation stop
      */
     zffinal void aniImplNotifyStop(void);
+
+protected:
+    zfoverride
+    virtual void objectOnInit(void);
+    zfoverride
+    virtual void objectOnDealloc(void);
+    zfoverride
+    virtual void objectOnDeallocPrepare(void);
 
 private:
     _ZFP_ZFAnimationPrivate *d;

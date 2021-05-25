@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIListAdapterArray.h
  * @brief basic list adapter which hold all list cells directly (with no recycle logic)
@@ -43,7 +34,7 @@ protected:
     virtual void objectOnInit(void)
     {
         zfsuper::objectOnInit();
-        d = zfAlloc(ZFArrayEditable);
+        d = zfAlloc(ZFArray);
     }
     zfoverride
     virtual void objectOnDealloc(void)
@@ -63,7 +54,7 @@ public:
      * @brief directly access internal cell array,
      *   you may modify it directly, with caution
      */
-    ZFMETHOD_INLINE_0(ZFArrayEditable *, cellArray)
+    ZFMETHOD_INLINE_0(ZFArray *, cellArray)
     {
         return d;
     }
@@ -139,7 +130,7 @@ protected:
                                                  ZF_OUT_OPT zfstring *outErrorHint = zfnull);
 
 private:
-    ZFArrayEditable *d;
+    ZFArray *d;
 };
 
 ZF_NAMESPACE_GLOBAL_END

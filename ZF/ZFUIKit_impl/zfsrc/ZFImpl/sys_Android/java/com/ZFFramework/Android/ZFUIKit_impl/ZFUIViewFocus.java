@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 package com.ZFFramework.Android.ZFUIKit_impl;
 
 import java.lang.ref.WeakReference;
@@ -58,24 +49,24 @@ public class ZFUIViewFocus {
             }
         }
     }
-    public static void native_viewFocusableSet(Object nativeView, boolean viewFocusable) {
+    public static void native_viewFocusable(Object nativeView, boolean viewFocusable) {
         ZFUIView nativeViewTmp = (ZFUIView)nativeView;
-        View viewToSet = nativeViewTmp;
+        View target = nativeViewTmp;
         if(nativeViewTmp.nativeImplView != null) {
-            viewToSet = nativeViewTmp.nativeImplView;
+            target = nativeViewTmp.nativeImplView;
         }
 
         nativeViewTmp.setFocusable(viewFocusable);
         nativeViewTmp.setFocusableInTouchMode(viewFocusable);
-        viewToSet.setFocusable(viewFocusable);
-        viewToSet.setFocusableInTouchMode(viewFocusable);
+        target.setFocusable(viewFocusable);
+        target.setFocusableInTouchMode(viewFocusable);
         if(viewFocusable) {
             nativeViewTmp.setOnFocusChangeListener(_onFocusChangeListener);
-            viewToSet.setOnFocusChangeListener(_onFocusChangeListener);
+            target.setOnFocusChangeListener(_onFocusChangeListener);
         }
         else {
             nativeViewTmp.setOnFocusChangeListener(null);
-            viewToSet.setOnFocusChangeListener(null);
+            target.setOnFocusChangeListener(null);
         }
     }
     public static boolean native_viewFocused(Object nativeView) {
@@ -104,16 +95,16 @@ public class ZFUIViewFocus {
     }
     public static void native_viewFocusRequest(Object nativeView, boolean viewFocus) {
         ZFUIView nativeViewTmp = (ZFUIView)nativeView;
-        View viewToSet = nativeViewTmp;
+        View target = nativeViewTmp;
         if(nativeViewTmp.nativeImplView != null && nativeViewTmp.nativeImplView.isFocusable()) {
-            viewToSet = nativeViewTmp.nativeImplView;
+            target = nativeViewTmp.nativeImplView;
         }
 
         if(viewFocus) {
-            viewToSet.requestFocus();
+            target.requestFocus();
         }
         else {
-            viewToSet.clearFocus();
+            target.clearFocus();
         }
     }
 

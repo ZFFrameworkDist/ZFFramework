@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ZFFramework'
-  s.version          = '0.8.0'
+  s.version          = '0.9.0'
   s.summary          = 'cross-platform C++ app framework'
   s.description      = <<-DESC
 see http://ZFFramework.com for more info
@@ -14,10 +14,9 @@ minimal steps to use in iOS with cocoapods to embed to existing projects:
       pod 'ZFFramework'
   2. add cpp files, with this as main entry
       #include "ZFUIKit.h" // ZF module header
-      ZFMAIN_ENTRY(params)
+      ZFMAIN_ENTRY()
       {
           // you cpp code
-          return 0;
       }
 
 recommended to use https://github.com/ZFFramework/ZFFramework/blob/master/tools/zfproj_creator/zfproj_creator.sh

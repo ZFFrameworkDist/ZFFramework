@@ -1,16 +1,6 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_default_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFTimer.h"
 #include "ZFCore/ZFThread.h"
-#include "ZFCore/ZFValue.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -23,6 +13,7 @@ public:
     ZFTimer *timer;
 private:
     zfbool timerThreadStarted;
+    zfbool timerThreadStartNotified;
     zfidentity threadCallbackTaskId;
     zfidentity threadCallbackId;
     zfidentity mainThreadCallbackTaskId;
@@ -32,6 +23,7 @@ protected:
     : impl(zfnull)
     , timer(zfnull)
     , timerThreadStarted(zffalse)
+    , timerThreadStartNotified(zffalse)
     , threadCallbackTaskId(zfidentityInvalid())
     , threadCallbackId(zfidentityInvalid())
     , mainThreadCallbackTaskId(zfidentityInvalid())
@@ -42,30 +34,34 @@ protected:
 public:
     zffinal void timerStart(void)
     {
+        zfRetain(this);
         ++(this->threadCallbackTaskId);
-        this->threadCallbackId = ZFThreadExecuteInNewThread(
+        this->threadCallbackId = ZFExecuteInNewThread(
             ZFCallbackForMemberMethod(this, ZFMethodAccess(zfself, threadCallback)),
-            this /* pass this as dummy param to keep retain count */,
-            ZFListenerData().param0Set(ZFValue::identityValueCreate(this->threadCallbackTaskId))
-            );
+            zflineAlloc(v_zfidentity, this->threadCallbackTaskId));
     }
     zffinal void timerStop(void)
     {
         ++(this->threadCallbackTaskId);
         ++(this->mainThreadCallbackTaskId);
-        ZFThreadExecuteCancel(this->threadCallbackId);
-        ZFThreadExecuteCancel(this->mainThreadCallbackId);
+        ZFExecuteCancel(this->threadCallbackId);
+        ZFExecuteCancel(this->mainThreadCallbackId);
         if(this->timerThreadStarted)
         {
             this->timerThreadStarted = zffalse;
             this->impl->notifyTimerStop(this->timer);
         }
+        zfRelease(this);
     }
 
 public:
-    ZFLISTENER_INLINE(threadCallback)
+    ZFMETHOD_INLINE_2(void, threadCallback,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
-        zfidentity curId = ZFCastZFObjectUnchecked(ZFValue *, listenerData.param0)->identityValue();
+        zfRetain(this);
+        zfblockedRelease(this);
+        zfidentity curId = userData->to<v_zfidentity *>()->zfv;
 
         // delay
         if(curId != this->threadCallbackTaskId) {return ;}
@@ -77,31 +73,35 @@ public:
         // start
         if(curId != this->threadCallbackTaskId) {return ;}
         this->timerThreadStarted = zftrue;
-        this->impl->notifyTimerStart(this->timer);
+        this->timerThreadStartNotified = zffalse;
         if(curId != this->threadCallbackTaskId) {return ;}
 
         // timer
         while(curId == this->threadCallbackTaskId)
         {
-            if(this->timer->timerActivateInMainThread())
-            {
+            // if(this->timer->timerActivateInMainThread())
+            { // always in main thread for default impl
                 ++(this->mainThreadCallbackTaskId);
-                this->mainThreadCallbackId = ZFThreadExecuteInNewThread(
+                this->mainThreadCallbackId = ZFExecuteInNewThread(
                     ZFCallbackForMemberMethod(this, ZFMethodAccess(zfself, mainThreadCallback)),
-                    zfnull,
-                    ZFListenerData().param0Set(ZFValue::identityValueCreate(this->mainThreadCallbackTaskId).toObject())
-                    );
-            }
-            else
-            {
-                this->impl->notifyTimerActivate(this->timer);
+                    zflineAlloc(v_zfidentity, this->mainThreadCallbackTaskId));
             }
             ZFThread::sleep(this->timer->timerInterval());
         }
     }
-    ZFLISTENER_INLINE(mainThreadCallback)
+    ZFMETHOD_INLINE_2(void, mainThreadCallback,
+                      ZFMP_IN(const ZFListenerData &, listenerData),
+                      ZFMP_IN(ZFObject *, userData))
     {
-        zfidentity curId = ZFCastZFObjectUnchecked(ZFValue *, listenerData.param0)->identityValue();
+        zfidentity curId = userData->to<v_zfidentity *>()->zfv;
+
+        if(curId != this->mainThreadCallbackTaskId) {return ;}
+        if(!this->timerThreadStartNotified)
+        {
+            this->timerThreadStartNotified = zftrue;
+            this->impl->notifyTimerStart(this->timer);
+        }
+
         if(curId != this->mainThreadCallbackTaskId) {return ;}
         this->impl->notifyTimerActivate(this->timer);
     }

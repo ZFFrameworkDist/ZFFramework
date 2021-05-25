@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIOnScreenKeyboardState.h
  * @brief on screen keyboard state helper
@@ -30,14 +21,12 @@ public:
     /**
      * @brief access keyboard state for sys window
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              ZFUIOnScreenKeyboardState *, instanceForSysWindow,
+    ZFMETHOD_DECLARE_STATIC_1(ZFUIOnScreenKeyboardState *, instanceForSysWindow,
                               ZFMP_IN_OPT(ZFUISysWindow *, sysWindow, zfnull))
     /**
      * @brief access keyboard state for view
      */
-    ZFMETHOD_DECLARE_DETAIL_1(public, ZFMethodTypeStatic,
-                              ZFUIOnScreenKeyboardState *, instanceForView,
+    ZFMETHOD_DECLARE_STATIC_1(ZFUIOnScreenKeyboardState *, instanceForView,
                               ZFMP_IN_OPT(ZFUIView *, view, zfnull))
 
 public:
@@ -70,7 +59,7 @@ public:
     ZFMETHOD_DECLARE_0(const ZFUIRect &, keyboardFramePrev)
 
     /**
-     * @brief fix client frame accorrding to current keyboard frame
+     * @brief fix client frame according to current keyboard frame
      *
      * output is the available client frame that won't be covered by the keyboard
      */
@@ -79,12 +68,7 @@ public:
     /**
      * @brief see #keyboardFixClientFrame
      */
-    ZFMETHOD_INLINE_0(ZFUIRect, keyboardFixClientFrame)
-    {
-        ZFUIRect ret = ZFUIRectZero();
-        this->keyboardFixClientFrameT(ret);
-        return ret;
-    }
+    ZFMETHOD_DECLARE_0(ZFUIRect, keyboardFixClientFrame)
 
 protected:
     zfoverride

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIDialogForChoice.h
  * @brief basic dialog for user to choose items
@@ -99,7 +90,7 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIDialogForChoiceModeEnum, choiceMode,
                                 ZFUIDialogForChoiceMode::EnumDefault())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_INLINE(ZFUIDialogForChoiceModeEnum, choiceMode)
+    ZFPROPERTY_ON_ATTACH_INLINE(ZFUIDialogForChoiceModeEnum, choiceMode)
     {
         if(this->choiceMode() != propertyValueOld)
         {
@@ -112,14 +103,14 @@ public:
      * @brief list of choice items, empty by default,
      *   use #choiceAdd/#choiceRemove to access the choice list
      */
-    ZFPROPERTY_RETAIN_DETAIL(ZFArrayEditable *, list, zflineAlloc(ZFArrayEditable),
+    ZFPROPERTY_RETAIN_DETAIL(ZFArray *, list, zflineAlloc(ZFArray),
                              private, protected)
 
     /**
      * @brief list of selected items' index, empty by default,
-     *   holds #ZFValue::indexValue
+     *   holds #v_zfindex
      */
-    ZFPROPERTY_RETAIN_DETAIL(ZFArrayEditable *, selected, zflineAlloc(ZFArrayEditable),
+    ZFPROPERTY_RETAIN_DETAIL(ZFArray *, selected, zflineAlloc(ZFArray),
                              private, protected)
 
 public:
@@ -165,8 +156,8 @@ public:
                       ZFMP_IN(const zfchar *, choiceName))
     {
         zfblockedAlloc(ZFUIDialogForChoiceData, choiceData);
-        choiceData->choiceIdSet(choiceId);
-        choiceData->choiceNameSet(choiceName);
+        choiceData->choiceId(choiceId);
+        choiceData->choiceName(choiceName);
         this->choiceAdd(choiceData);
     }
     /** @brief remove choice by id */
@@ -186,7 +177,7 @@ public:
         this->list()->remove(index);
         for(zfindex i = 0; i < this->selected()->count(); ++i)
         {
-            zfindex t = this->selected()->get<ZFValue *>(i)->indexValue();
+            zfindex t = this->selected()->get<v_zfindex *>(i)->zfv;
             if(t == index)
             {
                 this->selected()->remove(i);
@@ -194,7 +185,7 @@ public:
             }
             else if(t > index)
             {
-                this->selected()->set(i, ZFValue::indexValueCreate(t - 1).toObject());
+                this->selected()->set(i, zflineAlloc(v_zfindex, t - 1));
             }
         }
         this->choiceListOnChange();
@@ -223,14 +214,14 @@ public:
         {
             return ;
         }
-        zfautoObject indexHolder = ZFValue::indexValueCreate(index);
-        if(!this->selected()->isContain(indexHolder.toObject()))
+        zfblockedAlloc(v_zfindex, indexHolder, index);
+        if(!this->selected()->isContain(indexHolder))
         {
             if(this->_ZFP_singleChoiceMode())
             {
                 this->selected()->removeAll();
             }
-            this->selected()->add(indexHolder.toObject());
+            this->selected()->add(indexHolder);
             if(this->selected()->count() > 1)
             {
                 this->selected()->sort();
@@ -248,7 +239,7 @@ public:
         this->selected()->removeAll();
         for(zfindex i = 0; i < this->list()->count(); ++i)
         {
-            this->selected()->add(ZFValue::indexValueCreate(i).toObject());
+            this->selected()->add(zflineAlloc(v_zfindex, i));
         }
         this->choiceSelectedListOnChange();
     }
@@ -274,7 +265,7 @@ public:
         {
             return ;
         }
-        if(this->selected()->removeElement(ZFValue::indexValueCreate(index).toObject()))
+        if(this->selected()->removeElement(zflineAlloc(v_zfindex, index)))
         {
             this->choiceSelectedListOnChange();
         }
@@ -303,7 +294,7 @@ public:
         zfindex index = this->_ZFP_indexForChoiceId(choiceId);
         if(index != zfindexMax())
         {
-            return this->selected()->isContain(ZFValue::indexValueCreate(index).toObject());
+            return this->selected()->isContain(zflineAlloc(v_zfindex, index));
         }
         else
         {
@@ -316,7 +307,7 @@ public:
     ZFMETHOD_INLINE_1(zfbool, choiceSelectedAtIndex,
                       ZFMP_IN(zfindex, index))
     {
-        return this->selected()->isContain(ZFValue::indexValueCreate(index).toObject());
+        return this->selected()->isContain(zflineAlloc(v_zfindex, index));
     }
     /**
      * @brief return all selected choice index
@@ -324,10 +315,10 @@ public:
     ZFMETHOD_INLINE_0(ZFCoreArrayPOD<zfindex>, choiceSelectedIndexList)
     {
         ZFCoreArrayPOD<zfindex> ret;
-        ret.capacitySet(this->selected()->count());
+        ret.capacity(this->selected()->count());
         for(zfindex i = 0; i < this->selected()->count(); ++i)
         {
-            zfindex index = this->selected()->get<ZFValue *>(i)->indexValue();
+            zfindex index = this->selected()->get<v_zfindex *>(i)->zfv;
             ret.add(index);
         }
         return ret;
@@ -338,10 +329,10 @@ public:
     ZFMETHOD_INLINE_0(ZFCoreArray<zfstring>, choiceSelectedIdList)
     {
         ZFCoreArray<zfstring> ret;
-        ret.capacitySet(this->selected()->count());
+        ret.capacity(this->selected()->count());
         for(zfindex i = 0; i < this->selected()->count(); ++i)
         {
-            zfindex index = this->selected()->get<ZFValue *>(i)->indexValue();
+            zfindex index = this->selected()->get<v_zfindex *>(i)->zfv;
             ret.add(this->choiceIdAtIndex(index));
         }
         return ret;
@@ -352,10 +343,10 @@ public:
     ZFMETHOD_INLINE_0(ZFCoreArray<zfstring>, choiceSelectedNameList)
     {
         ZFCoreArray<zfstring> ret;
-        ret.capacitySet(this->selected()->count());
+        ret.capacity(this->selected()->count());
         for(zfindex i = 0; i < this->selected()->count(); ++i)
         {
-            zfindex index = this->selected()->get<ZFValue *>(i)->indexValue();
+            zfindex index = this->selected()->get<v_zfindex *>(i)->zfv;
             ret.add(this->choiceNameAtIndex(index));
         }
         return ret;
@@ -385,7 +376,7 @@ private:
                 }
                 else if(this->selected()->count() == 0 && !this->list()->isEmpty())
                 {
-                    this->selected()->add(ZFValue::indexValueCreate(0).toObject());
+                    this->selected()->add(zflineAlloc(v_zfindex, 0));
                     this->choiceSelectedListOnChange();
                 }
                 break;
@@ -461,10 +452,10 @@ public:
 public:
     zffinal void _ZFP_ZFUIDialogForChoice_choiceChange(ZF_IN zfindex index, ZF_IN zfbool selected)
     {
-        this->selected()->removeElement(ZFValue::indexValueCreate(index).toObject());
+        this->selected()->removeElement(zflineAlloc(v_zfindex, index));
         if(selected)
         {
-            this->selected()->add(ZFValue::indexValueCreate(index).toObject());
+            this->selected()->add(zflineAlloc(v_zfindex, index));
             this->selected()->sort();
         }
     }

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIScrollThumbDefault.h
  * @brief default scroll thumb of #ZFUIScroller
@@ -39,13 +30,13 @@ public:
      */
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUIImage *, scrollThumbImageHorizontal,
                                 zfRes("ZFUIKit/ZFUIScrollThumbDefault_thumb.xml"))
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIImage *, scrollThumbImageHorizontal)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIImage *, scrollThumbImageHorizontal)
     /**
      * @brief vertical scroll thumb image, null to hide it
      */
     ZFPROPERTY_RETAIN_WITH_INIT(ZFUIImage *, scrollThumbImageVertical,
                                 zfRes("ZFUIKit/ZFUIScrollThumbDefault_thumb.xml"))
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIImage *, scrollThumbImageVertical)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIImage *, scrollThumbImageVertical)
 
     /**
      * @brief delay to auto hide, #ZFAnimationDurationDefault by default

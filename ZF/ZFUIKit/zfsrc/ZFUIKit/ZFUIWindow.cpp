@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWindow.h"
 #include "ZFUIRootView.h"
 
@@ -22,7 +13,7 @@ zfclassNotPOD _ZFP_ZFUIWindowPrivate
 {
 public:
     ZFUISysWindow *windowOwnerSysWindow;
-    ZFUIViewLayoutParam *windowLayoutParam;
+    ZFUILayoutParam *windowLayoutParam;
     zfbool windowRemoveOverrideFlag;
 
 public:
@@ -71,7 +62,7 @@ ZFOBJECT_ON_INIT_DEFINE_1(ZFUIWindow, ZFMP_IN(ZFUISysWindow *, windowOwnerSysWin
     this->objectOnInit();
     if(windowOwnerSysWindow != zfnull)
     {
-        this->windowOwnerSysWindowSet(windowOwnerSysWindow);
+        this->windowOwnerSysWindow(windowOwnerSysWindow);
     }
 }
 
@@ -79,8 +70,8 @@ void ZFUIWindow::objectOnInit(void)
 {
     zfsuper::objectOnInit();
     d = zfpoolNew(_ZFP_ZFUIWindowPrivate);
-    d->windowLayoutParam = zfAlloc(ZFUIViewLayoutParam);
-    d->windowLayoutParam->sizeParamSet(ZFUISizeParamFillFill());
+    d->windowLayoutParam = zfAlloc(ZFUILayoutParam);
+    d->windowLayoutParam->sizeParam(ZFUISizeParamFillFill());
 }
 void ZFUIWindow::objectOnDealloc(void)
 {
@@ -92,12 +83,12 @@ void ZFUIWindow::objectOnDealloc(void)
 
 // ============================================================
 // properties
-ZFPROPERTY_OVERRIDE_ON_VERIFY_DEFINE(ZFUIWindow, ZFUIWindowLevelEnum, windowLevel)
+ZFPROPERTY_ON_VERIFY_DEFINE(ZFUIWindow, ZFUIWindowLevelEnum, windowLevel)
 {
     zfCoreAssertWithMessage(!this->windowShowing(), "you must not change window level while it's showing");
 }
 
-ZFMETHOD_DEFINE_1(ZFUIWindow, void, windowOwnerSysWindowSet,
+ZFMETHOD_DEFINE_1(ZFUIWindow, void, windowOwnerSysWindow,
                   ZFMP_IN(ZFUISysWindow *, windowOwnerSysWindow))
 {
     if(d->windowOwnerSysWindow != windowOwnerSysWindow)
@@ -150,7 +141,7 @@ ZFMETHOD_DEFINE_0(ZFUIWindow, void, windowShow)
 ZFMETHOD_DEFINE_0(ZFUIWindow, void, windowHide)
 {
     zfRetain(this);
-    ZFUIRootView *rootView = ZFCastZFObject(ZFUIRootView *, this->viewParentVirtual());
+    ZFUIRootView *rootView = ZFCastZFObject(ZFUIRootView *, this->viewParent());
     if(rootView != zfnull)
     {
         rootView->_ZFP_ZFUIRootView_windowList.removeElement(this);
@@ -230,7 +221,7 @@ ZFMETHOD_DEFINE_0(ZFUIWindow, void, windowMoveToBottom)
     }
 }
 
-ZFMETHOD_DEFINE_0(ZFUIWindow, ZFUIViewLayoutParam *, windowLayoutParam)
+ZFMETHOD_DEFINE_0(ZFUIWindow, ZFUILayoutParam *, windowLayoutParam)
 {
     return d->windowLayoutParam;
 }

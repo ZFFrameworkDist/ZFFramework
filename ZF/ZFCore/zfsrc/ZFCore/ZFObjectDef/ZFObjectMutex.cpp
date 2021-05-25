@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFObjectMutex.h"
 #include "ZFObjectImpl.h"
 
@@ -36,13 +27,17 @@ void ZFObjectMutexImplSet(ZF_IN_OPT ZFObjectMutexImplCallbackInit implInit /* = 
     _ZFP_ZFObjectMutexImplLock = implLock;
     _ZFP_ZFObjectMutexImplUnlock = implUnlock;
     _ZFP_ZFObjectMutexImplTryLock = implTryLock;
+}
 
+ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(_ZFP_ZFObjectMutexImplSetup, ZFLevelZFFrameworkLow)
+{
     if(_ZFP_ZFObjectMutexImplInit != zfnull)
     {
         void *implObject = _ZFP_ZFObjectMutexImplInit();
-        ZFCoreMutexImplSet(implObject, implLock, implUnlock);
+        ZFCoreMutexImplSet(implObject, _ZFP_ZFObjectMutexImplLock, _ZFP_ZFObjectMutexImplUnlock);
     }
 }
+ZF_GLOBAL_INITIALIZER_END(_ZFP_ZFObjectMutexImplSetup)
 
 ZF_NAMESPACE_GLOBAL_END
 

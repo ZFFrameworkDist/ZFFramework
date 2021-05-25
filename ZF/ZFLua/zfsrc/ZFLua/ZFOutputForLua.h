@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFOutputForLua.h
  * @brief util to create #ZFOutput for lua
@@ -27,7 +18,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  *   ZFOutputForLua(function(listenerData, userData)
  *       local text = listenerData:param0()
  *       local result = yourOutput(text)
- *       listenerData:param1():zfvSet(result)
+ *       listenerData:param1():zfv(result)
  *   end)
  * @endcode
  */

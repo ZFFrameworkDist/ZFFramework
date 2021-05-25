@@ -14,7 +14,8 @@ if test "x-$CLONE_OPTION" = "x-" ; then
 fi
 
 _OLD_DIR=$(pwd)
-_TIMEOUT=86400
+# 60*60*24*7, one week
+_TIMEOUT=604800
 _GIT_VALID=0
 
 if test -e "$DST_PATH/.git"; then
@@ -40,12 +41,13 @@ if test "$_GIT_VALID" = "1"; then
 
     if test ! "$?" = "0" ; then
         cd "$DST_PATH"
+        git stash
         git checkout .
         git reset --hard
-        git clean -xdf
         git fetch --all && git pull
         _SUCCESS="$?"
         git checkout $GIT_BRANCH
+        git stash pop
         cd "$_OLD_DIR"
 
         if test "$_SUCCESS" = "0"; then

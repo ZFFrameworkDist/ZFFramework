@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFLuaState.h
  * @brief native lua state impl
@@ -41,7 +32,7 @@ ZFMETHOD_FUNC_DECLARE_1(void, ZFLuaStateChange,
 
 /** @brief see #ZFLuaState */
 ZFMETHOD_FUNC_DECLARE_1(void, ZFLuaStateListT,
-                        ZFMP_OUT(ZFCoreArray<void *> &, ret))
+                        ZFMP_IN_OUT(ZFCoreArray<void *> &, ret))
 /** @brief see #ZFLuaState */
 ZFMETHOD_FUNC_DECLARE_0(ZFCoreArrayPOD<void *>, ZFLuaStateList)
 
@@ -63,14 +54,14 @@ ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
  * @brief see #ZFObject::observerNotify
  *
  * notified when #ZFLuaStateAttach,
- * param0 is a #v_VoidPointer to lua state
+ * param0 is a #v_ZFPtr to lua state
  */
 ZFOBSERVER_EVENT_GLOBAL(LuaStateOnAttach)
 /**
  * @brief see #ZFObject::observerNotify
  *
  * notified when #ZFLuaStateDetach,
- * param0 is a #v_VoidPointer to lua state
+ * param0 is a #v_ZFPtr to lua state
  */
 ZFOBSERVER_EVENT_GLOBAL(LuaStateOnDetach)
 ZF_NAMESPACE_END(ZFGlobalEvent)

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFLogLevel.h
  * @brief log level define
@@ -23,7 +14,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * @brief log level
  *
  * similar to Android's Log.v() to Log.e()\n
- * app's global log level can be set or get by #ZFLogLevelSet/#ZFLogLevelGet,
+ * app's global log level can be set or get by #ZFLogLevelDefault,
  * you may achieve your own log level specified behavior\n
  * it's ensured lower level has smaller value
  */
@@ -47,23 +38,25 @@ ZF_NAMESPACE_BEGIN(ZFGlobalEvent)
 /**
  * @brief see #ZFObject::observerNotify
  *
- * notified when #ZFLogLevelSet called
+ * notified when #ZFLogLevelDefault changed
  */
 ZFOBSERVER_EVENT_GLOBAL(LogLevelOnChange)
 ZF_NAMESPACE_END(ZFGlobalEvent)
 
 /** @brief see #ZFLogLevel, #ZFLogLevel::e_Warning by default */
-extern ZF_ENV_EXPORT void ZFLogLevelSet(ZF_IN ZFLogLevelEnum level);
+ZFMETHOD_FUNC_DECLARE_1(void, ZFLogLevelDefault,
+                        ZFMP_IN(ZFLogLevelEnum, level))
 /** @brief see #ZFLogLevel */
-extern ZF_ENV_EXPORT ZFLogLevelEnum ZFLogLevelGet(void);
+ZFMETHOD_FUNC_DECLARE_0(ZFLogLevelEnum, ZFLogLevelDefault)
 
 /**
  * @brief true if specified level is active
- *   (i.e. #ZFLogLevelGet not greater than the specified level)
+ *   (i.e. #ZFLogLevelDefault not greater than the specified level)
  */
-inline zfbool ZFLogLevelIsActive(ZF_IN ZFLogLevelEnum level)
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zfbool, ZFLogLevelIsActive,
+                               ZFMP_IN(ZFLogLevelEnum, level))
 {
-    return (ZFLogLevelGet() <= level);
+    return (ZFLogLevelDefault() <= level);
 }
 
 ZF_NAMESPACE_GLOBAL_END

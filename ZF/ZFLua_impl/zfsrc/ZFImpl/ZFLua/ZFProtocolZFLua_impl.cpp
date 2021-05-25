@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl.h"
 #include "ZFLua/protocol/ZFProtocolZFLua.h"
 #include "ZFImpl_ZFLua.h"
@@ -26,7 +17,7 @@ public:
         ZFImpl_ZFLua_luaStateChange((lua_State *)L);
     }
 
-    virtual void luaStateList(ZF_OUT ZFCoreArray<void *> &ret)
+    virtual void luaStateList(ZF_IN_OUT ZFCoreArray<void *> &ret)
     {
         typedef void *_T;
         ret.addFrom((const _T *)ZFImpl_ZFLua_luaStateList().arrayBuf(), ZFImpl_ZFLua_luaStateList().count());

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreEnvDef.h
  * @brief used to define the env used by ZFFramework
@@ -23,7 +14,7 @@
 #define ZF_NAMESPACE_BEGIN(NameSpace) \
     /** @brief \n */ \
     namespace NameSpace { \
-        extern const char *_ZFP_ZF_NAMESPACE_NOT_DECLARED(void);
+        extern const char *_ZFP_ZF_NAMESPACE_NOT_REGISTERED(void);
 
 /**
  * @brief end namespace
@@ -79,7 +70,7 @@
     #define ZF_NAMESPACE_GLOBAL_BEGIN
     #define ZF_NAMESPACE_GLOBAL_END
     #define ZF_NAMESPACE_GLOBAL_USE
-    extern const char *_ZFP_ZF_NAMESPACE_NOT_DECLARED(void);
+    extern const char *_ZFP_ZF_NAMESPACE_NOT_REGISTERED(void);
 #endif
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -97,12 +88,16 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 
 // ============================================================
 /**
- * @brief true to enable RTTI, false by default
+ * @brief true to enable lambda (which require C++11), auto detect by default
  *
- * add -DZF_ENV_RTTI=1 to compiler to make this macro take effect
+ * add -DZF_ENV_LAMBDA=1 to compiler to override
  */
-#ifndef ZF_ENV_RTTI
-    #define ZF_ENV_RTTI 0
+#ifndef ZF_ENV_LAMBDA
+    #if defined(__cplusplus) && (__cplusplus >= 201103L)
+        #define ZF_ENV_LAMBDA 1
+    #else
+        #define ZF_ENV_LAMBDA 0
+    #endif
 #endif
 
 // ============================================================

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFTimer.h
  * @brief timer utility
@@ -39,17 +30,13 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * called when timer started, ensured in the same thread of timer event\n
-     * param0 is the #ZFTimer::timerParam0
-     * and param1 is the #ZFTimer::timerParam1
+     * called when timer started, ensured in the same thread of timer event
      */
     ZFOBSERVER_EVENT(TimerOnStart)
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * called when timer activated\n
-     * param0 is the #ZFTimer::timerParam0
-     * and param1 is the #ZFTimer::timerParam1
+     * called when timer activated
      * @note on what thread this event is fired,
      *   depends on #timerActivateInMainThread
      */
@@ -57,9 +44,7 @@ public:
     /**
      * @brief see #ZFObject::observerNotify
      *
-     * called when timer stopped, ensured in the same thread that stop the timer\n
-     * param0 is the #ZFTimer::timerParam0
-     * and param1 is the #ZFTimer::timerParam1
+     * called when timer stopped, ensured in the same thread that stop the timer
      */
     ZFOBSERVER_EVENT(TimerOnStop)
 
@@ -70,20 +55,9 @@ protected:
      * you may change them after timer created,
      * but you must not if timer is started
      */
-    ZFOBJECT_ON_INIT_INLINE_5(ZFMP_IN(zftimet, timerInterval),
-                              ZFMP_IN_OPT(ZFObject *, timerParam0, zfnull),
-                              ZFMP_IN_OPT(ZFObject *, timerParam1, zfnull),
-                              ZFMP_IN_OPT(zftimet, timerDelay, zftimetZero()),
-                              ZFMP_IN_OPT(zfbool, timerActivateInMainThread, zffalse))
-    {
-        this->objectOnInit();
-        zfself::timerIntervalSet(timerInterval);
-        zfself::timerDelaySet(timerDelay);
-        zfself::timerParam0Set(timerParam0);
-        zfself::timerParam1Set(timerParam1);
-        zfself::timerActivateInMainThreadSet(timerActivateInMainThread);
-    }
-
+    ZFOBJECT_ON_INIT_DECLARE_3(ZFMP_IN(zftimet, timerInterval),
+                               ZFMP_IN_OPT(zftimet, timerDelay, zftimetZero()),
+                               ZFMP_IN_OPT(zfbool, timerActivateInMainThread, zftrue))
     zfoverride
     virtual void objectOnInit(void);
     zfoverride
@@ -102,11 +76,7 @@ public:
      * assert fail if interval is less than 0
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, timerInterval, 1000)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(zftimet, timerInterval)
-    {
-        zfCoreAssert(!this->timerStarted());
-        zfCoreAssert(this->timerInterval() > 0);
-    }
+    ZFPROPERTY_ON_VERIFY_DECLARE(zftimet, timerInterval)
 
     /**
      * @brief timer's delay when start a timer in mili seconds, default is 0
@@ -115,47 +85,16 @@ public:
      * else, first timer event would be fired after (timerDelay + timerInterval)
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zftimet, timerDelay, 0)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(zftimet, timerDelay)
-    {
-        zfCoreAssert(!this->timerStarted());
-        zfCoreAssert(this->timerDelay() >= 0);
-    }
+    ZFPROPERTY_ON_VERIFY_DECLARE(zftimet, timerDelay)
 
     /**
-     * @brief whether timer should be fired in main thread, false by default
+     * @brief whether timer should be fired in main thread, true by default
      *
      * fired in main thread for convenience but may cause timer to be more inaccurate,
      * use only if necessary
      */
-    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, timerActivateInMainThread, zffalse)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(zfbool, timerActivateInMainThread)
-    {
-        zfCoreAssert(!this->timerStarted());
-    }
-
-    /**
-     * @brief timer param, automatically retained
-     *
-     * the param is alive as long as the timer object is alive,
-     * it won't be released after timer stop
-     */
-    ZFPROPERTY_RETAIN(ZFObject *, timerParam0)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(ZFObject *, timerParam0)
-    {
-        zfCoreAssert(!this->timerStarted());
-    }
-
-    /**
-     * @brief timer param, automatically retained
-     *
-     * the param is alive as long as the timer object is alive,
-     * it won't be released after timer stop
-     */
-    ZFPROPERTY_RETAIN(ZFObject *, timerParam1)
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_INLINE(ZFObject *, timerParam1)
-    {
-        zfCoreAssert(!this->timerStarted());
-    }
+    ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, timerActivateInMainThread, zftrue)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zfbool, timerActivateInMainThread)
 
 public:
     /**
@@ -186,17 +125,17 @@ protected:
     /** @brief see #EventTimerOnStart */
     virtual inline void timerOnStart(void)
     {
-        this->observerNotify(ZFTimer::EventTimerOnStart(), this->timerParam0(), this->timerParam1());
+        this->observerNotify(ZFTimer::EventTimerOnStart());
     }
     /** @brief see #EventTimerOnActivate */
     virtual inline void timerOnActivate(void)
     {
-        this->observerNotify(ZFTimer::EventTimerOnActivate(), this->timerParam0(), this->timerParam1());
+        this->observerNotify(ZFTimer::EventTimerOnActivate());
     }
     /** @brief see #EventTimerOnStop */
     virtual inline void timerOnStop(void)
     {
-        this->observerNotify(ZFTimer::EventTimerOnStop(), this->timerParam0(), this->timerParam1());
+        this->observerNotify(ZFTimer::EventTimerOnStop());
     }
 
 private:
@@ -204,67 +143,13 @@ private:
 };
 
 // ============================================================
-// timer util
 /**
- * @brief see #ZFTimerExecute
+ * @brief util to start timer
  */
-zfclassLikePOD ZF_ENV_EXPORT ZFTimerExecuteParam
-{
-    ZFCORE_PARAM_DECLARE_SELF(ZFTimerExecuteParam)
-
-public:
-    /** @brief see #ZFTimer::timerInterval */
-    ZFCORE_PARAM_WITH_INIT(zftimet, timerInterval, 1000)
-    /** @brief see #ZFTimer::timerDelay */
-    ZFCORE_PARAM_WITH_INIT(zftimet, timerDelay, 0)
-    /** @brief see #ZFTimer::timerActivateInMainThread */
-    ZFCORE_PARAM_WITH_INIT(zfbool, timerActivateInMainThread, zffalse)
-    /** @brief see #ZFTimer::timerParam0 */
-    ZFCORE_PARAM_RETAIN_WITH_INIT(ZFObject *, timerParam0, zfnull)
-    /** @brief see #ZFTimer::timerParam1 */
-    ZFCORE_PARAM_RETAIN_WITH_INIT(ZFObject *, timerParam1, zfnull)
-    /** @brief see #ZFTimer */
-    ZFCORE_PARAM_RETAIN_WITH_INIT(ZFObject *, userData, zfnull)
-
-    /**
-     * @brief the timer callback to run
-     */
-    ZFCORE_PARAM(ZFListener, timerCallback)
-    /**
-     * @brief automatically stop timer when reach max count, 0 means no limit, 0 by default
-     */
-    ZFCORE_PARAM_WITH_INIT(zfindex, timerActivateCountMax, 0)
-
-public:
-    /** @cond ZFPrivateDoc */
-    zfbool operator == (ZF_IN const ZFTimerExecuteParam &ref) const
-    {
-        return (zftrue
-                && this->timerInterval() == ref.timerInterval()
-                && this->timerDelay() == ref.timerDelay()
-                && this->timerActivateInMainThread() == ref.timerActivateInMainThread()
-                && this->timerParam0() == ref.timerParam0()
-                && this->timerParam1() == ref.timerParam1()
-                && this->userData() == ref.userData()
-                && this->timerCallback() == ref.timerCallback()
-                && this->timerActivateCountMax() == ref.timerActivateCountMax()
-            );
-    }
-    zfbool operator != (ZF_IN const ZFTimerExecuteParam &ref) const
-    {
-        return !this->operator == (ref);
-    }
-    /** @endcond */
-};
-ZFTYPEID_ACCESS_ONLY_DECLARE(ZFTimerExecuteParam, ZFTimerExecuteParam)
-/**
- * @brief util method to start a timer
- *
- * return the started timer if success or null otherwise,
- * the started timer would be released automatically when stopped
- */
-ZFMETHOD_FUNC_DECLARE_1(zfautoObject, ZFTimerExecute,
-                        ZFMP_IN(const ZFTimerExecuteParam &, param))
+ZFMETHOD_FUNC_DECLARE_3(zfautoObjectT<ZFTimer *>, ZFTimerStart,
+                        ZFMP_IN(zftimet, timerInterval),
+                        ZFMP_IN(const ZFListener &, timerCallback),
+                        ZFMP_IN_OPT(ZFObject *, userData, zfnull))
 
 ZF_NAMESPACE_GLOBAL_END
 #endif // #ifndef _ZFI_ZFTimer_h_

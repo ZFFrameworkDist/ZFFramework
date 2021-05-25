@@ -1,15 +1,5 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFOutputDefault.h"
 #include "ZFObjectImpl.h"
-#include "ZFGlobalEventCenter.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
@@ -46,6 +36,16 @@ void ZFOutputDefaultRemove(ZF_IN const ZFOutput &v)
     ZFCoreArray<ZFOutput> &l = _ZFP_ZFOutputDefault_list();
     l.removeElement(v);
 }
+
+ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFOutputDefaultCleanup, ZFLevelZFFrameworkEssential)
+{
+}
+ZF_GLOBAL_INITIALIZER_DESTROY(ZFOutputDefaultCleanup)
+{
+    ZFCoreArray<ZFOutput> &l = _ZFP_ZFOutputDefault_list();
+    l.removeAll();
+}
+ZF_GLOBAL_INITIALIZER_END(ZFOutputDefaultCleanup)
 
 ZF_NAMESPACE_GLOBAL_END
 

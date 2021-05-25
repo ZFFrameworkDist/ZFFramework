@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIViewFocus.h"
 #include "ZFUIWindow.h"
 
@@ -16,27 +7,27 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define _ZFP_ZFUIViewFocus_tag_nextFocus "_ZFP_ZFUIViewFocus_tag_nextFocus"
 #define _ZFP_ZFUIViewFocus_tag_nextFocusOwner "_ZFP_ZFUIViewFocus_tag_nextFocusOwner"
 
-ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewFocusNextSetDataHolder, ZFLevelZFFrameworkEssential)
+ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewFocusNextSetupDataHolder, ZFLevelZFFrameworkEssential)
 {
     this->nextFocusOnDeallocListener = ZFCallbackForFunc(zfself::nextFocusOnDealloc);
 }
 public:
     ZFListener nextFocusOnDeallocListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(nextFocusOnDealloc)
+    static void nextFocusOnDealloc(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
     {
-        ZFObjectHolder *nextFocusOwner = listenerData.sender->tagGet<ZFObjectHolder *>(_ZFP_ZFUIViewFocus_tag_nextFocusOwner);
+        ZFObjectHolder *nextFocusOwner = listenerData.sender()->objectTag<ZFObjectHolder *>(_ZFP_ZFUIViewFocus_tag_nextFocusOwner);
         if(nextFocusOwner == zfnull)
         {
             return ;
         }
-        nextFocusOwner->tagRemove(_ZFP_ZFUIViewFocus_tag_nextFocus);
-        listenerData.sender->observerRemove(ZFObject::EventObjectBeforeDealloc(),
-            ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewFocusNextSetDataHolder)->nextFocusOnDeallocListener);
-        listenerData.sender->tagRemove(_ZFP_ZFUIViewFocus_tag_nextFocusOwner);
+        nextFocusOwner->objectTagRemove(_ZFP_ZFUIViewFocus_tag_nextFocus);
+        listenerData.sender()->observerRemove(ZFObject::EventObjectBeforeDealloc(),
+            ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewFocusNextSetupDataHolder)->nextFocusOnDeallocListener);
+        listenerData.sender()->objectTagRemove(_ZFP_ZFUIViewFocus_tag_nextFocusOwner);
     }
-ZF_GLOBAL_INITIALIZER_END(ZFUIViewFocusNextSetDataHolder)
+ZF_GLOBAL_INITIALIZER_END(ZFUIViewFocusNextSetupDataHolder)
 
-ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewFocusNextSet,
+ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewFocusNextSetup,
                        ZFMP_IN(ZFUIView *, from),
                        ZFMP_IN(ZFUIView *, nextFocus))
 {
@@ -45,34 +36,34 @@ ZFMETHOD_FUNC_DEFINE_2(void, ZFUIViewFocusNextSet,
         return ;
     }
 
-    ZF_GLOBAL_INITIALIZER_CLASS(ZFUIViewFocusNextSetDataHolder) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewFocusNextSetDataHolder);
+    ZF_GLOBAL_INITIALIZER_CLASS(ZFUIViewFocusNextSetupDataHolder) *d = ZF_GLOBAL_INITIALIZER_INSTANCE(ZFUIViewFocusNextSetupDataHolder);
 
-    ZFObjectHolder *nextFocusHolderOld = from->tagGet<ZFObjectHolder *>(_ZFP_ZFUIViewFocus_tag_nextFocus);
+    ZFObjectHolder *nextFocusHolderOld = from->objectTag<ZFObjectHolder *>(_ZFP_ZFUIViewFocus_tag_nextFocus);
     if(nextFocusHolderOld != zfnull)
     {
         nextFocusHolderOld->objectHolded().toObject()->observerRemove(ZFObject::EventObjectBeforeDealloc(), d->nextFocusOnDeallocListener);
-        nextFocusHolderOld->objectHolded().toObject()->tagRemove(_ZFP_ZFUIViewFocus_tag_nextFocusOwner);
-        from->tagRemove(_ZFP_ZFUIViewFocus_tag_nextFocus);
+        nextFocusHolderOld->objectHolded().toObject()->objectTagRemove(_ZFP_ZFUIViewFocus_tag_nextFocusOwner);
+        from->objectTagRemove(_ZFP_ZFUIViewFocus_tag_nextFocus);
     }
 
     if(nextFocus != zfnull)
     {
-        from->tagSet(_ZFP_ZFUIViewFocus_tag_nextFocus, nextFocus->objectHolder());
-        nextFocus->tagSet(_ZFP_ZFUIViewFocus_tag_nextFocusOwner, from->objectHolder());
+        from->objectTag(_ZFP_ZFUIViewFocus_tag_nextFocus, nextFocus->objectHolder());
+        nextFocus->objectTag(_ZFP_ZFUIViewFocus_tag_nextFocusOwner, from->objectHolder());
         nextFocus->observerAdd(ZFObject::EventObjectBeforeDealloc(), d->nextFocusOnDeallocListener);
     }
 }
 
-void _ZFP_ZFUIViewFocusNextSetChain(ZF_IN ZFUIView *view0, ZF_IN ZFUIView *view1, ...)
+void _ZFP_ZFUIViewFocusNextSetupChain(ZF_IN ZFUIView *view0, ZF_IN ZFUIView *view1, ...)
 {
     ZFUIView *from = view0;
     ZFUIView *to = view1;
 
     va_list vaList;
     va_start(vaList, view1);
-    while(to != _ZFP_ZFUIViewFocusNextSetChainEndPtr)
+    while(to != _ZFP_ZFUIViewFocusNextSetupChainEndPtr)
     {
-        ZFUIViewFocusNextSet(from, to);
+        ZFUIViewFocusNextSetup(from, to);
         from = to;
         to = va_arg(vaList, ZFUIView *);
     }
@@ -86,7 +77,7 @@ ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFUIViewFocusNextFilterDataHolder, ZFLevel
 }
 ZF_GLOBAL_INITIALIZER_DESTROY(ZFUIViewFocusNextFilterDataHolder)
 {
-    ZFUIViewFocusNextFilterSet(ZFFilterForZFObject());
+    ZFUIViewFocusNextFilter(ZFFilterForZFObject());
 }
 ZF_GLOBAL_INITIALIZER_END(ZFUIViewFocusNextFilterDataHolder)
 
@@ -103,13 +94,13 @@ ZFOUTPUT_TYPE(_ZFP_ZFUIViewFocusData, {
     ;
 })
 
-static void _ZFP_ZFUIViewFocusNextFind(ZF_OUT ZFCoreArrayPOD<_ZFP_ZFUIViewFocusData> &focusDatas,
+static void _ZFP_ZFUIViewFocusNextFind(ZF_IN_OUT ZFCoreArrayPOD<_ZFP_ZFUIViewFocusData> &focusDatas,
                                        ZF_IN ZFUIView *view,
                                        ZF_IN zfbool includingInternalViews,
-                                       ZF_IN zfint offsetX,
-                                       ZF_IN zfint offsetY)
+                                       ZF_IN zffloat offsetX,
+                                       ZF_IN zffloat offsetY)
 {
-    if(view->viewDelegateForParent() || !ZFUIViewFocusNextFilter().filterCheckActive(view))
+    if(!ZFUIViewFocusNextFilter().filterCheckActive(view))
     {
         return ;
     }
@@ -118,7 +109,7 @@ static void _ZFP_ZFUIViewFocusNextFind(ZF_OUT ZFCoreArrayPOD<_ZFP_ZFUIViewFocusD
     {
         _ZFP_ZFUIViewFocusData focusData;
         focusData.view = view;
-        focusData.center = ZFUIRectGetCenter(view->layoutedFrame());
+        focusData.center = ZFUIRectGetCenter(view->viewFrame());
         focusData.center.x += offsetX;
         focusData.center.y += offsetY;
         focusDatas.add(focusData);
@@ -130,8 +121,8 @@ static void _ZFP_ZFUIViewFocusNextFind(ZF_OUT ZFCoreArrayPOD<_ZFP_ZFUIViewFocusD
             focusDatas,
             view->childAtIndex(i),
             includingInternalViews,
-            offsetX + view->layoutedFrame().point.x,
-            offsetY + view->layoutedFrame().point.y);
+            offsetX + view->viewFrame().x,
+            offsetY + view->viewFrame().y);
     }
     if(includingInternalViews)
     {
@@ -142,8 +133,8 @@ static void _ZFP_ZFUIViewFocusNextFind(ZF_OUT ZFCoreArrayPOD<_ZFP_ZFUIViewFocusD
                 focusDatas,
                 viewArray[i],
                 includingInternalViews,
-                offsetX + view->layoutedFrame().point.x,
-                offsetY + view->layoutedFrame().point.y);
+                offsetX + view->viewFrame().x,
+                offsetY + view->viewFrame().y);
         }
         viewArray = view->internalFgViewArray();
         for(zfindex i = 0; i < viewArray.count(); ++i)
@@ -152,8 +143,8 @@ static void _ZFP_ZFUIViewFocusNextFind(ZF_OUT ZFCoreArrayPOD<_ZFP_ZFUIViewFocusD
                 focusDatas,
                 viewArray[i],
                 includingInternalViews,
-                offsetX + view->layoutedFrame().point.x,
-                offsetY + view->layoutedFrame().point.y);
+                offsetX + view->viewFrame().x,
+                offsetY + view->viewFrame().y);
         }
     }
 }
@@ -338,14 +329,10 @@ ZFUIView *_ZFP_ZFUIViewFocusDataFindFirst(ZF_IN const ZFCoreArrayPOD<_ZFP_ZFUIVi
 
 // ============================================================
 ZFTYPEID_ACCESS_ONLY_DEFINE(ZFUIViewFocusNextParam, ZFUIViewFocusNextParam)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewFocusNextParam, ZFUIOrientationFlags const &, focusDirection)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewFocusNextParam, void, focusDirectionSet, ZFMP_IN(ZFUIOrientationFlags const &, focusDirection))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewFocusNextParam, zfbool const &, focusLoopMode)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewFocusNextParam, void, focusLoopModeSet, ZFMP_IN(zfbool const &, focusLoopMode))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewFocusNextParam, ZFUIView * const &, focusEndParent)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewFocusNextParam, void, focusEndParentSet, ZFMP_IN(ZFUIView * const &, focusEndParent))
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_0(v_ZFUIViewFocusNextParam, zfbool const &, focusInternalViews)
-ZFMETHOD_USER_REGISTER_FOR_WRAPPER_FUNC_1(v_ZFUIViewFocusNextParam, void, focusInternalViewsSet, ZFMP_IN(zfbool const &, focusInternalViews))
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewFocusNextParam, ZFUIOrientationFlags, focusDirection)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewFocusNextParam, zfbool, focusLoopMode)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewFocusNextParam, ZFUIView *, focusEndParent)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_SETTER_GETTER(v_ZFUIViewFocusNextParam, zfbool, focusInternalViews)
 
 // ============================================================
 ZFMETHOD_FUNC_DEFINE_2(ZFUIView *, ZFUIViewFocusNextFind,
@@ -358,7 +345,7 @@ ZFMETHOD_FUNC_DEFINE_2(ZFUIView *, ZFUIViewFocusNextFind,
     }
 
     {
-        ZFObjectHolder *t = view->tagGet<ZFObjectHolder *>(_ZFP_ZFUIViewFocus_tag_nextFocus);
+        ZFObjectHolder *t = view->objectTag<ZFObjectHolder *>(_ZFP_ZFUIViewFocus_tag_nextFocus);
         if(t != zfnull)
         {
             return t->objectHolded();
@@ -366,14 +353,14 @@ ZFMETHOD_FUNC_DEFINE_2(ZFUIView *, ZFUIViewFocusNextFind,
     }
 
     ZFUIView *root = view;
-    ZFUIPoint viewCenter = ZFUIRectGetCenter(view->layoutedFrame());
-    while(root->viewParentVirtual() != zfnull
+    ZFUIPoint viewCenter = ZFUIRectGetCenter(view->viewFrame());
+    while(root->viewParent() != zfnull
         && !root->classData()->classIsTypeOf(ZFUIWindow::ClassData())
         && root != param.focusEndParent())
     {
-        viewCenter.x += root->layoutedFrame().point.x;
-        viewCenter.y += root->layoutedFrame().point.y;
-        root = root->viewParentVirtual();
+        viewCenter.x += root->viewFrame().x;
+        viewCenter.y += root->viewFrame().y;
+        root = root->viewParent();
     }
     ZFCoreArrayPOD<_ZFP_ZFUIViewFocusData> focusDatas;
     _ZFP_ZFUIViewFocusNextFind(focusDatas, root, param.focusInternalViews(), 0, 0);
@@ -510,27 +497,27 @@ ZFMETHOD_FUNC_DEFINE_4(zfbool, ZFUIViewFocusResolveKeyEvent,
     switch(keyEvent->keyCode)
     {
         case ZFUIKeyCode::e_kLeft:
-            param.focusDirectionSet(ZFUIOrientation::e_Left);
+            param.focusDirection(ZFUIOrientation::e_Left);
             break;
         case ZFUIKeyCode::e_kUp:
-            param.focusDirectionSet(ZFUIOrientation::e_Top);
+            param.focusDirection(ZFUIOrientation::e_Top);
             break;
         case ZFUIKeyCode::e_kRight:
-            param.focusDirectionSet(ZFUIOrientation::e_Right);
+            param.focusDirection(ZFUIOrientation::e_Right);
             break;
         case ZFUIKeyCode::e_kDown:
-            param.focusDirectionSet(ZFUIOrientation::e_Bottom);
+            param.focusDirection(ZFUIOrientation::e_Bottom);
             break;
         case ZFUIKeyCode::e_kTab:
         {
-            param.focusLoopModeSet(zftrue);
+            param.focusLoopMode(zftrue);
             if(_ZFP_ZFUIViewFocusResolveKeyEvent_shiftPressed)
             {
-                param.focusDirectionSet(ZFUIOrientation::e_Left | ZFUIOrientation::e_Top);
+                param.focusDirection(ZFUIOrientation::e_Left | ZFUIOrientation::e_Top);
             }
             else
             {
-                param.focusDirectionSet(ZFUIOrientation::e_Right | ZFUIOrientation::e_Bottom);
+                param.focusDirection(ZFUIOrientation::e_Right | ZFUIOrientation::e_Bottom);
             }
         }
             break;
@@ -549,17 +536,17 @@ ZFMETHOD_FUNC_DEFINE_4(zfbool, ZFUIViewFocusResolveKeyEvent,
                     zfCoreCriticalShouldNotGoHere();
                     break;
             }
-            keyEvent->eventResolvedSet(zftrue);
+            keyEvent->eventResolved(zftrue);
             return zffalse;
         default:
             return zffalse;
     }
-    keyEvent->eventResolvedSet(zftrue);
+    keyEvent->eventResolved(zftrue);
     if(keyEvent->keyAction != ZFUIKeyAction::e_KeyRepeat && keyEvent->keyAction != ZFUIKeyAction::e_KeyUp)
     {
         return zftrue;
     }
-    param.focusEndParentSet(endParent);
+    param.focusEndParent(endParent);
     ZFUIView *next = ZFUIViewFocusNextMove(view, param);
     if(nextFocus != zfnull)
     {

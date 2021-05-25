@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFAnimationGroup.h
  * @brief animation group
@@ -53,6 +44,11 @@ public:
      * @brief whether copy owner animation group's target (if not null) to self, true by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, childAutoCopyTarget, zftrue)
+
+    /**
+     * @brief whether copy owner animation group's duration to self, false by default
+     */
+    ZFPROPERTY_ASSIGN(zfbool, childAutoCopyDuration)
 };
 
 /** @brief keyword for serialize */
@@ -130,13 +126,7 @@ public:
     /**
      * @brief add child animation
      */
-    ZFMETHOD_DECLARE_2(void, childAniAdd,
-                       ZFMP_IN(ZFAnimation *, ani),
-                       ZFMP_IN(zfbool, childAutoCopyTarget))
-    /**
-     * @brief add child animation
-     */
-    ZFMETHOD_DECLARE_1(void, childAniAdd,
+    ZFMETHOD_DECLARE_1(void, childAniDataAdd,
                        ZFMP_IN(ZFAnimationGroupChildData *, childData))
     /**
      * @brief child animation count
@@ -145,12 +135,12 @@ public:
     /**
      * @brief get child animation
      */
-    ZFMETHOD_DECLARE_1(ZFAnimation *, childAniGet,
+    ZFMETHOD_DECLARE_1(ZFAnimation *, childAniAtIndex,
                        ZFMP_IN(zfindex , index))
     /**
      * @brief get child animation data
      */
-    ZFMETHOD_DECLARE_1(ZFAnimationGroupChildData *, childAniDataGet,
+    ZFMETHOD_DECLARE_1(ZFAnimationGroupChildData *, childAniDataAtIndex,
                        ZFMP_IN(zfindex, index))
     /**
      * @brief remove child animation

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFLua_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -22,7 +13,7 @@ protected:
         zfsuper::testCaseOnStart();
 
         {
-            ZFCoreStatisticInvokeTimeAccurateLoggerOneTime("run lua code");
+            ZFCoreStatisticInvokeTimeLoggerOneTime("run lua code");
             ZFLuaExecute(
                     "print('\\n__add: (5 5 5)')\n"
                     "print(zfint(2) + zfint(3))\n"
@@ -42,7 +33,7 @@ protected:
                     "print(2 * zfint(3))\n"
                 );
             ZFLuaExecute(
-                    "print('\\n__div: (0 0 0)')\n"
+                    "print('\\n__div: (0.66 0.66 0.66)')\n"
                     "print(zfint(2) / zfint(3))\n"
                     "print(zfint(2) / 3)\n"
                     "print(2 / zfint(3))\n"
@@ -153,7 +144,7 @@ protected:
         }
 
         {
-            ZFCoreStatisticInvokeTimeAccurateLoggerOneTime("lua gc");
+            ZFCoreStatisticInvokeTimeLoggerOneTime("lua gc");
             ZFLuaGC();
         }
 

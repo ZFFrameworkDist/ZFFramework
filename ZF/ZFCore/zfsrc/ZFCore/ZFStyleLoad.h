@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFStyleLoad.h
  * @brief style load utility
@@ -37,7 +28,7 @@ public:
     ZFMETHOD_DECLARE_1(ZFStyleable *, itemValueAtIndex,
                        ZFMP_IN(zfindex, index))
     /** @brief style value */
-    ZFMETHOD_DECLARE_2(void, itemSet,
+    ZFMETHOD_DECLARE_2(void, itemForKey,
                        ZFMP_IN(const zfchar *, key),
                        ZFMP_IN(ZFStyleable *, value))
 

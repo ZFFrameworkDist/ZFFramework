@@ -21,12 +21,12 @@
  *               myParam1); // param1
  *       }
  *   };
- *   static void testListener(ZF_IN_OUT ZFListenerData &listenerData, ZF_IN ZFObject *userData)
+ *   static void testListener(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
  *   {
  *       zfLogT()
- *           << listenerData.sender // should be MyObject
- *           << listenerData.param0 // should be myParam0 passed from observerNotify
- *           << listenerData.param1 // should be myParam1 passed from observerNotify
+ *           << listenerData.sender() // should be MyObject
+ *           << listenerData.param0() // should be myParam0 passed from observerNotify
+ *           << listenerData.param1() // should be myParam1 passed from observerNotify
  *           << userData // should be the userData passed from observerAdd
  *           ;
  *   }

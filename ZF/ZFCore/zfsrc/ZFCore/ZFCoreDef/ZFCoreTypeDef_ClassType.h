@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFCoreTypeDef_ClassType.h
  * @brief types for ZFFramework
@@ -78,14 +69,6 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 #define zfpurevirtual = 0
 
 // ============================================================
-/**
- * @brief same as dynamic_cast<Type>(obj), require #ZF_ENV_RTTI
- */
-#if ZF_ENV_RTTI
-    #define ZFCastDynamic(Type, obj) (dynamic_cast<Type>(obj))
-#else
-    #define ZFCastDynamic(Type, obj) "ZFCastDynamic depends on ZF_ENV_RTTI"
-#endif
 /**
  * @brief same as static_cast<Type>(obj)
  */
@@ -249,7 +232,7 @@ T_Element *zfmemmoveObject(T_Element *dst, const T_Element *src, zfindex count)
 
     inline void *_ZFP_ZFMEM_zfrealloc(void *oldPtr, zfindex newSize, const char *file, const char *func, int line)
     {
-        _ZFP_ZFMEM_logDelete(oldPtr, "zfrealloc        ", file, func, line);
+        _ZFP_ZFMEM_logDelete(oldPtr, "zfreallocD       ", file, func, line);
         void *ret = realloc(oldPtr, (size_t)newSize);
         _ZFP_ZFMEM_logNew(ret, "zfrealloc        ", file, func, line);
         return ret;
@@ -258,7 +241,7 @@ T_Element *zfmemmoveObject(T_Element *dst, const T_Element *src, zfindex count)
     #define zfrealloc(oldPtr, newSize) _ZFP_ZFMEM_zfrealloc((oldPtr), (newSize), __FILE__, __FUNCTION__, __LINE__)
     inline void *_ZFP_ZFMEM_zfreallocZero(void *oldPtr, zfindex newSize, zfindex oldSize, const char *file, const char *func, int line)
     {
-        _ZFP_ZFMEM_logDelete(oldPtr, "zfreallocZero    ", file, func, line);
+        _ZFP_ZFMEM_logDelete(oldPtr, "zfreallocZeroD   ", file, func, line);
         void *ret = _ZFP_zfreallocZero(oldPtr, newSize, oldSize);
         _ZFP_ZFMEM_logNew(ret, "zfreallocZero    ", file, func, line);
         return ret;

@@ -1,3 +1,21 @@
+# 0.9.0
+
+* reduce property impl's complexity
+* change property setter name
+* change ZFUIRect's property
+* change UI size unit
+* change lua to 5.4
+* change Qt impl to graphics view
+* add support for setter and getter method to simulate property
+* add lambda implemented by pure C++03
+* add basic graphics
+* enhance view layout logic
+* optimize image impl
+* optimize page impl
+* optimize ani image impl
+* remove view delegate support
+* remove some useless module
+
 # 0.8.0
 
 * optimize cache performance

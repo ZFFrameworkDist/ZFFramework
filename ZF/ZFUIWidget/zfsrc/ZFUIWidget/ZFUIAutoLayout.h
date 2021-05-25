@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIAutoLayout.h
  * @brief auto layout container with constraint
@@ -55,7 +46,7 @@ public:
     /** @brief see #ZFUIAutoLayout */
     ZFCORE_PARAM_WITH_INIT(zffloat, scale, 0)
     /** @brief see #ZFUIAutoLayout */
-    ZFCORE_PARAM(zfint, offset)
+    ZFCORE_PARAM(zffloat, offset)
 
 public:
     /** @brief remove all contents */
@@ -93,9 +84,9 @@ ZFTYPEID_ACCESS_ONLY_DECLARE(ZFUIAutoLayoutRule, ZFUIAutoLayoutRule)
 // ZFUIAutoLayoutParam
 zfclassFwd ZFUIAutoLayout;
 /** @brief see #ZFUIAutoLayout */
-zfclass ZF_ENV_EXPORT ZFUIAutoLayoutParam : zfextends ZFUIViewLayoutParam
+zfclass ZF_ENV_EXPORT ZFUIAutoLayoutParam : zfextends ZFUILayoutParam
 {
-    ZFOBJECT_DECLARE(ZFUIAutoLayoutParam, ZFUIViewLayoutParam)
+    ZFOBJECT_DECLARE(ZFUIAutoLayoutParam, ZFUILayoutParam)
 
     /** @brief see #ZFUIAutoLayout */
     ZFPROPERTY_ASSIGN_WITH_INIT(zffloat, biasX, 0.5f)
@@ -164,12 +155,12 @@ public:
 // ZFUIAutoLayout
 zfclassFwd _ZFP_ZFUIAutoLayoutPrivate;
 /**
- * @brief auto layout with contraint rule
+ * @brief auto layout with constraint rule
  *
  * recommended to use #ZFUIAutoLayoutMaker to create rules\n
  * \n
  * for #ZFUIAutoLayout,
- * base class #ZFUIViewLayoutParam's params would take no effect\n
+ * base class #ZFUILayoutParam's params would take no effect\n
  * \n
  * serializable data:
  * @code
@@ -208,7 +199,7 @@ zfclassFwd _ZFP_ZFUIAutoLayoutPrivate;
  *     it's implicitly set to align to parent with flexible rule\n
  *     note, if both left/right and width have flexible rule,
  *     the left/right rule would have higher priority
- * -  `offset` : #zfint shows offset to `target`
+ * -  `offset` : #zffloat shows offset to `target`
  * -  `biasX` : if both left and right has flexible rule,
  *   align to which side, `0` means totally align to left,
  *   while `1` means align to right
@@ -227,14 +218,14 @@ public:
     /**
      * @brief set rule
      */
-    ZFMETHOD_DECLARE_3(void, ruleSet,
+    ZFMETHOD_DECLARE_3(void, rule,
                        ZFMP_IN(ZFUIView *, child),
                        ZFMP_IN(ZFUIAutoLayoutPosEnum, pos),
                        ZFMP_IN(const ZFUIAutoLayoutRule &, rule))
     /**
      * @brief whether the rule has set
      */
-    ZFMETHOD_DECLARE_2(zfbool, ruleHasSet,
+    ZFMETHOD_DECLARE_2(zfbool, ruleExist,
                        ZFMP_IN(ZFUIView *, child),
                        ZFMP_IN(ZFUIAutoLayoutPosEnum, pos))
     /**
@@ -252,11 +243,6 @@ public:
     // ============================================================
     // override ZFUIView
 protected:
-    zfoverride
-    virtual zfbool viewDelegateSupported(void)
-    {
-        return zffalse;
-    }
     zfoverride
     virtual void viewChildOnAdd(ZF_IN ZFUIView *child,
                                 ZF_IN ZFUIViewChildLayerEnum layer);

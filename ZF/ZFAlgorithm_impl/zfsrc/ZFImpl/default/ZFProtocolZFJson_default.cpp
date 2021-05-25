@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_default_ZFAlgorithm_impl.h"
 #include "ZFAlgorithm/protocol/ZFProtocolZFJson.h"
 
@@ -95,7 +86,7 @@ private:
             {
                 ZFJsonItem jsonValue(ZFJsonType::e_JsonValue);
                 ++(docHolder->docRefCount);
-                this->jsonMemoryPool_jsonValueSet(jsonValue, implJsonItem.GetString(), docHolder);
+                this->jsonMemoryPool_jsonValue(jsonValue, implJsonItem.GetString(), docHolder);
                 return jsonValue;
             }
             case rapidjson::kArrayType:
@@ -123,7 +114,7 @@ private:
                         return ZFJsonItem();
                     }
                     ++(docHolder->docRefCount);
-                    this->jsonMemoryPool_jsonItemSet(jsonObject, it->name.GetString(), docHolder, jsonChild);
+                    this->jsonMemoryPool_jsonItem(jsonObject, it->name.GetString(), docHolder, jsonChild);
                 }
                 return jsonObject;
             }

@@ -8,8 +8,8 @@
  *   zfblockedAlloc(ZFUIView, parent);
  *   zfblockedAlloc(ZFUIButtonBasic, child);
  *   parent->childAdd(child);
- *   child->layoutParam()->sizeParamSet(ZFUISizeParamFillFill());
- *   child->buttonLabelTextSet(zflineAlloc(ZFString, "button"));
+ *   child->layoutParam()->sizeParam(ZFUISizeParamFillFill());
+ *   child->buttonLabelText("button");
  *
  *   ZFSerializableData data = ZFObjectToData(parent);
  *   zfstring xmlString;
@@ -30,9 +30,9 @@
  *           <ZFUITextView name="buttonLabelStyleNormal" >
  *               <zfstring name="text" value="button" />
  *           </ZFUITextView>
- *           <ZFUIViewLayoutParam category="layoutParam" >
+ *           <ZFUILayoutParam category="layoutParam" >
  *               <ZFUISizeParam name="sizeParam" value="(Fill, Fill)" />
- *           </ZFUIViewLayoutParam>
+ *           </ZFUILayoutParam>
  *       </ZFUIButtonBasic>
  *   </ZFUIView>
  *

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #ifndef _ZFI_ZFImpl_h_
 #define _ZFI_ZFImpl_h_
 
@@ -296,7 +287,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 /**
  * @brief true if under Android
  */
-#if !ZF_ENV_FORCE_sys_Android && (( \
+#if !ZF_ENV_FORCE_not_sys_Android && (( \
             defined(ANDROID) || defined(__ANDROID__) \
         ) || ZF_ENV_FORCE_sys_Android)
     #define ZF_ENV_sys_Android 1
@@ -309,7 +300,7 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 /**
  * @brief true if under QT
  */
-#if !ZF_ENV_FORCE_sys_Qt && (( \
+#if !ZF_ENV_FORCE_not_sys_Qt && (( \
             defined(QT_VERSION) || defined(QT_CORE_LIB) \
         ) || ZF_ENV_FORCE_sys_Qt)
     #define ZF_ENV_sys_Qt 1

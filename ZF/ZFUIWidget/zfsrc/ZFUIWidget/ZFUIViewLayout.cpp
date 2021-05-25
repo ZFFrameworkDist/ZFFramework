@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIViewLayout.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -15,7 +6,7 @@ void ZFUIViewLayout::layoutOnMeasure(ZF_OUT ZFUISize &ret,
                                      ZF_IN const ZFUISize &sizeHint,
                                      ZF_IN const ZFUISizeParam &sizeParam)
 {
-    ZFUIViewLayoutParam::sizeHintApply(ret, this->viewSizeMin(), sizeHint, sizeParam);
+    ZFUILayoutParam::sizeHintApply(ret, this->viewSizeMin(), sizeHint, sizeParam);
     for(zfindex i = 0; i < this->childCount(); ++i)
     {
         ZFUIView *child = this->childAtIndex(i);

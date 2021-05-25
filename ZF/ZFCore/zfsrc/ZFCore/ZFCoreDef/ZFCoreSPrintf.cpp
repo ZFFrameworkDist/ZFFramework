@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCoreSPrintf.h"
 #include "ZFCoreStringUtil.h"
 #include "ZFCoreUtilMacro.h"
@@ -141,8 +132,8 @@ public:
     } while(zffalse)
 
 void zfstringAppendV(ZF_OUT zfstring &s,
-                          ZF_IN const zfchar *fmt,
-                          ZF_IN va_list vaList)
+                     ZF_IN const zfchar *fmt,
+                     ZF_IN va_list vaList)
 {
     if(fmt == zfnull) {return ;}
 
@@ -193,35 +184,19 @@ void zfstringAppendV(ZF_OUT zfstring &s,
             }
             if(!flags.success) {break;}
 
-            if(*p == '*')
+            while(*p >= '0' && *p <= '9')
             {
-                flags.width = va_arg(vaList, zft_zfindex);
+                flags.width = flags.width * 10 + (*p - '0');
                 ++p;
-            }
-            else
-            {
-                while(*p >= '0' && *p <= '9')
-                {
-                    flags.width = flags.width * 10 + (*p - '0');
-                    ++p;
-                }
             }
             if(*p == '.')
             {
                 ++p;
-                if(*p == '*')
+                flags.precision = 0;
+                while(*p >= '0' && *p <= '9')
                 {
-                    flags.precision = va_arg(vaList, zft_zfindex);
+                    flags.precision = flags.precision * 10 + (*p - '0');
                     ++p;
-                }
-                else
-                {
-                    flags.precision = 0;
-                    while(*p >= '0' && *p <= '9')
-                    {
-                        flags.precision = flags.precision * 10 + (*p - '0');
-                        ++p;
-                    }
                 }
             }
         } while(zffalse);

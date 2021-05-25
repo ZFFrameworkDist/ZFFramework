@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIWidget_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -60,14 +51,14 @@ private:
     zfautoObject prepareTestObject(void)
     {
         zfblockedAlloc(ZFUIAutoLayout, parent);
-        parent->viewAlphaSet(0.5f);
+        parent->viewAlpha(0.5f);
 
         zfblockedAlloc(ZFUIView, child0);
-        child0->viewUIEnableTreeSet(zffalse);
+        child0->viewUIEnableTree(zffalse);
         zfal_maker(child0, parent).left().toParentLeft();
 
         zfblockedAlloc(ZFUITextView, child1);
-        child1->textSet("special chars: \r\n\t\"'-_=+<>()[]{}");
+        child1->text("special chars: \r\n\t\"'-_=+<>()[]{}");
         zfal_maker(child1, parent).right().toParentRight();
 
         return parent;

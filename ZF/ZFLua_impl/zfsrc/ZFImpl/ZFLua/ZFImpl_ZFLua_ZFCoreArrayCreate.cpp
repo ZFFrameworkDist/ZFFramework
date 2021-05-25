@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_ZFLua.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -20,7 +11,6 @@ static int _ZFP_ZFImpl_ZFLua_ZFCoreArrayCreate(ZF_IN lua_State *L)
     {
         zfautoObject p;
         if(ZFImpl_ZFLua_toObject(p, L, i + 1)
-            || ZFImpl_ZFLua_toNumberT(p, L, i + 1, zftrue)
             || ZFImpl_ZFLua_toCallback(p, L, i + 1))
         {
             ret->zfv.add(p);
@@ -34,9 +24,9 @@ static int _ZFP_ZFImpl_ZFLua_ZFCoreArrayCreate(ZF_IN lua_State *L)
             continue;
         }
 
-        ZFLuaErrorOccurredTrim("[ZFCoreArrayCreate] unknown param type: %s",
+        return ZFImpl_ZFLua_luaError(L,
+            "[ZFCoreArrayCreate] unknown param type: %s",
             ZFImpl_ZFLua_luaObjectInfo(L, i + 1, zftrue).cString());
-        return ZFImpl_ZFLua_luaError(L);
     }
 
     ZFImpl_ZFLua_luaPush(L, ret);

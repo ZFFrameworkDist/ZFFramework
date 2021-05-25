@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #ifndef _ZFI_ZFImpl_sys_Android_ZFUIKit_impl_h_
 #define _ZFI_ZFImpl_sys_Android_ZFUIKit_impl_h_
 
@@ -88,12 +79,12 @@ inline ZFUIRect ZFImpl_sys_Android_ZFUIRectFromZFAndroidRect(ZF_IN jobject jobjR
 
 // ============================================================
 // Color
-extern ZF_ENV_EXPORT jint ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorToColor(ZF_IN const ZFUIColor &color);
-extern ZF_ENV_EXPORT void ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorFromColorT(ZF_OUT ZFUIColor &ret, ZF_IN jint jColor);
-inline ZFUIColor ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorFromColor(ZF_IN jint jColor)
+extern ZF_ENV_EXPORT jint ZFImpl_sys_Android_ZFUIColorToColor(ZF_IN const ZFUIColor &color);
+extern ZF_ENV_EXPORT void ZFImpl_sys_Android_ZFUIColorFromColorT(ZF_OUT ZFUIColor &ret, ZF_IN jint jColor);
+inline ZFUIColor ZFImpl_sys_Android_ZFUIColorFromColor(ZF_IN jint jColor)
 {
     ZFUIColor ret = ZFUIColorZero();
-    ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorFromColorT(ret, jColor);
+    ZFImpl_sys_Android_ZFUIColorFromColorT(ret, jColor);
     return ret;
 }
 
@@ -102,11 +93,11 @@ inline ZFUIColor ZFImpl_sys_Android_ZFUIKit_impl_ZFUIColorFromColor(ZF_IN jint j
 #define ZFImpl_sys_Android_JNI_ID_ZFAndroidUI ZFImpl_sys_Android_JNI_ID(NativeUtil_ZFAndroidUI)
 #define ZFImpl_sys_Android_JNI_NAME_ZFAndroidUI ZFImpl_sys_Android_JNI_NAME(NativeUtil.ZFAndroidUI)
 
-extern ZF_ENV_EXPORT void ZFImpl_sys_Android_ViewGetViewTreeT(ZF_OUT zfstring &ret, ZF_IN jobject nativeView);
-inline zfstring ZFImpl_sys_Android_ViewGetViewTree(ZF_IN jobject nativeView)
+extern ZF_ENV_EXPORT void ZFImpl_sys_Android_viewTreePrintT(ZF_OUT zfstring &ret, ZF_IN jobject nativeView);
+inline zfstring ZFImpl_sys_Android_viewTreePrint(ZF_IN jobject nativeView)
 {
     zfstring ret;
-    ZFImpl_sys_Android_ViewGetViewTreeT(ret, nativeView);
+    ZFImpl_sys_Android_viewTreePrintT(ret, nativeView);
     return ret;
 }
 

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUITypeDef.h
  * @brief necessary header file for all ZFUIKit member
@@ -22,45 +13,37 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 // basic size
 /**
  * @brief return a scaled int
- *
- * note, to suit most case, apply scale on 1 pixel would always result to 1 pixel
  */
 ZFMETHOD_FUNC_DECLARE_3(void, ZFUISizeApplyScale,
-                        ZFMP_OUT(zfint &, ret),
-                        ZFMP_IN(zfint const &, v),
+                        ZFMP_OUT(zffloat &, ret),
+                        ZFMP_IN(zffloat const &, v),
                         ZFMP_IN(zffloat, scale))
 /**
  * @brief return a scaled int
- *
- * note, to suit most case, apply scale on 1 pixel would always result to 1 pixel
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(zfint, ZFUISizeApplyScale,
-                               ZFMP_IN(zfint const &, v),
+ZFMETHOD_FUNC_INLINE_DECLARE_2(zffloat, ZFUISizeApplyScale,
+                               ZFMP_IN(zffloat const &, v),
                                ZFMP_IN(zffloat, scale))
 {
-    zfint ret = 0;
+    zffloat ret = 0;
     ZFUISizeApplyScale(ret, v, scale);
     return ret;
 }
 /**
  * @brief return a scaled int reversely
- *
- * note, to suit most case, apply scale on 1 pixel would always result to 1 pixel
  */
 ZFMETHOD_FUNC_DECLARE_3(void, ZFUISizeApplyScaleReversely,
-                        ZFMP_OUT(zfint &, ret),
-                        ZFMP_IN(zfint const &, v),
+                        ZFMP_OUT(zffloat &, ret),
+                        ZFMP_IN(zffloat const &, v),
                         ZFMP_IN(zffloat, scale))
 /**
  * @brief return a scaled int reversely
- *
- * note, to suit most case, apply scale on 1 pixel would always result to 1 pixel
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(zfint, ZFUISizeApplyScaleReversely,
-                               ZFMP_IN(zfint const &, v),
+ZFMETHOD_FUNC_INLINE_DECLARE_2(zffloat, ZFUISizeApplyScaleReversely,
+                               ZFMP_IN(zffloat const &, v),
                                ZFMP_IN(zffloat, scale))
 {
-    zfint ret = 0;
+    zffloat ret = 0;
     ZFUISizeApplyScaleReversely(ret, v, scale);
     return ret;
 }
@@ -73,8 +56,8 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(zfint, ZFUISizeApplyScaleReversely,
 zfclassPOD ZF_ENV_EXPORT ZFUIPoint
 {
 public:
-    zfint x;   /**< @brief x */
-    zfint y;   /**< @brief y */
+    zffloat x;   /**< @brief x */
+    zffloat y;   /**< @brief y */
 };
 
 /**
@@ -93,11 +76,6 @@ ZFOUTPUT_TYPE(ZFUIPoint, {output << ZFUIPointToString(v);})
 
 ZFCORE_POD_COMPARER_DECLARE(ZFUIPoint)
 
-ZFTYPEID_PROGRESS_DECLARE(ZFUIPoint, {
-        ret.x = from.x + (zfint)((to.x - from.x) * progress);
-        ret.y = from.y + (zfint)((to.y - from.y) * progress);
-    })
-
 /**
  * @brief (0, 0)
  */
@@ -106,9 +84,9 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFUIPoint, ZFUIPointZero)
 /**
  * @brief make a ZFUIPoint
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIPoint, ZFUIPointMake,
-                               ZFMP_IN(zfint const &, x),
-                               ZFMP_IN(zfint const &, y))
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIPoint, ZFUIPointMake,
+                               ZFMP_IN(zffloat const &, x),
+                               ZFMP_IN(zffloat const &, y))
 {
     ZFUIPoint ret = {x, y};
     return ret;
@@ -117,7 +95,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIPoint, ZFUIPointMake,
 /**
  * @brief return a scaled point
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIPointApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIPointApplyScale,
                                ZFMP_OUT(ZFUIPoint &, ret),
                                ZFMP_IN(const ZFUIPoint &, point),
                                ZFMP_IN(zffloat, scale))
@@ -128,7 +106,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIPointApplyScale,
 /**
  * @brief return a scaled point
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIPoint, ZFUIPointApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIPoint, ZFUIPointApplyScale,
                                ZFMP_IN(const ZFUIPoint &, point),
                                ZFMP_IN(zffloat, scale))
 {
@@ -138,7 +116,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIPoint, ZFUIPointApplyScale,
 /**
  * @brief return a scaled point reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIPointApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIPointApplyScaleReversely,
                                ZFMP_OUT(ZFUIPoint &, ret),
                                ZFMP_IN(const ZFUIPoint &, point),
                                ZFMP_IN(zffloat, scale))
@@ -149,7 +127,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIPointApplyScaleReversely,
 /**
  * @brief return a scaled point reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIPoint, ZFUIPointApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIPoint, ZFUIPointApplyScaleReversely,
                                ZFMP_IN(const ZFUIPoint &, point),
                                ZFMP_IN(zffloat, scale))
 {
@@ -165,10 +143,10 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIPoint, ZFUIPointApplyScaleReversely,
 zfclassPOD ZF_ENV_EXPORT ZFUIMargin
 {
 public:
-    zfint left;    /**< @brief left margin */
-    zfint top;     /**< @brief top margin */
-    zfint right;   /**< @brief right margin */
-    zfint bottom;  /**< @brief bottom margin */
+    zffloat left;    /**< @brief left margin */
+    zffloat top;     /**< @brief top margin */
+    zffloat right;   /**< @brief right margin */
+    zffloat bottom;  /**< @brief bottom margin */
 };
 
 /**
@@ -187,13 +165,6 @@ ZFOUTPUT_TYPE(ZFUIMargin, {output << ZFUIMarginToString(v);})
 
 ZFCORE_POD_COMPARER_DECLARE(ZFUIMargin)
 
-ZFTYPEID_PROGRESS_DECLARE(ZFUIMargin, {
-        ret.left = from.left + (zfint)((to.left - from.left) * progress);
-        ret.top = from.top + (zfint)((to.top - from.top) * progress);
-        ret.right = from.right + (zfint)((to.right - from.right) * progress);
-        ret.bottom = from.bottom + (zfint)((to.bottom - from.bottom) * progress);
-    })
-
 /**
  * @brief (0, 0, 0, 0)
  */
@@ -202,11 +173,11 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFUIMargin, ZFUIMarginZero)
 /**
  * @brief make a margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_4(ZFUIMargin, ZFUIMarginMake,
-                               ZFMP_IN(zfint const &, left),
-                               ZFMP_IN(zfint const &, top),
-                               ZFMP_IN(zfint const &, right),
-                               ZFMP_IN(zfint const &, bottom))
+ZFMETHOD_FUNC_INLINE_DECLARE_4(ZFUIMargin, ZFUIMarginMake,
+                               ZFMP_IN(zffloat const &, left),
+                               ZFMP_IN(zffloat const &, top),
+                               ZFMP_IN(zffloat const &, right),
+                               ZFMP_IN(zffloat const &, bottom))
 {
     ZFUIMargin ret = {left, top, right, bottom};
     return ret;
@@ -214,8 +185,8 @@ ZFMETHOD_FUNC_DECLARE_INLINE_4(ZFUIMargin, ZFUIMarginMake,
 /**
  * @brief make a margin with all sides set to margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUIMargin, ZFUIMarginMake,
-                               ZFMP_IN(zfint const &, margin))
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFUIMargin, ZFUIMarginMake,
+                               ZFMP_IN(zffloat const &, margin))
 {
     ZFUIMargin ret = {margin, margin, margin, margin};
     return ret;
@@ -223,9 +194,9 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUIMargin, ZFUIMarginMake,
 /**
  * @brief make a margin with left/right to x and top/bottom to y
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginMake,
-                               ZFMP_IN(zfint const &, x),
-                               ZFMP_IN(zfint const &, y))
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIMargin, ZFUIMarginMake,
+                               ZFMP_IN(zffloat const &, x),
+                               ZFMP_IN(zffloat const &, y))
 {
     ZFUIMargin ret = {x, y, x, y};
     return ret;
@@ -234,7 +205,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginMake,
 /**
  * @brief return a scaled margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIMarginApplyScale,
                                ZFMP_OUT(ZFUIMargin &, ret),
                                ZFMP_IN(const ZFUIMargin &, margin),
                                ZFMP_IN(zffloat, scale))
@@ -247,7 +218,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginApplyScale,
 /**
  * @brief return a scaled margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIMargin, ZFUIMarginApplyScale,
                                ZFMP_IN(const ZFUIMargin &, margin),
                                ZFMP_IN(zffloat, scale))
 {
@@ -262,7 +233,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginApplyScale,
 /**
  * @brief return a scaled margin reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIMarginApplyScaleReversely,
                                ZFMP_OUT(ZFUIMargin &, ret),
                                ZFMP_IN(const ZFUIMargin &, margin),
                                ZFMP_IN(zffloat, scale))
@@ -275,7 +246,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginApplyScaleReversely,
 /**
  * @brief return a scaled margin reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIMargin, ZFUIMarginApplyScaleReversely,
                                ZFMP_IN(const ZFUIMargin &, margin),
                                ZFMP_IN(zffloat, scale))
 {
@@ -290,7 +261,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginApplyScaleReversely,
 /**
  * @brief left + right margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIMarginGetWidth,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIMarginGetWidth,
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
     return margin.left + margin.right;
@@ -298,7 +269,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIMarginGetWidth,
 /**
  * @brief top + bottom margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIMarginGetHeight,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIMarginGetHeight,
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
     return margin.top + margin.bottom;
@@ -306,7 +277,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIMarginGetHeight,
 /**
  * @brief v0 + v1
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginInc,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIMarginInc,
                                ZFMP_IN_OUT(ZFUIMargin &, ret),
                                ZFMP_IN(const ZFUIMargin &, v0),
                                ZFMP_IN(const ZFUIMargin &, v1))
@@ -319,7 +290,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginInc,
 /**
  * @brief v0 + v1
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginInc,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIMargin, ZFUIMarginInc,
                                ZFMP_IN(const ZFUIMargin &, v0),
                                ZFMP_IN(const ZFUIMargin &, v1))
 {
@@ -360,7 +331,7 @@ inline ZFUIMargin &operator += (ZF_IN_OUT ZFUIMargin &v0,
 /**
  * @brief v0 - v1
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginDec,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIMarginDec,
                                ZFMP_IN_OUT(ZFUIMargin &, ret),
                                ZFMP_IN(const ZFUIMargin &, v0),
                                ZFMP_IN(const ZFUIMargin &, v1))
@@ -373,7 +344,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIMarginDec,
 /**
  * @brief v0 - v1
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIMargin, ZFUIMarginDec,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIMargin, ZFUIMarginDec,
                                ZFMP_IN(const ZFUIMargin &, v0),
                                ZFMP_IN(const ZFUIMargin &, v1))
 {
@@ -420,8 +391,8 @@ inline ZFUIMargin &operator -= (ZF_IN_OUT ZFUIMargin &v0,
 zfclassPOD ZF_ENV_EXPORT ZFUISize
 {
 public:
-    zfint width;   /**< @brief width */
-    zfint height;  /**< @brief height */
+    zffloat width;   /**< @brief width */
+    zffloat height;  /**< @brief height */
 };
 
 /**
@@ -440,11 +411,6 @@ ZFOUTPUT_TYPE(ZFUISize, {output << ZFUISizeToString(v);})
 
 ZFCORE_POD_COMPARER_DECLARE(ZFUISize)
 
-ZFTYPEID_PROGRESS_DECLARE(ZFUISize, {
-        ret.width = from.width + (zfint)((to.width - from.width) * progress);
-        ret.height = from.height + (zfint)((to.height - from.height) * progress);
-    })
-
 /**
  * @brief (0, 0)
  */
@@ -460,9 +426,9 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFUISize, ZFUISizeInvalid)
 /**
  * @brief make a ZFUISize
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeMake,
-                               ZFMP_IN(zfint const &, width),
-                               ZFMP_IN(zfint const &, height))
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUISize, ZFUISizeMake,
+                               ZFMP_IN(zffloat const &, width),
+                               ZFMP_IN(zffloat const &, height))
 {
     ZFUISize ret = {width, height};
     return ret;
@@ -470,8 +436,8 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeMake,
 /**
  * @brief make a ZFUISize
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUISize, ZFUISizeMake,
-                               ZFMP_IN(zfint const &, v))
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFUISize, ZFUISizeMake,
+                               ZFMP_IN(zffloat const &, v))
 {
     ZFUISize ret = {v, v};
     return ret;
@@ -483,7 +449,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUISize, ZFUISizeMake,
  * return value in range [minSize, maxSize] if minSize < maxSize,
  * or return value in range [minSize, infinite) minSize > maxSize
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_4(void, ZFUISizeApplyRange,
+ZFMETHOD_FUNC_INLINE_DECLARE_4(void, ZFUISizeApplyRange,
                                ZFMP_OUT(ZFUISize &, ret),
                                ZFMP_IN(const ZFUISize &, orgSize),
                                ZFMP_IN(const ZFUISize &, minSize),
@@ -498,7 +464,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_4(void, ZFUISizeApplyRange,
  * return value in range [minSize, maxSize] if minSize < maxSize,
  * or return value in range [minSize, infinite) minSize > maxSize
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(ZFUISize, ZFUISizeApplyRange,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(ZFUISize, ZFUISizeApplyRange,
                                ZFMP_IN(const ZFUISize &, orgSize),
                                ZFMP_IN(const ZFUISize &, minSize),
                                ZFMP_IN(const ZFUISize &, maxSize))
@@ -512,7 +478,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(ZFUISize, ZFUISizeApplyRange,
 /**
  * @brief return a scaled size
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUISizeApplyScale,
                                ZFMP_OUT(ZFUISize &, ret),
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(zffloat, scale))
@@ -523,7 +489,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyScale,
 /**
  * @brief return a scaled size
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUISize, ZFUISizeApplyScale,
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(zffloat, scale))
 {
@@ -536,7 +502,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyScale,
 /**
  * @brief return a scaled size reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUISizeApplyScaleReversely,
                                ZFMP_OUT(ZFUISize &, ret),
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(zffloat, scale))
@@ -547,7 +513,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyScaleReversely,
 /**
  * @brief return a scaled size reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUISize, ZFUISizeApplyScaleReversely,
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(zffloat, scale))
 {
@@ -572,7 +538,7 @@ ZFMETHOD_FUNC_DECLARE_3(void, ZFUISizeApplyAspectRatio,
  *
  * input size must be valid, while negative refSize means no limit
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyAspectRatio,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUISize, ZFUISizeApplyAspectRatio,
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(const ZFUISize &, refSize))
 {
@@ -584,7 +550,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyAspectRatio,
 /**
  * @brief return a size excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyMargin,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUISizeApplyMargin,
                                ZFMP_OUT(ZFUISize &, ret),
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(const ZFUIMargin &, margin))
@@ -595,7 +561,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyMargin,
 /**
  * @brief return a size excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyMargin,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUISize, ZFUISizeApplyMargin,
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
@@ -608,7 +574,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyMargin,
 /**
  * @brief revert excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyMarginReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUISizeApplyMarginReversely,
                                ZFMP_OUT(ZFUISize &, ret),
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(const ZFUIMargin &, margin))
@@ -619,7 +585,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUISizeApplyMarginReversely,
 /**
  * @brief revert excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyMarginReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUISize, ZFUISizeApplyMarginReversely,
                                ZFMP_IN(const ZFUISize &, size),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
@@ -638,8 +604,10 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUISize, ZFUISizeApplyMarginReversely,
 zfclassPOD ZF_ENV_EXPORT ZFUIRect
 {
 public:
-    ZFUIPoint point;      /**< @brief top-left point */
-    ZFUISize size;        /**< @brief size of rect */
+    zffloat x; /**< @brief x */
+    zffloat y; /**< @brief y */
+    zffloat width; /**< @brief width */
+    zffloat height; /**< @brief height */
 };
 
 /**
@@ -658,13 +626,6 @@ ZFOUTPUT_TYPE(ZFUIRect, {output << ZFUIRectToString(v);})
 
 ZFCORE_POD_COMPARER_DECLARE(ZFUIRect)
 
-ZFTYPEID_PROGRESS_DECLARE(ZFUIRect, {
-        ret.point.x = from.point.x + (zfint)((to.point.x - from.point.x) * progress);
-        ret.point.y = from.point.y + (zfint)((to.point.y - from.point.y) * progress);
-        ret.size.width = from.size.width + (zfint)((to.size.width - from.size.width) * progress);
-        ret.size.height = from.size.height + (zfint)((to.size.height - from.size.height) * progress);
-    })
-
 /**
  * @brief (0, 0, 0, 0)
  */
@@ -673,23 +634,23 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFUIRect, ZFUIRectZero)
 /**
  * @brief make a ZFUIRect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_4(ZFUIRect, ZFUIRectMake,
-                               ZFMP_IN(zfint const &, x),
-                               ZFMP_IN(zfint const &, y),
-                               ZFMP_IN(zfint const &, w),
-                               ZFMP_IN(zfint const &, h))
+ZFMETHOD_FUNC_INLINE_DECLARE_4(ZFUIRect, ZFUIRectMake,
+                               ZFMP_IN(zffloat const &, x),
+                               ZFMP_IN(zffloat const &, y),
+                               ZFMP_IN(zffloat const &, w),
+                               ZFMP_IN(zffloat const &, h))
 {
-    ZFUIRect ret = {{x, y}, {w, h}};
+    ZFUIRect ret = {x, y, w, h};
     return ret;
 }
 /**
  * @brief make a ZFUIRect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectMake,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectMake,
                                ZFMP_IN(const ZFUIPoint &, point),
                                ZFMP_IN(const ZFUISize &, size))
 {
-    ZFUIRect ret = {point, size};
+    ZFUIRect ret = {point.x, point.y, size.width, size.height};
     return ret;
 }
 
@@ -698,27 +659,27 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectMake,
  *
  * rect is empty if width or height <= 0
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfbool, ZFUIRectIsEmpty,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zfbool, ZFUIRectIsEmpty,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    return (rect.size.width <= 0 || rect.size.height <= 0);
+    return (rect.width <= 0 || rect.height <= 0);
 }
 /**
  * @brief union two rect, return a rect that contains both rect1 and rect2
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectUnion,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectUnion,
                                ZFMP_IN(const ZFUIRect &, rect1),
                                ZFMP_IN(const ZFUIRect &, rect2))
 {
     ZFUIRect ret = {
-        {(rect1.point.x < rect2.point.x) ? rect1.point.x : rect2.point.x,
-        (rect1.point.y < rect2.point.y) ? rect1.point.y : rect2.point.y},
-        {(rect1.point.x + rect1.size.width > rect2.point.x + rect2.size.width)
-            ? (rect1.point.x + rect1.size.width)
-            : (rect2.point.x + rect2.size.width),
-        (rect1.point.y + rect1.size.height > rect2.point.y + rect2.size.height)
-            ? (rect1.point.y + rect1.size.height)
-            : (rect2.point.y + rect2.size.height)}
+        (rect1.x < rect2.x) ? rect1.x : rect2.x,
+        (rect1.y < rect2.y) ? rect1.y : rect2.y,
+        (rect1.x + rect1.width > rect2.x + rect2.width)
+            ? (rect1.x + rect1.width)
+            : (rect2.x + rect2.width),
+        (rect1.y + rect1.height > rect2.y + rect2.height)
+            ? (rect1.y + rect1.height)
+            : (rect2.y + rect2.height)
     };
     if(ZFUIRectIsEmpty(ret))
     {
@@ -732,19 +693,19 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectUnion,
 /**
  * @brief intersect two rect, return #ZFUIRectZero if not intersected
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectIntersection,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectIntersection,
                                ZFMP_IN(const ZFUIRect &, rect1),
                                ZFMP_IN(const ZFUIRect &, rect2))
 {
     ZFUIRect ret = {
-        {(rect1.point.x > rect2.point.x) ? rect1.point.x : rect2.point.x,
-        (rect1.point.y > rect2.point.y) ? rect1.point.y : rect2.point.y},
-        {(rect1.point.x + rect1.size.width < rect2.point.x + rect2.size.width)
-            ? (rect1.point.x + rect1.size.width)
-            : (rect2.point.x + rect2.size.width),
-        (rect1.point.y + rect1.size.height < rect2.point.y + rect2.size.height)
-            ? (rect1.point.y + rect1.size.height)
-            : (rect2.point.y + rect2.size.height)}
+        (rect1.x > rect2.x) ? rect1.x : rect2.x,
+        (rect1.y > rect2.y) ? rect1.y : rect2.y,
+        (rect1.x + rect1.width < rect2.x + rect2.width)
+            ? (rect1.x + rect1.width)
+            : (rect2.x + rect2.width),
+        (rect1.y + rect1.height < rect2.y + rect2.height)
+            ? (rect1.y + rect1.height)
+            : (rect2.y + rect2.height)
     };
     if(ZFUIRectIsEmpty(ret))
     {
@@ -759,7 +720,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectIntersection,
  * @brief is two rect intersected,
  *   two tangented rect is not intersected
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIRectIsIntersectToRect,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(zfbool, ZFUIRectIsIntersectToRect,
                                ZFMP_IN(const ZFUIRect &, rect1),
                                ZFMP_IN(const ZFUIRect &, rect2))
 {
@@ -768,14 +729,14 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIRectIsIntersectToRect,
 /**
  * @brief is rect contains point
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIRectIsContainPoint,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(zfbool, ZFUIRectIsContainPoint,
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(const ZFUIPoint &, point))
 {
-    return (point.x >= rect.point.x
-        && point.x <= rect.point.x + rect.size.width
-        && point.y >= rect.point.y
-        && point.y <= rect.point.y + rect.size.height);
+    return (point.x >= rect.x
+        && point.x <= rect.x + rect.width
+        && point.y >= rect.y
+        && point.y <= rect.y + rect.height);
 }
 /**
  * @brief see #ZFUIRectIsContainPoint
@@ -783,28 +744,28 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIRectIsContainPoint,
  * if margin is positive, rect's area is reduced by margin,
  * if margin is negative, rect's area is increased by margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(zfbool, ZFUIRectIsContainPoint,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(zfbool, ZFUIRectIsContainPoint,
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(const ZFUIPoint &, point),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
-    return (point.x >= rect.point.x + margin.left
-        && point.x <= rect.point.x + rect.size.width - margin.right
-        && point.y >= rect.point.y + margin.top
-        && point.y <= rect.point.y + rect.size.height - margin.bottom);
+    return (point.x >= rect.x + margin.left
+        && point.x <= rect.x + rect.width - margin.right
+        && point.y >= rect.y + margin.top
+        && point.y <= rect.y + rect.height - margin.bottom);
 }
 /**
  * @brief return true if rect2 is completely contained by rect1,
  *   two equal rect is regarded as contain each other
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIRectIsContainRect,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(zfbool, ZFUIRectIsContainRect,
                                ZFMP_IN(const ZFUIRect &, rect1),
                                ZFMP_IN(const ZFUIRect &, rect2))
 {
-    return (rect2.point.x >= rect1.point.x
-        && rect2.point.x + rect2.size.width <= rect1.point.x + rect1.size.width
-        && rect2.point.y >= rect1.point.y
-        && rect2.point.y + rect2.size.height <= rect1.point.y + rect1.size.height);
+    return (rect2.x >= rect1.x
+        && rect2.x + rect2.width <= rect1.x + rect1.width
+        && rect2.y >= rect1.y
+        && rect2.y + rect2.height <= rect1.y + rect1.height);
 }
 /**
  * @brief see #ZFUIRectIsContainRect
@@ -812,181 +773,186 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIRectIsContainRect,
  * if margin is positive, rect's area is reduced by margin,
  * if margin is negative, rect's area is increased by margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(zfbool, ZFUIRectIsContainRect,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(zfbool, ZFUIRectIsContainRect,
                                ZFMP_IN(const ZFUIRect &, rect1),
                                ZFMP_IN(const ZFUIRect &, rect2),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
-    return (rect2.point.x >= rect1.point.x + margin.left
-        && rect2.point.x + rect2.size.width <= rect1.point.x + rect1.size.width - margin.right
-        && rect2.point.y >= rect1.point.y + margin.top
-        && rect2.point.y + rect2.size.height <= rect1.point.y + rect1.size.height - margin.bottom);
+    return (rect2.x >= rect1.x + margin.left
+        && rect2.x + rect2.width <= rect1.x + rect1.width - margin.right
+        && rect2.y >= rect1.y + margin.top
+        && rect2.y + rect2.height <= rect1.y + rect1.height - margin.bottom);
 }
 /**
  * @brief return a scaled rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIRectApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIRectApplyScale,
                                ZFMP_OUT(ZFUIRect &, ret),
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(zffloat, scale))
 {
-    ret.point.x = ZFUISizeApplyScale(rect.point.x, scale);
-    ret.point.y = ZFUISizeApplyScale(rect.point.y, scale);
-    ret.size.width = ZFUISizeApplyScale(rect.size.width, scale);
-    ret.size.height = ZFUISizeApplyScale(rect.size.height, scale);
+    ret.x = ZFUISizeApplyScale(rect.x, scale);
+    ret.y = ZFUISizeApplyScale(rect.y, scale);
+    ret.width = ZFUISizeApplyScale(rect.width, scale);
+    ret.height = ZFUISizeApplyScale(rect.height, scale);
 }
 /**
  * @brief return a scaled rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectApplyScale,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectApplyScale,
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(zffloat, scale))
 {
-    ZFUIRect ret = {{
-        ZFUISizeApplyScale(rect.point.x, scale),
-        ZFUISizeApplyScale(rect.point.y, scale)
-    }, {
-        ZFUISizeApplyScale(rect.size.width, scale),
-        ZFUISizeApplyScale(rect.size.height, scale)
-    }};
+    ZFUIRect ret = {
+        ZFUISizeApplyScale(rect.x, scale),
+        ZFUISizeApplyScale(rect.y, scale),
+        ZFUISizeApplyScale(rect.width, scale),
+        ZFUISizeApplyScale(rect.height, scale)
+    };
     return ret;
 }
 /**
  * @brief return a scaled rect reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIRectApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIRectApplyScaleReversely,
                                ZFMP_OUT(ZFUIRect &, ret),
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(zffloat, scale))
 {
-    ret.point.x = ZFUISizeApplyScaleReversely(rect.point.x, scale);
-    ret.point.y = ZFUISizeApplyScaleReversely(rect.point.y, scale);
-    ret.size.width = ZFUISizeApplyScaleReversely(rect.size.width, scale);
-    ret.size.height = ZFUISizeApplyScaleReversely(rect.size.height, scale);
+    ret.x = ZFUISizeApplyScaleReversely(rect.x, scale);
+    ret.y = ZFUISizeApplyScaleReversely(rect.y, scale);
+    ret.width = ZFUISizeApplyScaleReversely(rect.width, scale);
+    ret.height = ZFUISizeApplyScaleReversely(rect.height, scale);
 }
 /**
  * @brief return a scaled rect reversely
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectApplyScaleReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectApplyScaleReversely,
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(zffloat, scale))
 {
-    ZFUIRect ret = {{
-        ZFUISizeApplyScaleReversely(rect.point.x, scale),
-        ZFUISizeApplyScaleReversely(rect.point.y, scale)
-    }, {
-        ZFUISizeApplyScaleReversely(rect.size.width, scale),
-        ZFUISizeApplyScaleReversely(rect.size.height, scale)
-    }};
+    ZFUIRect ret = {
+        ZFUISizeApplyScaleReversely(rect.x, scale),
+        ZFUISizeApplyScaleReversely(rect.y, scale),
+        ZFUISizeApplyScaleReversely(rect.width, scale),
+        ZFUISizeApplyScaleReversely(rect.height, scale)
+    };
     return ret;
 }
 /**
  * @brief get bounds for rect, i.e. (0, 0, width, height)
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUIRect, ZFUIRectGetBounds,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFUIRect, ZFUIRectGetBounds,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    ZFUIRect ret = {{0, 0}, {rect.size.width, rect.size.height}};
+    ZFUIRect ret = {0, 0, rect.width, rect.height};
+    return ret;
+}
+/**
+ * @brief get size of the rect
+ */
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFUISize, ZFUIRectGetSize,
+                               ZFMP_IN(const ZFUIRect &, rect))
+{
+    ZFUISize ret = {rect.width, rect.height};
     return ret;
 }
 /**
  * @brief get center point of the rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUIPoint, ZFUIRectGetCenter,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFUIPoint, ZFUIRectGetCenter,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    ZFUIPoint ret = {rect.point.x + rect.size.width / 2, rect.point.y + rect.size.height / 2};
+    ZFUIPoint ret = {rect.x + rect.width / 2, rect.y + rect.height / 2};
     return ret;
 }
 /**
  * @brief get left edge of the rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIRectGetLeft,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIRectGetLeft,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    return rect.point.x;
+    return rect.x;
 }
 /**
  * @brief get top edge of the rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIRectGetTop,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIRectGetTop,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    return rect.point.y;
+    return rect.y;
 }
 /**
  * @brief get right edge of the rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIRectGetRight,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIRectGetRight,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    return (rect.point.x + rect.size.width);
+    return (rect.x + rect.width);
 }
 /**
  * @brief get bottom edge of the rect
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfint, ZFUIRectGetBottom,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIRectGetBottom,
                                ZFMP_IN(const ZFUIRect &, rect))
 {
-    return (rect.point.y + rect.size.height);
+    return (rect.y + rect.height);
 }
 
 /**
  * @brief return a rect excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIRectApplyMargin,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIRectApplyMargin,
                                ZFMP_OUT(ZFUIRect &, ret),
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
-    ret.point.x = rect.point.x + margin.left;
-    ret.point.y = rect.point.y + margin.top;
-    ret.size.width = rect.size.width - margin.left - margin.right;
-    ret.size.height = rect.size.height - margin.top - margin.bottom;
+    ret.x = rect.x + margin.left;
+    ret.y = rect.y + margin.top;
+    ret.width = rect.width - margin.left - margin.right;
+    ret.height = rect.height - margin.top - margin.bottom;
 }
 /**
  * @brief return a rect excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectApplyMargin,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectApplyMargin,
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
-    ZFUIRect ret = {{
-        rect.point.x + margin.left,
-        rect.point.y + margin.top
-    }, {
-        rect.size.width - margin.left - margin.right,
-        rect.size.height - margin.top - margin.bottom
-    }};
+    ZFUIRect ret = {
+        rect.x + margin.left,
+        rect.y + margin.top,
+        rect.width - margin.left - margin.right,
+        rect.height - margin.top - margin.bottom
+    };
     return ret;
 }
 /**
  * @brief revert excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(void, ZFUIRectApplyMarginReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(void, ZFUIRectApplyMarginReversely,
                                ZFMP_OUT(ZFUIRect &, ret),
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
-    ret.point.x = rect.point.x - margin.left;
-    ret.point.y = rect.point.y - margin.top;
-    ret.size.width = rect.size.width + margin.left + margin.right;
-    ret.size.height = rect.size.height + margin.top + margin.bottom;
+    ret.x = rect.x - margin.left;
+    ret.y = rect.y - margin.top;
+    ret.width = rect.width + margin.left + margin.right;
+    ret.height = rect.height + margin.top + margin.bottom;
 }
 /**
  * @brief revert excluding the margin
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIRect, ZFUIRectApplyMarginReversely,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIRect, ZFUIRectApplyMarginReversely,
                                ZFMP_IN(const ZFUIRect &, rect),
                                ZFMP_IN(const ZFUIMargin &, margin))
 {
-    ZFUIRect ret = {{
-        rect.point.x - margin.left,
-        rect.point.y - margin.top
-    }, {
-        rect.size.width + margin.left + margin.right,
-        rect.size.height + margin.top + margin.bottom
-    }};
+    ZFUIRect ret = {
+        rect.x - margin.left,
+        rect.y - margin.top,
+        rect.width + margin.left + margin.right,
+        rect.height + margin.top + margin.bottom
+    };
     return ret;
 }
 
@@ -1041,7 +1007,7 @@ ZFMETHOD_FUNC_DECLARE_5(void, ZFUIAlignApply,
 /**
  * @brief apply align and calculate result, or #ZFUIRectZero if error
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_4(ZFUIRect, ZFUIAlignApply,
+ZFMETHOD_FUNC_INLINE_DECLARE_4(ZFUIRect, ZFUIAlignApply,
                                ZFMP_IN(const ZFUIAlignFlags &, align),
                                ZFMP_IN(const ZFUIRect &, refRect),
                                ZFMP_IN(const ZFUISize &, itemSize),
@@ -1095,7 +1061,7 @@ ZFEXPORT_VAR_READONLY_DECLARE(ZFUIOrientationFlags, ZFUIOrientationFlagsVertical
 /**
  * @brief true if vertical orientation
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfbool, ZFUIOrientationIsVertical,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zfbool, ZFUIOrientationIsVertical,
                                ZFMP_IN(ZFUIOrientationEnum, orientation))
 {
     return (orientation == ZFUIOrientation::e_Top || orientation == ZFUIOrientation::e_Bottom);
@@ -1103,7 +1069,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zfbool, ZFUIOrientationIsVertical,
 /**
  * @brief true if vertical orientation
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zfbool, ZFUIOrientationIsHorizontal,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zfbool, ZFUIOrientationIsHorizontal,
                                ZFMP_IN(ZFUIOrientationEnum, orientation))
 {
     return (orientation == ZFUIOrientation::e_Left || orientation == ZFUIOrientation::e_Right);
@@ -1159,7 +1125,7 @@ ZFOUTPUT_TYPE(ZFUIColor, {output << ZFUIColorToString(v);})
 /**
  * @brief true if two color is equal
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIColorIsEqual,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(zfbool, ZFUIColorIsEqual,
                                ZFMP_IN(ZFUIColor const &, v0),
                                ZFMP_IN(ZFUIColor const &, v1))
 {
@@ -1195,7 +1161,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(zfbool, ZFUIColorIsEqual,
 /**
  * @brief make a color
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_4(ZFUIColor, ZFUIColorMake,
+ZFMETHOD_FUNC_INLINE_DECLARE_4(ZFUIColor, ZFUIColorMake,
                                ZFMP_IN(zffloat, r),
                                ZFMP_IN(zffloat, g),
                                ZFMP_IN(zffloat, b),
@@ -1207,7 +1173,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_4(ZFUIColor, ZFUIColorMake,
 /**
  * @brief get alpha from a #ZFUIColor as zffloat
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetA,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIColorGetA,
                                ZFMP_IN(ZFUIColor const &, c))
 {
     return ZFUIColorGetA(c);
@@ -1215,7 +1181,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetA,
 /**
  * @brief get red from a #ZFUIColor as zffloat
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetR,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIColorGetR,
                                ZFMP_IN(ZFUIColor const &, c))
 {
     return ZFUIColorGetR(c);
@@ -1223,7 +1189,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetR,
 /**
  * @brief get green from a #ZFUIColor as zffloat
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetG,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIColorGetG,
                                ZFMP_IN(ZFUIColor const &, c))
 {
     return ZFUIColorGetG(c);
@@ -1231,7 +1197,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetG,
 /**
  * @brief get blue from a #ZFUIColor as zffloat
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetB,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(zffloat, ZFUIColorGetB,
                                ZFMP_IN(ZFUIColor const &, c))
 {
     return ZFUIColorGetB(c);
@@ -1240,7 +1206,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_1(zffloat, ZFUIColorGetB,
 /**
  * @brief set alpha to a #ZFUIColor
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetA,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor &, ZFUIColorSetA,
                                ZFMP_IN_OUT(ZFUIColor &, c),
                                ZFMP_IN(zffloat, a))
 {
@@ -1249,7 +1215,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetA,
 /**
  * @brief set red from a #ZFUIColor
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetR,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor &, ZFUIColorSetR,
                                ZFMP_IN_OUT(ZFUIColor &, c),
                                ZFMP_IN(zffloat, r))
 {
@@ -1258,7 +1224,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetR,
 /**
  * @brief set green from a #ZFUIColor
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetG,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor &, ZFUIColorSetG,
                                ZFMP_IN_OUT(ZFUIColor &, c),
                                ZFMP_IN(zffloat, g))
 {
@@ -1267,7 +1233,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetG,
 /**
  * @brief set blue from a #ZFUIColor
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetB,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor &, ZFUIColorSetB,
                                ZFMP_IN_OUT(ZFUIColor &, c),
                                ZFMP_IN(zffloat, b))
 {
@@ -1277,7 +1243,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor &, ZFUIColorSetB,
 /**
  * @brief return a copy of color with changed alpha
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithA,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor, ZFUIColorWithA,
                                ZFMP_IN(ZFUIColor const &, c),
                                ZFMP_IN(zffloat, a))
 {
@@ -1286,7 +1252,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithA,
 /**
  * @brief return a copy of color with changed red
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithR,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor, ZFUIColorWithR,
                                ZFMP_IN(ZFUIColor const &, c),
                                ZFMP_IN(zffloat, r))
 {
@@ -1295,7 +1261,7 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithR,
 /**
  * @brief return a copy of color with changed green
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithG,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor, ZFUIColorWithG,
                                ZFMP_IN(ZFUIColor const &, c),
                                ZFMP_IN(zffloat, g))
 {
@@ -1304,26 +1270,17 @@ ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithG,
 /**
  * @brief return a copy of color with changed blue
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_2(ZFUIColor, ZFUIColorWithB,
+ZFMETHOD_FUNC_INLINE_DECLARE_2(ZFUIColor, ZFUIColorWithB,
                                ZFMP_IN(ZFUIColor const &, c),
                                ZFMP_IN(zffloat, b))
 {
     return ZFUIColorWithB(c, b);
 }
 
-ZFTYPEID_PROGRESS_DECLARE(ZFUIColor, {
-        ret = ZFUIColorMake(
-            ZFUIColorGetR(from) + (zffloat)((ZFUIColorGetR(to) - ZFUIColorGetR(from)) * progress),
-            ZFUIColorGetG(from) + (zffloat)((ZFUIColorGetG(to) - ZFUIColorGetG(from)) * progress),
-            ZFUIColorGetB(from) + (zffloat)((ZFUIColorGetB(to) - ZFUIColorGetB(from)) * progress),
-            ZFUIColorGetA(from) + (zffloat)((ZFUIColorGetA(to) - ZFUIColorGetA(from)) * progress)
-        );
-    })
-
 /**
  * @brief create a random color with specified alpha
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_1(ZFUIColor, ZFUIColorRandom,
+ZFMETHOD_FUNC_INLINE_DECLARE_1(ZFUIColor, ZFUIColorRandom,
                                ZFMP_IN_OPT(zffloat, alpha, 1.0f))
 {
     return ZFUIColorMake(zfmRand(0xFF) / (zft_zffloat)0xFF, zfmRand(0xFF) / (zft_zffloat)0xFF, zfmRand(0xFF) / (zft_zffloat)0xFF, alpha);
@@ -1433,7 +1390,7 @@ ZFMETHOD_FUNC_DECLARE_4(void, ZFUIContentScaleTypeApply,
 /**
  * @brief apply scale for #ZFUIContentScaleType
  */
-ZFMETHOD_FUNC_DECLARE_INLINE_3(ZFUIRect, ZFUIContentScaleTypeApply,
+ZFMETHOD_FUNC_INLINE_DECLARE_3(ZFUIRect, ZFUIContentScaleTypeApply,
                                ZFMP_IN(ZFUIContentScaleTypeEnum, scaleType),
                                ZFMP_IN(const ZFUIRect &, bounds),
                                ZFMP_IN(const ZFUISize &, contentSize))

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIDialogContentBasic.h
  * @brief basic content for #ZFUIDialogBasic
@@ -31,35 +22,19 @@ zfclass ZF_ENV_EXPORT ZFUIDialogContentBasic : zfextends ZFUIView, zfimplements 
     ZFSTYLE_DEFAULT_DECLARE(ZFUIDialogContentBasic)
 
 public:
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUISize, viewSizeMin)
-    {
-        propertyValue = ZFUISizeMake(
-            ZFUIGlobalStyle::DefaultStyle()->itemSizeDialogWidth(),
-            ZFUIGlobalStyle::DefaultStyle()->itemSizeDialog());
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUISize, viewSizeMin)
 
     /**
      * @brief dialog title view
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, titleTextView, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUITextView *, titleTextView)
-    {
-        zfblockedAlloc(ZFUITextView, titleTextView);
-        propertyValue = titleTextView;
-        titleTextView->textSizeSet(ZFUIGlobalStyle::DefaultStyle()->textSizeBig());
-        titleTextView->textAppearanceSet(ZFUITextAppearance::e_Bold);
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUITextView *, titleTextView)
 
     /**
      * @brief dialog content view
      */
     ZFPROPERTY_RETAIN_READONLY(ZFUITextView *, contentTextView, ZFPropertyNoInitValue)
-    ZFPROPERTY_OVERRIDE_ON_INIT_INLINE(ZFUITextView *, contentTextView)
-    {
-        zfblockedAlloc(ZFUITextView, contentTextView);
-        propertyValue = contentTextView;
-        contentTextView->textSingleLineSet(zffalse);
-    }
+    ZFPROPERTY_ON_INIT_DECLARE(ZFUITextView *, contentTextView)
 
 public:
     // ============================================================
@@ -86,8 +61,8 @@ public:
     zfoverride
     virtual const zfchar *dialogButtonText(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType);
     zfoverride
-    virtual void dialogButtonTextSet(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType,
-                                     ZF_IN const zfchar *text);
+    virtual void dialogButtonText(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType,
+                                  ZF_IN const zfchar *text);
     zfoverride
     virtual void dialogButtonRemove(ZF_IN ZFUIDialogButtonTypeEnum dialogButtonType);
 
@@ -123,7 +98,7 @@ protected:
                                  ZF_IN const ZFUISize &sizeHint,
                                  ZF_IN const ZFUISizeParam &sizeParam);
     zfoverride
-    virtual void internalFgViewOnLayout(ZF_IN const ZFUIRect &bounds);
+    virtual void internalViewOnLayout(ZF_IN const ZFUIRect &bounds);
     zfoverride
     virtual zfbool internalViewShouldLayout(ZF_IN ZFUIView *internalView);
 

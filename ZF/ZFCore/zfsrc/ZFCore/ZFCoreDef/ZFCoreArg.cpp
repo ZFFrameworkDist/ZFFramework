@@ -1,17 +1,8 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCoreArg.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-void zfCoreArgSplit(ZF_OUT ZFCoreArray<zfstring> &result,
+void zfCoreArgSplit(ZF_IN_OUT ZFCoreArray<zfstring> &result,
                     ZF_IN const zfchar *cmdLine)
 {
     if(cmdLine == zfnull) {return ;}

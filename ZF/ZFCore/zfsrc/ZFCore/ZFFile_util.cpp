@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFFile_impl.cpp"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -404,7 +395,7 @@ ZFMETHOD_FUNC_DEFINE_1(zfstring, ZFFilePathParentOf,
     return ret;
 }
 ZFMETHOD_FUNC_DEFINE_2(zfbool, ZFFilePathComponentsOf,
-                       ZFMP_OUT(ZFCoreArray<zfstring> &, ret),
+                       ZFMP_IN_OUT(ZFCoreArray<zfstring> &, ret),
                        ZFMP_IN(const zfchar *, src))
 {
     if(zfsIsEmpty(src) || zfscmpTheSame(src, "."))
@@ -450,7 +441,7 @@ static void _ZFP_ZFFileTreePrint(ZF_IN const zfchar *pathData,
                                  ZF_IN const zfchar *headToken,
                                  ZF_IN const zfchar *indentToken,
                                  ZF_IN zfindex indentLevel,
-                                 ZF_IN ZFFilePathInfoData const &fileImpl)
+                                 ZF_IN ZFFilePathInfoImpl const &fileImpl)
 {
     ZFFileFindData fd;
     if(fileImpl.callbackFindFirst(fd, pathData))
@@ -494,7 +485,7 @@ ZFMETHOD_FUNC_DEFINE_4(void, ZFFilePathInfoTreePrint,
                        ZFMP_IN_OPT(const zfchar *, headToken, zfnull),
                        ZFMP_IN_OPT(const zfchar *, indentToken, "  "))
 {
-    const ZFFilePathInfoData *data = ZFFilePathInfoDataGet(pathInfo.pathType);
+    const ZFFilePathInfoImpl *data = ZFFilePathInfoImplForPathType(pathInfo.pathType);
     if(data != zfnull
         && data->callbackFindFirst
         && data->callbackFindNext
@@ -511,7 +502,7 @@ ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFFilePathInfoForEach,
                        ZFMP_IN(const ZFListener &, fileCallback),
                        ZFMP_IN_OPT(ZFObject *, userData, zfnull))
 {
-    const ZFFilePathInfoData *impl = ZFFilePathInfoDataGet(pathInfo.pathType);
+    const ZFFilePathInfoImpl *impl = ZFFilePathInfoImplForPathType(pathInfo.pathType);
     if(impl == zfnull)
     {
         return zffalse;
@@ -531,204 +522,12 @@ ZFMETHOD_FUNC_DEFINE_3(zfbool, ZFFilePathInfoForEach,
                 break;
             }
             fileCallback.execute(
-                ZFListenerData().param0Set(childPathInfo).param1Set(childFd),
+                ZFListenerData().param0(childPathInfo).param1(childFd),
                 userData);
         } while(impl->callbackFindNext(fd));
         impl->callbackFindClose(fd);
     }
     return zftrue;
-}
-
-// ============================================================
-zfclass _ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner : zfextends ZFObject
-{
-    ZFOBJECT_DECLARE(_ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner, ZFObject)
-public:
-    _ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate *d;
-
-    ZFMETHOD_DECLARE_2(zfbool, ioSeek,
-                       ZFMP_IN(zfindex, byteSize),
-                       ZFMP_IN(ZFSeekPos, pos))
-    ZFMETHOD_DECLARE_0(zfindex, ioTell)
-    ZFMETHOD_DECLARE_0(zfindex, ioSize)
-};
-zfclass _ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate : zfextends ZFObject
-{
-    ZFOBJECT_DECLARE(_ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate, ZFObject)
-
-public:
-    ZFToken token;
-    zfstring tmpFilePath;
-    zfindex outputIndex;
-    zfindex inputIndex;
-    zfindex fileSize;
-    _ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner *outputIOOwner;
-
-protected:
-    zfoverride
-    virtual void objectOnInit(void)
-    {
-        zfsuper::objectOnInit();
-        zfstringAppend(this->tmpFilePath, "%s%cZFIOBufferedCallbackUsingTmpFile_%s",
-            ZFFilePathForCache(),
-            ZFFileSeparator(),
-            zfsFromInt(zfidentityCalcPointer(this)).cString());
-        this->token = ZFFileFileOpen(this->tmpFilePath.cString(),
-            ZFFileOpenOption::e_Create | ZFFileOpenOption::e_Read | ZFFileOpenOption::e_Write);
-        this->outputIndex = 0;
-        this->inputIndex = 0;
-        this->fileSize = 0;
-        this->outputIOOwner = zfAlloc(_ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner);
-        this->outputIOOwner->d = this;
-    }
-    zfoverride
-    virtual void objectOnDealloc(void)
-    {
-        if(this->token != ZFTokenInvalid())
-        {
-            ZFFileFileClose(this->token);
-            this->token = ZFTokenInvalid();
-        }
-        ZFFileFileRemove(this->tmpFilePath.cString(), zfHint("recursive")zffalse, zfHint("force")zftrue);
-        this->outputIOOwner->d = zfnull;
-        zfRelease(this->outputIOOwner);
-        zfsuper::objectOnDealloc();
-    }
-
-public:
-    void resetInput(void)
-    {
-        this->inputIndex = 0;
-    }
-    void resetOutput(void)
-    {
-        this->inputIndex = 0;
-        this->outputIndex = 0;
-        this->fileSize = 0;
-    }
-
-public:
-    ZFMETHOD_INLINE_2(zfindex, onInput,
-                      ZFMP_IN(void *, buf),
-                      ZFMP_IN(zfindex, count))
-    {
-        if(buf == zfnull)
-        {
-            return this->fileSize - this->inputIndex;
-        }
-        else
-        {
-            ZFFileFileSeek(this->token, this->inputIndex);
-            zfindex read = ZFFileFileRead(this->token, buf, zfmMin(count, this->fileSize - this->inputIndex));
-            this->inputIndex += read;
-            return read;
-        }
-    }
-    ZFMETHOD_INLINE_2(zfindex, onOutput,
-                      ZFMP_IN(const void *, buf),
-                      ZFMP_IN(zfindex, count))
-    {
-        ZFFileFileSeek(this->token, this->outputIndex);
-        zfindex written = ZFFileFileWrite(this->token, buf, count);
-        this->outputIndex += written;
-        if(this->outputIndex > this->fileSize)
-        {
-            this->fileSize = this->outputIndex;
-        }
-        return written;
-    }
-
-    // input IO
-    ZFMETHOD_INLINE_2(zfbool, ioSeek,
-                      ZFMP_IN(zfindex, byteSize),
-                      ZFMP_IN(ZFSeekPos, pos))
-    {
-        this->inputIndex = ZFIOCallbackCalcFSeek(0, this->fileSize, this->inputIndex, byteSize, pos);
-        return zftrue;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioTell)
-    {
-        return this->inputIndex;
-    }
-    ZFMETHOD_INLINE_0(zfindex, ioSize)
-    {
-        return this->fileSize;
-    }
-};
-// output IO
-ZFMETHOD_DEFINE_2(_ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner, zfbool, ioSeek,
-                  ZFMP_IN(zfindex, byteSize),
-                  ZFMP_IN(ZFSeekPos, pos))
-{
-    d->outputIndex = ZFIOCallbackCalcFSeek(0, d->fileSize, d->outputIndex, byteSize, pos);
-    return zftrue;
-}
-ZFMETHOD_DEFINE_0(_ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner, zfindex, ioTell)
-{
-    return d->outputIndex;
-}
-ZFMETHOD_DEFINE_0(_ZFP_ZFIOBufferedCallbackUsingTmpFileOutputIOOwner, zfindex, ioSize)
-{
-    return d->fileSize;
-}
-
-ZFIOBufferedCallbackUsingTmpFile::ZFIOBufferedCallbackUsingTmpFile(void)
-: ZFIOBufferedCallback()
-{
-    d = zfAlloc(_ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate);
-}
-ZFIOBufferedCallbackUsingTmpFile::ZFIOBufferedCallbackUsingTmpFile(ZF_IN const ZFIOBufferedCallbackUsingTmpFile &ref)
-: ZFIOBufferedCallback(ref)
-{
-    d = zfRetain(ref.d);
-}
-ZFIOBufferedCallbackUsingTmpFile &ZFIOBufferedCallbackUsingTmpFile::operator = (ZF_IN const ZFIOBufferedCallbackUsingTmpFile &ref)
-{
-    zfRetain(ref.d);
-    zfRelease(d);
-    d = ref.d;
-    return *this;
-}
-ZFIOBufferedCallbackUsingTmpFile::~ZFIOBufferedCallbackUsingTmpFile(void)
-{
-    zfRelease(d);
-    d = zfnull;
-}
-
-ZFInput ZFIOBufferedCallbackUsingTmpFile::inputCallback(void)
-{
-    if(d->token == ZFTokenInvalid())
-    {
-        return ZFCallbackNull();
-    }
-    else
-    {
-        ZFInput ret = ZFCallbackForMemberMethod(d, ZFMethodAccess(_ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate, onInput));
-        ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, d);
-        return ret;
-    }
-}
-ZFOutput ZFIOBufferedCallbackUsingTmpFile::outputCallback(void)
-{
-    if(d->token == ZFTokenInvalid())
-    {
-        return ZFCallbackNull();
-    }
-    else
-    {
-        ZFOutput ret = ZFCallbackForMemberMethod(d, ZFMethodAccess(_ZFP_ZFIOBufferedCallbackUsingTmpFilePrivate, onOutput));
-        ret.callbackTagSet(ZFCallbackTagKeyword_ioOwner, d->outputIOOwner);
-        return ret;
-    }
-}
-
-void ZFIOBufferedCallbackUsingTmpFile::resetInput(void)
-{
-    d->resetInput();
-}
-void ZFIOBufferedCallbackUsingTmpFile::resetOutput(void)
-{
-    d->resetOutput();
 }
 
 ZF_NAMESPACE_GLOBAL_END

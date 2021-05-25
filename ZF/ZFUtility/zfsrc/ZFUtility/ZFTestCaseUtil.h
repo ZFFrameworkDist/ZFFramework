@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFTestCaseUtil.h
  * @brief test case define
@@ -64,7 +55,7 @@ extern ZF_ENV_EXPORT void ZFTestCaseRunAllStart(ZF_IN_OPT const ZFCallbackT<zfbo
 extern ZF_ENV_EXPORT void ZFTestCaseRunAllStop(void);
 
 /** @brief see #ZFTestCaseGetAll */
-extern ZF_ENV_EXPORT void ZFTestCaseGetAllT(ZF_OUT ZFCoreArray<const ZFClass *> &ret);
+extern ZF_ENV_EXPORT void ZFTestCaseGetAllT(ZF_IN_OUT ZFCoreArray<const ZFClass *> &ret);
 /**
  * @brief get all test case currently registered
  */

@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFImpl_default_ZFCore_impl.h"
 #include "ZFCore/protocol/ZFProtocolZFFileReadWrite.h"
 #include "ZFCore/ZFString.h"
@@ -21,8 +12,8 @@ ZF_NAMESPACE_GLOBAL_BEGIN
 ZFPROTOCOL_IMPLEMENTATION_BEGIN(ZFFileReadWriteImpl_default, ZFFileReadWrite, ZFProtocolLevel::e_Default)
     ZFPROTOCOL_IMPLEMENTATION_PLATFORM_HINT("C:FILE")
 public:
-    virtual ZFToken fileOpen(ZF_IN const zfchar *filePath,
-                             ZF_IN_OPT ZFFileOpenOptionFlags flag = ZFFileOpenOption::e_Read)
+    virtual void *fileOpen(ZF_IN const zfchar *filePath,
+                           ZF_IN_OPT ZFFileOpenOptionFlags flag = ZFFileOpenOption::e_Read)
     {
         const zfchar *sFlag = zfnull;
         if(ZFBitTest(flag, ZFFileOpenOption::e_Append))
@@ -65,17 +56,17 @@ public:
         else
         {
             zfCoreCriticalShouldNotGoHere();
-            return ZFTokenInvalid();
+            return zfnull;
         }
 
         #if ZF_ENV_sys_Windows
             zfstringW _filePathSaved;
-            ZFString::toUTF16(_filePathSaved, filePath, ZFStringEncoding::e_UTF8);
+            zfstringToUTF16(_filePathSaved, filePath, ZFStringEncoding::e_UTF8);
             DWORD _fileAttrSaved = GetFileAttributesW(_filePathSaved.cString());
             SetFileAttributesW(_filePathSaved.cString(), FILE_ATTRIBUTE_NORMAL);
         #endif
 
-        ZFToken ret = (ZFToken)(fopen(filePath, sFlag));
+        void *ret = fopen(filePath, sFlag);
 
         #if ZF_ENV_sys_Windows
             SetFileAttributesW(_filePathSaved.cString(), _fileAttrSaved);
@@ -83,18 +74,18 @@ public:
 
         return ret;
     }
-    virtual zfbool fileClose(ZF_IN ZFToken token)
+    virtual zfbool fileClose(ZF_IN void *token)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zftrue;
         }
         return (fclose((FILE *)token) == 0);
     }
 
-    virtual zfindex fileTell(ZF_IN ZFToken token)
+    virtual zfindex fileTell(ZF_IN void *token)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zfindexMax();
         }
@@ -105,11 +96,11 @@ public:
         }
         return (zfindex)result;
     }
-    virtual zfbool fileSeek(ZF_IN ZFToken token,
+    virtual zfbool fileSeek(ZF_IN void *token,
                             ZF_IN zfindex byteSize,
                             ZF_IN_OPT ZFSeekPos position = ZFSeekPosBegin)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return zffalse;
         }
@@ -137,11 +128,11 @@ public:
         return (fseek((FILE *)token, seekSize, tmpPos) == 0);
     }
 
-    virtual zfindex fileRead(ZF_IN ZFToken token,
+    virtual zfindex fileRead(ZF_IN void *token,
                              ZF_IN void *buf,
                              ZF_IN zfindex maxByteSize)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return 0;
         }
@@ -151,11 +142,11 @@ public:
         }
     }
 
-    virtual zfindex fileWrite(ZF_IN ZFToken token,
+    virtual zfindex fileWrite(ZF_IN void *token,
                               ZF_IN const void *src,
                               ZF_IN zfindex maxByteSize)
     {
-        if(token == ZFTokenInvalid())
+        if(token == zfnull)
         {
             return 0;
         }
@@ -164,18 +155,18 @@ public:
             return (zfindex)fwrite(src, 1, (size_t)maxByteSize, (FILE *)token);
         }
     }
-    virtual void fileFlush(ZF_IN ZFToken token)
+    virtual void fileFlush(ZF_IN void *token)
     {
-        if(token != ZFTokenInvalid())
+        if(token != zfnull)
         {
             fflush((FILE *)token);
         }
     }
-    virtual zfbool fileIsEof(ZF_IN ZFToken token)
+    virtual zfbool fileIsEof(ZF_IN void *token)
     {
         return (feof((FILE *)token) != 0);
     }
-    virtual zfbool fileIsError(ZF_IN ZFToken token)
+    virtual zfbool fileIsError(ZF_IN void *token)
     {
         return (ferror((FILE *)token) != 0);
     }

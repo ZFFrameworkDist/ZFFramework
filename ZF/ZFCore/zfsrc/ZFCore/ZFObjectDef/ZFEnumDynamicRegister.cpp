@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFEnumDynamicRegister.h"
 #include "ZFObjectImpl.h"
 
@@ -17,25 +8,6 @@
 #include "../ZFSTLWrapper/zfstl_map.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
-
-// ============================================================
-ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFEnumDynamicRegisterAutoRemove, ZFLevelZFFrameworkHigh)
-{
-}
-ZF_GLOBAL_INITIALIZER_DESTROY(ZFEnumDynamicRegisterAutoRemove)
-{
-    if(!m.empty())
-    {
-        zfstlmap<const ZFClass *, zfbool> t;
-        t.swap(m);
-        for(zfstlmap<const ZFClass *, zfbool>::iterator it = t.begin(); it != t.end(); ++it)
-        {
-            ZFEnumDynamicUnregister(it->first);
-        }
-    }
-}
-zfstlmap<const ZFClass *, zfbool> m;
-ZF_GLOBAL_INITIALIZER_END(ZFEnumDynamicRegisterAutoRemove)
 
 // ============================================================
 zfclass _ZFP_I_ZFEnumDynamicHolder : zfextends ZFObject
@@ -116,7 +88,7 @@ private:
         return this->classData()->classDynamicRegisterUserData()->to<_ZFP_I_ZFEnumDynamicHolder *>()->d;
     }
 };
-zfclassNotPOD _ZFP_ZFEnumTypeId : zfextendsNotPOD ZFTypeIdBase
+zfclassNotPOD _ZFP_ZFEnumTypeId : zfextendsNotPOD ZFTypeInfo
 {
 public:
     const ZFClass *enumClass;
@@ -137,10 +109,9 @@ public:
         return this->enumClass->classNameFull();
     }
     zfoverride
-    virtual zfbool typeIdWrapper(ZF_OUT zfautoObject &v) const
+    virtual const ZFClass *typeIdClass(void) const
     {
-        v = this->enumClass->newInstance();
-        return zftrue;
+        return this->enumClass;
     }
 };
 
@@ -149,7 +120,7 @@ static ZFEnum *_ZFP_ZFEnumDynamic_e(ZF_IN const ZFMethod *invokerMethod, ZF_IN Z
 {
     const zfchar *enumName = invokerMethod->methodName() + zfslen("e_");
     zfstring tagKey = zfstringWithFormat("_ZFP_EnumDyn_%s", enumName);
-    ZFEnum *ret = invokerMethod->methodOwnerClass()->classTagGet<ZFEnum *>(tagKey);
+    ZFEnum *ret = invokerMethod->methodOwnerClass()->classTag<ZFEnum *>(tagKey);
     if(ret != zfnull)
     {
         return ret;
@@ -157,8 +128,8 @@ static ZFEnum *_ZFP_ZFEnumDynamic_e(ZF_IN const ZFMethod *invokerMethod, ZF_IN Z
     const _ZFP_ZFEnumData *d = _ZFP_ZFEnumDataFind(invokerMethod->methodOwnerClass());
     zfautoObject retHolder = invokerMethod->methodOwnerClass()->newInstance();
     ret = retHolder;
-    ret->_ZFP_enumValueSet(d->enumValueForName(enumName));
-    invokerMethod->methodOwnerClass()->classTagSet(tagKey, retHolder);
+    ret->_ZFP_enumValue(d->enumValueForName(enumName));
+    invokerMethod->methodOwnerClass()->classTag(tagKey, retHolder);
     return ret;
 }
 const ZFClass *ZFEnumDynamicRegister(ZF_IN const zfchar *enumClassName,
@@ -190,7 +161,7 @@ const ZFClass *ZFEnumDynamicRegister(ZF_IN const zfchar *enumClassName,
             zfstringAppend(errorHint,
                 "default enum value %s doesn't exists in enum value list: %s",
                 zfuintToString(enumDefault).cString(),
-                enumValues.objectInfoOfContent(ZFCoreElementInfoGetter<zfuint>::elementInfoGetter).cString());
+                enumValues.objectInfoOfContent().cString());
             return zfnull;
         }
     }
@@ -225,7 +196,7 @@ const ZFClass *ZFEnumDynamicRegister(ZF_IN const zfchar *enumClassName,
 
     // typeid
     _ZFP_ZFEnumTypeId *typeIdData = zfnew(_ZFP_ZFEnumTypeId);
-    ZFCorePointerForObject<ZFTypeIdBase *> typeIdDataHolder(typeIdData);
+    ZFCorePointerForObject<ZFTypeInfo *> typeIdDataHolder(typeIdData);
     typeIdData->enumClass = enumClass;
     if(!ZFTypeIdDynamicRegister(enumClassName, typeIdDataHolder, errorHint))
     {
@@ -238,8 +209,9 @@ const ZFClass *ZFEnumDynamicRegister(ZF_IN const zfchar *enumClassName,
     _ZFP_ZFEnumMethodReg(d->userRegMethods, d->d);
     for(zfindex i = 0; i < d->d->enumCount(); ++i)
     {
-        ZFMethodUserRegisterDetail_0(resultMethod, _ZFP_ZFEnumDynamic_e, enumClass,
-            public, ZFMethodTypeStatic,
+        ZFMethodUserRegisterDetail_0(resultMethod, {
+                return _ZFP_ZFEnumDynamic_e(invokerMethod, invokerObject);
+            }, enumClass, public, ZFMethodTypeStatic,
             ZFEnum *, zfstringWithFormat("e_%s", d->d->enumNameAtIndex(i)));
         d->userRegMethods.add(resultMethod);
     }

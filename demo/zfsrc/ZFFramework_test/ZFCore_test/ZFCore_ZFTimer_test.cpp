@@ -1,19 +1,10 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFCore_test.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFCore_ZFTimer_test_timerEvent)
+static void _ZFP_ZFCore_ZFTimer_test_timerEvent(ZF_IN const ZFListenerData &listenerData, ZF_IN ZFObject *userData)
 {
-    ZFTimer *timer = ZFCastZFObject(ZFTimer *, listenerData.sender);
+    ZFTimer *timer = listenerData.sender<ZFTimer *>();
     zfLogTrim("timer event, current thread: %s", ZFThread::currentThread()->objectInfo().cString());
     if(timer->timerActivatedCount() >= 3)
     {
@@ -22,7 +13,7 @@ static ZFLISTENER_PROTOTYPE_EXPAND(_ZFP_ZFCore_ZFTimer_test_timerEvent)
         ZFLISTENER_LOCAL(action, {
             userData->to<ZFTestCase *>()->testCaseStop();
         })
-        ZFThreadExecuteInMainThread(action, userData);
+        ZFExecuteInMainThread(action, userData);
     }
 }
 zfclass ZFCore_ZFTimer_test : zfextends ZFFramework_test_TestCase
@@ -42,10 +33,10 @@ protected:
 
         zfblockedAlloc(ZFTimer, timer);
 #if 0
-        timer->timerActivateInMainThreadSet(zftrue);
+        timer->timerActivateInMainThread(zftrue);
 #endif
         timer->observerAdd(ZFTimer::EventTimerOnActivate(), ZFCallbackForFunc(_ZFP_ZFCore_ZFTimer_test_timerEvent), this);
-        timer->timerIntervalSet((zftimet)1000);
+        timer->timerInterval((zftimet)1000);
         timer->timerStart();
     }
 };

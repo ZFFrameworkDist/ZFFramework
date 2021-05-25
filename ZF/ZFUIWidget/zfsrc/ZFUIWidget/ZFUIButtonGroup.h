@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFUIButtonGroup.h
  * @brief abstract button group management
@@ -69,7 +60,7 @@ public:
      * called when button added,
      * sender is the button,
      * param0 is this button group itself,
-     * param1 is a #ZFValue::indexValue which shows the button's index
+     * param1 is a #v_zfindex which shows the button's index
      */
     ZFOBSERVER_EVENT(ButtonOnAdd)
     /**
@@ -78,7 +69,7 @@ public:
      * called when button removed,
      * sender is the button,
      * param0 is this button group itself,
-     * param1 is a #ZFValue::indexValue which shows the button's index
+     * param1 is a #v_zfindex which shows the button's index
      */
     ZFOBSERVER_EVENT(ButtonOnRemove)
 
@@ -88,10 +79,10 @@ public:
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(ZFUIButtonGroupTypeEnum, buttonGroupType,
                                 ZFUIButtonGroupType::EnumDefault())
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(ZFUIButtonGroupTypeEnum, buttonGroupType)
+    ZFPROPERTY_ON_ATTACH_DECLARE(ZFUIButtonGroupTypeEnum, buttonGroupType)
 
 private:
-    ZFPROPERTY_RETAIN_WITH_INIT(ZFArrayEditable *, _ZFP_ZFUIButtonGroup_buttons, zflineAlloc(ZFArrayEditable))
+    ZFPROPERTY_RETAIN_WITH_INIT(ZFArray *, _ZFP_ZFUIButtonGroup_buttons, zflineAlloc(ZFArray))
 public:
     /**
      * @brief button count
@@ -110,7 +101,7 @@ public:
     /**
      * @brief add button
      *
-     * newly added button's setting would be changed accorrding #buttonGroupType,
+     * newly added button's setting would be changed according #buttonGroupType,
      * before #buttonOnAdd
      */
     ZFMETHOD_DECLARE_2(void, buttonAdd,
@@ -166,7 +157,7 @@ protected:
      * note:
      * sender is the button that fired the button event,
      * param0 is the button group itself,
-     * param1 is a #ZFValue::indexValue which shows the button's index
+     * param1 is a #v_zfindex which shows the button's index
      */
     virtual inline void buttonGroupOnEvent(ZF_IN ZFUIButton *button,
                                            ZF_IN zfindex buttonIndex,
@@ -176,7 +167,7 @@ protected:
             button,
             eventId,
             this->toObject(),
-            ZFValue::indexValueCreate(buttonIndex).toObject());
+            zflineAlloc(v_zfindex, buttonIndex));
     }
     /** @brief see #EventButtonOnAdd */
     virtual inline void buttonOnAdd(ZF_IN ZFUIButton *button,
@@ -186,7 +177,7 @@ protected:
             button,
             ZFUIButtonGroup::EventButtonOnAdd(),
             this->toObject(),
-            ZFValue::indexValueCreate(buttonIndex).toObject());
+            zflineAlloc(v_zfindex, buttonIndex));
     }
     /** @brief see #EventButtonOnRemove */
     virtual inline void buttonOnRemove(ZF_IN ZFUIButton *button,
@@ -196,7 +187,7 @@ protected:
             button,
             ZFUIButtonGroup::EventButtonOnRemove(),
             this->toObject(),
-            ZFValue::indexValueCreate(buttonIndex).toObject());
+            zflineAlloc(v_zfindex, buttonIndex));
     }
 
     // ============================================================
@@ -209,7 +200,7 @@ public:
      * called when #buttonTabChecked changed,
      * sender is the newly clicked button,
      * param0 is the button group itself,
-     * param1 is a #ZFValue::indexValue which shows the previous checked button index
+     * param1 is a #v_zfindex which shows the previous checked button index
      * (may be #zfindexMax if nothing checked previously)
      */
     ZFOBSERVER_EVENT(ButtonTabOnChange)
@@ -220,7 +211,7 @@ public:
      * called when checked button clicked,
      * sender is the clicked button,
      * param0 is the button group itself,
-     * param1 is a #ZFValue::indexValue which shows the button's index
+     * param1 is a #v_zfindex which shows the button's index
      */
     ZFOBSERVER_EVENT(ButtonTabOnClickChecked)
 
@@ -228,14 +219,14 @@ public:
      * @brief for #ZFUIButtonGroupType::e_Tab type only, whether allow uncheck all button, false by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfbool, buttonTabAllowUnchecked, zffalse)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfbool, buttonTabAllowUnchecked)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfbool, buttonTabAllowUnchecked)
 
     /**
      * @brief for #ZFUIButtonGroupType::e_Tab type only, the checked tab index, zfindexMax() by default
      */
     ZFPROPERTY_ASSIGN_WITH_INIT(zfindex, buttonTabChecked, zfindexMax())
-    ZFPROPERTY_OVERRIDE_ON_VERIFY_DECLARE(zfindex, buttonTabChecked)
-    ZFPROPERTY_OVERRIDE_ON_ATTACH_DECLARE(zfindex, buttonTabChecked)
+    ZFPROPERTY_ON_VERIFY_DECLARE(zfindex, buttonTabChecked)
+    ZFPROPERTY_ON_ATTACH_DECLARE(zfindex, buttonTabChecked)
 
 public:
     zffinal inline void _ZFP_ZFUIButtonGroup_buttonTabOnChange(ZF_IN ZFUIButton *button,
@@ -257,7 +248,7 @@ protected:
             button,
             ZFUIButtonGroup::EventButtonTabOnChange(),
             this->toObject(),
-            ZFValue::indexValueCreate(buttonIndexPrev).toObject());
+            zflineAlloc(v_zfindex, buttonIndexPrev));
     }
     /** @brief see #EventButtonTabOnClickChecked */
     virtual inline void buttonTabOnClickChecked(ZF_IN ZFUIButton *button,
@@ -267,7 +258,7 @@ protected:
             button,
             ZFUIButtonGroup::EventButtonTabOnClickChecked(),
             this->toObject(),
-            ZFValue::indexValueCreate(buttonIndex).toObject());
+            zflineAlloc(v_zfindex, buttonIndex));
     }
 };
 

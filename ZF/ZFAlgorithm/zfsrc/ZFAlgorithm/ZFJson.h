@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFJson.h
  * @brief JSON processing
@@ -260,14 +251,14 @@ public:
     /**
      * @brief value of the node, valid only for value type
      */
-    void jsonValueSet(ZF_IN const zfchar *value);
+    void jsonValue(ZF_IN const zfchar *value);
     /**
-     * @brief see #jsonValueSet
+     * @brief see #jsonValue
      */
     const zfchar *jsonValue(void) const;
 
-    zffinal void _ZFP_ZFJson_jsonMemoryPool_jsonValueSet(ZF_IN const zfchar *value, ZF_IN void *token);
-    zffinal void _ZFP_ZFJson_jsonMemoryPool_jsonItemSet(ZF_IN const zfchar *key, ZF_IN void *token, ZF_IN const ZFJsonItem &jsonItem);
+    zffinal void _ZFP_ZFJson_jsonMemoryPool_jsonValue(ZF_IN const zfchar *value, ZF_IN void *token);
+    zffinal void _ZFP_ZFJson_jsonMemoryPool_jsonItem(ZF_IN const zfchar *key, ZF_IN void *token, ZF_IN const ZFJsonItem &jsonItem);
 
     // ============================================================
 public:
@@ -288,8 +279,8 @@ public:
     /**
      * @brief set json item for key
      */
-    void jsonItemSet(ZF_IN const zfchar *key,
-                     ZF_IN const ZFJsonItem &jsonItem);
+    void jsonItem(ZF_IN const zfchar *key,
+                  ZF_IN const ZFJsonItem &jsonItem);
 
     /**
      * @brief util method to access json value, return a null type item if no such item or not value type
@@ -298,7 +289,7 @@ public:
     /**
      * @brief util method to add a json value item
      */
-    void jsonItemValueSet(ZF_IN const zfchar *key, ZF_IN const zfchar *value);
+    void jsonItemValue(ZF_IN const zfchar *key, ZF_IN const zfchar *value);
 
     /**
      * @brief remove json item
@@ -329,17 +320,17 @@ public:
     zfbool jsonItemIteratorIsEqual(ZF_IN const zfiterator &it0,
                                    ZF_IN const zfiterator &it1) const;
     /** @brief see #zfiterator */
-    void jsonItemIteratorSet(ZF_IN_OUT zfiterator &it, ZF_IN const ZFJsonItem &jsonItem);
+    void jsonItemIteratorValue(ZF_IN_OUT zfiterator &it, ZF_IN const ZFJsonItem &jsonItem);
     /** @brief see #zfiterator */
     void jsonItemIteratorRemove(ZF_IN_OUT zfiterator &it);
     /** @brief see #zfiterator */
-    const zfchar *jsonItemIteratorGetKey(ZF_IN const zfiterator &it) const;
+    const zfchar *jsonItemIteratorKey(ZF_IN const zfiterator &it) const;
     /** @brief see #zfiterator */
-    ZFJsonItem jsonItemIteratorGet(ZF_IN const zfiterator &it) const;
+    ZFJsonItem jsonItemIteratorValue(ZF_IN const zfiterator &it) const;
     /** @brief see #zfiterator */
     const zfchar *jsonItemIteratorNextKey(ZF_IN_OUT zfiterator &it) const;
     /** @brief see #zfiterator */
-    ZFJsonItem jsonItemIteratorNext(ZF_IN_OUT zfiterator &it) const;
+    ZFJsonItem jsonItemIteratorNextValue(ZF_IN_OUT zfiterator &it) const;
 
     // ============================================================
     // for array type
@@ -394,6 +385,13 @@ private:
 };
 ZFTYPEID_DECLARE(ZFJsonItem, ZFJsonItem)
 ZFOUTPUT_TYPE(ZFJsonItem, {output << v.objectInfo();})
+
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFJsonItem, ZFJsonValue)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFJsonItem, ZFJsonObject)
+/** @brief util to create #ZFXmlItem */
+ZFMETHOD_FUNC_DECLARE_0(ZFJsonItem, ZFJsonArray)
 
 // ============================================================
 /**

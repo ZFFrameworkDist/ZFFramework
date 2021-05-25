@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 /**
  * @file ZFIterator.h
  * @brief iterator in ZFFramework
@@ -29,32 +20,28 @@ ZF_NAMESPACE_GLOBAL_BEGIN
  * typically, you may use iterators like this:
  * @code
  *   for(zfiterator it = someIterable.iterator();
- *       someIterable.iteratorIsValid(it);)
+ *       someIterable.iteratorValid(it);
+ *       someIterable.iteratorNext(it))
  *   {
  *       // get current value located by iterator,
  *       // then move iterator to next
- *       const SomeType &value = someIterable.iteratorNext(it);
+ *       const SomeType &value = someIterable.iteratorValue(it);
  *
  *       // or you may simply want to access without move iterator
- *       // const SomeType &value = someIterable.iteratorGet(it);
+ *       // const SomeType &value = someIterable.iteratorValue(it);
  *   }
  * @endcode
  * for key-value container,
  * access by iterator should return value,
  * and should supply key-value version of iterator access:
  * @code
- *   for(zfiterator it = keyValueIterable.iteratorForKey(key);
- *       keyValueIterable.iteratorIsValid(it);)
+ *   for(zfiterator it = keyValueIterable.iteratorFind(key);
+ *       keyValueIterable.iteratorValid(it);
+ *       keyValueIterable.iteratorNext(it))
  *   {
  *       // access key and value
- *       KeyType key = keyValueIterable.iteratorGetKey(it);
- *       ValueType value = keyValueIterable.iteratorGetValue(it);
- *
- *       // access by iterator should return value type
- *       ValueType value2 = keyValueIterable.iteratorGet(it);
- *
- *       // move to next
- *       keyValueIterable.iteratorNext(it);
+ *       KeyType key = keyValueIterable.iteratorPair(it).key;
+ *       ValueType value = keyValueIterable.iteratorValue(it);
  *   }
  * @endcode
  * \n
@@ -81,7 +68,7 @@ public:
      * @brief helper method to compare two iterator, for implementation only
      */
     template<typename T_Data>
-    static zfbool iteratorIsEqual(ZF_IN zfiterator const &it0, ZF_IN zfiterator const &it1)
+    static zfbool iteratorEqual(ZF_IN zfiterator const &it0, ZF_IN zfiterator const &it1)
     {
         T_Data d0 = it0.data<T_Data>();
         T_Data d1 = it1.data<T_Data>();
@@ -218,7 +205,7 @@ extern ZF_ENV_EXPORT const zfiterator _ZFP_zfiteratorInvalid;
  * @brief invalid iterator
  * @note compare another iterator with this value is not safe,
  *   always use the check method that container supplys is recommended,
- *   such as aArray.iteratorIsValid(it)
+ *   such as aArray.iteratorValid(it)
  */
 #define zfiteratorInvalid() _ZFP_zfiteratorInvalid
 

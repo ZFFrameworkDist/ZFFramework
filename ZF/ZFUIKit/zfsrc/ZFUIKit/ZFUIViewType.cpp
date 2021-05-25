@@ -1,33 +1,64 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIViewType.h"
 #include "ZFUIView.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
-ZFENUM_DEFINE(ZFUIViewChildLayer)
-
-ZFOBJECT_REGISTER(ZFUIViewMeasureResult)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIViewMeasureResult, ZFUISize, sizeHint)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIViewMeasureResult, ZFUISizeParam, sizeParam)
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIViewMeasureResult, ZFUISize, measuredSize)
+ZFENUM_DEFINE(ZFUISizeType)
 
 // ============================================================
-// ZFUIViewLayoutParam
-ZFOBJECT_REGISTER(ZFUIViewLayoutParam)
-void ZFUIViewLayoutParam::layoutParamApplyT(ZF_OUT ZFUIRect &ret,
-                                            ZF_IN const ZFUIRect &rect,
-                                            ZF_IN ZFUIView *child,
-                                            ZF_IN ZFUIViewLayoutParam *lp)
+// ZFUISizeParam
+ZFTYPEID_DEFINE_BY_STRING_CONVERTER(ZFUISizeParam, ZFUISizeParam, {
+        ZFCoreArrayPOD<ZFIndexRange> pos;
+        if(!zfCoreDataPairSplitString(pos, 2, src, srcLen))
+        {
+            return zffalse;
+        }
+
+        if(!ZFUISizeTypeEnumFromString(v.width, src + pos[0].start, pos[0].count))
+        {
+            return zffalse;
+        }
+
+        if(!ZFUISizeTypeEnumFromString(v.height, src + pos[1].start, pos[1].count))
+        {
+            return zffalse;
+        }
+
+        return zftrue;
+    }, {
+        s += "(";
+        ZFUISizeTypeEnumToString(s, v.width);
+        s += ", ";
+        ZFUISizeTypeEnumToString(s, v.height);
+        s += ")";
+        return zftrue;
+    })
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFUISizeParam, ZFUISizeTypeEnum, width)
+ZFMETHOD_USER_REGISTER_FOR_WRAPPER_VAR(v_ZFUISizeParam, ZFUISizeTypeEnum, height)
+
+ZFMETHOD_FUNC_INLINE_DEFINE_2(ZFUISizeParam, ZFUISizeParamMake,
+                              ZFMP_IN(ZFUISizeTypeEnum const &, width),
+                              ZFMP_IN(ZFUISizeTypeEnum const &, height))
+ZFMETHOD_FUNC_INLINE_DEFINE_1(ZFUISizeParam, ZFUISizeParamMake,
+                              ZFMP_IN(ZFUISizeTypeEnum const &, v))
+
+ZFEXPORT_VAR_READONLY_DEFINE(ZFUISizeParam, ZFUISizeParamZero, ZFUISizeParamMake(ZFUISizeType::e_Wrap, ZFUISizeType::e_Wrap))
+ZFEXPORT_VAR_READONLY_DEFINE(ZFUISizeParam, ZFUISizeParamWrapWrap, ZFUISizeParamMake(ZFUISizeType::e_Wrap, ZFUISizeType::e_Wrap))
+ZFEXPORT_VAR_READONLY_DEFINE(ZFUISizeParam, ZFUISizeParamWrapFill, ZFUISizeParamMake(ZFUISizeType::e_Wrap, ZFUISizeType::e_Fill))
+ZFEXPORT_VAR_READONLY_DEFINE(ZFUISizeParam, ZFUISizeParamFillWrap, ZFUISizeParamMake(ZFUISizeType::e_Fill, ZFUISizeType::e_Wrap))
+ZFEXPORT_VAR_READONLY_DEFINE(ZFUISizeParam, ZFUISizeParamFillFill, ZFUISizeParamMake(ZFUISizeType::e_Fill, ZFUISizeType::e_Fill))
+
+// ============================================================
+ZFOBJECT_REGISTER(ZFUILayoutParam)
+ZFOBSERVER_EVENT_REGISTER(ZFUILayoutParam, LayoutParamOnChange)
+
+ZFMETHOD_DEFINE_4(ZFUILayoutParam, void, layoutParamApply,
+                  ZFMP_OUT(ZFUIRect &, ret),
+                  ZFMP_IN(const ZFUIRect &, rect),
+                  ZFMP_IN(ZFUIView *, child),
+                  ZFMP_IN(ZFUILayoutParam *, lp))
 {
-    ZFUISize refSizeTmp = ZFUIRectApplyMargin(rect, lp->layoutMargin()).size;
+    ZFUISize refSizeTmp = ZFUIRectGetSize(ZFUIRectApplyMargin(rect, lp->layoutMargin()));
     if(refSizeTmp.width < 0)
     {
         refSizeTmp.width = 0;
@@ -48,15 +79,20 @@ void ZFUIViewLayoutParam::layoutParamApplyT(ZF_OUT ZFUIRect &ret,
     child->layoutMeasure(refSizeTmp, lp->sizeParam());
     ZFUIAlignApply(ret, lp->layoutAlign(), rect, child->layoutMeasuredSize(), lp->layoutMargin());
 }
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_STATIC_4(ZFUIViewLayoutParam, void, layoutParamApplyT,
-    ZFMP_OUT(ZFUIRect &, ret), ZFMP_IN(const ZFUIRect &, rect), ZFMP_IN(ZFUIView *, child), ZFMP_IN(ZFUIViewLayoutParam *, lp))
-ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_FUNC_STATIC_3(ZFUIViewLayoutParam, ZFUIRect, layoutParamApply,
-    ZFMP_IN(const ZFUIRect &, rect), ZFMP_IN(ZFUIView *, child), ZFMP_IN(ZFUIViewLayoutParam *, lp))
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, ZFUIRect, layoutParamApply,
+                  ZFMP_IN(const ZFUIRect &, rect),
+                  ZFMP_IN(ZFUIView *, child),
+                  ZFMP_IN(ZFUILayoutParam *, lp))
+{
+    ZFUIRect ret = ZFUIRectZero();
+    ZFUILayoutParam::layoutParamApply(ret, rect, child, lp);
+    return ret;
+}
 
-ZFMETHOD_DEFINE_4(ZFUIViewLayoutParam, void, sizeHintApply,
-                  ZFMP_OUT(zfint &, ret),
-                  ZFMP_IN(zfint, size),
-                  ZFMP_IN(zfint, sizeHint),
+ZFMETHOD_DEFINE_4(ZFUILayoutParam, void, sizeHintApply,
+                  ZFMP_OUT(zffloat &, ret),
+                  ZFMP_IN(zffloat, size),
+                  ZFMP_IN(zffloat, sizeHint),
                   ZFMP_IN(ZFUISizeTypeEnum, sizeParam))
 {
     ret = size;
@@ -79,19 +115,39 @@ ZFMETHOD_DEFINE_4(ZFUIViewLayoutParam, void, sizeHintApply,
             break;
     }
 }
-ZFMETHOD_DEFINE_4(ZFUIViewLayoutParam, void, sizeHintApply,
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, zffloat, sizeHintApply,
+                  ZFMP_IN(zffloat, size),
+                  ZFMP_IN(zffloat, sizeHint),
+                  ZFMP_IN(ZFUISizeTypeEnum, sizeParam))
+{
+    zffloat ret = size;
+    ZFUILayoutParam::sizeHintApply(ret, size, sizeHint, sizeParam);
+    return ret;
+}
+
+ZFMETHOD_DEFINE_4(ZFUILayoutParam, void, sizeHintApply,
                   ZFMP_OUT(ZFUISize &, ret),
                   ZFMP_IN(const ZFUISize &, size),
                   ZFMP_IN(const ZFUISize &, sizeHint),
                   ZFMP_IN(const ZFUISizeParam &, sizeParam))
 {
-    ret.width = ZFUIViewLayoutParam::sizeHintApply(size.width, sizeHint.width, sizeParam.width);
-    ret.height = ZFUIViewLayoutParam::sizeHintApply(size.height, sizeHint.height, sizeParam.height);
+    ret.width = ZFUILayoutParam::sizeHintApply(size.width, sizeHint.width, sizeParam.width);
+    ret.height = ZFUILayoutParam::sizeHintApply(size.height, sizeHint.height, sizeParam.height);
 }
-ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintMerge,
-                  ZFMP_OUT(zfint &, ret),
-                  ZFMP_IN(zfint, sizeHint0),
-                  ZFMP_IN(zfint, sizeHint1))
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, ZFUISize, sizeHintApply,
+                  ZFMP_IN(const ZFUISize &, size),
+                  ZFMP_IN(const ZFUISize &, sizeHint),
+                  ZFMP_IN(const ZFUISizeParam &, sizeParam))
+{
+    ZFUISize ret = ZFUISizeZero();
+    ZFUILayoutParam::sizeHintApply(ret, size, sizeHint, sizeParam);
+    return ret;
+}
+
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, void, sizeHintMerge,
+                  ZFMP_OUT(zffloat &, ret),
+                  ZFMP_IN(zffloat, sizeHint0),
+                  ZFMP_IN(zffloat, sizeHint1))
 {
     if(sizeHint0 < 0 && sizeHint1 < 0)
     {
@@ -106,18 +162,36 @@ ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintMerge,
         ret = zfmMax(sizeHint0, sizeHint1);
     }
 }
-ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintMerge,
+ZFMETHOD_DEFINE_2(ZFUILayoutParam, zffloat, sizeHintMerge,
+                  ZFMP_IN(zffloat, sizeHint0),
+                  ZFMP_IN(zffloat, sizeHint1))
+{
+    zffloat ret = 0;
+    ZFUILayoutParam::sizeHintMerge(ret, sizeHint0, sizeHint1);
+    return ret;
+}
+
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, void, sizeHintMerge,
                   ZFMP_OUT(ZFUISize &, ret),
                   ZFMP_IN(const ZFUISize &, sizeHint0),
                   ZFMP_IN(const ZFUISize &, sizeHint1))
 {
-    ret.width = ZFUIViewLayoutParam::sizeHintMerge(sizeHint0.width, sizeHint1.width);
-    ret.height = ZFUIViewLayoutParam::sizeHintMerge(sizeHint0.height, sizeHint1.height);
+    ret.width = ZFUILayoutParam::sizeHintMerge(sizeHint0.width, sizeHint1.width);
+    ret.height = ZFUILayoutParam::sizeHintMerge(sizeHint0.height, sizeHint1.height);
 }
-ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintOffset,
-                  ZFMP_OUT(zfint &, ret),
-                  ZFMP_IN(zfint, sizeHint),
-                  ZFMP_IN(zfint, offset))
+ZFMETHOD_DEFINE_2(ZFUILayoutParam, ZFUISize, sizeHintMerge,
+                  ZFMP_IN(const ZFUISize &, sizeHint0),
+                  ZFMP_IN(const ZFUISize &, sizeHint1))
+{
+    ZFUISize ret = ZFUISizeZero();
+    ZFUILayoutParam::sizeHintMerge(ret, sizeHint0, sizeHint1);
+    return ret;
+}
+
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, void, sizeHintOffset,
+                  ZFMP_OUT(zffloat &, ret),
+                  ZFMP_IN(zffloat, sizeHint),
+                  ZFMP_IN(zffloat, offset))
 {
     if(offset >= 0)
     {
@@ -125,25 +199,59 @@ ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintOffset,
     }
     else
     {
-        ret = ((sizeHint >= 0) ? zfmMax(0, sizeHint + offset) : -1);
+        ret = ((sizeHint >= 0) ? zfmMax((zffloat)0, sizeHint + offset) : -1);
     }
 }
-ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintOffset,
+ZFMETHOD_DEFINE_2(ZFUILayoutParam, zffloat, sizeHintOffset,
+                  ZFMP_IN(zffloat, sizeHint),
+                  ZFMP_IN(zffloat, offset))
+{
+    zffloat ret = 0;
+    ZFUILayoutParam::sizeHintOffset(ret, sizeHint, offset);
+    return ret;
+}
+
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, void, sizeHintOffset,
                   ZFMP_OUT(ZFUISize &, ret),
                   ZFMP_IN(const ZFUISize &, sizeHint),
                   ZFMP_IN(const ZFUISize &, offset))
 {
-    ret.width = ZFUIViewLayoutParam::sizeHintOffset(sizeHint.width, offset.width);
-    ret.height = ZFUIViewLayoutParam::sizeHintOffset(sizeHint.height, offset.height);
+    ret.width = ZFUILayoutParam::sizeHintOffset(sizeHint.width, offset.width);
+    ret.height = ZFUILayoutParam::sizeHintOffset(sizeHint.height, offset.height);
 }
-ZFMETHOD_DEFINE_3(ZFUIViewLayoutParam, void, sizeHintOffset,
+ZFMETHOD_DEFINE_2(ZFUILayoutParam, ZFUISize, sizeHintOffset,
+                  ZFMP_IN(const ZFUISize &, sizeHint),
+                  ZFMP_IN(const ZFUISize &, offset))
+{
+    ZFUISize ret = ZFUISizeZero();
+    ZFUILayoutParam::sizeHintOffset(ret, sizeHint, offset);
+    return ret;
+}
+
+ZFMETHOD_DEFINE_3(ZFUILayoutParam, void, sizeHintOffset,
                   ZFMP_OUT(ZFUISize &, ret),
                   ZFMP_IN(const ZFUISize &, sizeHint),
-                  ZFMP_IN(zfint, offset))
+                  ZFMP_IN(zffloat, offset))
 {
-    ret.width = ZFUIViewLayoutParam::sizeHintOffset(sizeHint.width, offset);
-    ret.height = ZFUIViewLayoutParam::sizeHintOffset(sizeHint.height, offset);
+    ret.width = ZFUILayoutParam::sizeHintOffset(sizeHint.width, offset);
+    ret.height = ZFUILayoutParam::sizeHintOffset(sizeHint.height, offset);
 }
+ZFMETHOD_DEFINE_2(ZFUILayoutParam, ZFUISize, sizeHintOffset,
+                  ZFMP_IN(const ZFUISize &, sizeHint),
+                  ZFMP_IN(zffloat, offset))
+{
+    ZFUISize ret = ZFUISizeZero();
+    ZFUILayoutParam::sizeHintOffset(ret, sizeHint, offset);
+    return ret;
+}
+
+// ============================================================
+ZFENUM_DEFINE(ZFUIViewChildLayer)
+
+ZFOBJECT_REGISTER(ZFUIViewMeasureResult)
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIViewMeasureResult, ZFUISize, sizeHint)
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIViewMeasureResult, ZFUISizeParam, sizeParam)
+ZFMETHOD_USER_REGISTER_FOR_ZFOBJECT_VAR(ZFUIViewMeasureResult, ZFUISize, measuredSize)
 
 ZF_NAMESPACE_GLOBAL_END
 

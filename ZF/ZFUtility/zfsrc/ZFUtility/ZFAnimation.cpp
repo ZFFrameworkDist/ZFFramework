@@ -1,12 +1,3 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFAnimation.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
@@ -26,52 +17,28 @@ public:
 zfclassNotPOD _ZFP_ZFAnimationPrivate
 {
 public:
-    ZFObject *aniTarget;
+    ZFObjectHolder *aniTargetHolder;
     zfbool aniRunning;
     zfbool aniDelaying;
     zfidentity aniDelayTaskId;
     zfidentity aniDelayThreadId;
     zfidentity aniDummyThreadId;
-    zfbool aniStopCalled;
     zfbool aniStoppedByUser;
     zfidentity aniId;
 
 public:
     _ZFP_ZFAnimationPrivate(void)
-    : aniTarget(zfnull)
+    : aniTargetHolder(zfnull)
     , aniRunning(zffalse)
     , aniDelaying(zffalse)
     , aniDelayTaskId(zfidentityInvalid())
     , aniDelayThreadId(zfidentityInvalid())
     , aniDummyThreadId(zfidentityInvalid())
-    , aniStopCalled(zffalse)
     , aniStoppedByUser(zffalse)
     , aniId(zfidentityInvalid())
     {
     }
 };
-
-// ============================================================
-ZF_GLOBAL_INITIALIZER_INIT_WITH_LEVEL(ZFAnimationTaskHolder, ZFLevelZFFrameworkEssential)
-{
-    this->delayOnFinishListener = ZFCallbackForFunc(zfself::delayOnFinish);
-    this->dummyOnFinishListener = ZFCallbackForFunc(zfself::dummyOnFinish);
-}
-public:
-    ZFListener delayOnFinishListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(delayOnFinish)
-    {
-        ZFAnimation *ani = userData->objectHolded();
-        ZFValue *taskId = listenerData.param0->to<ZFValue *>();
-        ani->_ZFP_ZFAnimation_aniImplDelayNotifyFinish(taskId->identityValue());
-    }
-    ZFListener dummyOnFinishListener;
-    static ZFLISTENER_PROTOTYPE_EXPAND(dummyOnFinish)
-    {
-        ZFAnimation *ani = userData->objectHolded();
-        ani->_ZFP_ZFAnimation_aniDummyNotifyStop();
-    }
-ZF_GLOBAL_INITIALIZER_END(ZFAnimationTaskHolder)
 
 // ============================================================
 ZFOBJECT_REGISTER(ZFAnimation)
@@ -80,45 +47,38 @@ ZFOBSERVER_EVENT_REGISTER(ZFAnimation, AniOnInvalid)
 ZFOBSERVER_EVENT_REGISTER(ZFAnimation, AniOnDelayFinish)
 ZFOBSERVER_EVENT_REGISTER(ZFAnimation, AniOnStart)
 ZFOBSERVER_EVENT_REGISTER(ZFAnimation, AniOnStop)
-ZFOBSERVER_EVENT_REGISTER(ZFAnimation, AniOnStopOrOnInvalid)
+ZFOBSERVER_EVENT_REGISTER(ZFAnimation, AniOnStopOrInvalid)
 
-void ZFAnimation::objectOnInit(void)
+ZFMETHOD_DEFINE_0(ZFAnimation, zftimet, aniDurationFixed)
 {
-    zfsuper::objectOnInit();
-    d = zfpoolNew(_ZFP_ZFAnimationPrivate);
-}
-void ZFAnimation::objectOnDealloc(void)
-{
-    zfpoolDelete(d);
-    d = zfnull;
-    zfsuper::objectOnDealloc();
-}
-void ZFAnimation::objectOnDeallocPrepare(void)
-{
-    this->aniStop();
-    zfsuper::objectOnDeallocPrepare();
+    return (this->aniDuration() > 0 ? this->aniDuration() : ZFAnimationDurationDefault());
 }
 
-ZFMETHOD_DEFINE_1(ZFAnimation, void, aniTargetSet,
+ZFMETHOD_DEFINE_1(ZFAnimation, void, aniTarget,
                   ZFMP_IN(ZFObject *, aniTarget))
 {
     zfCoreAssertWithMessage(!d->aniRunning, "change animation's target while animation is running");
-    d->aniTarget = aniTarget;
+    ZFObjectHolder *aniTargetHolderTmp = d->aniTargetHolder;
+    zfblockedRelease(aniTargetHolderTmp);
+    d->aniTargetHolder = aniTarget ? zfRetain(aniTarget->objectHolder()) : zfnull;
+    this->aniImplTargetOnChange(aniTargetHolderTmp ? aniTargetHolderTmp->objectHolded().toObject() : zfnull);
+    zfRetainChange(d->aniTargetHolder, aniTarget ? aniTarget->objectHolder() : zfnull);
 }
 ZFMETHOD_DEFINE_0(ZFAnimation, ZFObject *, aniTarget)
 {
-    return d->aniTarget;
+    return d->aniTargetHolder ? d->aniTargetHolder->objectHolded().toObject() : zfnull;
 }
 
 ZFMETHOD_DEFINE_0(ZFAnimation, void, aniStart)
 {
+    this->aniStop();
     this->_ZFP_ZFAnimation_aniReadyStart();
 
     d->aniStoppedByUser = zffalse;
     if(!this->aniValid())
     {
         this->aniOnInvalid();
-        this->aniOnStopOrOnInvalid(zffalse);
+        this->aniOnStopOrInvalid(zffalse);
         return ;
     }
 
@@ -126,9 +86,8 @@ ZFMETHOD_DEFINE_0(ZFAnimation, void, aniStart)
     zfRetain(this->aniTarget());
 
     d->aniRunning = zftrue;
-    d->aniStopCalled = zffalse;
+    d->aniDelaying = zffalse;
     ++(d->aniId);
-    this->aniOnStart();
 
     if(this->aniDelay() > 0)
     {
@@ -137,9 +96,9 @@ ZFMETHOD_DEFINE_0(ZFAnimation, void, aniStart)
     }
     else
     {
-        d->aniDelaying = zffalse;
         this->aniImplStart();
     }
+    this->aniOnStart();
 }
 ZFMETHOD_DEFINE_0(ZFAnimation, zfbool, aniRunning)
 {
@@ -151,11 +110,10 @@ ZFMETHOD_DEFINE_0(ZFAnimation, zfbool, aniDelaying)
 }
 ZFMETHOD_DEFINE_0(ZFAnimation, void, aniStop)
 {
-    if(!(d->aniRunning) || d->aniStopCalled)
+    if(!(d->aniRunning))
     {
         return ;
     }
-    d->aniStopCalled = zftrue;
     d->aniStoppedByUser = zftrue;
     ++(d->aniId);
     if(d->aniDelaying)
@@ -183,10 +141,6 @@ ZFMETHOD_DEFINE_0(ZFAnimation, zfbool, aniValid)
 {
     return this->aniImplCheckValid();
 }
-zfbool ZFAnimation::aniImplCheckValid(void)
-{
-    return (this->aniDurationFixed() > 0);
-}
 
 void ZFAnimation::_ZFP_ZFAnimation_aniImplDelayNotifyFinish(ZF_IN zfidentity taskId)
 {
@@ -199,11 +153,11 @@ void ZFAnimation::_ZFP_ZFAnimation_aniReadyStart(void)
 {
     if(this->aniTarget() != zfnull)
     {
-        _ZFP_I_ZFAnimationAniList *aniList = this->aniTarget()->tagGet<_ZFP_I_ZFAnimationAniList *>(_ZFP_I_ZFAnimationAniList::ClassData()->classNameFull());
+        _ZFP_I_ZFAnimationAniList *aniList = this->aniTarget()->objectTag<_ZFP_I_ZFAnimationAniList *>(_ZFP_I_ZFAnimationAniList::ClassData()->classNameFull());
         if(aniList == zfnull)
         {
             aniList = zfAlloc(_ZFP_I_ZFAnimationAniList);
-            this->aniTarget()->tagSet(_ZFP_I_ZFAnimationAniList::ClassData()->classNameFull(), aniList);
+            this->aniTarget()->objectTag(_ZFP_I_ZFAnimationAniList::ClassData()->classNameFull(), aniList);
             zfRelease(aniList);
         }
         if(this->aniAutoStopPrev())
@@ -220,7 +174,7 @@ void ZFAnimation::_ZFP_ZFAnimation_aniReadyStop(void)
 {
     if(this->aniTarget() != zfnull)
     {
-        _ZFP_I_ZFAnimationAniList *aniList = this->aniTarget()->tagGet<_ZFP_I_ZFAnimationAniList *>(_ZFP_I_ZFAnimationAniList::ClassData()->classNameFull());
+        _ZFP_I_ZFAnimationAniList *aniList = this->aniTarget()->objectTag<_ZFP_I_ZFAnimationAniList *>(_ZFP_I_ZFAnimationAniList::ClassData()->classNameFull());
         if(aniList != zfnull)
         {
             aniList->aniList.removeElement(this);
@@ -235,17 +189,22 @@ void ZFAnimation::_ZFP_ZFAnimation_aniDummyNotifyStop(void)
 void ZFAnimation::aniImplDelay(void)
 {
     ++(d->aniDelayTaskId);
-    d->aniDelayThreadId = ZFThreadExecuteInMainThreadAfterDelay(
+    zfidentity aniDelayTaskId = d->aniDelayTaskId;
+    ZFLISTENER_LAMBDA_1(delayOnFinish
+        , zfidentity, aniDelayTaskId
+        , {
+            ZFAnimation *ani = userData->objectHolded();
+            ani->_ZFP_ZFAnimation_aniImplDelayNotifyFinish(aniDelayTaskId);
+        })
+    d->aniDelayThreadId = ZFExecuteAfterDelay(
         this->aniDelay(),
-        ZF_GLOBAL_INITIALIZER_INSTANCE(ZFAnimationTaskHolder)->delayOnFinishListener,
-        this->objectHolder(),
-        ZFListenerData().param0Set(ZFValue::identityValueCreate(d->aniDelayTaskId).toObject())
-        );
+        delayOnFinish,
+        this->objectHolder());
 }
 void ZFAnimation::aniImplDelayCancel(void)
 {
     ++(d->aniDelayTaskId);
-    ZFThreadExecuteCancel(d->aniDelayThreadId);
+    ZFExecuteCancel(d->aniDelayThreadId);
 }
 void ZFAnimation::aniImplDelayNotifyFinish(void)
 {
@@ -259,9 +218,13 @@ void ZFAnimation::aniImplStart(void)
     // start a dummy animation if not implemented
     if(this->classData() == ZFAnimation::ClassData())
     {
-        d->aniDummyThreadId = ZFThreadExecuteInMainThreadAfterDelay(
+        ZFLISTENER_LOCAL(dummyOnFinish, {
+                ZFAnimation *ani = userData->objectHolded();
+                ani->_ZFP_ZFAnimation_aniDummyNotifyStop();
+            })
+        d->aniDummyThreadId = ZFExecuteAfterDelay(
             this->aniDurationFixed(),
-            ZF_GLOBAL_INITIALIZER_INSTANCE(ZFAnimationTaskHolder)->dummyOnFinishListener,
+            dummyOnFinish,
             this->objectHolder());
     }
 }
@@ -269,7 +232,7 @@ void ZFAnimation::aniImplStop(void)
 {
     if(this->classData() == ZFAnimation::ClassData())
     {
-        ZFThreadExecuteCancel(d->aniDummyThreadId);
+        ZFExecuteCancel(d->aniDummyThreadId);
     }
 }
 
@@ -280,12 +243,29 @@ void ZFAnimation::aniImplNotifyStop(void)
     ZFObject *aniTargetToRelease = this->aniTarget();
 
     d->aniRunning = zffalse;
-    d->aniStopCalled = zffalse;
     this->aniOnStop();
-    this->aniOnStopOrOnInvalid(zftrue);
+    this->aniOnStopOrInvalid(zftrue);
 
     zfRelease(aniTargetToRelease);
     zfRelease(this);
+}
+
+void ZFAnimation::objectOnInit(void)
+{
+    zfsuper::objectOnInit();
+    d = zfpoolNew(_ZFP_ZFAnimationPrivate);
+}
+void ZFAnimation::objectOnDealloc(void)
+{
+    zfRetainChange(d->aniTargetHolder, zfnull);
+    zfpoolDelete(d);
+    d = zfnull;
+    zfsuper::objectOnDealloc();
+}
+void ZFAnimation::objectOnDeallocPrepare(void)
+{
+    this->aniStop();
+    zfsuper::objectOnDeallocPrepare();
 }
 
 ZF_NAMESPACE_GLOBAL_END

@@ -1,17 +1,39 @@
-/* ====================================================================== *
- * Copyright (c) 2010-2018 ZFFramework
- * Github repo: https://github.com/ZFFramework/ZFFramework
- * Home page: http://ZFFramework.com
- * Blog: http://zsaber.com
- * Contact: master@zsaber.com (Chinese and English only)
- * Distributed under MIT license:
- *   https://github.com/ZFFramework/ZFFramework/blob/master/LICENSE
- * ====================================================================== */
 #include "ZFUIDialogForInput.h"
 
 ZF_NAMESPACE_GLOBAL_BEGIN
 
 ZFSTYLE_DEFAULT_DEFINE(ZFUIDialogForInput)
+
+ZFPROPERTY_ON_INIT_DEFINE(ZFUIDialogForInput, ZFUITextEditWidget *, inputView)
+{
+    zfblockedAlloc(ZFUITextEditWidget, inputView);
+    propertyValue = inputView;
+    inputView->to<ZFUIView *>()->viewSizeMin(ZFUISizeMake(
+            ZFUIGlobalStyle::DefaultStyle()->itemSizeDialogWidth(),
+            ZFUIGlobalStyle::DefaultStyle()->itemSizeControl()
+        ));
+    inputView->textEditConfirmWhenLostFocus(zffalse);
+}
+
+ZFMETHOD_DEFINE_1(ZFUIDialogForInput, void, inputHintText,
+                  ZFMP_IN(const zfchar *, text))
+{
+    this->inputView()->textPlaceHolder()->text(text);
+}
+ZFMETHOD_DEFINE_0(ZFUIDialogForInput, const zfchar *, inputHintText)
+{
+    return this->inputView()->textPlaceHolder()->text();
+}
+
+ZFMETHOD_DEFINE_1(ZFUIDialogForInput, void, inputText,
+                  ZFMP_IN(const zfchar *, text))
+{
+    this->inputView()->text(text);
+}
+ZFMETHOD_DEFINE_0(ZFUIDialogForInput, const zfchar *, inputText)
+{
+    return this->inputView()->text();
+}
 
 void ZFUIDialogForInput::objectOnInit(void)
 {
